@@ -5,7 +5,9 @@
   "version": "0.1.1",
   "scripts": {
     "test": "standard | snazzy && tap --no-cov test/*.test.js",
-    "ci": "standard | snazzy && tap --cov test/*.test.js"
+    "ci-lint": "standard | snazzy",
+    "ci-test": "tap --cov test/*.test.js",
+    "lint": "standard --fix | snazzy"
   },
   "devDependencies": {
     "snazzy": "^7.0.0",
