@@ -6,11 +6,11 @@ class ClinicBubbleprof {
   }
 
   collect (args, callback) {
-    process.nextTick(callback, new Error('bubbleprof is not implemented'));
+    process.nextTick(callback, new Error('bubbleprof is not implemented'))
   }
 
   visualize (dataFilename, outputFilename, callback) {
-    process.nextTick(callback, new Error('bubbleprof is not implemented'));
+    process.nextTick(callback, new Error('bubbleprof is not implemented'))
   }
 }
 
