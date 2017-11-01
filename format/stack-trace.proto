@@ -1,0 +1,19 @@
+
+message StackTrace {
+  required double asyncId = 1;
+  repeated Frame frames = 2;
+
+  message Frame {
+    required string functionName = 1;
+    required string typeName = 2;
+
+    required bool isEval = 3;
+    required bool isConstructor = 4;
+    required bool isNative = 5;
+    required bool isToplevel = 6;
+
+    required string fileName = 7;
+    required uint32 lineNumber = 8;
+    required uint32 columnNumber = 9;
+  }
+}

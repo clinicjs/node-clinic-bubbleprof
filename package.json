@@ -15,5 +15,8 @@
     "tap": "^10.7.2"
   },
   "keywords": [],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "protocol-buffers": "^3.2.1"
+  }
 }
