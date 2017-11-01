@@ -17,6 +17,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
+    "async": "^2.5.0",
     "protocol-buffers": "^3.2.1"
   }
 }
