@@ -12,8 +12,9 @@ message StackTrace {
     required bool isNative = 5;
     required bool isToplevel = 6;
 
-    required string fileName = 7;
-    required uint32 lineNumber = 8;
-    required uint32 columnNumber = 9;
+    required string evalOrigin = 7;
+    required string fileName = 8;
+    required uint32 lineNumber = 9;
+    required uint32 columnNumber = 10;
   }
 }
