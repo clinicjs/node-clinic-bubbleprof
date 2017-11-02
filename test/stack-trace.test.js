@@ -9,7 +9,7 @@ test('stack trace - function scope', function (t) {
     frames = stackTrace()
   })()
 
-  t.strictDeepEqual(frames[0].toJSON(), {
+  t.strictDeepEqual(Object.assign({}, frames[0]), {
     functionName: 'functionScope',
     typeName: '',
     isEval: false,
@@ -34,7 +34,7 @@ test('stack trace - method', function (t) {
   const type = new Type()
   const frames = type.method()
 
-  t.strictDeepEqual(frames[0].toJSON(), {
+  t.strictDeepEqual(Object.assign({}, frames[0]), {
     functionName: 'method',
     typeName: 'Type',
     isEval: false,
@@ -58,7 +58,7 @@ test('stack trace - constructor', function (t) {
   }
   const frames = (new Type()).frames
 
-  t.strictDeepEqual(frames[0].toJSON(), {
+  t.strictDeepEqual(Object.assign({}, frames[0]), {
     functionName: 'Type',
     typeName: '',
     isEval: false,

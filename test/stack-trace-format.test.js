@@ -12,7 +12,7 @@ function produceExample (asyncId) {
     if (left === 0) {
       return {
         asyncId: asyncId,
-        frames: stackTrace().map((frame) => frame.toJSON())
+        frames: stackTrace().map((frame) => Object.assign({}, frame))
       }
     } else {
       return recursive(left - 1)

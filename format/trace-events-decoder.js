@@ -4,7 +4,7 @@ const stream = require('stream')
 const JSONStream = require('JSONStream')
 
 class TraceEvent {
-  constructor(data) {
+  constructor (data) {
     const isCallback = data.name.slice(-'_CALLBACK'.length) === '_CALLBACK'
 
     if (data.ph === 'b' && !isCallback) {
@@ -19,7 +19,7 @@ class TraceEvent {
       throw new Error('invalid phase: ' + data.ph)
     }
 
-    this.type = isCallback ? data.name.slice(0, '_CALLBACK'.length) : data.name
+    this.type = isCallback ? data.name.slice(0, -'_CALLBACK'.length) : data.name
     this.asyncId = parseInt(data.id, 16)
     this.timestamp = data.ts / 1000 // convert to ms
     this.triggerId = null
@@ -29,8 +29,8 @@ class TraceEvent {
   }
 }
 
-class TraceEventDecoder extends stream.Transform {
-  constructor() {
+class TraceEventsDecoder extends stream.Transform {
+  constructor () {
     super({
       readableObjectMode: true,
       writableObjectMode: false
@@ -42,14 +42,14 @@ class TraceEventDecoder extends stream.Transform {
     this.parser.on('data', (data) => this.push(new TraceEvent(data)))
   }
 
-  _transform(chunk, encoding, callback) {
+  _transform (chunk, encoding, callback) {
     this.parser.write(chunk, encoding)
     callback(null)
   }
 
-  _flush(callback) {
+  _flush (callback) {
     this.parser.end()
     callback(null)
   }
 }
-module.exports = TraceEventDecoder
+module.exports = TraceEventsDecoder
