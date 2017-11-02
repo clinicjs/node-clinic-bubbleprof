@@ -20,17 +20,27 @@ encoder.pipe(
 )
 
 // log stack traces
-let skip = false
+let skipThis = false
+const skipAsyncIds = new Set()
 const hook = asyncHooks.createHook({
-  init(asyncId) {
-    if (skip) return
+  init (asyncId, type, triggerAsyncId) {
+    // Save the asyncId such nested async operations can be skiped later.
+    if (skipThis) return skipAsyncIds.add(asyncId)
+    // This is a nested async operations, skip this and track futher nested
+    // async operations.
+    if (skipAsyncIds.has(triggerAsyncId)) return skipAsyncIds.add(asyncId)
 
-    skip = true
+    // Track async events that comes from this async operation
+    skipThis = true
     encoder.write({
       asyncId: asyncId,
       frames: stackTrace()
     })
-    skip = false
+    skipThis = false
+  },
+
+  destroy (asyncId) {
+    skipAsyncIds.delete(asyncId)
   }
 })
 hook.enable()

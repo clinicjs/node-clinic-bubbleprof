@@ -8,7 +8,6 @@ const getStackTraceFilename = require('./collect/get-stack-trace-filename.js')
 const getTraceEventsFilename = require('./collect/get-trace-events-filename.js')
 const getLoggingDirname = require('./collect/get-logging-dirname.js')
 
-
 class ClinicBubbleprof {
   constructor (settings = {}) {
 
@@ -45,24 +44,24 @@ class ClinicBubbleprof {
 
       // create directory and move files to that directory
       fs.mkdir(loggingDirname, function (err) {
-        if (err) return callback(err);
+        if (err) return callback(err)
 
-        async.parallel([
-          function (done) {
+        async.parallel({
+          stackTrace (done) {
             fs.rename(
               stackTraceFilepath,
               path.join(loggingDirname, getStackTraceFilename(proc.pid)),
               done
             )
           },
-          function (done) {
+          traceEvents (done) {
             fs.rename(
               traceEventsFilepath,
               path.join(loggingDirname, getTraceEventsFilename(proc.pid)),
               done
             )
           }
-        ], function (err) {
+        }, function (err) {
           if (err) return callback(err)
           callback(null, loggingDirname)
         })
