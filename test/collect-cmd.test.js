@@ -5,7 +5,7 @@ const test = require('tap').test
 const async = require('async')
 const ClinicBubbleprof = require('../index.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
-const TraceEventDecoder = require('../format/trace-event-decoder.js')
+const TraceEventsDecoder = require('../format/trace-events-decoder.js')
 const getLoggingFiles = require('../collect/get-logging-files.js')
 
 function collect (tool, callback) {
@@ -35,7 +35,7 @@ function collect (tool, callback) {
         traveEvents (done) {
           const traceEvents = []
           fs.createReadStream(files.traceEvents)
-            .pipe(new TraceEventDecoder())
+            .pipe(new TraceEventsDecoder())
             .on('data', function (data) {
               traceEvents.push(data)
             })

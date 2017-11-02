@@ -40,23 +40,6 @@ class Frame {
       this.columnNumber = frame.getColumnNumber() || 0
     }
   }
-
-  // This is only used for testing. Because strictDeepEqual checks the
-  // constructor type too.
-  toJSON () {
-    return {
-      functionName: this.functionName,
-      typeName: this.typeName,
-      isEval: this.isEval,
-      isConstructor: this.isConstructor,
-      isNative: this.isNative,
-      isToplevel: this.isToplevel,
-      evalOrigin: this.evalOrigin,
-      fileName: this.fileName,
-      lineNumber: this.lineNumber,
-      columnNumber: this.columnNumber
-    }
-  }
 }
 
 function stackTrace () {
