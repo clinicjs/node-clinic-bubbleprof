@@ -5,6 +5,7 @@ const test = require('tap').test
 const async = require('async')
 const ClinicBubbleprof = require('../index.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
+const TraceEventDecoder = require('../format/trace-event-decoder.js')
 const getLoggingFiles = require('../collect/get-logging-files.js')
 
 function collect (tool, callback) {
@@ -32,15 +33,19 @@ function collect (tool, callback) {
             })
         },
         traveEvents (done) {
-          fs.readFile(files.traceEvents, function (err, content) {
-            if (err) return done(err)
-
-            // remove datafile
-            fs.unlink(files.traceEvents, function (err) {
-              if (err) return done(err)
-              done(null, JSON.parse(content).traceEvents)
+          const traceEvents = []
+          fs.createReadStream(files.traceEvents)
+            .pipe(new TraceEventDecoder())
+            .on('data', function (data) {
+              traceEvents.push(data)
             })
-          })
+            .once('end', function () {
+              // remove datafile
+              fs.unlink(files.traceEvents, function (err) {
+                if (err) return done(err)
+                done(null, traceEvents)
+              })
+            })
         }
       }, function (err, output) {
         if (err) return callback(err, dirname, null)
@@ -68,10 +73,12 @@ test('default collect command', function (t) {
     // find traceEvents for tracked asyncIds
     const traceEvents = new Map()
     for (const traceEvent of output.traveEvents) {
-      const asyncId = parseInt(traceEvent.id, 16)
-      if (trackedAsyncIds.has(asyncId)) {
-        if (!traceEvents.has(asyncId)) traceEvents.set(asyncId, [])
-        traceEvents.get(asyncId).push(traceEvent)
+      if (trackedAsyncIds.has(traceEvent.asyncId)) {
+        if (!traceEvents.has(traceEvent.asyncId)) {
+          traceEvents.set(traceEvent.asyncId, [traceEvent])
+        } else {
+          traceEvents.get(traceEvent.asyncId).push(traceEvent)
+        }
       }
     }
 
@@ -84,7 +91,7 @@ test('default collect command', function (t) {
     // Get async operation types
     const asyncOperationTypes = []
     for (const trackedTraceEvents of traceEvents.values()) {
-      asyncOperationTypes.push(trackedTraceEvents[0].name)
+      asyncOperationTypes.push(trackedTraceEvents[0].type)
     }
 
     // Expect Timeout and TIMERWRAP to be there
