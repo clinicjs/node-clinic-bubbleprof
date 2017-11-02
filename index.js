@@ -9,10 +9,6 @@ const getTraceEventsFilename = require('./collect/get-trace-events-filename.js')
 const getLoggingDirname = require('./collect/get-logging-dirname.js')
 
 class ClinicBubbleprof {
-  constructor (settings = {}) {
-
-  }
-
   collect (args, callback) {
     const samplerPath = path.resolve(__dirname, 'logger.js')
 
