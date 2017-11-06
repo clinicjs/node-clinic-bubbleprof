@@ -6,7 +6,7 @@ const async = require('async')
 const ClinicBubbleprof = require('../index.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
 const TraceEventsDecoder = require('../format/trace-events-decoder.js')
-const getLoggingFiles = require('../collect/get-logging-files.js')
+const getLoggingPaths = require('../collect/get-logging-paths.js')
 
 function collect (tool, callback) {
   tool.collect(
@@ -14,19 +14,19 @@ function collect (tool, callback) {
     function (err, dirname) {
       if (err) return callback(err, dirname, null)
 
-      const files = getLoggingFiles(dirname)
+      const files = getLoggingPaths(dirname.split('.')[0])
 
       async.parallel({
         stackTraces (done) {
           const stackTraces = []
-          fs.createReadStream(files.stackTrace)
+          fs.createReadStream(files['/stacktrace'])
             .pipe(new StackTraceDecoder())
             .on('data', function (data) {
               stackTraces.push(data)
             })
             .once('end', function () {
               // remove datafile
-              fs.unlink(files.stackTrace, function (err) {
+              fs.unlink(files['/stacktrace'], function (err) {
                 if (err) return done(err)
                 done(null, stackTraces)
               })
@@ -34,14 +34,14 @@ function collect (tool, callback) {
         },
         traveEvents (done) {
           const traceEvents = []
-          fs.createReadStream(files.traceEvents)
+          fs.createReadStream(files['/traceevents'])
             .pipe(new TraceEventsDecoder())
             .on('data', function (data) {
               traceEvents.push(data)
             })
             .once('end', function () {
               // remove datafile
-              fs.unlink(files.traceEvents, function (err) {
+              fs.unlink(files['/traceevents'], function (err) {
                 if (err) return done(err)
                 done(null, traceEvents)
               })
@@ -50,7 +50,7 @@ function collect (tool, callback) {
       }, function (err, output) {
         if (err) return callback(err, dirname, null)
 
-        fs.rmdir(dirname, function (err) {
+        fs.rmdir(files['/'], function (err) {
           callback(err, dirname, output)
         })
       })

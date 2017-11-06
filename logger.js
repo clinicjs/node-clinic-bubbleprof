@@ -1,21 +1,23 @@
 'use strict'
 
 const fs = require('fs')
-const path = require('path')
 const asyncHooks = require('async_hooks')
 const stackTrace = require('./collect/stack-trace.js')
 const StackTraceEncoder = require('./format/stack-trace-encoder.js')
-const getStackTraceFilename = require('./collect/get-stack-trace-filename.js')
+const getLoggingPaths = require('./collect/get-logging-paths.js')
+
+// create dirname
+const paths = getLoggingPaths(process.pid)
+fs.mkdirSync(paths['/'])
 
 // setup encoded states file
-const stackTraceFilepath = path.resolve(getStackTraceFilename(process.pid))
 const encoder = new StackTraceEncoder()
 encoder.pipe(
-  fs.createWriteStream(stackTraceFilepath, {
+  fs.createWriteStream(paths['/stacktrace'], {
     // Open log file synchronously to ensure that that .write() only
     // corresponds to one async action. This makes it easy to filter .write()
     // in async_hooks.
-    fd: fs.openSync(stackTraceFilepath, 'w')
+    fd: fs.openSync(paths['/stacktrace'], 'w')
   })
 )
 

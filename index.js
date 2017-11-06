@@ -2,11 +2,8 @@
 
 const fs = require('fs')
 const path = require('path')
-const async = require('async')
 const { spawn } = require('child_process')
-const getStackTraceFilename = require('./collect/get-stack-trace-filename.js')
-const getTraceEventsFilename = require('./collect/get-trace-events-filename.js')
-const getLoggingDirname = require('./collect/get-logging-dirname.js')
+const getLoggingPaths = require('./collect/get-logging-paths.js')
 
 class ClinicBubbleprof {
   collect (args, callback) {
@@ -34,38 +31,20 @@ class ClinicBubbleprof {
       }
 
       // get filenames of logfiles
-      const stackTraceFilepath = path.resolve(getStackTraceFilename(proc.pid))
-      const traceEventsFilepath = path.resolve('node_trace.1.log')
-      const loggingDirname = getLoggingDirname(proc.pid)
+      const paths = getLoggingPaths(proc.pid)
 
       // create directory and move files to that directory
-      fs.mkdir(loggingDirname, function (err) {
-        if (err) return callback(err)
-
-        async.parallel({
-          stackTrace (done) {
-            fs.rename(
-              stackTraceFilepath,
-              path.join(loggingDirname, getStackTraceFilename(proc.pid)),
-              done
-            )
-          },
-          traceEvents (done) {
-            fs.rename(
-              traceEventsFilepath,
-              path.join(loggingDirname, getTraceEventsFilename(proc.pid)),
-              done
-            )
-          }
-        }, function (err) {
+      fs.rename(
+        'node_trace.1.log', paths['/traceevents'],
+        function (err) {
           if (err) return callback(err)
-          callback(null, loggingDirname)
-        })
-      })
+          callback(null, paths['/'])
+        }
+      )
     })
   }
 
-  visualize (dataFilename, outputFilename, callback) {
+  visualize (dataDirname, outputFilename, callback) {
     process.nextTick(callback, new Error('bubbleprof is not implemented'))
   }
 }
