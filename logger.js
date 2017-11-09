@@ -36,7 +36,7 @@ const hook = asyncHooks.createHook({
     skipThis = true
     encoder.write({
       asyncId: asyncId,
-      frames: stackTrace()
+      frames: stackTrace(2)
     })
     skipThis = false
   },
