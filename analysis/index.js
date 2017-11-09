@@ -3,6 +3,7 @@
 const JoinEvents = require('./join-events.js')
 const CollapseEvents = require('./collapse-events.js')
 const FilterEvents = require('./filter-events.js')
+const AggregateEvents = require('./aggregate-events.js')
 
 function analysis (sourceStreams) {
   const { stackTrace, traceEvents } = sourceStreams
@@ -11,20 +12,16 @@ function analysis (sourceStreams) {
   // asyncId from each stream are approximatly the same. The output data
   // is annotated with the source.
   const result = new JoinEvents(stackTrace, traceEvents)
-  // Collaps the joined events into SourceNode's that combines all the data
-  // for the same asyncId.
+    // Collaps the joined events into SourceNode's that combines all the data
+    // for the same asyncId.
     .pipe(new CollapseEvents())
-  // Remove SourceNode's that don't have a stack trace. No stack trace
-  // indicates that the event was filtered in the stack-trace logger.
+    // Remove SourceNode's that don't have a stack trace. No stack trace
+    // indicates that the event was filtered in the stack-trace logger.
     .pipe(new FilterEvents())
+    // Aggregate SourceNode's that have the same asynchronous path
+    .pipe(new AggregateEvents())
 
-  result.on('data', function (data) {
-    console.log('> data ', data.asyncId)
-  })
-
-  result.on('end', function () {
-    console.log('> end ')
-  })
+  return result
 }
 
 module.exports = analysis
