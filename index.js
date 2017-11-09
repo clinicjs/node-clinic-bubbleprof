@@ -7,6 +7,7 @@ const analysis = require('./analysis/index.js')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventsDecoder = require('./format/trace-events-decoder.js')
+const AggregateToDprof = require('./debug/aggregate-to-dprof.js')
 
 class ClinicBubbleprof {
   collect (args, callback) {
@@ -56,7 +57,10 @@ class ClinicBubbleprof {
     const traceEvents = fs.createReadStream(paths['/traceevents'])
       .pipe(new TraceEventsDecoder())
 
-    const analysisStream = analysis({ stackTrace, traceEvents })
+    const result = analysis({ stackTrace, traceEvents })
+    result
+      .pipe(new AggregateToDprof())
+      .pipe(process.stdout)
   }
 }
 
