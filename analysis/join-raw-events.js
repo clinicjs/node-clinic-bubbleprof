@@ -1,7 +1,7 @@
 'use strict'
 const stream = require('stream')
 
-class JoinEvents extends stream.Readable {
+class JoinRawEvents extends stream.Readable {
   constructor (stackTrace, traceEvents) {
     super({ objectMode: true })
 
@@ -79,4 +79,4 @@ class JoinEvents extends stream.Readable {
     }
   }
 }
-module.exports = JoinEvents
+module.exports = JoinRawEvents

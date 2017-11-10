@@ -1,7 +1,7 @@
 'use strict'
 const stream = require('stream')
 
-class FilterEvents extends stream.Transform {
+class FilterSourceNodes extends stream.Transform {
   constructor () {
     super({
       readableObjectMode: true,
@@ -15,4 +15,4 @@ class FilterEvents extends stream.Transform {
   }
 }
 
-module.exports = FilterEvents
+module.exports = FilterSourceNodes

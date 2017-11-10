@@ -2,7 +2,7 @@
 const stream = require('stream')
 const SourceNode = require('./source-node.js')
 
-class CollapseEvents extends stream.Transform {
+class CombineAsSourceNodes extends stream.Transform {
   constructor () {
     super({
       readableObjectMode: true,
@@ -49,4 +49,4 @@ class CollapseEvents extends stream.Transform {
   }
 }
 
-module.exports = CollapseEvents
+module.exports = CombineAsSourceNodes

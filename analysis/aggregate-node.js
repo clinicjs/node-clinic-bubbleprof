@@ -11,23 +11,23 @@ class AggregateNode {
   }
 
   makeRoot() {
-    this.addSource(new SourceNode(1))
+    this.addSourceNode(new SourceNode(1))
   }
 
-  addChild(childNode) {
-    this.children.push(childNode.nodeId)
+  addChild(nodeId) {
+    this.children.push(nodeId)
   }
 
   getChildren() {
-    return this.children.slice(0)
+    return this.children
   }
 
-  addSource(sourceNode) {
+  addSourceNode(sourceNode) {
     this.sources.push(sourceNode)
   }
 
-  getAsyncIds() {
-    return this.sources.map((sourceNode) => sourceNode.asyncId)
+  getSourceNodes(sourceNode) {
+    return this.sources
   }
 }
 
