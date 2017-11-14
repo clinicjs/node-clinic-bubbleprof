@@ -1,6 +1,7 @@
 'use strict'
 
 const test = require('tap').test
+const endpoint = require('endpoint')
 const TraceEventDecoder = require('../format/trace-events-decoder.js')
 
 test('trace event decoder', function (t) {
@@ -49,9 +50,12 @@ test('trace event decoder', function (t) {
     traceEvents: [init, before, after, destroy]
   }))
 
-  const traceEvents = []
-  decoder.on('data', (data) => traceEvents.push(Object.assign({}, data)))
-  decoder.once('end', function () {
+  decoder.pipe(endpoint({ objectMode: true }, function (err, data) {
+    if (err) return t.ifError(err)
+
+    // Remove prototype constructor
+    const traceEvents = data.map((v) => Object.assign({}, v))
+
     t.strictDeepEqual(traceEvents, [{
       event: 'init',
       type: 'TYPENAME',
@@ -79,5 +83,5 @@ test('trace event decoder', function (t) {
     }])
 
     t.end()
-  })
+  }))
 })

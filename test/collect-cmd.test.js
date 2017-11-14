@@ -2,43 +2,49 @@
 
 const test = require('tap').test
 const async = require('async')
+const endpoint = require('endpoint')
 const CollectAndRead = require('./collect-and-read.js')
 
 test('collect command produces data files with content', function (t) {
   const cmd = new CollectAndRead('-e', 'setTimeout(() => {}, 200)')
   cmd.on('error', t.ifError.bind(t))
   cmd.on('ready', function (stackTraceReader, traceEventsReader) {
-
     async.parallel({
-      stackTrace(done) {
+      stackTrace (done) {
         // collect tracked asyncIds
-        const stackTraceMap = new Map()
         stackTraceReader
-          .on('data', function (stackTrace) {
-            stackTraceMap.set(stackTrace.asyncId, stackTrace)
-          })
-          .on('error', done)
-          .on('end', function () {
+          .pipe(endpoint({ objectMode: true }, function (err, data) {
+            if (err) return done(err)
+
+            const stackTraceMap = new Map()
+            for (const stackTrace of data) {
+              stackTraceMap.set(stackTrace.asyncId, stackTrace)
+            }
+
             done(null, stackTraceMap)
-          })
+          }))
       },
 
-      traceEvents(done) {
+      traceEvents (done) {
         // collect traceEvents for all asyncIds
-        const traceEventsMap = new Map()
         traceEventsReader
-          .on('data', function (traceEvent) {
-            if (!traceEventsMap.has(traceEvent.asyncId)) {
-              traceEventsMap.set(traceEvent.asyncId, [])
+          .pipe(endpoint({ objectMode: true }, function (err, data) {
+            if (err) return done(err)
+
+            const traceEventsMap = new Map()
+            for (const traceEvent of data) {
+              if (!traceEventsMap.has(traceEvent.asyncId)) {
+                traceEventsMap.set(traceEvent.asyncId, [])
+              }
+              traceEventsMap.get(traceEvent.asyncId).push(traceEvent)
             }
-            traceEventsMap.get(traceEvent.asyncId).push(traceEvent)
-          })
-          .on('error', done)
-          .on('end', function () {
+
             done(null, traceEventsMap)
-          })
+          }))
       }
     }, function (err, output) {
+      if (err) return t.ifError(err)
+
       // filter untracked events out
       for (const asyncId of output.traceEvents.keys()) {
         if (!output.stackTrace.has(asyncId)) {

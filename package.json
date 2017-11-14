@@ -10,8 +10,10 @@
     "lint": "standard --fix | snazzy"
   },
   "devDependencies": {
+    "endpoint": "^0.4.5",
     "snazzy": "^7.0.0",
     "standard": "^10.0.3",
+    "startpoint": "^0.3.2",
     "tap": "^10.7.2"
   },
   "keywords": [],
