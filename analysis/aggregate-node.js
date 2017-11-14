@@ -3,30 +3,30 @@
 const SourceNode = require('./source-node.js')
 
 class AggregateNode {
-  constructor(nodeId, parentNodeId) {
+  constructor (nodeId, parentNodeId) {
     this.nodeId = nodeId
     this.parentNodeId = parentNodeId
     this.children = []
     this.sources = []
   }
 
-  makeRoot() {
+  makeRoot () {
     this.addSourceNode(new SourceNode(1))
   }
 
-  addChild(nodeId) {
+  addChild (nodeId) {
     this.children.push(nodeId)
   }
 
-  getChildren() {
+  getChildren () {
     return this.children
   }
 
-  addSourceNode(sourceNode) {
+  addSourceNode (sourceNode) {
     this.sources.push(sourceNode)
   }
 
-  getSourceNodes(sourceNode) {
+  getSourceNodes (sourceNode) {
     return this.sources
   }
 }

@@ -9,7 +9,7 @@ const StackTraceDecoder = require('../format/stack-trace-decoder.js')
 const TraceEventsDecoder = require('../format/trace-events-decoder.js')
 
 class CollectAndRead extends events.EventEmitter {
-  constructor(...args) {
+  constructor (...args) {
     super()
     const self = this
     const tool = new ClinicBubbleprof()
@@ -29,8 +29,8 @@ class CollectAndRead extends events.EventEmitter {
     })
   }
 
-  _setupAutoCleanup(files, stacktrace, traceevents) {
-    const self = this;
+  _setupAutoCleanup (files, stacktrace, traceevents) {
+    const self = this
 
     async.parallel({
       stackTraces (done) {

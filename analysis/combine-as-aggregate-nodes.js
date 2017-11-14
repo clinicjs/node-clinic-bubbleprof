@@ -25,7 +25,7 @@ class CombineAsAggregateNodes extends stream.Transform {
     this._aggregateNodes.set(root.nodeId, root)
   }
 
-  _newAggregateNode(parentNode) {
+  _newAggregateNode (parentNode) {
     const childNode = new AggregateNode(this._nodeId++, parentNode.nodeId)
     this._aggregateNodes.set(childNode.nodeId, childNode)
     return childNode
@@ -41,13 +41,13 @@ class CombineAsAggregateNodes extends stream.Transform {
     callback(null)
   }
 
-  _findAndAssignChildren(parentNode) {
+  _findAndAssignChildren (parentNode) {
     const frameHashIndex = new Map()
 
     // get SourceNode belonging to the parent AggregateNode
     for (const parentSourceNode of parentNode.getSourceNodes()) {
       if (!this._triggerAsyncIdIndex.has(parentSourceNode.asyncId)) {
-          continue
+        continue
       }
 
       // check children of current sourceNode of the AggregateNode

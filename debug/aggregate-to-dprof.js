@@ -14,7 +14,7 @@ class AggregateToDprof extends stream.Transform {
     this._total = 0
   }
 
-  _transform(node, encoding, callback) {
+  _transform (node, encoding, callback) {
     if (node.nodeId === 1) {
       this._rootChildren = node.children
       return callback(null)
@@ -32,7 +32,7 @@ class AggregateToDprof extends stream.Transform {
       uid: node.nodeId,
       parent: node.parentNodeId,
       stack: node.sources[0].frames.map(function (frame, index) {
-        return  {
+        return {
           description: stackTrace[index],
           filename: frame.fileName,
           column: frame.columnNumber,

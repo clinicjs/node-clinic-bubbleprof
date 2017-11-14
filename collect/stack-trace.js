@@ -62,10 +62,10 @@ function stackTrace (minSkip) {
   const frames = structuredStackTrace.map((frame) => new Frame(frame))
 
   // Don't include async_hooks frames
-  let skip = minSkip;
+  let skip = minSkip
   for (; skip < frames.length; skip++) {
     if (frames[skip].fileName !== 'async_hooks.js') {
-      break;
+      break
     }
   }
   return frames.slice(skip)

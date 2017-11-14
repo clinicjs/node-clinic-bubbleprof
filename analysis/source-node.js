@@ -24,7 +24,7 @@ class SourceNode {
     this.destroy = null
   }
 
-  [util.inspect.custom](depth, options) {
+  [util.inspect.custom] (depth, options) {
     return `<SourceNode` +
            ` type:${options.stylize(this.type, 'string')},` +
            ` asyncId:${options.stylize(this.asyncId, 'number')},` +
@@ -65,7 +65,6 @@ class SourceNode {
   hasStackTrace () {
     return this.frames !== null
   }
-
 
   positionalStackTrace () {
     const framesPosition = this.frames.map(function (frame) {
