@@ -5,13 +5,11 @@ const CombineAsSourceNodes = require('./combine-as-source-nodes.js')
 const FilterSourceNodes = require('./filter-source-nodes.js')
 const CombineAsAggregateNodes = require('./combine-as-aggregate-nodes.js')
 
-function analysis (sourceStreams) {
-  const { stackTrace, traceEvents } = sourceStreams
-
+function analysis (stackTraceReader, traceEventsReader) {
   // Join the two data streams. The streams are read such that the latest
   // asyncId from each stream are approximatly the same. The output data
   // is annotated with the source.
-  const result = new JoinRawEvents(stackTrace, traceEvents)
+  const result = new JoinRawEvents(stackTraceReader, traceEventsReader)
     // combine the joined events into SourceNode's that combines all the data
     // for the same asyncId.
     .pipe(new CombineAsSourceNodes())

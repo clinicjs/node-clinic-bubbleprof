@@ -51,13 +51,13 @@ class ClinicBubbleprof {
   visualize (dataDirname, outputFilename, callback) {
     const paths = getLoggingPaths(dataDirname.split('.')[0])
 
-    const stackTrace = fs.createReadStream(paths['/stacktrace'])
+    const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
       .pipe(new StackTraceDecoder())
 
-    const traceEvents = fs.createReadStream(paths['/traceevents'])
+    const traceEventsReader = fs.createReadStream(paths['/traceevents'])
       .pipe(new TraceEventsDecoder())
 
-    const result = analysis({ stackTrace, traceEvents })
+    const result = analysis(stackTraceReader, traceEventsReader)
     result
       .pipe(new AggregateToDprof())
       .pipe(process.stdout)
