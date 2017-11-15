@@ -10,7 +10,7 @@ class AggregateNode {
     this.sources = []
   }
 
-  toJSON() {
+  toJSON () {
     return {
       nodeId: this.nodeId,
       parentNodeId: this.parentNodeId,

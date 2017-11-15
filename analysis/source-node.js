@@ -42,7 +42,7 @@ class SourceNode {
       case 'init':
         this.type = info.type
         this.init = info.timestamp
-        this.triggerAsyncId = info.triggerId
+        this.triggerAsyncId = info.triggerAsyncId
         break
       case 'destroy':
         this.destroy = info.timestamp
