@@ -52,10 +52,9 @@ class JoinRawEvents extends stream.Readable {
   _maybeEnded () {
     if (this._stackTraceEnded && this._traceEventsEnded) {
       this.push(null)
-    }
-    // If more data is expected and only one stream ended, then make a manual
-    // _read call, such that .push(data) is called.
-    else if (this._awaitRead) {
+    } else if (this._awaitRead) {
+      // If more data is expected and only one stream ended, then make a manual
+      // _read call, such that .push(data) is called.
       this._read(1)
     }
   }
@@ -66,7 +65,7 @@ class JoinRawEvents extends stream.Readable {
     // the asyncId's are approximatively incrementing. Descide what
     // stream to read from by selecting the one where the asyncId is lowest
     if (this._traceEventsEnded || (
-      this._stackTraceAsyncId < this._traceEventsAsyncId && !this._traceEventsEnded
+      this._stackTraceAsyncId < this._traceEventsAsyncId && !this._stackTraceEnded
     )) {
       const data = this._stackTrace.read()
       if (data === null) {

@@ -43,3 +43,55 @@ test('join raw events order', function (t) {
       t.end()
     }))
 })
+
+test('join raw events - earily stackTrace end', function (t) {
+  const stackTrace = startpoint([
+    { asyncId: 1, timestamp: 1 }
+  ], { objectMode: true })
+
+  const traceEvents = startpoint([
+    { asyncId: 1, timestamp: 1 },
+    { asyncId: 2, timestamp: 2 },
+    { asyncId: 3, timestamp: 3 }
+  ], { objectMode: true })
+
+  new JoinRawEvents(stackTrace, traceEvents)
+    .pipe(endpoint({ objectMode: true }, function (err, data) {
+      if (err) return t.ifError(err)
+
+      t.strictDeepEqual(data, [
+        { type: 'traceEvents', info: { asyncId: 1, timestamp: 1 } },
+        { type: 'stackTrace', info: { asyncId: 1, timestamp: 1 } },
+        { type: 'traceEvents', info: { asyncId: 2, timestamp: 2 } },
+        { type: 'traceEvents', info: { asyncId: 3, timestamp: 3 } }
+      ])
+      t.end()
+    }))
+})
+
+test('join raw events - earily traceEvents end', function (t) {
+  const stackTrace = startpoint([
+    { asyncId: 1, timestamp: 1 },
+    { asyncId: 2, timestamp: 2 },
+    { asyncId: 3, timestamp: 3 }
+  ], { objectMode: true })
+
+  const traceEvents = startpoint([
+    { asyncId: 1, timestamp: 1 },
+    { asyncId: 1, timestamp: 2 }
+  ], { objectMode: true })
+
+  new JoinRawEvents(stackTrace, traceEvents)
+    .pipe(endpoint({ objectMode: true }, function (err, data) {
+      if (err) return t.ifError(err)
+
+      t.strictDeepEqual(data, [
+        { type: 'traceEvents', info: { asyncId: 1, timestamp: 1 } },
+        { type: 'stackTrace', info: { asyncId: 1, timestamp: 1 } },
+        { type: 'traceEvents', info: { asyncId: 1, timestamp: 2 } },
+        { type: 'stackTrace', info: { asyncId: 2, timestamp: 2 } },
+        { type: 'stackTrace', info: { asyncId: 3, timestamp: 3 } }
+      ])
+      t.end()
+    }))
+})
