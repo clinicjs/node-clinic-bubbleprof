@@ -1,0 +1,56 @@
+
+/* Define colors */
+html {
+  --main-bg-color: rgb(27, 30, 39);
+
+  --banner-text-color: rgb(255, 255, 255);
+  --banner-bg-color: rgb(41, 45, 57);
+}
+
+/* Main layout */
+
+html, body {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--main-bg-color);
+}
+
+/* Global Typography */
+
+html {
+  font-family: sans-serif;
+}
+
+html #banner {
+  /* light text on dark background doesn't look so good in the browser compared
+     to graphical design tools. This is because graphical design tools uses
+     antialiasing, where browsers uses subpixel rendering. To make it look
+     like in the design tool, use antialiased font rendering. More details,
+     especially on why this is a bad idea:
+       http://usabilitypost.com/2012/11/05/stop-fixing-font-smoothing/
+  */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Banner layout */
+
+#banner {
+  height: 65px;
+  background: var(--banner-bg-color);
+  position: relative;
+}
+
+#banner::after {
+  content: 'BubbleProf';
+  font-size: 14pt;
+  font-weight: lighter;
+  color: var(--banner-text-color);
+  display: block;
+  margin-left: 35px;
+  line-height: 65px;
+}

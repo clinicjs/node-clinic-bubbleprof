@@ -85,36 +85,6 @@ class SourceNode {
 
     return framesPosition.join('\n')
   }
-
-  stackTrace () {
-    const formattedFrames = this.frames.map(function (frame) {
-      let name = frame.functionName ? frame.functionName : '<anonymous>'
-      if (frame.isEval) {
-        // no change
-      } else if (frame.isToplevel) {
-        // no change
-      } else if (frame.isConstructor) {
-        name = 'new ' + name
-      } else if (frame.isNative) {
-        name = 'native ' + name
-      } else {
-        name = frame.typeName + '.' + name
-      }
-
-      let formatted = '    at ' + name
-      if (frame.isEval) {
-        formatted += ' ' + frame.evalOrigin
-      } else {
-        formatted += ' ' + frame.fileName
-        formatted += ':' + (frame.lineNumber > 0 ? frame.lineNumber : '')
-        formatted += (frame.columnNumber > 0 ? ':' + frame.columnNumber : '')
-      }
-
-      return formatted
-    })
-
-    return formattedFrames.join('\n')
-  }
 }
 
 module.exports = SourceNode
