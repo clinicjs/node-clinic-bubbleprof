@@ -2,12 +2,15 @@
 
 const fs = require('fs')
 const path = require('path')
+const pump = require('pump')
 const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
+const Stringify = require('streaming-json-stringify')
+const browserify = require('browserify')
+const streamTemplate = require('stream-template')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventsDecoder = require('./format/trace-events-decoder.js')
-const AggregateToDprof = require('./debug/aggregate-to-dprof.js')
 
 class ClinicBubbleprof {
   collect (args, callback) {
@@ -49,18 +52,55 @@ class ClinicBubbleprof {
   }
 
   visualize (dataDirname, outputFilename, callback) {
-    const paths = getLoggingPaths(dataDirname.split('.')[0])
+    const fakeDataPath = path.join(__dirname, 'visualizer', 'data.json')
+    const stylePath = path.join(__dirname, 'visualizer', 'style.css')
+    const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
 
+    // Load data
+    const paths = getLoggingPaths(dataDirname.split('.')[0])
     const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
       .pipe(new StackTraceDecoder())
-
     const traceEventsReader = fs.createReadStream(paths['/traceevents'])
       .pipe(new TraceEventsDecoder())
 
-    const result = analysis(stackTraceReader, traceEventsReader)
-    result
-      .pipe(new AggregateToDprof())
-      .pipe(process.stdout)
+    // create dataFile
+    const dataFile = analysis(stackTraceReader, traceEventsReader)
+      .pipe(new Stringify({
+        seperator: ',\n',
+        stringifier: JSON.stringify
+      }))
+
+    // create script-file stream
+    const b = browserify({
+      'basedir': __dirname,
+      // 'debug': true,
+      'noParse': [fakeDataPath]
+    })
+    b.transform('brfs')
+    b.require(dataFile, {
+      'file': fakeDataPath
+    })
+    b.add(scriptPath)
+    const scriptFile = b.bundle()
+
+    // create style-file stream
+    const styleFile = fs.createReadStream(stylePath)
+
+    // build output file
+    const outputFile = streamTemplate`
+      <!DOCTYPE html>
+      <meta charset="utf8">
+      <title>Clinic Bubbleprof</title>
+      <style>${styleFile}</style>
+      <div id="banner"></div>
+      <script>${scriptFile}</script>
+    `
+
+    pump(
+      outputFile,
+      fs.createWriteStream(outputFilename),
+      callback
+    )
   }
 }
 
