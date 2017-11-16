@@ -1,7 +1,7 @@
 'use strict'
 const stream = require('stream')
 
-function describeFrame(frame) {
+function describeFrame (frame) {
   // Get name
   let name = frame.functionName ? frame.functionName : '<anonymous>'
   if (frame.isEval) {
@@ -42,8 +42,8 @@ class AggregateToDprof extends stream.Transform {
     this._total = 0
   }
 
-  _offset(time) {
-    return (time - this._start) * 1e6;
+  _offset (time) {
+    return (time - this._start) * 1e6
   }
 
   _transform (node, encoding, callback) {
