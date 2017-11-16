@@ -22,9 +22,9 @@ class TraceEvent {
     this.type = isCallback ? data.name.slice(0, -'_CALLBACK'.length) : data.name
     this.asyncId = parseInt(data.id, 16)
     this.timestamp = data.ts / 1000 // convert to ms
-    this.triggerId = null
-    if (data.args.hasOwnProperty('triggerId')) {
-      this.triggerId = data.args.triggerId
+    this.triggerAsyncId = null
+    if (data.args.hasOwnProperty('triggerAsyncId')) {
+      this.triggerAsyncId = data.args.triggerAsyncId
     }
   }
 }

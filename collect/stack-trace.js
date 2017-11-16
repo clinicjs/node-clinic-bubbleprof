@@ -42,7 +42,7 @@ class Frame {
   }
 }
 
-function stackTrace () {
+function stackTrace (minSkip) {
   // overwrite stack trace limit and formatting
   const restoreFormat = Error.prepareStackTrace
   const restoreLimit = Error.stackTraceLimit
@@ -59,6 +59,15 @@ function stackTrace () {
   Error.stackTraceLimit = restoreLimit
 
   // extract data
-  return structuredStackTrace.map((frame) => new Frame(frame))
+  const frames = structuredStackTrace.map((frame) => new Frame(frame))
+
+  // Don't include async_hooks frames
+  let skip = minSkip
+  for (; skip < frames.length; skip++) {
+    if (frames[skip].fileName !== 'async_hooks.js') {
+      break
+    }
+  }
+  return frames.slice(skip)
 }
 module.exports = stackTrace

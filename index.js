@@ -3,7 +3,11 @@
 const fs = require('fs')
 const path = require('path')
 const { spawn } = require('child_process')
+const analysis = require('./analysis/index.js')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
+const StackTraceDecoder = require('./format/stack-trace-decoder.js')
+const TraceEventsDecoder = require('./format/trace-events-decoder.js')
+const AggregateToDprof = require('./debug/aggregate-to-dprof.js')
 
 class ClinicBubbleprof {
   collect (args, callback) {
@@ -45,7 +49,18 @@ class ClinicBubbleprof {
   }
 
   visualize (dataDirname, outputFilename, callback) {
-    process.nextTick(callback, new Error('bubbleprof is not implemented'))
+    const paths = getLoggingPaths(dataDirname.split('.')[0])
+
+    const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
+      .pipe(new StackTraceDecoder())
+
+    const traceEventsReader = fs.createReadStream(paths['/traceevents'])
+      .pipe(new TraceEventsDecoder())
+
+    const result = analysis(stackTraceReader, traceEventsReader)
+    result
+      .pipe(new AggregateToDprof())
+      .pipe(process.stdout)
   }
 }
 
