@@ -8,6 +8,7 @@ const CombineAsAggregateNodes = require('../analysis/combine-as-aggregate-nodes.
 
 test('join raw events order', function (t) {
   const serverNode = new SourceNode(2)
+  serverNode.setIdentifier('server.js')
   serverNode.addStackTrace({
     asyncId: 2,
     frames: [{ fileName: 'server.js' }]
@@ -35,6 +36,7 @@ test('join raw events order', function (t) {
 
     const socketNode = new SourceNode(socketAsyncId)
     socketNodes.push(socketNode)
+    socketNode.setIdentifier('server.js')
     socketNode.addStackTrace({
       asyncId: socketAsyncId,
       frames: [{ fileName: 'server.js' }]
@@ -54,6 +56,7 @@ test('join raw events order', function (t) {
 
     const logNode = new SourceNode(logAsyncId)
     logNodes.push(logNode)
+    logNode.setIdentifier('log.js')
     logNode.addStackTrace({
       asyncId: logAsyncId,
       frames: [{ fileName: 'log.js' }]
@@ -73,6 +76,7 @@ test('join raw events order', function (t) {
 
     const endNode = new SourceNode(endAsyncId)
     endNodes.push(endNode)
+    endNode.setIdentifier('server.js')
     endNode.addStackTrace({
       asyncId: endAsyncId,
       frames: [{ fileName: 'server.js' }]

@@ -6,6 +6,7 @@ const { murmurHash128 } = require('murmurhash-native')
 class SourceNode {
   constructor (asyncId) {
     this.asyncId = asyncId
+    this.identifier = null
 
     // parent
     this.triggerAsyncId = null
@@ -15,7 +16,6 @@ class SourceNode {
 
     // stack trace
     this.frames = null
-    this.framesHash = null
 
     // event timestamps
     this.init = null
@@ -29,12 +29,15 @@ class SourceNode {
            ` type:${options.stylize(this.type, 'string')},` +
            ` asyncId:${options.stylize(this.asyncId, 'number')},` +
            ` triggerAsyncId:${options.stylize(this.triggerAsyncId, 'number')},` +
-           ` frames:${options.stylize(this.framesHash, 'special')}>`
+           ` identifier:${options.stylize(this.identifier, 'special')}>`
+  }
+
+  setIdentifier (identifier) {
+    this.identifier = murmurHash128(identifier)
   }
 
   addStackTrace (info) {
     this.frames = info.frames
-    this.framesHash = murmurHash128(this.positionalStackTrace())
   }
 
   addTraceEvent (info) {
