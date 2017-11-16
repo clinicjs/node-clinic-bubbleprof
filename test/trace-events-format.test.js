@@ -1,6 +1,7 @@
 'use strict'
 
 const test = require('tap').test
+const endpoint = require('endpoint')
 const TraceEventDecoder = require('../format/trace-events-decoder.js')
 
 test('trace event decoder', function (t) {
@@ -11,7 +12,7 @@ test('trace event decoder', function (t) {
     'cat': 'node.async_hooks',
     'name': 'TYPENAME',
     'id': '0x2',
-    'args': { 'triggerId': 1 }
+    'args': { 'triggerAsyncId': 1 }
   }
 
   const before = {
@@ -49,35 +50,38 @@ test('trace event decoder', function (t) {
     traceEvents: [init, before, after, destroy]
   }))
 
-  const traceEvents = []
-  decoder.on('data', (data) => traceEvents.push(Object.assign({}, data)))
-  decoder.once('end', function () {
+  decoder.pipe(endpoint({ objectMode: true }, function (err, data) {
+    if (err) return t.ifError(err)
+
+    // Remove prototype constructor
+    const traceEvents = data.map((v) => Object.assign({}, v))
+
     t.strictDeepEqual(traceEvents, [{
       event: 'init',
       type: 'TYPENAME',
       asyncId: 2,
-      triggerId: 1,
+      triggerAsyncId: 1,
       timestamp: 1
     }, {
       event: 'before',
       type: 'TYPENAME',
       asyncId: 2,
-      triggerId: null,
+      triggerAsyncId: null,
       timestamp: 2
     }, {
       event: 'after',
       type: 'TYPENAME',
       asyncId: 2,
-      triggerId: null,
+      triggerAsyncId: null,
       timestamp: 3
     }, {
       event: 'destroy',
       type: 'TYPENAME',
       asyncId: 2,
-      triggerId: null,
+      triggerAsyncId: null,
       timestamp: 4
     }])
 
     t.end()
-  })
+  }))
 })
