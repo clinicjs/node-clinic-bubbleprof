@@ -17,7 +17,7 @@ function describeFrame(frame) {
   }
 
   // Get position
-  let formatted = 'at ' + name
+  let formatted = name
   if (frame.isEval) {
     formatted += ' ' + frame.evalOrigin
   } else {
