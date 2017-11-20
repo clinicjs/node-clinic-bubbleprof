@@ -23,6 +23,7 @@ class AggregateNode {
         return {
           asyncId: source.asyncId,
           triggerAsyncId: source.triggerAsyncId,
+          executionAsyncId: source.executionAsyncId,
           init: source.init,
           before: source.before,
           after: source.after,

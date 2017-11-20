@@ -10,6 +10,7 @@ class SourceNode {
 
     // parent
     this.triggerAsyncId = null
+    this.executionAsyncId = null
 
     // async type
     this.type = null
@@ -29,6 +30,7 @@ class SourceNode {
            ` type:${options.stylize(this.type, 'string')},` +
            ` asyncId:${options.stylize(this.asyncId, 'number')},` +
            ` triggerAsyncId:${options.stylize(this.triggerAsyncId, 'number')},` +
+           ` executionAsyncId:${options.stylize(this.executionAsyncId, 'number')},` +
            ` identifier:${options.stylize(this.identifier, 'special')}>`
   }
 
@@ -46,6 +48,7 @@ class SourceNode {
         this.type = info.type
         this.init = info.timestamp
         this.triggerAsyncId = info.triggerAsyncId
+        this.executionAsyncId = info.executionAsyncId
         break
       case 'destroy':
         this.destroy = info.timestamp

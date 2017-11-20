@@ -23,8 +23,12 @@ class TraceEvent {
     this.asyncId = parseInt(data.id, 16)
     this.timestamp = data.ts / 1000 // convert to ms
     this.triggerAsyncId = null
+    this.executionAsyncId = null
     if (data.args.hasOwnProperty('triggerAsyncId')) {
       this.triggerAsyncId = data.args.triggerAsyncId
+    }
+    if (data.args.hasOwnProperty('executionAsyncId')) {
+      this.executionAsyncId = data.args.executionAsyncId
     }
   }
 }
