@@ -7,8 +7,10 @@ class SourceNode {
   constructor (asyncId) {
     this.asyncId = asyncId
     this.identifier = null
+    this.mark = null
 
     // parent
+    this.parentAsyncId = null
     this.triggerAsyncId = null
     this.executionAsyncId = null
 
@@ -29,13 +31,22 @@ class SourceNode {
     return `<SourceNode` +
            ` type:${options.stylize(this.type, 'string')},` +
            ` asyncId:${options.stylize(this.asyncId, 'number')},` +
+           ` parentAsyncId:${options.stylize(this.parentAsyncId, 'number')},` +
            ` triggerAsyncId:${options.stylize(this.triggerAsyncId, 'number')},` +
            ` executionAsyncId:${options.stylize(this.executionAsyncId, 'number')},` +
            ` identifier:${options.stylize(this.identifier, 'special')}>`
   }
 
+  setMark (mark) {
+    this.mark = mark
+  }
+
   setIdentifier (identifier) {
     this.identifier = murmurHash128(identifier)
+  }
+
+  setParentAsyncId(asyncId) {
+    this.parentAsyncId = asyncId;
   }
 
   addStackTrace (info) {
@@ -49,6 +60,7 @@ class SourceNode {
         this.init = info.timestamp
         this.triggerAsyncId = info.triggerAsyncId
         this.executionAsyncId = info.executionAsyncId
+        this.setParentAsyncId(info.triggerAsyncId)
         break
       case 'destroy':
         this.destroy = info.timestamp

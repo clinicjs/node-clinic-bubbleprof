@@ -9,10 +9,10 @@ class CombineAsAggregateNodes extends stream.Transform {
       writableObjectMode: true
     })
 
-    // Index incomming SourceNode by their triggerAsyncId. This will tell
+    // Index incomming SourceNode by their parentAsyncId. This will tell
     // what parent SourceNode they have, which is necessary information to
     // build the aggregated tree.
-    this._triggerAsyncIdIndex = new Map()
+    this._parentAsyncIdIndex = new Map()
 
     // the root node as nodeId = 1
     const root = new AggregateNode(1, 0)
@@ -32,10 +32,10 @@ class CombineAsAggregateNodes extends stream.Transform {
   }
 
   _transform (node, encoding, callback) {
-    if (this._triggerAsyncIdIndex.has(node.triggerAsyncId)) {
-      this._triggerAsyncIdIndex.get(node.triggerAsyncId).push(node)
+    if (this._parentAsyncIdIndex.has(node.parentAsyncId)) {
+      this._parentAsyncIdIndex.get(node.parentAsyncId).push(node)
     } else {
-      this._triggerAsyncIdIndex.set(node.triggerAsyncId, [node])
+      this._parentAsyncIdIndex.set(node.parentAsyncId, [node])
     }
 
     callback(null)
@@ -46,12 +46,12 @@ class CombineAsAggregateNodes extends stream.Transform {
 
     // get SourceNode belonging to the parent AggregateNode
     for (const parentSourceNode of parentNode.getSourceNodes()) {
-      if (!this._triggerAsyncIdIndex.has(parentSourceNode.asyncId)) {
+      if (!this._parentAsyncIdIndex.has(parentSourceNode.asyncId)) {
         continue
       }
 
       // check children of current sourceNode of the AggregateNode
-      const children = this._triggerAsyncIdIndex.get(parentSourceNode.asyncId)
+      const children = this._parentAsyncIdIndex.get(parentSourceNode.asyncId)
       for (const childSourceNode of children) {
         // if this is a new identifier create a new AggregateNode for it
         if (!identifierIndex.has(childSourceNode.identifier)) {
