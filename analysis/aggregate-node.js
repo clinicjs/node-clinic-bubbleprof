@@ -22,7 +22,9 @@ class AggregateNode {
       sources: this.sources.map(function (source) {
         return {
           asyncId: source.asyncId,
+          parentAsyncId: source.parentAsyncId,
           triggerAsyncId: source.triggerAsyncId,
+          executionAsyncId: source.executionAsyncId,
           init: source.init,
           before: source.before,
           after: source.after,
