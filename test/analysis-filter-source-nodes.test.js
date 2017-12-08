@@ -66,4 +66,4 @@ test('filter source nodes', function (t) {
       t.strictEqual(nodes[0].asyncId, 1)
       t.end()
     }))
-});
+})

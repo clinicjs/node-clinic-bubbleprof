@@ -6,16 +6,19 @@ const { murmurHash128 } = require('murmurhash-native')
 class SourceNode {
   constructor (asyncId) {
     this.asyncId = asyncId
+    this.identifier = null
+    this.mark = null
 
     // parent
+    this.parentAsyncId = null
     this.triggerAsyncId = null
+    this.executionAsyncId = null
 
     // async type
     this.type = null
 
     // stack trace
     this.frames = null
-    this.framesHash = null
 
     // event timestamps
     this.init = null
@@ -28,13 +31,26 @@ class SourceNode {
     return `<SourceNode` +
            ` type:${options.stylize(this.type, 'string')},` +
            ` asyncId:${options.stylize(this.asyncId, 'number')},` +
+           ` parentAsyncId:${options.stylize(this.parentAsyncId, 'number')},` +
            ` triggerAsyncId:${options.stylize(this.triggerAsyncId, 'number')},` +
-           ` frames:${options.stylize(this.framesHash, 'special')}>`
+           ` executionAsyncId:${options.stylize(this.executionAsyncId, 'number')},` +
+           ` identifier:${options.stylize(this.identifier, 'special')}>`
+  }
+
+  setMark (mark) {
+    this.mark = mark
+  }
+
+  setIdentifier (identifier) {
+    this.identifier = murmurHash128(identifier)
+  }
+
+  setParentAsyncId(asyncId) {
+    this.parentAsyncId = asyncId;
   }
 
   addStackTrace (info) {
     this.frames = info.frames
-    this.framesHash = murmurHash128(this.positionalStackTrace())
   }
 
   addTraceEvent (info) {
@@ -43,6 +59,8 @@ class SourceNode {
         this.type = info.type
         this.init = info.timestamp
         this.triggerAsyncId = info.triggerAsyncId
+        this.executionAsyncId = info.executionAsyncId
+        this.setParentAsyncId(info.triggerAsyncId)
         break
       case 'destroy':
         this.destroy = info.timestamp
