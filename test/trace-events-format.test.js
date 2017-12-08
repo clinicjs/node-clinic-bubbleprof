@@ -12,7 +12,10 @@ test('trace event decoder', function (t) {
     'cat': 'node.async_hooks',
     'name': 'TYPENAME',
     'id': '0x2',
-    'args': { 'triggerAsyncId': 1 }
+    'args': {
+      'triggerAsyncId': 1,
+      'executionAsyncId': 0
+    }
   }
 
   const before = {
@@ -61,24 +64,28 @@ test('trace event decoder', function (t) {
       type: 'TYPENAME',
       asyncId: 2,
       triggerAsyncId: 1,
+      executionAsyncId: 0,
       timestamp: 1
     }, {
       event: 'before',
       type: 'TYPENAME',
       asyncId: 2,
       triggerAsyncId: null,
+      executionAsyncId: null,
       timestamp: 2
     }, {
       event: 'after',
       type: 'TYPENAME',
       asyncId: 2,
       triggerAsyncId: null,
+      executionAsyncId: null,
       timestamp: 3
     }, {
       event: 'destroy',
       type: 'TYPENAME',
       asyncId: 2,
       triggerAsyncId: null,
+      executionAsyncId: null,
       timestamp: 4
     }])
 

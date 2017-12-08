@@ -19,7 +19,7 @@ class ParseTcpSourceNodes extends stream.Transform {
     this._stroageIndexedByTriggerAsyncId = new Map()
   }
 
-  _processNode(node) {
+  _processNode (node) {
     this._observedAsyncIds.add(node.asyncId)
 
     if (node.type === 'TCPSERVERWRAP' || node.type === 'PIPESERVERWRAP') {
@@ -27,7 +27,7 @@ class ParseTcpSourceNodes extends stream.Transform {
       node.setMark('tcp.server')
       this._serverAsyncIds.add(node.asyncId)
     } else if (this._serverAsyncIds.has(node.triggerAsyncId) &&
-               node.type === 'TCPWRAP' || node.type === 'PIPEWRAP') {
+               (node.type === 'TCPWRAP' || node.type === 'PIPEWRAP')) {
       // add as connection
       node.setMark('tcp.connection')
       this._connectionAsyncIds.add(node.asyncId)
@@ -44,7 +44,7 @@ class ParseTcpSourceNodes extends stream.Transform {
     }
   }
 
-  _processTree(subroot) {
+  _processTree (subroot) {
     // process as much of the subtree as possible
     const queue = [ subroot ]
 
@@ -66,7 +66,7 @@ class ParseTcpSourceNodes extends stream.Transform {
     }
   }
 
-  _saveNode(node) {
+  _saveNode (node) {
     if (this._stroageIndexedByTriggerAsyncId.has(node.triggerAsyncId)) {
       this._stroageIndexedByTriggerAsyncId.get(node.triggerAsyncId).push(node)
     } else {
@@ -86,7 +86,7 @@ class ParseTcpSourceNodes extends stream.Transform {
     callback(null)
   }
 
-  _flush(callback) {
+  _flush (callback) {
     if (this._stroageIndexedByTriggerAsyncId.size > 0) {
       callback(new Error('some nodes are without parent'))
     } else {
