@@ -3,8 +3,8 @@
 const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
-const SourceNode = require('../analysis/source-node.js')
-const CombineAsAggregateNodes = require('../analysis/combine-as-aggregate-nodes.js')
+const SourceNode = require('../analysis/source/source-node.js')
+const CombineAsAggregateNodes = require('../analysis/aggregate/combine-as-aggregate-nodes.js')
 
 test('join raw events order', function (t) {
   const serverNode = new SourceNode(2)

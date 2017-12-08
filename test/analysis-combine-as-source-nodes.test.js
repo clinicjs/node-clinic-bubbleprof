@@ -3,7 +3,7 @@
 const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
-const CombineAsSourceNodes = require('../analysis/combine-as-source-nodes.js')
+const CombineAsSourceNodes = require('../analysis/source/combine-as-source-nodes.js')
 
 test('join raw events order', function (t) {
   const joined = startpoint([
@@ -14,6 +14,7 @@ test('join raw events order', function (t) {
         type: 'HAS_STACK',
         asyncId: 1,
         triggerAsyncId: 0,
+        executionAsyncId: 0,
         timestamp: 1
       }
     },
@@ -55,6 +56,7 @@ test('join raw events order', function (t) {
         type: 'NO_STACK',
         asyncId: 2,
         triggerAsyncId: 1,
+        executionAsyncId: 1,
         timestamp: 5
       }
     },
@@ -73,6 +75,7 @@ test('join raw events order', function (t) {
         type: 'NO_DESTROY',
         asyncId: 3,
         triggerAsyncId: 1,
+        executionAsyncId: 1,
         timestamp: 7
       }
     }
@@ -90,9 +93,12 @@ test('join raw events order', function (t) {
       t.strictDeepEqual(Object.assign({}, sourceNodes.get(1)), {
         asyncId: 1,
         triggerAsyncId: 0,
+        executionAsyncId: 0,
+        parentAsyncId: 0,
         type: 'HAS_STACK',
         frames: [],
         identifier: null,
+        mark: null,
         init: 1,
         before: [2],
         after: [3],
@@ -102,9 +108,12 @@ test('join raw events order', function (t) {
       t.strictDeepEqual(Object.assign({}, sourceNodes.get(2)), {
         asyncId: 2,
         triggerAsyncId: 1,
+        executionAsyncId: 1,
+        parentAsyncId: 1,
         type: 'NO_STACK',
         frames: null,
         identifier: null,
+        mark: null,
         init: 5,
         before: [],
         after: [],
@@ -114,9 +123,12 @@ test('join raw events order', function (t) {
       t.strictDeepEqual(Object.assign({}, sourceNodes.get(3)), {
         asyncId: 3,
         triggerAsyncId: 1,
+        executionAsyncId: 1,
+        parentAsyncId: 1,
         type: 'NO_DESTROY',
         frames: null,
         identifier: null,
+        mark: null,
         init: 7,
         before: [],
         after: [],

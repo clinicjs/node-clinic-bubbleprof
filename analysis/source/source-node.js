@@ -45,8 +45,8 @@ class SourceNode {
     this.identifier = murmurHash128(identifier)
   }
 
-  setParentAsyncId(asyncId) {
-    this.parentAsyncId = asyncId;
+  setParentAsyncId (asyncId) {
+    this.parentAsyncId = asyncId
   }
 
   addStackTrace (info) {

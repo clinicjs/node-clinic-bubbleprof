@@ -1,6 +1,6 @@
 'use strict'
 
-const SourceNode = require('./source-node.js')
+const SourceNode = require('../source/source-node.js')
 
 class AggregateNode {
   constructor (nodeId, parentNodeId) {

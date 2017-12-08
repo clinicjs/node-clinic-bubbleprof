@@ -1,11 +1,11 @@
 'use strict'
 
 const JoinRawEvents = require('./join-raw-events.js')
-const CombineAsSourceNodes = require('./combine-as-source-nodes.js')
-const FilterSourceNodes = require('./filter-source-nodes.js')
-const ParseTcpSourceNodes = require('./parse-tcp-source-nodes.js')
-const IdentifySourceNodes = require('./identify-source-nodes.js')
-const CombineAsAggregateNodes = require('./combine-as-aggregate-nodes.js')
+const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
+const FilterSourceNodes = require('./source/filter-source-nodes.js')
+const ParseTcpSourceNodes = require('./source/parse-tcp-source-nodes.js')
+const IdentifySourceNodes = require('./source/identify-source-nodes.js')
+const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
 
 function analysis (stackTraceReader, traceEventsReader) {
   // Join the two data streams. The streams are read such that the latest

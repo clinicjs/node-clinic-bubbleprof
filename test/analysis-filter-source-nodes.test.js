@@ -3,8 +3,8 @@
 const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
-const FilterSourceNodes = require('../analysis/filter-source-nodes.js')
-const SourceNode = require('../analysis/source-node.js')
+const FilterSourceNodes = require('../analysis/source/filter-source-nodes.js')
+const SourceNode = require('../analysis/source/source-node.js')
 
 test('filter source nodes', function (t) {
   const nodeNotFiltered = new SourceNode(1)
