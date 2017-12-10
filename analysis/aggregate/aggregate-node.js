@@ -8,6 +8,10 @@ class AggregateNode {
     this.parentNodeId = parentNodeId
     this.children = []
     this.sources = []
+
+    this.mark = null
+    this.type = null
+    this.frames = null
   }
 
   toJSON () {
@@ -15,10 +19,11 @@ class AggregateNode {
       nodeId: this.nodeId,
       parentNodeId: this.parentNodeId,
       children: this.children,
+      mark: this.mark,
+      type: this.type,
+      frames: this.frames,
       // frames and type are the same for all SourceNode's, so remove them
       // from the SourceNode data.
-      frames: this.sources[0].frames,
-      type: this.sources[0].type,
       sources: this.sources.map(function (source) {
         return {
           asyncId: source.asyncId,
@@ -34,8 +39,13 @@ class AggregateNode {
     }
   }
 
+  setMark (mark) {
+    this.mark = mark
+  }
+
   makeRoot () {
     this.addSourceNode(new SourceNode(1))
+    this.setMark('root')
   }
 
   addChild (nodeId) {
@@ -47,6 +57,11 @@ class AggregateNode {
   }
 
   addSourceNode (sourceNode) {
+    if (this.sources.length === 0) {
+      this.type = sourceNode.type
+      this.frames = sourceNode.frames
+    }
+
     this.sources.push(sourceNode)
   }
 

@@ -23,13 +23,9 @@ class ParseTcpSourceNodes extends stream.Transform {
     this._observedAsyncIds.add(node.asyncId)
 
     if (node.type === 'TCPSERVERWRAP' || node.type === 'PIPESERVERWRAP') {
-      // add as server
-      node.setMark('tcp.server')
       this._serverAsyncIds.add(node.asyncId)
     } else if (this._serverAsyncIds.has(node.triggerAsyncId) &&
                (node.type === 'TCPWRAP' || node.type === 'PIPEWRAP')) {
-      // add as connection
-      node.setMark('tcp.connection')
       this._connectionAsyncIds.add(node.asyncId)
     } else if (this._connectionAsyncIds.has(node.triggerAsyncId) &&
                !this._serverAsyncIds.has(node.executionAsyncId)) {
