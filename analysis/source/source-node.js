@@ -7,7 +7,6 @@ class SourceNode {
   constructor (asyncId) {
     this.asyncId = asyncId
     this.identifier = null
-    this.mark = null
 
     // parent
     this.parentAsyncId = null
@@ -35,10 +34,6 @@ class SourceNode {
            ` triggerAsyncId:${options.stylize(this.triggerAsyncId, 'number')},` +
            ` executionAsyncId:${options.stylize(this.executionAsyncId, 'number')},` +
            ` identifier:${options.stylize(this.identifier, 'special')}>`
-  }
-
-  setMark (mark) {
-    this.mark = mark
   }
 
   setIdentifier (identifier) {

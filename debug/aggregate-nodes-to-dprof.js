@@ -67,10 +67,10 @@ class AggregateToDprof extends stream.Transform {
                     .sort((a, b) => a - b)
 
     this._nodes.push({
-      name: `${node.sources[0].type} <${node.sources[0].mark}>`,
+      name: `${node.type} <${node.mark}>`,
       uid: node.nodeId,
       parent: node.parentNodeId,
-      stack: node.sources[0].frames.map(function (frame) {
+      stack: node.frames.map(function (frame) {
         return {
           description: describeFrame(frame),
           filename: frame.fileName,
