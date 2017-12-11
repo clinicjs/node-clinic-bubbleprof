@@ -29,6 +29,18 @@ function describeFrame (frame) {
   return formatted
 }
 
+function formatMark (mark) {
+  if (mark[0] === null) {
+    return '<null>'
+  } else if (mark[1] === null) {
+    return `<${mark[0]}>`
+  } else if (mark[2] === null) {
+    return `<${mark[0]}.${mark[1]}>`
+  } else {
+    return `<${mark[0]}.${mark[1]}.${mark[2]}>`
+  }
+}
+
 class AggregateToDprof extends stream.Transform {
   constructor () {
     super({
@@ -67,7 +79,7 @@ class AggregateToDprof extends stream.Transform {
                     .sort((a, b) => a - b)
 
     this._nodes.push({
-      name: `${node.type} <${node.mark}>`,
+      name: `${node.type} ${formatMark(node.mark)}`,
       uid: node.nodeId,
       parent: node.parentNodeId,
       stack: node.frames.map(function (frame) {

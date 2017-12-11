@@ -8,7 +8,7 @@ const CollectAndRead = require('./collect-and-read.js')
 test('collect command produces data files with content', function (t) {
   const cmd = new CollectAndRead('-e', 'setTimeout(() => {}, 200)')
   cmd.on('error', t.ifError.bind(t))
-  cmd.on('ready', function (stackTraceReader, traceEventReader) {
+  cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     async.parallel({
       stackTrace (done) {
         // collect tracked asyncIds

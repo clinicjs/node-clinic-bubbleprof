@@ -1,14 +1,17 @@
 'use strict'
 
+const stream = require('stream')
+const endpoint = require('endpoint')
 const JoinRawEvents = require('./join-raw-events.js')
 const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
 const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const ParseTcpSourceNodes = require('./source/parse-tcp-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
+const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
 
-function analysis (stackTraceReader, traceEventReader) {
+function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
   // The data progressing changes data structure a few times. The data
   // structures are transformed the following way:
@@ -43,8 +46,33 @@ function analysis (stackTraceReader, traceEventReader) {
   //       use this for your convenience. However, also avoid changing
   //       the order.
     .pipe(new CombineAsAggregateNodes())
+  // Mark {1,2,3}-party type
+    .pipe(new MarkPartyAggregateNodes(systemInfo))
   // Mark require('net') nodes
     .pipe(new MarkHttpAggregateNodes())
+
+  return result
+}
+
+class Analysis extends stream.PassThrough {
+  constructor () {
+    super({
+      readableObjectMode: true,
+      writableObjectMode: true
+    })
+  }
+}
+
+function analysis (systemInfoReader, stackTraceReader, traceEventReader) {
+  const result = new Analysis()
+
+  systemInfoReader.pipe(endpoint({ objectMode: true }, function (err, data) {
+    if (err) return result.emit('error', err)
+    const systemInfo = data[0]
+
+    analysisPipeline(systemInfo, stackTraceReader, traceEventReader)
+      .pipe(result)
+  }))
 
   return result
 }

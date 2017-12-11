@@ -9,6 +9,7 @@ const Stringify = require('streaming-json-stringify')
 const browserify = require('browserify')
 const streamTemplate = require('stream-template')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
+const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 
@@ -64,17 +65,20 @@ class ClinicBubbleprof {
 
     // Load data
     const paths = getLoggingPaths(dataDirname.split('.')[0])
+    const systemInfoReader = fs.createReadStream(paths['/systeminfo'])
+      .pipe(new SystemInfoDecoder())
     const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
       .pipe(new StackTraceDecoder())
     const traceEventReader = fs.createReadStream(paths['/traceevent'])
       .pipe(new TraceEventDecoder())
 
     // create dataFile
-    const dataFile = analysis(stackTraceReader, traceEventReader)
-      .pipe(new Stringify({
-        seperator: ',\n',
-        stringifier: JSON.stringify
-      }))
+    const dataFile = analysis(
+      systemInfoReader, stackTraceReader, traceEventReader
+    ).pipe(new Stringify({
+      seperator: ',\n',
+      stringifier: JSON.stringify
+    }))
 
     // create script-file stream
     const b = browserify({

@@ -9,7 +9,7 @@ class AggregateNode {
     this.children = []
     this.sources = []
 
-    this.mark = null
+    this.mark = [null, null, null]
     this.type = null
     this.frames = null
   }
@@ -39,13 +39,9 @@ class AggregateNode {
     }
   }
 
-  setMark (mark) {
-    this.mark = mark
-  }
-
   makeRoot () {
     this.addSourceNode(new SourceNode(1))
-    this.setMark('root')
+    this.mark[0] = 'root'
   }
 
   addChild (nodeId) {

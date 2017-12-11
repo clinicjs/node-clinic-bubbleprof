@@ -112,7 +112,7 @@ test('join raw events order', function (t) {
         parentNodeId: 0,
         children: [ 2 ],
         sources: [ aggregateNodes[0].sources[0] ],
-        mark: 'root',
+        mark: ['root', null, null],
         type: null,
         frames: null
       })
@@ -123,7 +123,7 @@ test('join raw events order', function (t) {
         parentNodeId: 1,
         children: [ 3 ],
         sources: [ serverNode ],
-        mark: null,
+        mark: [null, null, null],
         type: 'SERVER',
         frames: [{ fileName: 'server.js' }]
       })
@@ -134,7 +134,7 @@ test('join raw events order', function (t) {
         parentNodeId: 2,
         children: [ 4, 5 ],
         sources: socketNodes,
-        mark: null,
+        mark: [null, null, null],
         type: 'SOCKET',
         frames: [{ fileName: 'server.js' }]
       })
@@ -145,7 +145,7 @@ test('join raw events order', function (t) {
         parentNodeId: 3,
         children: [ ],
         sources: logNodes,
-        mark: null,
+        mark: [null, null, null],
         type: 'LOG',
         frames: [{ fileName: 'log.js' }]
       })
@@ -156,7 +156,7 @@ test('join raw events order', function (t) {
         parentNodeId: 3,
         children: [ ],
         sources: endNodes,
-        mark: null,
+        mark: [null, null, null],
         type: 'END',
         frames: [{ fileName: 'server.js' }]
       })

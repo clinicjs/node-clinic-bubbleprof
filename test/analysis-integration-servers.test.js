@@ -24,8 +24,8 @@ function runServer (name, callback) {
 
   // await result
   cmd.on('error', callback)
-  cmd.on('ready', function (stackTraceReader, traceEventReader) {
-    analysis(stackTraceReader, traceEventReader)
+  cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
+    analysis(systemInfoReader, stackTraceReader, traceEventReader)
       .pipe(endpoint({ objectMode: true }, callback))
   })
 }
