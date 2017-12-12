@@ -62,7 +62,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new MarkHttpAggregateNodes())
 
   // BarrierNode:
-  // .pipe(new CombineAsBarrierNodes())
+   .pipe(new CombineAsBarrierNodes())
   // .pipe(new MakeSynconuseBarrierNodes())
   // .pipe(new MakeExternalBarrierNodes())
 

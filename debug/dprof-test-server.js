@@ -24,8 +24,9 @@ function runServer (name) {
   // await result
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     analysis(systemInfoReader, stackTraceReader, traceEventReader)
-      .pipe(new AggregateNodesToDprof())
-      .pipe(process.stdout)
+      .on('data', (data) => console.log(require('util').inspect(data, { colors: true, depth: 4 })))
+      //.pipe(new AggregateNodesToDprof())
+      //.pipe(process.stdout)
   })
 }
 

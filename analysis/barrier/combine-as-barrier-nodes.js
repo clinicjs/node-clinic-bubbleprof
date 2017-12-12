@@ -12,7 +12,7 @@ class CombineAsBarrierNodes extends stream.Transform {
 
   _transform (node, encoding, callback) {
     const barrier = new BarrierNode(node.nodeId, node.parentNodeId)
-    barrier.makeWrapper(data, data.children)
+    barrier.makeWrapper(node, node.children)
     callback(null, barrier)
   }
 }

@@ -28,7 +28,7 @@ class SourceNode {
   }
 
   [util.inspect.custom] (depth, options) {
-    return `<SourceNode` +
+    return `<${options.stylize('SourceNode', 'special')}` +
            ` type:${options.stylize(this.type, 'string')},` +
            ` asyncId:${options.stylize(this.asyncId, 'number')},` +
            ` parentAsyncId:${options.stylize(this.parentAsyncId, 'number')},` +
