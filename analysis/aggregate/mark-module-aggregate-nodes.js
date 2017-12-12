@@ -17,7 +17,6 @@ class MarkModuleAggregateNodes extends stream.Transform {
       const deepestModule = node.frames
         .filter((frame) => !frame.isNodecore(this.systemInfo))
         .map((frame) => frame.getModuleName(this.systemInfo))
-        .sort((a, b) => a.depth - b.depth)
         .shift()
 
       node.mark.set(1, deepestModule.name)
