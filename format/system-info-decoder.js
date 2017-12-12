@@ -2,14 +2,6 @@
 
 const stream = require('stream')
 
-class SystemInfo {
-  constructor (data) {
-    this.providers = new Set(data.providers)
-    this.pathSeperator = data.pathSeperator
-    this.mainDirectory = data.mainDirectory
-  }
-}
-
 class SystemInfoDecoder extends stream.Transform {
   constructor () {
     super({
@@ -27,7 +19,7 @@ class SystemInfoDecoder extends stream.Transform {
 
   _flush (callback) {
     this.push(
-      new SystemInfo(JSON.parse(Buffer.concat(this._data).toString()))
+      JSON.parse(Buffer.concat(this._data).toString())
     )
     callback(null)
   }

@@ -2,14 +2,22 @@
 
 const stream = require('stream')
 const endpoint = require('endpoint')
+
+const SystemInfo = require('./system-info.js')
+
 const JoinRawEvents = require('./join-raw-events.js')
-const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
+
 const FilterSourceNodes = require('./source/filter-source-nodes.js')
-const ParseTcpSourceNodes = require('./source/parse-tcp-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
+const ParseTcpSourceNodes = require('./source/parse-tcp-source-nodes.js')
+const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
+
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
-const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
+const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.js')
+const MarkModuleAggregateNodes = require('./aggregate/mark-module-aggregate-nodes.js')
+
+const CombineAsBarrierNodes = require('./barrier/combine-as-barrier-nodes.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
@@ -33,7 +41,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new CombineAsSourceNodes())
   // Remove SourceNode's that are not relevant.
     .pipe(new FilterSourceNodes())
-  // Mark and restructure TCP source nodes and the socket children.
+  // Restructure TCP source nodes and the socket children.
     .pipe(new ParseTcpSourceNodes())
   // Key each SourceNode with an identify hash.
     .pipe(new IdentifySourceNodes())
@@ -48,8 +56,15 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new CombineAsAggregateNodes())
   // Mark {1,2,3}-party type
     .pipe(new MarkPartyAggregateNodes(systemInfo))
-  // Mark require('net') nodes
+  // Mark external node_modules
+    .pipe(new MarkModuleAggregateNodes(systemInfo))
+  // Mark HTTP server nodes
     .pipe(new MarkHttpAggregateNodes())
+
+  // BarrierNode:
+  // .pipe(new CombineAsBarrierNodes())
+  // .pipe(new MakeSynconuseBarrierNodes())
+  // .pipe(new MakeExternalBarrierNodes())
 
   return result
 }
@@ -68,7 +83,7 @@ function analysis (systemInfoReader, stackTraceReader, traceEventReader) {
 
   systemInfoReader.pipe(endpoint({ objectMode: true }, function (err, data) {
     if (err) return result.emit('error', err)
-    const systemInfo = data[0]
+    const systemInfo = new SystemInfo(data[0])
 
     analysisPipeline(systemInfo, stackTraceReader, traceEventReader)
       .pipe(result)

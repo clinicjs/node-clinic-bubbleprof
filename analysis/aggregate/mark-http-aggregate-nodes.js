@@ -16,17 +16,23 @@ class MarkHttpAggregateNodes extends stream.Transform {
   _transform (node, encoding, done) {
     if (node.type === 'TCPSERVERWRAP' || node.type === 'PIPESERVERWRAP') {
       this._tcpServerNodeIds.add(node.nodeId)
-      node.mark[1] = 'net'
-      node.mark[2] = 'server'
+      if (node.mark[0] === 'nodecore') {
+        node.mark[1] = 'net'
+        node.mark[2] = 'server'
+      }
     } else if (this._tcpServerNodeIds.has(node.parentNodeId) &&
                (node.type === 'TCPWRAP' || node.type === 'PIPEWRAP')) {
       this._tcpOnconnectionNodeIds.add(node.nodeId)
-      node.mark[1] = 'net'
-      node.mark[2] = 'onconnection'
+      if (node.mark[0] === 'nodecore') {
+        node.mark[1] = 'net'
+        node.mark[2] = 'onconnection'
+      }
     } else if (this._tcpOnconnectionNodeIds.has(node.parentNodeId) &&
                node.type === 'HTTPPARSER') {
-      node.mark[1] = 'http'
-      node.mark[2] = 'onrequest'
+      if (node.mark[0] === 'nodecore') {
+        node.mark[1] = 'http'
+        node.mark[2] = 'onrequest'
+      }
     }
 
     done(null, node)

@@ -1,34 +1,6 @@
 'use strict'
 const stream = require('stream')
 
-function describeFrame (frame) {
-  // Get name
-  let name = frame.functionName ? frame.functionName : '<anonymous>'
-  if (frame.isEval) {
-    // no change
-  } else if (frame.isToplevel) {
-    // no change
-  } else if (frame.isConstructor) {
-    name = 'new ' + name
-  } else if (frame.isNative) {
-    name = 'native ' + name
-  } else {
-    name = frame.typeName + '.' + name
-  }
-
-  // Get position
-  let formatted = name
-  if (frame.isEval) {
-    formatted += ' ' + frame.evalOrigin
-  } else {
-    formatted += ' ' + frame.fileName
-    formatted += ':' + (frame.lineNumber > 0 ? frame.lineNumber : '')
-    formatted += (frame.columnNumber > 0 ? ':' + frame.columnNumber : '')
-  }
-
-  return formatted
-}
-
 function formatMark (mark) {
   if (mark[0] === null) {
     return '<null>'
@@ -84,7 +56,7 @@ class AggregateToDprof extends stream.Transform {
       parent: node.parentNodeId,
       stack: node.frames.map(function (frame) {
         return {
-          description: describeFrame(frame),
+          description: frame.format(),
           filename: frame.fileName,
           column: frame.columnNumber,
           line: frame.lineNumber

@@ -1,6 +1,7 @@
 'use strict'
 
 const util = require('util')
+const Frames = require('./frames.js')
 const { murmurHash128 } = require('murmurhash-native')
 
 class SourceNode {
@@ -45,7 +46,7 @@ class SourceNode {
   }
 
   addStackTrace (info) {
-    this.frames = info.frames
+    this.frames = new Frames(info.frames)
   }
 
   addTraceEvent (info) {
@@ -80,23 +81,7 @@ class SourceNode {
   }
 
   positionalStackTrace () {
-    const framesPosition = this.frames.map(function (frame) {
-      let position = frame.fileName
-      if (frame.lineNumber > 0) {
-        position += ':' + frame.lineNumber
-      }
-      if (frame.columnNumber > 0) {
-        position += ':' + frame.columnNumber
-      }
-
-      if (frame.isEval) {
-        position += ' ' + frame.evalOrigin
-      }
-
-      return position
-    })
-
-    return framesPosition.join('\n')
+    return this.frames.map((frame) => frame.getPosition()).join('\n')
   }
 }
 

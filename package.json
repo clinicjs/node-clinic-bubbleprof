@@ -11,6 +11,7 @@
   },
   "devDependencies": {
     "inspectpoint": "^0.2.2",
+    "express": "^4.16.2",
     "snazzy": "^7.0.0",
     "standard": "^10.0.3",
     "startpoint": "^0.3.2",
