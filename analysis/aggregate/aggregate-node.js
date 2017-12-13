@@ -61,19 +61,24 @@ class AggregateNode {
       return `<${options.stylize('AggregateNode', 'special')}>`
     }
 
-    const shallow = `<${options.stylize('AggregateNode', 'special')}` +
-                    ` type:${options.stylize(this.type, 'string')},` +
-                    ` mark:${util.inspect(this.mark, nestedOptions)},` +
-                    ` nodeId:${options.stylize(this.nodeId, 'number')},` +
-                    ` parentNodeId:${options.stylize(this.parentNodeId, 'number')},`
-
+    let inner
     if (depth < 1) {
-      return shallow +
-             ` frames:${framesInspect}>`
+      inner = framesInspect.join(', ')
+    } else {
+      inner = framesInspect.slice(0, -1).join('\n  ')
     }
 
-    const padding = ' '.repeat(2)
-    return shallow + ` frames:${framesInspect.slice(0, -1).join('\n' + padding)}>`
+    const childrenFormatted = this.children
+      .map((child) => options.stylize(child, 'number'))
+      .join(', ')
+
+    return `<${options.stylize('AggregateNode', 'special')}` +
+           ` type:${options.stylize(this.type, 'string')},` +
+           ` mark:${util.inspect(this.mark, nestedOptions)},` +
+           ` nodeId:${options.stylize(this.nodeId, 'number')},` +
+           ` parentNodeId:${options.stylize(this.parentNodeId, 'number')},` +
+           ` children:[${childrenFormatted}],` +
+           ` frames:${inner}>`
   }
 
   toJSON () {
