@@ -44,6 +44,7 @@ class AggregateNode {
     this.children = []
     this.sources = []
 
+    this.isRoot = false
     this.mark = new Mark()
     this.type = null
     this.frames = null
@@ -71,10 +72,8 @@ class AggregateNode {
              ` frames:${framesInspect}>`
     }
 
-    const prePadding = ' '.repeat(19)
-    const padding = ' '.repeat(19+8)
-    return shallow + `\n${prePadding}` +
-           ` frames:${framesInspect.slice(0, -1).join('\n' + padding)}>`
+    const padding = ' '.repeat(2)
+    return shallow + ` frames:${framesInspect.slice(0, -1).join('\n' + padding)}>`
   }
 
   toJSON () {
@@ -104,6 +103,7 @@ class AggregateNode {
 
   makeRoot () {
     this.addSourceNode(new SourceNode(1))
+    this.isRoot = true
     this.mark.set(0, 'root')
   }
 

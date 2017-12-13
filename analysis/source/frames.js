@@ -127,6 +127,10 @@ class Frames {
       return `<${options.stylize('Frames', 'special')}>`;
     }
 
+    if (this.frames.length === 0) {
+      return `<${options.stylize('Frames', 'special')} []>`;
+    }
+
     const nestedOptions = Object.assign({}, options, {
       depth: depth === null ? null : depth - 1
     });
@@ -138,7 +142,7 @@ class Frames {
     if (depth < 1) {
       inner = nestedFormat.join(',')
     } else {
-      inner = nestedFormat.join(`,\n${padding}`)
+      inner = `\n${padding}` + nestedFormat.join(`,\n${padding}`)
     }
 
     return `<${options.stylize('Frames', 'special')} [${inner}]>\n`;
@@ -146,6 +150,10 @@ class Frames {
 
   toJSON() {
     return this.frames
+  }
+
+  get length() {
+    return this.frames.length
   }
 
   map(fn, self) {
@@ -166,6 +174,10 @@ class Frames {
 
   some(fn, self) {
     return this.frames.every(fn, self)
+  }
+
+  pop(fn, self) {
+    return this.frames.pop()
   }
 }
 

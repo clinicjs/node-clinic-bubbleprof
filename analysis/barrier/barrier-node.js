@@ -10,12 +10,22 @@ class BarrierNode {
     // Wrappers are not barriers, but they can be turned into bairrers later.
     // The tree will be initialized as being just wrappers. The barriers
     // are then created later in the pipeline.
+    this.isRoot = false
     this.isWrapper = null
     this.nodes = []
     this.children = []
   }
 
+  unwrapNode() {
+    if (!this.isWrapper) {
+      throw new Error(`trying to unwrap non-wrap barrierNode: ${this.barrierId}`)
+    }
+
+    return this.nodes[0]
+  }
+
   makeWrapper(node, children) {
+    this.isRoot = node.isRoot
     this.isWrapper = true
     this.nodes.push(node)
     this.children.push(...children)
@@ -23,41 +33,46 @@ class BarrierNode {
 
   makeCombined(nodes, children) {
     this.isWrapper = false
-    this.nodes.push(...node)
+    this.nodes.push(...nodes)
     this.children.push(...children)
   }
 
-  combineChildren(barrierNodes) {
+  combineChildren(barrierChildrenNodes) {
     // assert that all input children are already children
-    for (const barrierNode of barrierNodes) {
-      if (!this.children.includes(barrierNode.barrierId)) {
-        throw new Error(`${barrierNode.barrierId} is not an child of ${this.barrierId}`)
+    for (const barrierChildNode of barrierChildrenNodes) {
+      if (!this.children.includes(barrierChildNode.barrierId)) {
+        throw new Error(`${barrierChildNode.barrierId} is not an child of ${this.barrierId}`)
       }
     }
 
     // extract barrierIds and internalNodes
-    const internalNodes = []
-    const barrierIds = []
-    const barrierChildren = []
-    for (const barrierNode of barrierNodes) {
-      barrierIds.push(barrierNode.barrierId)
-      internalNodes.push(...barrierNode.nodes)
-      barrierChildren.push(...barrierNode.children)
+    const barrierChildrenInternalNodes = []
+    const barrierChildrenChildren = []
+    const barrierChildrenIds = []
+    for (const barrierChildNode of barrierChildrenNodes) {
+      barrierChildrenInternalNodes.push(...barrierChildNode.nodes)
+      barrierChildrenChildren.push(...barrierChildNode.children)
+      barrierChildrenIds.push(barrierChildNode.barrierId)
     }
 
     // remove children from this barrier
     this.children = this.children.filter(
-      (childBarrierId) => !barrierIds.includes(childBarrierId)
+      (barrierChildId) => !barrierChildrenIds.includes(barrierChildId)
     )
 
     // Create new barrier
-    const combinedChildBarrier = new BarrierNode(
-      Math.min(...barrierIds), this.barrierId
+    const combinedChildBarrierNode = new BarrierNode(
+      Math.min(...barrierChildrenIds), this.barrierId
     )
-    combinedChildBarrier.makeCombined(internalNodes, barrierChildren)
+    combinedChildBarrierNode.makeCombined(
+      barrierChildrenInternalNodes, barrierChildrenChildren
+    )
+
+    // add new combined barrier as a child
+    this.children.push(combinedChildBarrierNode.barrierId)
 
     // return the new barrier, so it can be pushed to the data stream
-    return combinedChildBarrier
+    return combinedChildBarrierNode
   }
 }
 

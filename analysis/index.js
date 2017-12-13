@@ -18,6 +18,7 @@ const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.
 const MarkModuleAggregateNodes = require('./aggregate/mark-module-aggregate-nodes.js')
 
 const CombineAsBarrierNodes = require('./barrier/combine-as-barrier-nodes.js')
+const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
@@ -63,7 +64,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
 
   // BarrierNode:
    .pipe(new CombineAsBarrierNodes())
-  // .pipe(new MakeSynconuseBarrierNodes())
+   .pipe(new MakeSynchronousBarrierNodes(systemInfo))
   // .pipe(new MakeExternalBarrierNodes())
 
   return result
