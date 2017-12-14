@@ -1,7 +1,5 @@
 'use strict'
 
-const util = require('util')
-
 class BarrierNode {
   constructor (barrierId, parentBarrierId) {
     this.barrierId = barrierId
@@ -17,7 +15,7 @@ class BarrierNode {
     this.children = []
   }
 
-  unwrapNode() {
+  unwrapNode () {
     if (!this.isWrapper) {
       throw new Error(`trying to unwrap non-wrap barrierNode: ${this.barrierId}`)
     }
@@ -25,12 +23,12 @@ class BarrierNode {
     return this.nodes[0]
   }
 
-  makeBarrier() {
+  makeBarrier () {
     // Make this barrier a real barrier
     this.isWrapper = false
   }
 
-  initializeAsWrapper(node, children) {
+  initializeAsWrapper (node, children) {
     if (this.initialized) {
       throw new Error(`can not reinitialize BarrierNode: ${this.barrierId}`)
     }
@@ -42,7 +40,7 @@ class BarrierNode {
     this.children.push(...children)
   }
 
-  initializeAsCombined(nodes, children) {
+  initializeAsCombined (nodes, children) {
     if (this.initialized) {
       throw new Error(`can not reinitialize BarrierNode: ${this.barrierId}`)
     }
@@ -53,7 +51,7 @@ class BarrierNode {
     this.children.push(...children)
   }
 
-  combineChildren(barrierChildrenNodes) {
+  combineChildren (barrierChildrenNodes) {
     // assert that all input children are already children
     for (const barrierChildNode of barrierChildrenNodes) {
       if (!this.children.includes(barrierChildNode.barrierId)) {

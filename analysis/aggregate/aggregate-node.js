@@ -4,19 +4,19 @@ const util = require('util')
 const SourceNode = require('../source/source-node.js')
 
 class Mark {
-  constructor() {
+  constructor () {
     this.mark = [null, null, null] /* party, module, name */
   }
 
-  set(index, value) {
+  set (index, value) {
     this.mark[index] = value
   }
 
-  get(index) {
+  get (index) {
     return this.mark[index]
   }
 
-  format() {
+  format () {
     if (this.mark[0] === null) {
       return 'null'
     } else if (this.mark[1] === null) {
@@ -53,7 +53,7 @@ class AggregateNode {
   [util.inspect.custom] (depth, options) {
     const nestedOptions = Object.assign({}, options, {
       depth: depth === null ? null : depth - 1
-    });
+    })
     const framesInspect = util.inspect(this.frames, nestedOptions)
       .split('\n')
 

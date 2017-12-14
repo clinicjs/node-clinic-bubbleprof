@@ -3,7 +3,7 @@
 const util = require('util')
 
 class Frame {
-  constructor(frame) {
+  constructor (frame) {
     this.functionName = frame.functionName
     this.typeName = frame.typeName
     this.isEval = frame.isEval
@@ -26,7 +26,7 @@ class Frame {
     return !fileName.includes(systemInfo.pathSeperator)
   }
 
-  getFileNameWithoutModuleDirectory(systemInfo) {
+  getFileNameWithoutModuleDirectory (systemInfo) {
     // Cut out the module directory if present. This is to avoid detecting
     // the path as being external, in case the module directory iself contains
     // node_modules.
@@ -50,7 +50,7 @@ class Frame {
       .includes('node_modules')
   }
 
-  getModuleName(systemInfo) {
+  getModuleName (systemInfo) {
     const filePath = this.fileName.split(systemInfo.pathSeperator)
     if (!filePath.includes('node_modules')) return null
 
@@ -63,7 +63,7 @@ class Frame {
     }
   }
 
-  getPosition() {
+  getPosition () {
     let position = this.fileName
     if (this.lineNumber > 0) {
       position += ':' + this.lineNumber
@@ -79,7 +79,7 @@ class Frame {
     return position
   }
 
-  format() {
+  format () {
     // Get name
     let name = this.functionName ? this.functionName : '<anonymous>'
     if (this.isEval) {
@@ -109,7 +109,7 @@ class Frame {
 
   [util.inspect.custom] (depth, options) {
     if (depth < 0) {
-      return `<${options.stylize('Frame', 'special')}>`;
+      return `<${options.stylize('Frame', 'special')}>`
     }
 
     return `<${options.stylize('Frame', 'special')}` +
@@ -118,65 +118,65 @@ class Frame {
 }
 
 class Frames {
-  constructor(frames) {
+  constructor (frames) {
     this.frames = frames.map((frame) => new Frame(frame))
   }
 
   [util.inspect.custom] (depth, options) {
     if (depth < 0) {
-      return `<${options.stylize('Frames', 'special')}>`;
+      return `<${options.stylize('Frames', 'special')}>`
     }
 
     if (this.frames.length === 0) {
-      return `<${options.stylize('Frames', 'special')} []>`;
+      return `<${options.stylize('Frames', 'special')} []>`
     }
 
     const nestedOptions = Object.assign({}, options, {
       depth: depth === null ? null : depth - 1
-    });
+    })
 
     const nestedFormat = this.map((frame) => util.inspect(frame, nestedOptions))
 
     const padding = ' '.repeat(9)
-    let inner;
+    let inner
     if (depth < 1) {
       inner = nestedFormat.join(',')
     } else {
       inner = `\n${padding}` + nestedFormat.join(`,\n${padding}`)
     }
 
-    return `<${options.stylize('Frames', 'special')} [${inner}]>\n`;
+    return `<${options.stylize('Frames', 'special')} [${inner}]>\n`
   }
 
-  toJSON() {
+  toJSON () {
     return this.frames
   }
 
-  get length() {
+  get length () {
     return this.frames.length
   }
 
-  map(fn, self) {
+  map (fn, self) {
     return this.frames.map(fn, self)
   }
 
-  forEach(fn, self) {
+  forEach (fn, self) {
     return this.frames.forEach(fn, self)
   }
 
-  filter(fn, self) {
+  filter (fn, self) {
     return new Frames(this.frames.filter(fn, self))
   }
 
-  every(fn, self) {
+  every (fn, self) {
     return this.frames.every(fn, self)
   }
 
-  some(fn, self) {
+  some (fn, self) {
     return this.frames.every(fn, self)
   }
 
-  pop(fn, self) {
+  pop (fn, self) {
     return this.frames.pop()
   }
 }

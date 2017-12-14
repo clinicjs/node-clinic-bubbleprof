@@ -1,6 +1,5 @@
 'use strict'
 const stream = require('stream')
-const BarrierNode = require('./barrier-node.js')
 
 class MakeSynchronousBarrierNodes extends stream.Transform {
   constructor (systemInfo) {
@@ -14,7 +13,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
     this._storage = new Map()
   }
 
-  _processNode(node) {
+  _processNode (node) {
     // scan children for possible merges
     const maybeMerges = new Map()
     for (const childBarrierId of node.children) {
@@ -35,7 +34,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
       if (!maybeMerges.has(userCallSite.getPosition())) {
         maybeMerges.set(userCallSite.getPosition(), [ childBarrierNode ])
       } else {
-        maybeMerges.get(userCallSite.getPosition()).push( childBarrierNode )
+        maybeMerges.get(userCallSite.getPosition()).push(childBarrierNode)
       }
     }
 
@@ -92,7 +91,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
     callback(null)
   }
 
-  _flush(callback) {
+  _flush (callback) {
     // basic non-recursive BFS (breadth-first-search)
     const queue = [1] // root has barrierId = 1
     while (queue.length > 0) {

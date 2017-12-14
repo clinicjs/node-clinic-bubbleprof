@@ -1,6 +1,5 @@
 'use strict'
 const stream = require('stream')
-const BarrierNode = require('./barrier-node.js')
 
 const EXTERNAL = Symbol('external')
 const USER = Symbol('user')

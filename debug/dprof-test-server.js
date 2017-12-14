@@ -4,6 +4,7 @@ const path = require('path')
 const async = require('async')
 const CollectAndRead = require('../test/collect-and-read.js')
 const analysis = require('../analysis/index.js')
+const ExtractAggregateNodes = require('./extract-aggregate-nodes.js')
 const AggregateNodesToDprof = require('./aggregate-nodes-to-dprof.js')
 
 function runServer (name) {
@@ -24,9 +25,9 @@ function runServer (name) {
   // await result
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     analysis(systemInfoReader, stackTraceReader, traceEventReader)
-      .on('data', (data) => console.log(require('util').inspect(data, { colors: true, depth: 4 })))
-      //.pipe(new AggregateNodesToDprof())
-      //.pipe(process.stdout)
+      .pipe(new ExtractAggregateNodes())
+      .pipe(new AggregateNodesToDprof())
+      .pipe(process.stdout)
   })
 }
 

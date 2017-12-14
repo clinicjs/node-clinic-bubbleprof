@@ -1,5 +1,4 @@
 'use strict'
-const util = require('util')
 const stream = require('stream')
 
 class MarkModuleAggregateNodes extends stream.Transform {
