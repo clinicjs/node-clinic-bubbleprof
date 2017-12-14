@@ -10,9 +10,11 @@ class CombineAsBarrierNodes extends stream.Transform {
     })
   }
 
-  _transform (node, encoding, callback) {
-    const barrier = new BarrierNode(node.nodeId, node.parentNodeId)
-    barrier.initializeAsWrapper(node, node.children)
+  _transform (aggregateNode, encoding, callback) {
+    const barrier = new BarrierNode(
+      aggregateNode.nodeId, aggregateNode.parentNodeId
+    )
+    barrier.initializeAsWrapper(aggregateNode, aggregateNode.children)
     callback(null, barrier)
   }
 }

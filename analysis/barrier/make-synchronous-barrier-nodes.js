@@ -13,10 +13,10 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
     this._storage = new Map()
   }
 
-  _processNode (node) {
+  _processNode (barrierNode) {
     // scan children for possible merges
     const maybeMerges = new Map()
-    for (const childBarrierId of node.children) {
+    for (const childBarrierId of barrierNode.children) {
       const childBarrierNode = this._storage.get(childBarrierId)
 
       // don't merge child BarrierNodes that are already merged
@@ -43,8 +43,8 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
       // if there is only one child, there is no need to merge
       if (sameSourceChildren.length === 1) continue
 
-      // All node.children are guaranteed to be in stroage
-      const newChildBarrierNode = node.combineChildren(sameSourceChildren)
+      // All barrierNode.children are guaranteed to be in stroage
+      const newChildBarrierNode = barrierNode.combineChildren(sameSourceChildren)
 
       // Remove children from storage and log them as rewrites
       for (const sameSourceChild of sameSourceChildren) {
@@ -62,27 +62,27 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
     }
   }
 
-  _transform (node, encoding, callback) {
-    this._storage.set(node.barrierId, node)
+  _transform (barrierNode, encoding, callback) {
+    this._storage.set(barrierNode.barrierId, barrierNode)
 
     // root have no parents
-    if (node.isRoot) return callback(null)
+    if (barrierNode.isRoot) return callback(null)
 
     // check if parentBarrierId have been remapped. If so update
     // the parrentBarrierId
-    if (this._barrierIdRewrite.has(node.parentBarrierId)) {
-      node.parentBarrierId = this._barrierIdRewrite.get(node.parentBarrierId)
+    if (this._barrierIdRewrite.has(barrierNode.parentBarrierId)) {
+      barrierNode.parentBarrierId = this._barrierIdRewrite.get(barrierNode.parentBarrierId)
     }
 
     // check if parent have all children avaliable in storage
     // The order is BFS, so the parrent is guaranteed to be in stroage
-    const parentNode = this._storage.get(node.parentBarrierId)
-    const allSiblingsInStorage = parentNode.children
+    const parentBarrierNode = this._storage.get(barrierNode.parentBarrierId)
+    const allSiblingsInStorage = parentBarrierNode.children
       .every((childNode) => this._storage.has(childNode))
     if (allSiblingsInStorage) {
-      this._processNode(parentNode)
-      // It is technically possible to emit the parentNode at this point. The
-      // problem is that leaf nodes are never parrents, thus they won't be
+      this._processNode(parentBarrierNode)
+      // It is technically possible to emit the parentBarrierNode at this point.
+      // The problem is that leaf nodes are never parrents, thus they won't be
       // emitted correctly. It is theoretically possible to work arround this,
       // but it is quite compilicated. Since all nodes are in memory anyway,
       // just dump out the tree in _flush.

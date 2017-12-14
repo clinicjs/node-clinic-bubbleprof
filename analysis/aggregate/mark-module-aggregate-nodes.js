@@ -11,17 +11,17 @@ class MarkModuleAggregateNodes extends stream.Transform {
     this.systemInfo = systemInfo
   }
 
-  _transform (node, encoding, done) {
-    if (node.mark.get(0) === 'external') {
-      const firstModule = node.frames
+  _transform (aggregateNode, encoding, done) {
+    if (aggregateNode.mark.get(0) === 'external') {
+      const firstModule = aggregateNode.frames
         .filter((frame) => !frame.isNodecore(this.systemInfo))
         .map((frame) => frame.getModuleName(this.systemInfo))
         .pop()
 
-      node.mark.set(1, firstModule.name)
+      aggregateNode.mark.set(1, firstModule.name)
     }
 
-    done(null, node)
+    done(null, aggregateNode)
   }
 }
 

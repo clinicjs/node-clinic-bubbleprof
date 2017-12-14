@@ -16,27 +16,29 @@ class ParseTcpSourceNodes extends stream.Transform {
     this._connectionAsyncIds = new Set()
 
     // Save source nodes with unobserved triggerAsyncId for later
-    this._stroageIndexedByTriggerAsyncId = new Map()
+    this._stroageByTriggerAsyncId = new Map()
   }
 
-  _processNode (node) {
-    this._observedAsyncIds.add(node.asyncId)
+  _processNode (sourceNode) {
+    this._observedAsyncIds.add(sourceNode.asyncId)
 
-    if (node.type === 'TCPSERVERWRAP' || node.type === 'PIPESERVERWRAP') {
-      this._serverAsyncIds.add(node.asyncId)
-    } else if (this._serverAsyncIds.has(node.triggerAsyncId) &&
-               (node.type === 'TCPWRAP' || node.type === 'PIPEWRAP')) {
-      this._connectionAsyncIds.add(node.asyncId)
-    } else if (this._connectionAsyncIds.has(node.triggerAsyncId) &&
-               !this._serverAsyncIds.has(node.executionAsyncId)) {
+    if (sourceNode.type === 'TCPSERVERWRAP' ||
+        sourceNode.type === 'PIPESERVERWRAP') {
+      this._serverAsyncIds.add(sourceNode.asyncId)
+    } else if (this._serverAsyncIds.has(sourceNode.triggerAsyncId) &&
+               (sourceNode.type === 'TCPWRAP' ||
+                sourceNode.type === 'PIPEWRAP')) {
+      this._connectionAsyncIds.add(sourceNode.asyncId)
+    } else if (this._connectionAsyncIds.has(sourceNode.triggerAsyncId) &&
+               !this._serverAsyncIds.has(sourceNode.executionAsyncId)) {
       // Set the children of a socket to the the caller. This can be
       // SHUTDOWNWRAP, WRITEWRAP or some internal nextTick.
       // Nodes that actually comes from the TCPWRAP (in ondata) will have
-      // `node.executionAsyncId === node.triggerAsyncId` anyway.
+      // `sourceNode.executionAsyncId === sourceNode.triggerAsyncId` anyway.
       // In the initialzation of the connections, the executionAsyncId is
       // the server onconnection event. We don't want to bind those resources
       // to the server, rather they should just stay on the connection.
-      node.setParentAsyncId(node.executionAsyncId)
+      sourceNode.setParentAsyncId(sourceNode.executionAsyncId)
     }
   }
 
@@ -46,44 +48,44 @@ class ParseTcpSourceNodes extends stream.Transform {
 
     while (queue.length > 0) {
       // get node from queue and processs it
-      const node = queue.shift()
-      this._processNode(node)
+      const sourceNode = queue.shift()
+      this._processNode(sourceNode)
 
       // Once the node is processed push to stream
-      this.push(node)
+      this.push(sourceNode)
 
       // Add children of the newly updated node to the queue and delete them
       // from storage.
-      if (this._stroageIndexedByTriggerAsyncId.has(node.asyncId)) {
-        const children = this._stroageIndexedByTriggerAsyncId.get(node.asyncId)
-        this._stroageIndexedByTriggerAsyncId.delete(node.asyncId)
+      if (this._stroageByTriggerAsyncId.has(sourceNode.asyncId)) {
+        const children = this._stroageByTriggerAsyncId.get(sourceNode.asyncId)
+        this._stroageByTriggerAsyncId.delete(sourceNode.asyncId)
         queue.push(...children)
       }
     }
   }
 
-  _saveNode (node) {
-    if (this._stroageIndexedByTriggerAsyncId.has(node.triggerAsyncId)) {
-      this._stroageIndexedByTriggerAsyncId.get(node.triggerAsyncId).push(node)
+  _saveNode (sourceNode) {
+    if (this._stroageByTriggerAsyncId.has(sourceNode.triggerAsyncId)) {
+      this._stroageByTriggerAsyncId.get(sourceNode.triggerAsyncId).push(sourceNode)
     } else {
-      this._stroageIndexedByTriggerAsyncId.set(node.triggerAsyncId, [node])
+      this._stroageByTriggerAsyncId.set(sourceNode.triggerAsyncId, [sourceNode])
     }
   }
 
-  _transform (node, encoding, callback) {
+  _transform (sourceNode, encoding, callback) {
     // If the triggerAsyncId is observed, then we have all the information
     // for this node too.
-    if (this._observedAsyncIds.has(node.triggerAsyncId)) {
-      this._processTree(node)
+    if (this._observedAsyncIds.has(sourceNode.triggerAsyncId)) {
+      this._processTree(sourceNode)
     } else {
-      this._saveNode(node)
+      this._saveNode(sourceNode)
     }
 
     callback(null)
   }
 
   _flush (callback) {
-    if (this._stroageIndexedByTriggerAsyncId.size > 0) {
+    if (this._stroageByTriggerAsyncId.size > 0) {
       callback(new Error('some nodes are without parent'))
     } else {
       callback(null)

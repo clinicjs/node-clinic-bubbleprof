@@ -28,15 +28,15 @@ class BarrierNode {
     this.isWrapper = false
   }
 
-  initializeAsWrapper (node, children) {
+  initializeAsWrapper (aggregateNode, children) {
     if (this.initialized) {
       throw new Error(`can not reinitialize BarrierNode: ${this.barrierId}`)
     }
 
     this.initialized = true
-    this.isRoot = node.isRoot
+    this.isRoot = aggregateNode.isRoot
     this.isWrapper = true
-    this.nodes.push(node)
+    this.nodes.push(aggregateNode)
     this.children.push(...children)
   }
 
