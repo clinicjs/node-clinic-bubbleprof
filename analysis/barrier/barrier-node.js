@@ -15,6 +15,16 @@ class BarrierNode {
     this.children = []
   }
 
+  toJSON () {
+    return {
+      barrierId: this.barrierId,
+      parentBarrierId: this.parentBarrierId,
+      isWrapper: this.isWrapper,
+      children: this.children,
+      nodes: this.nodes.map((aggregateNode) => aggregateNode.toJSON())
+    }
+  }
+
   unwrapNode () {
     if (!this.isWrapper) {
       throw new Error(`trying to unwrap non-wrap barrierNode: ${this.barrierId}`)

@@ -42,9 +42,9 @@ class Mark {
 }
 
 class AggregateNode {
-  constructor (aggregateId, parentNodeId) {
+  constructor (aggregateId, parentAggregateId) {
     this.aggregateId = aggregateId
-    this.parentNodeId = parentNodeId
+    this.parentAggregateId = parentAggregateId
     this.children = []
     this.sources = []
 
@@ -80,7 +80,7 @@ class AggregateNode {
            ` type:${options.stylize(this.type, 'string')},` +
            ` mark:${util.inspect(this.mark, nestedOptions)},` +
            ` aggregateId:${options.stylize(this.aggregateId, 'number')},` +
-           ` parentNodeId:${options.stylize(this.parentNodeId, 'number')},` +
+           ` parentAggregateId:${options.stylize(this.parentAggregateId, 'number')},` +
            ` sources.length:${options.stylize(this.sources.length, 'number')},` +
            ` children:[${childrenFormatted}],` +
            ` frames:${inner}>`
@@ -89,7 +89,7 @@ class AggregateNode {
   toJSON () {
     return {
       aggregateId: this.aggregateId,
-      parentNodeId: this.parentNodeId,
+      parentAggregateId: this.parentAggregateId,
       children: this.children,
       mark: this.mark.toJSON(),
       type: this.type,

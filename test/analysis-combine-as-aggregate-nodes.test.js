@@ -104,7 +104,7 @@ test('join raw events order', function (t) {
       // root
       t.strictDeepEqual(aggregateNodes[0].toJSON(), {
         aggregateId: 1,
-        parentNodeId: 0,
+        parentAggregateId: 0,
         children: [ 2 ],
         sources: [ aggregateNodes[0].sources[0].toJSON({ short: true }) ],
         mark: ['root', null, null],
@@ -115,7 +115,7 @@ test('join raw events order', function (t) {
       // server
       t.strictDeepEqual(aggregateNodes[1].toJSON(), {
         aggregateId: 2,
-        parentNodeId: 1,
+        parentAggregateId: 1,
         children: [ 3 ],
         sources: [ serverNode.toJSON({ short: true }) ],
         mark: [null, null, null],
@@ -126,7 +126,7 @@ test('join raw events order', function (t) {
       // socket
       t.strictDeepEqual(aggregateNodes[2].toJSON(), {
         aggregateId: 3,
-        parentNodeId: 2,
+        parentAggregateId: 2,
         children: [ 4, 5 ],
         sources: socketNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
@@ -137,7 +137,7 @@ test('join raw events order', function (t) {
       // log
       t.strictDeepEqual(aggregateNodes[3].toJSON(), {
         aggregateId: 4,
-        parentNodeId: 3,
+        parentAggregateId: 3,
         children: [ ],
         sources: logNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
@@ -148,7 +148,7 @@ test('join raw events order', function (t) {
       // end
       t.strictDeepEqual(aggregateNodes[4].toJSON(), {
         aggregateId: 5,
-        parentNodeId: 3,
+        parentAggregateId: 3,
         children: [ ],
         sources: endNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],

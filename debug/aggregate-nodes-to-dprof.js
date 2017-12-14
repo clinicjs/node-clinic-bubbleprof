@@ -41,7 +41,7 @@ class AggregateToDprof extends stream.Transform {
     this._nodes.push({
       name: `${node.type} <${node.mark.format()}>`,
       uid: node.aggregateId,
-      parent: node.parentNodeId,
+      parent: node.parentAggregateId,
       stack: node.frames.map(function (frame) {
         return {
           description: frame.format(),

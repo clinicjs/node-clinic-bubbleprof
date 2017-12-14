@@ -21,7 +21,7 @@ class MarkHttpAggregateNodes extends stream.Transform {
         aggregateNode.mark.set(1, 'net')
         aggregateNode.mark.set(2, 'server')
       }
-    } else if (this._tcpServerNodeIds.has(aggregateNode.parentNodeId) &&
+    } else if (this._tcpServerNodeIds.has(aggregateNode.parentAggregateId) &&
                (aggregateNode.type === 'TCPWRAP' ||
                 aggregateNode.type === 'PIPEWRAP')) {
       this._tcpOnconnectionNodeIds.add(aggregateNode.aggregateId)
@@ -29,7 +29,7 @@ class MarkHttpAggregateNodes extends stream.Transform {
         aggregateNode.mark.set(1, 'net')
         aggregateNode.mark.set(2, 'onconnection')
       }
-    } else if (this._tcpOnconnectionNodeIds.has(aggregateNode.parentNodeId) &&
+    } else if (this._tcpOnconnectionNodeIds.has(aggregateNode.parentAggregateId) &&
                aggregateNode.type === 'HTTPPARSER') {
       if (aggregateNode.mark.get(0) === 'nodecore') {
         aggregateNode.mark.set(1, 'net')
