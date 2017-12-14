@@ -19,14 +19,14 @@ test('collect-analysis pipeline', function (t) {
         )
 
         const nodeMap = new Map(
-          aggregateNodes.map((node) => [node.nodeId, node])
+          aggregateNodes.map((node) => [node.aggregateId, node])
         )
         t.strictEqual(nodes.length, 2)
         t.strictEqual(nodeMap.size, 2)
 
-        // nodeId = 1 is the root and points to the Timeout
+        // aggregateId = 1 is the root and points to the Timeout
         t.strictDeepEqual(nodeMap.get(1).children, [ 2 ])
-        // nodeId = 2 is the Timeout
+        // aggregateId = 2 is the Timeout
         t.strictEqual(nodeMap.get(2).sources[0].type, 'Timeout')
 
         t.end()

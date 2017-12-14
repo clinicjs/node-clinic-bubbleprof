@@ -14,22 +14,22 @@ class CombineAsAggregateNodes extends stream.Transform {
     // build the aggregated tree.
     this._parentAsyncIdIndex = new Map()
 
-    // the root node as nodeId = 1
+    // the root node as aggregateId = 1
     const root = new AggregateNode(1, 0)
     root.makeRoot()
 
-    // maintain a map of nodes such nodeIds can be translated to AggregateNode
+    // maintain a map of nodes such aggregateIds can be translated to AggregateNode
     // objects
-    this._nodeId = 2
+    this._aggregateId = 2
     this._aggregateNodes = new Map()
-    this._aggregateNodes.set(root.nodeId, root)
+    this._aggregateNodes.set(root.aggregateId, root)
   }
 
   _newAggregateNode (parentAggregateNode) {
     const childNode = new AggregateNode(
-      this._nodeId++, parentAggregateNode.nodeId
+      this._aggregateId++, parentAggregateNode.aggregateId
     )
-    this._aggregateNodes.set(childNode.nodeId, childNode)
+    this._aggregateNodes.set(childNode.aggregateId, childNode)
     return childNode
   }
 
@@ -59,7 +59,7 @@ class CombineAsAggregateNodes extends stream.Transform {
         if (!identifierIndex.has(childSourceNode.identifier)) {
           const childNode = this._newAggregateNode(parentAggregateNode)
           identifierIndex.set(childSourceNode.identifier, childNode)
-          parentAggregateNode.addChild(childNode.nodeId)
+          parentAggregateNode.addChild(childNode.aggregateId)
         }
 
         // add SourceNode child to the new AggregateNode object
@@ -71,11 +71,11 @@ class CombineAsAggregateNodes extends stream.Transform {
 
   _flush (callback) {
     // basic non-recursive BFS (breadth-first-search)
-    const queue = [1] // root has nodeId = 1
+    const queue = [1] // root has aggregateId = 1
     while (queue.length > 0) {
       // get node from queue and assign children to it
-      const nodeId = queue.shift()
-      const aggregateNode = this._aggregateNodes.get(nodeId)
+      const aggregateId = queue.shift()
+      const aggregateNode = this._aggregateNodes.get(aggregateId)
       this._findAndAssignChildren(aggregateNode)
 
       // once a node has been assigned all its children, no more mutations

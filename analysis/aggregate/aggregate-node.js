@@ -42,8 +42,8 @@ class Mark {
 }
 
 class AggregateNode {
-  constructor (nodeId, parentNodeId) {
-    this.nodeId = nodeId
+  constructor (aggregateId, parentNodeId) {
+    this.aggregateId = aggregateId
     this.parentNodeId = parentNodeId
     this.children = []
     this.sources = []
@@ -79,7 +79,7 @@ class AggregateNode {
     return `<${options.stylize('AggregateNode', 'special')}` +
            ` type:${options.stylize(this.type, 'string')},` +
            ` mark:${util.inspect(this.mark, nestedOptions)},` +
-           ` nodeId:${options.stylize(this.nodeId, 'number')},` +
+           ` aggregateId:${options.stylize(this.aggregateId, 'number')},` +
            ` parentNodeId:${options.stylize(this.parentNodeId, 'number')},` +
            ` sources.length:${options.stylize(this.sources.length, 'number')},` +
            ` children:[${childrenFormatted}],` +
@@ -88,7 +88,7 @@ class AggregateNode {
 
   toJSON () {
     return {
-      nodeId: this.nodeId,
+      aggregateId: this.aggregateId,
       parentNodeId: this.parentNodeId,
       children: this.children,
       mark: this.mark.toJSON(),
@@ -109,8 +109,8 @@ class AggregateNode {
     this.mark.set(0, 'root')
   }
 
-  addChild (nodeId) {
-    this.children.push(nodeId)
+  addChild (aggregateId) {
+    this.children.push(aggregateId)
   }
 
   getChildren () {

@@ -103,7 +103,7 @@ test('join raw events order', function (t) {
 
       // root
       t.strictDeepEqual(aggregateNodes[0].toJSON(), {
-        nodeId: 1,
+        aggregateId: 1,
         parentNodeId: 0,
         children: [ 2 ],
         sources: [ aggregateNodes[0].sources[0].toJSON({ short: true }) ],
@@ -114,7 +114,7 @@ test('join raw events order', function (t) {
 
       // server
       t.strictDeepEqual(aggregateNodes[1].toJSON(), {
-        nodeId: 2,
+        aggregateId: 2,
         parentNodeId: 1,
         children: [ 3 ],
         sources: [ serverNode.toJSON({ short: true }) ],
@@ -125,7 +125,7 @@ test('join raw events order', function (t) {
 
       // socket
       t.strictDeepEqual(aggregateNodes[2].toJSON(), {
-        nodeId: 3,
+        aggregateId: 3,
         parentNodeId: 2,
         children: [ 4, 5 ],
         sources: socketNodes.map((source) => source.toJSON({ short: true })),
@@ -136,7 +136,7 @@ test('join raw events order', function (t) {
 
       // log
       t.strictDeepEqual(aggregateNodes[3].toJSON(), {
-        nodeId: 4,
+        aggregateId: 4,
         parentNodeId: 3,
         children: [ ],
         sources: logNodes.map((source) => source.toJSON({ short: true })),
@@ -147,7 +147,7 @@ test('join raw events order', function (t) {
 
       // end
       t.strictDeepEqual(aggregateNodes[4].toJSON(), {
-        nodeId: 5,
+        aggregateId: 5,
         parentNodeId: 3,
         children: [ ],
         sources: endNodes.map((source) => source.toJSON({ short: true })),

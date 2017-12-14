@@ -12,7 +12,7 @@ class CombineAsBarrierNodes extends stream.Transform {
 
   _transform (aggregateNode, encoding, callback) {
     const barrier = new BarrierNode(
-      aggregateNode.nodeId, aggregateNode.parentNodeId
+      aggregateNode.aggregateId, aggregateNode.parentNodeId
     )
     barrier.initializeAsWrapper(aggregateNode, aggregateNode.children)
     callback(null, barrier)
