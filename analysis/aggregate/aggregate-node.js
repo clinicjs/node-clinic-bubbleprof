@@ -58,6 +58,8 @@ class AggregateNode {
     const nestedOptions = Object.assign({}, options, {
       depth: depth === null ? null : depth - 1
     })
+    if (depth === null) depth = Infinity
+
     const framesInspect = util.inspect(this.frames, nestedOptions)
       .split('\n')
 
@@ -65,13 +67,7 @@ class AggregateNode {
       return `<${options.stylize('AggregateNode', 'special')}>`
     }
 
-    let inner
-    if (depth < 1) {
-      inner = framesInspect.join(', ')
-    } else {
-      inner = framesInspect.slice(0, -1).join('\n  ')
-    }
-
+    const framesFormatted = framesInspect.slice(0, -1).join('\n  ')
     const childrenFormatted = this.children
       .map((child) => options.stylize(child, 'number'))
       .join(', ')
@@ -83,7 +79,7 @@ class AggregateNode {
            ` parentAggregateId:${options.stylize(this.parentAggregateId, 'number')},` +
            ` sources.length:${options.stylize(this.sources.length, 'number')},` +
            ` children:[${childrenFormatted}],` +
-           ` frames:${inner}>`
+           ` frames:${framesFormatted}>`
   }
 
   toJSON () {

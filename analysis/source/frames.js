@@ -139,6 +139,12 @@ class Frames {
   }
 
   [util.inspect.custom] (depth, options) {
+    const nestedOptions = Object.assign({}, options, {
+      depth: depth === null ? null : depth - 1
+    })
+
+    if (depth === null) depth = Infinity
+
     if (depth < 0) {
       return `<${options.stylize('Frames', 'special')}>`
     }
@@ -147,16 +153,12 @@ class Frames {
       return `<${options.stylize('Frames', 'special')} []>`
     }
 
-    const nestedOptions = Object.assign({}, options, {
-      depth: depth === null ? null : depth - 1
-    })
-
     const nestedFormat = this.map((frame) => util.inspect(frame, nestedOptions))
 
     const padding = ' '.repeat(9)
     let inner
     if (depth < 1) {
-      inner = nestedFormat.join(',')
+      inner = nestedFormat.join(', ')
     } else {
       inner = `\n${padding}` + nestedFormat.join(`,\n${padding}`)
     }
