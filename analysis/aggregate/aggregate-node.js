@@ -28,6 +28,10 @@ class Mark {
     }
   }
 
+  toJSON () {
+    return this.mark
+  }
+
   [util.inspect.custom] (depth, options) {
     if (depth < 0) {
       return `<${options.stylize('Mark', 'special')}>`
@@ -77,6 +81,7 @@ class AggregateNode {
            ` mark:${util.inspect(this.mark, nestedOptions)},` +
            ` nodeId:${options.stylize(this.nodeId, 'number')},` +
            ` parentNodeId:${options.stylize(this.parentNodeId, 'number')},` +
+           ` sources.length:${options.stylize(this.sources.length, 'number')},` +
            ` children:[${childrenFormatted}],` +
            ` frames:${inner}>`
   }
@@ -86,28 +91,20 @@ class AggregateNode {
       nodeId: this.nodeId,
       parentNodeId: this.parentNodeId,
       children: this.children,
-      mark: this.mark,
+      mark: this.mark.toJSON(),
       type: this.type,
-      frames: this.frames,
+      frames: this.frames.toJSON(),
       // frames and type are the same for all SourceNode's, so remove them
       // from the SourceNode data.
-      sources: this.sources.map(function (source) {
-        return {
-          asyncId: source.asyncId,
-          parentAsyncId: source.parentAsyncId,
-          triggerAsyncId: source.triggerAsyncId,
-          executionAsyncId: source.executionAsyncId,
-          init: source.init,
-          before: source.before,
-          after: source.after,
-          destroy: source.destroy
-        }
-      })
+      sources: this.sources.map((source) => source.toJSON({ short: true }))
     }
   }
 
   makeRoot () {
-    this.addSourceNode(new SourceNode(1))
+    const root = new SourceNode(1)
+    root.makeRoot()
+
+    this.addSourceNode(root)
     this.isRoot = true
     this.mark.set(0, 'root')
   }

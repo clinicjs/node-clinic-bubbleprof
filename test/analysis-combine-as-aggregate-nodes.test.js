@@ -98,64 +98,59 @@ test('join raw events order', function (t) {
   const sourceNodes = [serverNode, ...socketNodes, ...logNodes, ...endNodes]
   startpoint(sourceNodes, { objectMode: true })
     .pipe(new CombineAsAggregateNodes())
-    .pipe(endpoint({ objectMode: true }, function (err, data) {
+    .pipe(endpoint({ objectMode: true }, function (err, aggregateNodes) {
       if (err) return t.ifError(err)
 
-      // remove constructor from object
-      const aggregateNodes = data.map(
-        (aggregateNode) => Object.assign({}, aggregateNode)
-      )
-
       // root
-      t.strictDeepEqual(aggregateNodes[0], {
+      t.strictDeepEqual(aggregateNodes[0].toJSON(), {
         nodeId: 1,
         parentNodeId: 0,
         children: [ 2 ],
-        sources: [ aggregateNodes[0].sources[0] ],
+        sources: [ aggregateNodes[0].sources[0].toJSON({ short: true }) ],
         mark: ['root', null, null],
         type: null,
-        frames: null
+        frames: []
       })
 
       // server
-      t.strictDeepEqual(aggregateNodes[1], {
+      t.strictDeepEqual(aggregateNodes[1].toJSON(), {
         nodeId: 2,
         parentNodeId: 1,
         children: [ 3 ],
-        sources: [ serverNode ],
+        sources: [ serverNode.toJSON({ short: true }) ],
         mark: [null, null, null],
         type: 'SERVER',
         frames: [{ fileName: 'server.js' }]
       })
 
       // socket
-      t.strictDeepEqual(aggregateNodes[2], {
+      t.strictDeepEqual(aggregateNodes[2].toJSON(), {
         nodeId: 3,
         parentNodeId: 2,
         children: [ 4, 5 ],
-        sources: socketNodes,
+        sources: socketNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
         type: 'SOCKET',
         frames: [{ fileName: 'server.js' }]
       })
 
       // log
-      t.strictDeepEqual(aggregateNodes[3], {
+      t.strictDeepEqual(aggregateNodes[3].toJSON(), {
         nodeId: 4,
         parentNodeId: 3,
         children: [ ],
-        sources: logNodes,
+        sources: logNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
         type: 'LOG',
         frames: [{ fileName: 'log.js' }]
       })
 
       // end
-      t.strictDeepEqual(aggregateNodes[4], {
+      t.strictDeepEqual(aggregateNodes[4].toJSON(), {
         nodeId: 5,
         parentNodeId: 3,
         children: [ ],
-        sources: endNodes,
+        sources: endNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
         type: 'END',
         frames: [{ fileName: 'server.js' }]

@@ -16,6 +16,22 @@ class Frame {
     this.columnNumber = frame.columnNumber
   }
 
+  toJSON () {
+    const json = {}
+    if (this.functionName) json.functionName = this.functionName
+    if (this.typeName) json.typeName = this.typeName
+    if (this.isEval) json.isEval = this.isEval
+    if (this.isConstructor) json.isConstructor = this.isConstructor
+    if (this.isNative) json.isNative = this.isNative
+    if (this.isToplevel) json.isToplevel = this.isToplevel
+    if (this.evalOrigin) json.evalOrigin = this.evalOrigin
+    if (this.fileName) json.fileName = this.fileName
+    if (this.lineNumber) json.lineNumber = this.lineNumber
+    if (this.columnNumber) json.columnNumber = this.columnNumber
+
+    return json
+  }
+
   isNodecore (systemInfo) {
     const fileName = this.fileName
 
@@ -149,7 +165,7 @@ class Frames {
   }
 
   toJSON () {
-    return this.frames
+    return this.frames.map((frame) => frame.toJSON())
   }
 
   get length () {

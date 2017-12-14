@@ -37,6 +37,32 @@ class SourceNode {
            ` identifier:${options.stylize(this.identifier, 'special')}>`
   }
 
+  toJSON ({short} = {short: false}) {
+    const json = {
+      asyncId: this.asyncId,
+      parentAsyncId: this.parentAsyncId,
+      triggerAsyncId: this.triggerAsyncId,
+      executionAsyncId: this.executionAsyncId,
+
+      init: this.init,
+      before: this.before,
+      after: this.after,
+      destroy: this.destroy
+    }
+
+    if (!short) {
+      json.identifier = this.identifier
+      json.type = this.type
+      json.frames = this.frames === null ? null : this.frames.toJSON()
+    }
+
+    return json
+  }
+
+  makeRoot () {
+    this.frames = new Frames([])
+  }
+
   setIdentifier (identifier) {
     this.identifier = murmurHash128(identifier)
   }

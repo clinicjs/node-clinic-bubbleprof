@@ -34,7 +34,12 @@ test('basis server aggregates HTTPPARSER', function (t) {
   runServer('basic', function (err, nodes) {
     if (err) return t.ifError(err)
 
-    const httpParserNodes = nodes.filter(function (aggregateNode) {
+    // Get AggregateNodes from BarrierNodes
+    const aggregateNodes = [].concat(
+      ...nodes.map((barrierNode) => barrierNode.nodes)
+    )
+
+    const httpParserNodes = aggregateNodes.filter(function (aggregateNode) {
       return aggregateNode.sources[0].type === 'HTTPPARSER'
     })
 

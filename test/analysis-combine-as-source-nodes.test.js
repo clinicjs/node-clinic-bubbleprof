@@ -90,7 +90,7 @@ test('join raw events order', function (t) {
       t.strictEqual(data.length, 3)
       t.strictEqual(sourceNodes.size, 3)
 
-      t.strictDeepEqual(Object.assign({}, sourceNodes.get(1)), {
+      t.strictDeepEqual(sourceNodes.get(1).toJSON(), {
         asyncId: 1,
         triggerAsyncId: 0,
         executionAsyncId: 0,
@@ -104,7 +104,7 @@ test('join raw events order', function (t) {
         destroy: 4
       })
 
-      t.strictDeepEqual(Object.assign({}, sourceNodes.get(2)), {
+      t.strictDeepEqual(sourceNodes.get(2).toJSON(), {
         asyncId: 2,
         triggerAsyncId: 1,
         executionAsyncId: 1,
@@ -118,7 +118,7 @@ test('join raw events order', function (t) {
         destroy: 6
       })
 
-      t.strictDeepEqual(Object.assign({}, sourceNodes.get(3)), {
+      t.strictDeepEqual(sourceNodes.get(3).toJSON(), {
         asyncId: 3,
         triggerAsyncId: 1,
         executionAsyncId: 1,

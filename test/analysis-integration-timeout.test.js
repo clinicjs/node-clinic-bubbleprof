@@ -13,7 +13,14 @@ test('collect-analysis pipeline', function (t) {
       .pipe(endpoint({ objectMode: true }, function (err, nodes) {
         if (err) return t.ifError(err)
 
-        const nodeMap = new Map(nodes.map((node) => [node.nodeId, node]))
+        // Get AggregateNodes from BarrierNodes
+        const aggregateNodes = [].concat(
+          ...nodes.map((barrierNode) => barrierNode.nodes)
+        )
+
+        const nodeMap = new Map(
+          aggregateNodes.map((node) => [node.nodeId, node])
+        )
         t.strictEqual(nodes.length, 2)
         t.strictEqual(nodeMap.size, 2)
 
