@@ -18,6 +18,7 @@ const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.
 const MarkModuleAggregateNodes = require('./aggregate/mark-module-aggregate-nodes.js')
 
 const CombineAsBarrierNodes = require('./barrier/combine-as-barrier-nodes.js')
+const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.js')
 const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
@@ -63,9 +64,21 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new MarkHttpAggregateNodes())
 
   // BarrierNode:
+  // Barriers are cut-off points in the aggregated tree. Initialize the tree
+  // with BarrierNodes that are just wrappers around AggregateNodes. These can
+  // then latter be merged together.
+  // Barriers are not clusters, they are constructed later in the pipeline.
+  // However, barriers provides a simple datastructure for creating clusters
+  // as they only combine direct children. They can be seen as a
+  // Finite-State-Machine.
+  // * Try to express as much of the clustering logic using barriers.
+  // NOTE: BFS ordering is maintained in the BarrierNodes too.
    .pipe(new CombineAsBarrierNodes())
+  // Create barriers where the user callSite is the same
    .pipe(new MakeSynchronousBarrierNodes(systemInfo))
-  // .pipe(new MakeExternalBarrierNodes())
+  // Create barriers where one goes from user to external, or from external
+  // to user. External includes nodecore.
+   .pipe(new MakeExternalBarrierNodes(systemInfo))
 
   return result
 }

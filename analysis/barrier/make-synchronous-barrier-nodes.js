@@ -20,7 +20,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
     for (const childBarrierId of node.children) {
       const childBarrierNode = this._storage.get(childBarrierId)
 
-      // don't merge child Barriernodes that are already merged
+      // don't merge child BarrierNodes that are already merged
       if (!childBarrierNode.isWrapper) continue
 
       // get the first user call site

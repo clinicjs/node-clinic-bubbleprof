@@ -10,6 +10,7 @@ class BarrierNode {
     // Wrappers are not barriers, but they can be turned into bairrers later.
     // The tree will be initialized as being just wrappers. The barriers
     // are then created later in the pipeline.
+    this.initialized = false
     this.isRoot = false
     this.isWrapper = null
     this.nodes = []
@@ -24,14 +25,29 @@ class BarrierNode {
     return this.nodes[0]
   }
 
-  makeWrapper(node, children) {
+  makeBarrier() {
+    // Make this barrier a real barrier
+    this.isWrapper = false
+  }
+
+  initializeAsWrapper(node, children) {
+    if (this.initialized) {
+      throw new Error(`can not reinitialize BarrierNode: ${this.barrierId}`)
+    }
+
+    this.initialized = true
     this.isRoot = node.isRoot
     this.isWrapper = true
     this.nodes.push(node)
     this.children.push(...children)
   }
 
-  makeCombined(nodes, children) {
+  initializeAsCombined(nodes, children) {
+    if (this.initialized) {
+      throw new Error(`can not reinitialize BarrierNode: ${this.barrierId}`)
+    }
+
+    this.initialized = true
     this.isWrapper = false
     this.nodes.push(...nodes)
     this.children.push(...children)
@@ -64,7 +80,7 @@ class BarrierNode {
     const combinedChildBarrierNode = new BarrierNode(
       Math.min(...barrierChildrenIds), this.barrierId
     )
-    combinedChildBarrierNode.makeCombined(
+    combinedChildBarrierNode.initializeAsCombined(
       barrierChildrenInternalNodes, barrierChildrenChildren
     )
 
