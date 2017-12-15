@@ -1,7 +1,10 @@
+'use strict'
+
+const path = require('path')
 const express = require('express')
 
 const app = express()
-const server = app.listen(18353)
+const server = app.listen(path.resolve(__dirname, '..', '.test-server.sock'))
 
 let connections = 0
 app.use(express.urlencoded({ extended: true }))

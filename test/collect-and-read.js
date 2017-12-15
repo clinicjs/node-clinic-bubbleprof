@@ -48,7 +48,7 @@ class CollectAndRead extends events.EventEmitter {
         const traceevent = fs.createReadStream(files['/traceevent'])
           .pipe(new TraceEventDecoder())
 
-        self._setupAutoCleanup(files, stacktrace, traceevent)
+        self._setupAutoCleanup(files, systeminfo, stacktrace, traceevent)
         self.emit('ready', systeminfo, stacktrace, traceevent)
       })
     })

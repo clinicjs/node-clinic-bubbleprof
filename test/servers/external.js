@@ -1,5 +1,7 @@
+'use strict'
 
 const http = require('http')
+const path = require('path')
 const async = require('async')
 const fakeDataFetch = require('fake-data-fetch')
 
@@ -18,4 +20,4 @@ const server = http.createServer(function (req, res) {
   }
 })
 
-server.listen(18353)
+server.listen(path.resolve(__dirname, '..', '.test-server.sock'))
