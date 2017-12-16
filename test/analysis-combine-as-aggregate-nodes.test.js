@@ -4,27 +4,29 @@ const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
 const SourceNode = require('../analysis/source/source-node.js')
+const StackTrace = require('../analysis/raw-event/stack-trace.js')
+const TraceEvent = require('../analysis/raw-event/trace-event.js')
 const CombineAsAggregateNodes = require('../analysis/aggregate/combine-as-aggregate-nodes.js')
 
 test('join raw events order', function (t) {
   const serverNode = new SourceNode(2)
   serverNode.setIdentifier('server.js')
-  serverNode.addStackTrace({
+  serverNode.addStackTrace(new StackTrace({
     asyncId: 2,
     frames: [{ fileName: 'server.js' }]
-  })
-  serverNode.addTraceEvent({
+  }))
+  serverNode.addTraceEvent(new TraceEvent({
     event: 'init',
     type: 'SERVER',
     asyncId: 2,
     triggerAsyncId: 1,
     timestamp: 1
-  })
-  serverNode.addTraceEvent({
+  }))
+  serverNode.addTraceEvent(new TraceEvent({
     event: 'destroy',
     asyncId: 2,
     timestamp: 10
-  })
+  }))
 
   const socketNodes = []
   const logNodes = []
@@ -37,62 +39,62 @@ test('join raw events order', function (t) {
     const socketNode = new SourceNode(socketAsyncId)
     socketNodes.push(socketNode)
     socketNode.setIdentifier('server.js')
-    socketNode.addStackTrace({
+    socketNode.addStackTrace(new StackTrace({
       asyncId: socketAsyncId,
       frames: [{ fileName: 'server.js' }]
-    })
-    socketNode.addTraceEvent({
+    }))
+    socketNode.addTraceEvent(new TraceEvent({
       event: 'init',
       type: 'SOCKET',
       asyncId: socketAsyncId,
       triggerAsyncId: 2,
       timestamp: 2 + i * 2
-    })
-    socketNode.addTraceEvent({
+    }))
+    socketNode.addTraceEvent(new TraceEvent({
       event: 'destroy',
       asyncId: socketAsyncId,
       timestamp: 4 + i * 2
-    })
+    }))
 
     const logNode = new SourceNode(logAsyncId)
     logNodes.push(logNode)
     logNode.setIdentifier('log.js')
-    logNode.addStackTrace({
+    logNode.addStackTrace(new StackTrace({
       asyncId: logAsyncId,
       frames: [{ fileName: 'log.js' }]
-    })
-    logNode.addTraceEvent({
+    }))
+    logNode.addTraceEvent(new TraceEvent({
       event: 'init',
       type: 'LOG',
       asyncId: logAsyncId,
       triggerAsyncId: socketAsyncId,
       timestamp: 3 + i * 2
-    })
-    logNode.addTraceEvent({
+    }))
+    logNode.addTraceEvent(new TraceEvent({
       event: 'destroy',
       asyncId: logAsyncId,
       timestamp: 4 + i * 2
-    })
+    }))
 
     const endNode = new SourceNode(endAsyncId)
     endNodes.push(endNode)
     endNode.setIdentifier('server.js')
-    endNode.addStackTrace({
+    endNode.addStackTrace(new StackTrace({
       asyncId: endAsyncId,
       frames: [{ fileName: 'server.js' }]
-    })
-    endNode.addTraceEvent({
+    }))
+    endNode.addTraceEvent(new TraceEvent({
       event: 'init',
       type: 'END',
       asyncId: endAsyncId,
       triggerAsyncId: socketAsyncId,
       timestamp: 3 + i * 2
-    })
-    endNode.addTraceEvent({
+    }))
+    endNode.addTraceEvent(new TraceEvent({
       event: 'destroy',
       asyncId: endAsyncId,
       timestamp: 4 + i * 2
-    })
+    }))
   }
 
   const sourceNodes = [serverNode, ...socketNodes, ...logNodes, ...endNodes]

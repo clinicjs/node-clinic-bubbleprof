@@ -3,82 +3,59 @@
 const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
+const RawEvent = require('../analysis/raw-event/raw-event.js')
 const CombineAsSourceNodes = require('../analysis/source/combine-as-source-nodes.js')
 
 test('join raw events order', function (t) {
   const joined = startpoint([
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'init',
-        type: 'HAS_STACK',
-        asyncId: 1,
-        triggerAsyncId: 0,
-        executionAsyncId: 0,
-        timestamp: 1
-      }
-    },
-    {
-      type: 'stackTrace',
-      info: {
-        asyncId: 1,
-        frames: []
-      }
-    },
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'before',
-        asyncId: 1,
-        timestamp: 2
-      }
-    },
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'after',
-        asyncId: 1,
-        timestamp: 3
-      }
-    },
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'destroy',
-        asyncId: 1,
-        timestamp: 4
-      }
-    },
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'init',
-        type: 'NO_STACK',
-        asyncId: 2,
-        triggerAsyncId: 1,
-        executionAsyncId: 1,
-        timestamp: 5
-      }
-    },
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'destroy',
-        asyncId: 2,
-        timestamp: 6
-      }
-    },
-    {
-      type: 'traceEvent',
-      info: {
-        event: 'init',
-        type: 'NO_DESTROY',
-        asyncId: 3,
-        triggerAsyncId: 1,
-        executionAsyncId: 1,
-        timestamp: 7
-      }
-    }
+    RawEvent.wrapTraceEvent({
+      event: 'init',
+      type: 'HAS_STACK',
+      asyncId: 1,
+      triggerAsyncId: 0,
+      executionAsyncId: 0,
+      timestamp: 1
+    }),
+    RawEvent.wrapStackTrace({
+      asyncId: 1,
+      frames: []
+    }),
+    RawEvent.wrapTraceEvent({
+      event: 'before',
+      asyncId: 1,
+      timestamp: 2
+    }),
+    RawEvent.wrapTraceEvent({
+      event: 'after',
+      asyncId: 1,
+      timestamp: 3
+    }),
+    RawEvent.wrapTraceEvent({
+      event: 'destroy',
+      asyncId: 1,
+      timestamp: 4
+    }),
+    RawEvent.wrapTraceEvent({
+      event: 'init',
+      type: 'NO_STACK',
+      asyncId: 2,
+      triggerAsyncId: 1,
+      executionAsyncId: 1,
+      timestamp: 5
+    }),
+    RawEvent.wrapTraceEvent({
+      event: 'destroy',
+      asyncId: 2,
+      timestamp: 6
+    }),
+    RawEvent.wrapTraceEvent({
+      event: 'init',
+      type: 'NO_DESTROY',
+      asyncId: 3,
+      triggerAsyncId: 1,
+      executionAsyncId: 1,
+      timestamp: 7
+    })
   ], { objectMode: true })
 
   joined

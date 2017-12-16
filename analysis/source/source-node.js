@@ -1,7 +1,7 @@
 'use strict'
 
 const util = require('util')
-const Frames = require('./frames.js')
+const Frames = require('../raw-event/frames.js')
 const { murmurHash128 } = require('murmurhash-native')
 
 class SourceNode {
@@ -72,7 +72,7 @@ class SourceNode {
   }
 
   addStackTrace (info) {
-    this.frames = new Frames(info.frames)
+    this.frames = info.frames
   }
 
   addTraceEvent (info) {

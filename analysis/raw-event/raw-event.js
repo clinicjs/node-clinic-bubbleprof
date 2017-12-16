@@ -1,5 +1,8 @@
 'use strict'
 
+const StackTrace = require('./stack-trace.js')
+const TraceEvent = require('./trace-event.js')
+
 class RawEvent {
   constructor (type, info) {
     this.type = type
@@ -9,16 +12,16 @@ class RawEvent {
   toJSON () {
     return {
       type: this.type,
-      info: this.info
+      info: this.info.toJSON()
     }
   }
 
   static wrapStackTrace (data) {
-    return new RawEvent('stackTrace', data)
+    return new RawEvent('stackTrace', new StackTrace(data))
   }
 
   static wrapTraceEvents (data) {
-    return new RawEvent('traceEvents', data)
+    return new RawEvent('traceEvents', new TraceEvent(data))
   }
 }
 
