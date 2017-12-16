@@ -3,7 +3,7 @@
 const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
-const JoinRawEvents = require('../analysis/join-raw-events.js')
+const JoinAsRawEvents = require('../analysis/raw-event/join-as-raw-events.js')
 
 test('join raw events order', function (t) {
   const stackTrace = startpoint([
@@ -23,11 +23,11 @@ test('join raw events order', function (t) {
     { asyncId: 3, timestamp: 8 }
   ], { objectMode: true })
 
-  new JoinRawEvents(stackTrace, traceEvent)
+  new JoinAsRawEvents(stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, data) {
       if (err) return t.ifError(err)
 
-      t.strictDeepEqual(data, [
+      t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
         { type: 'traceEvent', info: { asyncId: 1, timestamp: 1 } },
         { type: 'stackTrace', info: { asyncId: 1, timestamp: 1 } },
         { type: 'traceEvent', info: { asyncId: 1, timestamp: 2 } },
@@ -55,11 +55,11 @@ test('join raw events - earily stackTrace end', function (t) {
     { asyncId: 3, timestamp: 3 }
   ], { objectMode: true })
 
-  new JoinRawEvents(stackTrace, traceEvent)
+  new JoinAsRawEvents(stackTrace, traceEvents)
     .pipe(endpoint({ objectMode: true }, function (err, data) {
       if (err) return t.ifError(err)
 
-      t.strictDeepEqual(data, [
+      t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
         { type: 'traceEvent', info: { asyncId: 1, timestamp: 1 } },
         { type: 'stackTrace', info: { asyncId: 1, timestamp: 1 } },
         { type: 'traceEvent', info: { asyncId: 2, timestamp: 2 } },
@@ -81,11 +81,11 @@ test('join raw events - earily traceEvent end', function (t) {
     { asyncId: 1, timestamp: 2 }
   ], { objectMode: true })
 
-  new JoinRawEvents(stackTrace, traceEvent)
+  new JoinAsRawEvents(stackTrace, traceEvents)
     .pipe(endpoint({ objectMode: true }, function (err, data) {
       if (err) return t.ifError(err)
 
-      t.strictDeepEqual(data, [
+      t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
         { type: 'traceEvent', info: { asyncId: 1, timestamp: 1 } },
         { type: 'stackTrace', info: { asyncId: 1, timestamp: 1 } },
         { type: 'traceEvent', info: { asyncId: 1, timestamp: 2 } },
