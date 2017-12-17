@@ -4,8 +4,8 @@ const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
 const SourceNode = require('../analysis/source/source-node.js')
-const StackTrace = require('../analysis/raw-event/stack-trace.js')
-const TraceEvent = require('../analysis/raw-event/trace-event.js')
+const StackTrace = require('../analysis/stack-trace/stack-trace.js')
+const TraceEvent = require('../analysis/trace-event/trace-event.js')
 const CombineAsAggregateNodes = require('../analysis/aggregate/combine-as-aggregate-nodes.js')
 
 test('join raw events order', function (t) {

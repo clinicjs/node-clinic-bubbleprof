@@ -4,8 +4,8 @@ const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
 const FilterSourceNodes = require('../analysis/source/filter-source-nodes.js')
-const StackTrace = require('../analysis/raw-event/stack-trace.js')
-const TraceEvent = require('../analysis/raw-event/trace-event.js')
+const StackTrace = require('../analysis/stack-trace/stack-trace.js')
+const TraceEvent = require('../analysis/trace-event/trace-event.js')
 const SourceNode = require('../analysis/source/source-node.js')
 
 test('filter source nodes', function (t) {

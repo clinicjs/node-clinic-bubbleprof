@@ -4,58 +4,60 @@ const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
 const RawEvent = require('../analysis/raw-event/raw-event.js')
+const StackTrace = require('../analysis/stack-trace/stack-trace.js')
+const TraceEvent = require('../analysis/trace-event/trace-event.js')
 const CombineAsSourceNodes = require('../analysis/source/combine-as-source-nodes.js')
 
 test('join raw events order', function (t) {
   const joined = startpoint([
-    RawEvent.wrapTraceEvent({
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'init',
       type: 'HAS_STACK',
       asyncId: 1,
       triggerAsyncId: 0,
       executionAsyncId: 0,
       timestamp: 1
-    }),
-    RawEvent.wrapStackTrace({
+    })),
+    RawEvent.wrapStackTrace(new StackTrace({
       asyncId: 1,
       frames: []
-    }),
-    RawEvent.wrapTraceEvent({
+    })),
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'before',
       asyncId: 1,
       timestamp: 2
-    }),
-    RawEvent.wrapTraceEvent({
+    })),
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'after',
       asyncId: 1,
       timestamp: 3
-    }),
-    RawEvent.wrapTraceEvent({
+    })),
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'destroy',
       asyncId: 1,
       timestamp: 4
-    }),
-    RawEvent.wrapTraceEvent({
+    })),
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'init',
       type: 'NO_STACK',
       asyncId: 2,
       triggerAsyncId: 1,
       executionAsyncId: 1,
       timestamp: 5
-    }),
-    RawEvent.wrapTraceEvent({
+    })),
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'destroy',
       asyncId: 2,
       timestamp: 6
-    }),
-    RawEvent.wrapTraceEvent({
+    })),
+    RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'init',
       type: 'NO_DESTROY',
       asyncId: 3,
       triggerAsyncId: 1,
       executionAsyncId: 1,
       timestamp: 7
-    })
+    }))
   ], { objectMode: true })
 
   joined

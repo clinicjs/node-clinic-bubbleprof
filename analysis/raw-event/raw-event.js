@@ -1,7 +1,7 @@
 'use strict'
 
-const StackTrace = require('./stack-trace.js')
-const TraceEvent = require('./trace-event.js')
+const StackTrace = require('../stack-trace/stack-trace.js')
+const TraceEvent = require('../trace-event/trace-event.js')
 
 class RawEvent {
   constructor (type, info) {
@@ -17,11 +17,19 @@ class RawEvent {
   }
 
   static wrapStackTrace (data) {
-    return new RawEvent('stackTrace', new StackTrace(data))
+    if (!(data instanceof StackTrace)) {
+      throw new Error('data must be a StackTrace instance')
+    }
+
+    return new RawEvent('stackTrace', data)
   }
 
   static wrapTraceEvent (data) {
-    return new RawEvent('traceEvent', new TraceEvent(data))
+    if (!(data instanceof TraceEvent)) {
+      throw new Error('data must be a TraceEvent instance')
+    }
+
+    return new RawEvent('traceEvent', data)
   }
 }
 
