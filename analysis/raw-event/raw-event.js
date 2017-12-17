@@ -20,8 +20,8 @@ class RawEvent {
     return new RawEvent('stackTrace', new StackTrace(data))
   }
 
-  static wrapTraceEvents (data) {
-    return new RawEvent('traceEvents', new TraceEvent(data))
+  static wrapTraceEvent (data) {
+    return new RawEvent('traceEvent', new TraceEvent(data))
   }
 }
 
