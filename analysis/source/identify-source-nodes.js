@@ -22,7 +22,7 @@ class IdentifySourceNodes extends stream.Transform {
       sourceNode.setIdentifier(sourceNode.type)
     } else {
       sourceNode.setIdentifier(
-        `${sourceNode.type}\f${sourceNode.positionalStackTrace()}`
+        `${sourceNode.type}\f${sourceNode.frames.formatPositionOnly()}`
       )
     }
 

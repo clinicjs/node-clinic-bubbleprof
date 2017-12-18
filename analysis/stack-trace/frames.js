@@ -142,6 +142,12 @@ class Frames {
     this.frames = frames.map((frame) => new Frame(frame))
   }
 
+  formatPositionOnly () {
+    return this.frames
+      .map((frame) => frame.getPosition())
+      .join('\n')
+  }
+
   [util.inspect.custom] (depth, options) {
     const nestedOptions = Object.assign({}, options, {
       depth: depth === null ? null : depth - 1

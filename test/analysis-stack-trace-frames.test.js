@@ -273,6 +273,30 @@ test('Stack Trace - frame.inspect', function (t) {
   t.end()
 })
 
+test('Stack Trace - frames.formatPositionOnly', function (t) {
+  const frames = new Frames([
+    {
+      functionName: 'functionA',
+      fileName: 'fileName.js',
+      lineNumber: 10,
+      columnNumber: 20
+    },
+    {
+      functionName: 'functionB',
+      fileName: 'fileName.js',
+      lineNumber: 20,
+      columnNumber: 10
+    }
+  ])
+
+  t.strictEqual(
+    frames.formatPositionOnly(),
+    'fileName.js:10:20\n' +
+    'fileName.js:20:10'
+  )
+  t.end()
+})
+
 test('Stack Trace - frames.inspect', function (t) {
   const framesEmpty = new Frames([])
 

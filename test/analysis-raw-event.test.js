@@ -18,12 +18,12 @@ test('Raw Event - type check', function (t) {
 
   t.throws(
     () => RawEvent.wrapTraceEvent(stackTraceObject),
-    new TypeError('data must be a TraceEvent instance')
+    new TypeError('wrapTraceEvent input must be a TraceEvent instance')
   )
 
   t.throws(
     () => RawEvent.wrapStackTrace(traceEventObject),
-    new TypeError('data must be a StackTrace instance')
+    new TypeError('wrapStackTrace input must be a StackTrace instance')
   )
 
   t.end()

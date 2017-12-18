@@ -4,8 +4,9 @@ const StackTrace = require('../stack-trace/stack-trace.js')
 const TraceEvent = require('../trace-event/trace-event.js')
 
 class RawEvent {
-  constructor (type, info) {
+  constructor (type, asyncId, info) {
     this.type = type
+    this.asyncId = asyncId
     this.info = info
   }
 
@@ -16,20 +17,20 @@ class RawEvent {
     }
   }
 
-  static wrapStackTrace (data) {
-    if (!(data instanceof StackTrace)) {
-      throw new TypeError('data must be a StackTrace instance')
+  static wrapStackTrace (stackTrace) {
+    if (!(stackTrace instanceof StackTrace)) {
+      throw new TypeError('wrapStackTrace input must be a StackTrace instance')
     }
 
-    return new RawEvent('stackTrace', data)
+    return new RawEvent('stackTrace', stackTrace.asyncId, stackTrace)
   }
 
-  static wrapTraceEvent (data) {
-    if (!(data instanceof TraceEvent)) {
-      throw new TypeError('data must be a TraceEvent instance')
+  static wrapTraceEvent (traceEvent) {
+    if (!(traceEvent instanceof TraceEvent)) {
+      throw new TypeError('wrapTraceEvent input must be a TraceEvent instance')
     }
 
-    return new RawEvent('traceEvent', data)
+    return new RawEvent('traceEvent', traceEvent.asyncId, traceEvent)
   }
 }
 

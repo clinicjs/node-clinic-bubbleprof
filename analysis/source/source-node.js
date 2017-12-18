@@ -137,10 +137,6 @@ class SourceNode {
   hasStackTrace () {
     return this.frames !== null
   }
-
-  positionalStackTrace () {
-    return this.frames.map((frame) => frame.getPosition()).join('\n')
-  }
 }
 
 module.exports = SourceNode
