@@ -16,7 +16,7 @@ class MarkModuleAggregateNodes extends stream.Transform {
       const firstModule = aggregateNode.frames
         .filter((frame) => !frame.isNodecore(this.systemInfo))
         .map((frame) => frame.getModuleName(this.systemInfo))
-        .pop()
+        .last()
 
       aggregateNode.mark.set(1, firstModule.name)
     }

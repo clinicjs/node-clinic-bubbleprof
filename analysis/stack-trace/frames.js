@@ -4,16 +4,16 @@ const util = require('util')
 
 class Frame {
   constructor (frame) {
-    this.functionName = frame.functionName
-    this.typeName = frame.typeName
-    this.isEval = frame.isEval
-    this.isConstructor = frame.isConstructor
-    this.isNative = frame.isNative
-    this.isToplevel = frame.isToplevel
-    this.evalOrigin = frame.evalOrigin
-    this.fileName = frame.fileName
-    this.lineNumber = frame.lineNumber
-    this.columnNumber = frame.columnNumber
+    this.functionName = frame.functionName || ''
+    this.typeName = frame.typeName || ''
+    this.isEval = frame.isEval || false
+    this.isConstructor = frame.isConstructor || false
+    this.isNative = frame.isNative || false
+    this.isToplevel = frame.isToplevel || false
+    this.evalOrigin = frame.evalOrigin || ''
+    this.fileName = frame.fileName || ''
+    this.lineNumber = frame.lineNumber || 0
+    this.columnNumber = frame.columnNumber || 0
   }
 
   toJSON () {
@@ -34,6 +34,8 @@ class Frame {
 
   isNodecore (systemInfo) {
     const fileName = this.fileName
+    // evals are not in nodecore
+    if (this.isEval) return false
 
     if (fileName.startsWith(`internal${systemInfo.pathSeperator}`)) {
       return true
@@ -59,6 +61,9 @@ class Frame {
 
   isExternal (systemInfo) {
     if (this.isNodecore(systemInfo)) return true
+    // Properly evals are from an external module.
+    // NOTE: Consider parseing evalOrigin
+    if (this.isEval) return true
 
     // If the remaining path contains node_modules it is external
     return this.getFileNameWithoutModuleDirectory(systemInfo)
@@ -70,29 +75,28 @@ class Frame {
     const filePath = this.fileName.split(systemInfo.pathSeperator)
     if (!filePath.includes('node_modules')) return null
 
-    const depth = filePath.lastIndexOf('node_modules') + 1
-    if (!filePath[depth]) return null
+    // Find the last node_modules directory, and count how many were
+    // encountered.
+    let depth = 0
+    let pathIndex = 0
+    while (true) {
+      const searchIndex = filePath.indexOf('node_modules', pathIndex)
+      if (searchIndex === -1) break
+      pathIndex = searchIndex + 1
+      depth += 1
+    }
+
+    if (filePath[pathIndex][0] === '@') pathIndex += 1
 
     return {
       depth: depth,
-      name: filePath[depth]
+      name: filePath[pathIndex]
     }
   }
 
   getPosition () {
-    let position = this.fileName
-    if (this.lineNumber > 0) {
-      position += ':' + this.lineNumber
-    }
-    if (this.columnNumber > 0) {
-      position += ':' + this.columnNumber
-    }
-
-    if (this.isEval) {
-      position += ' ' + this.evalOrigin
-    }
-
-    return position
+    return `${this.fileName}:${this.lineNumber}:${this.columnNumber}` +
+            (this.isEval ? ` [${this.evalOrigin}]` : '')
   }
 
   format () {
@@ -113,7 +117,7 @@ class Frame {
     // Get position
     let formatted = name
     if (this.isEval) {
-      formatted += ' ' + this.evalOrigin
+      formatted += ' [' + this.evalOrigin + ']'
     } else {
       formatted += ' ' + this.fileName
       formatted += ':' + (this.lineNumber > 0 ? this.lineNumber : '')
@@ -163,7 +167,7 @@ class Frames {
       inner = `\n${padding}` + nestedFormat.join(`,\n${padding}`)
     }
 
-    return `<${options.stylize('Frames', 'special')} [${inner}]>\n`
+    return `<${options.stylize('Frames', 'special')} [${inner}]>`
   }
 
   toJSON () {
@@ -191,11 +195,19 @@ class Frames {
   }
 
   some (fn, self) {
-    return this.frames.every(fn, self)
+    return this.frames.some(fn, self)
   }
 
-  pop (fn, self) {
-    return this.frames.pop()
+  first () {
+    return this.frames[0]
+  }
+
+  last () {
+    return this.frames[this.frames.length - 1]
+  }
+
+  get (index) {
+    return this.frames[index]
   }
 }
 

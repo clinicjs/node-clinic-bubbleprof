@@ -30,7 +30,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
       if (userFrames.length === 0) continue
 
       // make the first call site the split point
-      const userCallSite = userFrames.pop()
+      const userCallSite = userFrames.last()
       if (!maybeMerges.has(userCallSite.getPosition())) {
         maybeMerges.set(userCallSite.getPosition(), [ childBarrierNode ])
       } else {

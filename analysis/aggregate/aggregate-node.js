@@ -60,14 +60,11 @@ class AggregateNode {
     })
     if (depth === null) depth = Infinity
 
-    const framesInspect = util.inspect(this.frames, nestedOptions)
-      .split('\n')
-
     if (depth < 0) {
       return `<${options.stylize('AggregateNode', 'special')}>`
     }
 
-    const framesFormatted = framesInspect.slice(0, -1).join('\n  ')
+    const framesFormatted = util.inspect(this.frames, nestedOptions)
     const childrenFormatted = this.children
       .map((child) => options.stylize(child, 'number'))
       .join(', ')
