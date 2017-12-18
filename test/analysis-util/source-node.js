@@ -21,6 +21,7 @@ class FakeSourceNode extends SourceNode {
         type: data.type,
         asyncId: data.asyncId,
         triggerAsyncId: data.triggerAsyncId,
+        executionAsyncId: data.executionAsyncId,
         timestamp: data.init
       }))
     }

@@ -74,62 +74,61 @@ class SourceNode {
     this.parentAsyncId = asyncId
   }
 
-  addRawEvent (data) {
-    if (!(data instanceof RawEvent)) {
-      throw new TypeError('data must be a RawEvent instance')
+  addRawEvent (rawEvent) {
+    if (!(rawEvent instanceof RawEvent)) {
+      throw new TypeError('addRawEvent input must be a RawEvent instance')
     }
 
-    switch (data.type) {
+    switch (rawEvent.type) {
       case 'stackTrace':
-        this.addStackTrace(data.info)
+        this.addStackTrace(rawEvent.info)
         break
       case 'traceEvent':
-        this.addTraceEvent(data.info)
+        this.addTraceEvent(rawEvent.info)
         break
       default:
-        throw new Error('unknown RawEvent type value ' + data.type)
+        throw new Error('unknown RawEvent type value: ' + rawEvent.type)
     }
   }
 
-  addStackTrace (info) {
-    if (!(info instanceof StackTrace)) {
-      throw new Error('info must be a StackTrace instance')
+  addStackTrace (stackTrace) {
+    if (!(stackTrace instanceof StackTrace)) {
+      throw new TypeError('addStackTrace input must be a StackTrace instance')
     }
 
-    if (!(info.frames instanceof Frames)) {
-      throw new Error('stackTrace.frames must be a Frames instance')
-    }
-
-    this.frames = info.frames
+    this.frames = stackTrace.frames
   }
 
-  addTraceEvent (info) {
-    if (!(info instanceof TraceEvent)) {
-      throw new Error('info must be a TraceEvent instance')
+  addTraceEvent (traceEvent) {
+    if (!(traceEvent instanceof TraceEvent)) {
+      throw new TypeError('addTraceEvent input must be a TraceEvent instance')
     }
 
-    switch (info.event) {
+    switch (traceEvent.event) {
       case 'init':
-        this.type = info.type
-        this.init = info.timestamp
-        this.triggerAsyncId = info.triggerAsyncId
-        this.executionAsyncId = info.executionAsyncId
-        this.setParentAsyncId(info.triggerAsyncId)
+        this.type = traceEvent.type
+        this.init = traceEvent.timestamp
+        this.triggerAsyncId = traceEvent.triggerAsyncId
+        this.executionAsyncId = traceEvent.executionAsyncId
+        this.setParentAsyncId(traceEvent.triggerAsyncId)
         break
       case 'destroy':
-        this.destroy = info.timestamp
+        this.destroy = traceEvent.timestamp
         break
       case 'before':
-        this.before.push(info.timestamp)
+        this.before.push(traceEvent.timestamp)
         break
       case 'after':
-        this.after.push(info.timestamp)
+        this.after.push(traceEvent.timestamp)
         break
+      default:
+        throw new Error('unknown TraceEvent type value: ' + traceEvent.event)
     }
   }
 
   isComplete () {
     return (this.hasStackTrace() &&
+            this.init !== null &&
             this.destroy !== null &&
             this.before.length === this.after.length)
   }

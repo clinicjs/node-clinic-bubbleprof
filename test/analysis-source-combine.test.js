@@ -8,7 +8,7 @@ const StackTrace = require('../analysis/stack-trace/stack-trace.js')
 const TraceEvent = require('../analysis/trace-event/trace-event.js')
 const CombineAsSourceNodes = require('../analysis/source/combine-as-source-nodes.js')
 
-test('join raw events order', function (t) {
+test('Source Node - combine', function (t) {
   const joined = startpoint([
     RawEvent.wrapTraceEvent(new TraceEvent({
       event: 'init',

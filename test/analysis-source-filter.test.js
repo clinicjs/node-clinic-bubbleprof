@@ -4,16 +4,15 @@ const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
 const FilterSourceNodes = require('../analysis/source/filter-source-nodes.js')
-const StackTrace = require('../analysis/stack-trace/stack-trace.js')
-const TraceEvent = require('../analysis/trace-event/trace-event.js')
 const { FakeSourceNode } = require('./analysis-util')
 
-test('filter source nodes', function (t) {
+test('Source Node - filter', function (t) {
   const nodeNotFiltered = new FakeSourceNode({
     asyncId: 1,
     frames: [],
     type: 'NOT_FILTERED',
     triggerAsyncId: 0,
+    executionAsyncId: 0,
     init: 1,
     destroy: 2
   })
@@ -22,6 +21,7 @@ test('filter source nodes', function (t) {
     asyncId: 2,
     type: 'NO_STACK_TRACE',
     triggerAsyncId: 0,
+    executionAsyncId: 0,
     init: 1,
     destroy: 2
   })
@@ -31,6 +31,7 @@ test('filter source nodes', function (t) {
     frames: [],
     type: 'TIMERWRAP',
     triggerAsyncId: 0,
+    executionAsyncId: 0,
     init: 1,
     destroy: 2
   })

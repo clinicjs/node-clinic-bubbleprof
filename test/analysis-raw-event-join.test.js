@@ -90,17 +90,17 @@ test('Raw Event - join order', function (t) {
       if (err) return t.ifError(err)
 
       t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
-        { type: 'traceEvent', info: traceEventData[0].toJSON() },
-        { type: 'stackTrace', info: stackTraceData[0].toJSON() },
-        { type: 'traceEvent', info: traceEventData[1].toJSON() },
-        { type: 'traceEvent', info: traceEventData[2].toJSON() },
-        { type: 'stackTrace', info: stackTraceData[1].toJSON() },
-        { type: 'traceEvent', info: traceEventData[3].toJSON() },
-        { type: 'traceEvent', info: traceEventData[4].toJSON() },
-        { type: 'stackTrace', info: stackTraceData[2].toJSON() },
-        { type: 'traceEvent', info: traceEventData[5].toJSON() },
-        { type: 'traceEvent', info: traceEventData[6].toJSON() },
-        { type: 'traceEvent', info: traceEventData[7].toJSON() }
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() },
+        { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() },
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[1].toJSON() },
+        { type: 'traceEvent', asyncId: 2, info: traceEventData[2].toJSON() },
+        { type: 'stackTrace', asyncId: 2, info: stackTraceData[1].toJSON() },
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[3].toJSON() },
+        { type: 'traceEvent', asyncId: 3, info: traceEventData[4].toJSON() },
+        { type: 'stackTrace', asyncId: 3, info: stackTraceData[2].toJSON() },
+        { type: 'traceEvent', asyncId: 2, info: traceEventData[5].toJSON() },
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[6].toJSON() },
+        { type: 'traceEvent', asyncId: 3, info: traceEventData[7].toJSON() }
       ])
       t.end()
     }))
@@ -145,10 +145,10 @@ test('Raw Event - join with earily stackTrace end', function (t) {
       if (err) return t.ifError(err)
 
       t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
-        { type: 'traceEvent', info: traceEventData[0].toJSON() },
-        { type: 'stackTrace', info: stackTraceData[0].toJSON() },
-        { type: 'traceEvent', info: traceEventData[1].toJSON() },
-        { type: 'traceEvent', info: traceEventData[2].toJSON() }
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() },
+        { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() },
+        { type: 'traceEvent', asyncId: 2, info: traceEventData[1].toJSON() },
+        { type: 'traceEvent', asyncId: 3, info: traceEventData[2].toJSON() }
       ])
       t.end()
     }))
@@ -187,11 +187,11 @@ test('Raw Event - join with earily traceEvent end', function (t) {
       if (err) return t.ifError(err)
 
       t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
-        { type: 'traceEvent', info: traceEventData[0].toJSON() },
-        { type: 'stackTrace', info: stackTraceData[0].toJSON() },
-          { type: 'traceEvent', info: traceEventData[1].toJSON() },
-          { type: 'stackTrace', info: stackTraceData[1].toJSON() },
-          { type: 'stackTrace', info: stackTraceData[2].toJSON() }
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() },
+        { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() },
+        { type: 'traceEvent', asyncId: 1, info: traceEventData[1].toJSON() },
+        { type: 'stackTrace', asyncId: 2, info: stackTraceData[1].toJSON() },
+        { type: 'stackTrace', asyncId: 3, info: stackTraceData[2].toJSON() }
       ])
       t.end()
     }))
@@ -230,7 +230,7 @@ test('Raw Event - read before available', function (t) {
       join.once('readable', function () {
         t.strictDeepEqual(
           join.read().toJSON(),
-          { type: 'traceEvent', info: traceEventData[0].toJSON() }
+          { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() }
         )
         done(null)
       })
@@ -242,7 +242,7 @@ test('Raw Event - read before available', function (t) {
       join.once('readable', function () {
         t.strictDeepEqual(
           join.read().toJSON(),
-          { type: 'stackTrace', info: stackTraceData[0].toJSON() }
+          { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() }
         )
         done(null)
       })
@@ -254,7 +254,7 @@ test('Raw Event - read before available', function (t) {
       join.once('readable', function () {
         t.strictDeepEqual(
           join.read().toJSON(),
-          { type: 'traceEvent', info: traceEventData[1].toJSON() }
+          { type: 'traceEvent', asyncId: 1, info: traceEventData[1].toJSON() }
         )
         done(null)
       })
@@ -280,7 +280,7 @@ test('Raw Event - end switches stream', function (t) {
   join.once('readable', function () {
     t.strictDeepEqual(
       join.read().toJSON(),
-      { type: 'stackTrace', info: stackTraceData[0].toJSON() }
+      { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() }
     )
     t.end()
   })

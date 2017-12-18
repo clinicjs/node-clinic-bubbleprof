@@ -1,7 +1,7 @@
 'use strict'
 const stream = require('stream')
 
-class ParseTcpSourceNodes extends stream.Transform {
+class RestructureTcpSourceNodes extends stream.Transform {
   constructor () {
     super({
       readableObjectMode: true,
@@ -93,4 +93,4 @@ class ParseTcpSourceNodes extends stream.Transform {
   }
 }
 
-module.exports = ParseTcpSourceNodes
+module.exports = RestructureTcpSourceNodes

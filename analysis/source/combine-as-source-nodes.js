@@ -13,12 +13,12 @@ class CombineAsSourceNodes extends stream.Transform {
   }
 
   _transform (rawEvent, encoding, callback) {
-    // add sourceNode if necessary
+    // create new sourceNode if necessary
     if (!this._storage.has(rawEvent.asyncId)) {
       this._storage.set(rawEvent.asyncId, new SourceNode(rawEvent.asyncId))
     }
 
-    // add info to sourceNode
+    // add rawEvent to sourceNode
     const sourceNode = this._storage.get(rawEvent.asyncId)
     sourceNode.addRawEvent(rawEvent)
 

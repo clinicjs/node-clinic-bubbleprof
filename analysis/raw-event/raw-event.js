@@ -13,6 +13,7 @@ class RawEvent {
   toJSON () {
     return {
       type: this.type,
+      asyncId: this.asyncId,
       info: this.info.toJSON()
     }
   }
