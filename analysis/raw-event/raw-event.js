@@ -18,7 +18,7 @@ class RawEvent {
 
   static wrapStackTrace (data) {
     if (!(data instanceof StackTrace)) {
-      throw new Error('data must be a StackTrace instance')
+      throw new TypeError('data must be a StackTrace instance')
     }
 
     return new RawEvent('stackTrace', data)
@@ -26,7 +26,7 @@ class RawEvent {
 
   static wrapTraceEvent (data) {
     if (!(data instanceof TraceEvent)) {
-      throw new Error('data must be a TraceEvent instance')
+      throw new TypeError('data must be a TraceEvent instance')
     }
 
     return new RawEvent('traceEvent', data)

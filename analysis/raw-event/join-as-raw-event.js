@@ -2,7 +2,7 @@
 const stream = require('stream')
 const RawEvent = require('./raw-event.js')
 
-class JoinAsRawEvents extends stream.Readable {
+class JoinAsRawEvent extends stream.Readable {
   constructor (stackTrace, traceEvent) {
     super({ objectMode: true })
 
@@ -86,4 +86,4 @@ class JoinAsRawEvents extends stream.Readable {
     }
   }
 }
-module.exports = JoinAsRawEvents
+module.exports = JoinAsRawEvent

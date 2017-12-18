@@ -7,7 +7,7 @@ const SystemInfo = require('./system-info.js')
 
 const WrapAsStackTrace = require('./stack-trace/wrap-as-stack-trace.js')
 const WrapAsTraceEvent = require('./trace-event/wrap-as-trace-event.js')
-const JoinAsRawEvents = require('./raw-event/join-as-raw-events.js')
+const JoinAsRawEvent = require('./raw-event/join-as-raw-event.js')
 
 const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
@@ -34,7 +34,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Join the two data streams. The streams are read such that the latest
   // asyncId from each stream are approximatly the same. The output data
   // is annotated with the source.
-  const result = new JoinAsRawEvents(
+  const result = new JoinAsRawEvent(
     stackTraceReader.pipe(new WrapAsStackTrace()),
     traceEventReader.pipe(new WrapAsTraceEvent())
   )
