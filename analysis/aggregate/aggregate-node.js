@@ -13,7 +13,11 @@ class Mark {
   }
 
   get (index) {
-    return this.mark[index]
+    if (index >= 0 && index < 3) {
+      return this.mark[index]
+    }
+
+    throw new RangeError(`index ${index} is out of range in mark object`)
   }
 
   format () {

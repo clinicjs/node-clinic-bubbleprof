@@ -23,7 +23,7 @@ test('Stack Trace - frame.toJSON', function (t) {
     {
       functionName: 'eval',
       isEval: true,
-      evalOrigin: 'eval at eval.js:1:1',
+      evalOrigin: 'eval at eval.js:1:1'
     },
     {
       functionName: 'functionName',
@@ -138,24 +138,23 @@ test('Stack Trace - frame.getModuleName', function (t) {
 
   t.strictDeepEqual(
     frames.map((frame) => frame.getModuleName(root)), [
-    null,
-    {
-      depth: 1,
-      name: 'external'
-    },
-    {
-      depth: 1,
-      name: 'internal'
-    },
-    {
-      depth: 2,
-      name: 'deep'
-    }
-  ])
+      null,
+      {
+        depth: 1,
+        name: 'external'
+      },
+      {
+        depth: 1,
+        name: 'internal'
+      },
+      {
+        depth: 2,
+        name: 'deep'
+      }
+    ])
 
   t.end()
 })
-
 
 test('Stack Trace - frame.getPosition', function (t) {
   const frames = new Frames([
@@ -184,12 +183,12 @@ test('Stack Trace - frame.getPosition', function (t) {
 
   t.strictDeepEqual(
     frames.map((frame) => frame.getPosition()), [
-    'events.js:10:20',
-    'events.js:0:20',
-    'events.js:10:0',
-    'events.js:0:0',
-    'events.js:0:0 [eval.js:1:1]'
-  ])
+      'events.js:10:20',
+      'events.js:0:20',
+      'events.js:10:0',
+      'events.js:0:0',
+      'events.js:0:0 [eval.js:1:1]'
+    ])
 
   t.end()
 })
@@ -212,7 +211,7 @@ test('Stack Trace - frame.format', function (t) {
     {
       functionName: 'eval',
       isEval: true,
-      evalOrigin: 'eval at eval.js:1:1',
+      evalOrigin: 'eval at eval.js:1:1'
     },
     {
       functionName: 'className',
@@ -237,17 +236,16 @@ test('Stack Trace - frame.format', function (t) {
 
   t.strictDeepEqual(
     frames.map((frame) => frame.format()), [
-    '<anonymous> filename.js:2:1',
-    'typeName.functionName filename.js:2:1',
-    'eval [eval at eval.js:1:1]',
-    'new className filename.js:',
-    'native functionName filename.js:2:1',
-    'functionName filename.js:2:1',
-  ])
+      '<anonymous> filename.js:2:1',
+      'typeName.functionName filename.js:2:1',
+      'eval [eval at eval.js:1:1]',
+      'new className filename.js:',
+      'native functionName filename.js:2:1',
+      'functionName filename.js:2:1'
+    ])
 
   t.end()
 })
-
 
 test('Stack Trace - frame.inspect', function (t) {
   const frame = new Frames([
@@ -333,7 +331,6 @@ test('Stack Trace - frames.inspect', function (t) {
 
   t.end()
 })
-
 
 test('Stack Trace - frames.toJSON', function (t) {
   const data = [
@@ -589,5 +586,16 @@ test('Stack Trace - frames.get', function (t) {
 
   t.strictDeepEqual(frames.get(0).toJSON(), data[0])
   t.strictDeepEqual(frames.get(1).toJSON(), data[1])
+
+  t.throws(
+    () => frames.get(2),
+    new RangeError(`index 2 is out of range in frames array of length 2`)
+  )
+
+  t.throws(
+    () => frames.get(-1),
+    new RangeError(`index -1 is out of range in frames array of length 2`)
+  )
+
   t.end()
 })

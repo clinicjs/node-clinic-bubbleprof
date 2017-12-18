@@ -207,7 +207,13 @@ class Frames {
   }
 
   get (index) {
-    return this.frames[index]
+    if (index >= 0 && index < this.frames.length) {
+      return this.frames[index]
+    }
+
+    throw new RangeError(
+      `index ${index} is out of range in frames array of length ${this.length}`
+    )
   }
 }
 
