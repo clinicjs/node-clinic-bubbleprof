@@ -6,7 +6,7 @@ const startpoint = require('startpoint')
 const RestructureNetSourceNodes = require('../analysis/source/restructure-net-source-nodes.js')
 const { FakeSourceNode } = require('./analysis-util')
 
-function createTreeStructure(serverWrapType, socketWrapType) {
+function createTreeStructure (serverWrapType, socketWrapType) {
   const sourceNodeRoot = new FakeSourceNode({
     asyncId: 1,
     frames: [],
@@ -70,7 +70,6 @@ function createTreeStructure(serverWrapType, socketWrapType) {
     destroy: 8
   })
 
-
   // WRITEWRAP should have its execution context as its parent
   const sourceNodeUnknownParent = new FakeSourceNode({
     asyncId: 7,
@@ -89,7 +88,7 @@ function createTreeStructure(serverWrapType, socketWrapType) {
   ]
 }
 
-function checkTreeStructure(t, sourceNodes) {
+function checkTreeStructure (t, sourceNodes) {
   const sourceNodeIndex = new Map()
   for (const sourceNode of sourceNodes) {
     sourceNodeIndex.set(sourceNode.asyncId, sourceNode)

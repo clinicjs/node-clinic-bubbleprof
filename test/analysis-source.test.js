@@ -10,18 +10,18 @@ const { FakeSourceNode } = require('./analysis-util')
 
 test('Source Node - sourceNode.inspect', function (t) {
   const sourceNode = new FakeSourceNode({
-   asyncId: 2,
-   frames: [
+    asyncId: 2,
+    frames: [
      { fileName: 'fileName.js' }
-   ],
-   type: 'CUSTOM',
-   triggerAsyncId: 1,
-   executionAsyncId: 0,
-   init: 1,
-   before: [2, 4],
-   after: [3, 5],
-   destroy: 6
- })
+    ],
+    type: 'CUSTOM',
+    triggerAsyncId: 1,
+    executionAsyncId: 0,
+    init: 1,
+    before: [2, 4],
+    after: [3, 5],
+    destroy: 6
+  })
 
   t.strictEqual(
     util.inspect(sourceNode),
@@ -187,7 +187,7 @@ test('Source Node - sourceNode.addRawEvent', function (t) {
   const sourceNodeBadRawEventType = new SourceNode(2)
   const badRawEvent = new RawEvent('badType', 2, {})
   t.throws(
-    () => sourceNodeNotRawEvent.addRawEvent(badRawEvent),
+    () => sourceNodeBadRawEventType.addRawEvent(badRawEvent),
     new Error('unknown RawEvent type value: badType')
   )
 
@@ -207,9 +207,8 @@ test('Source Node - sourceNode.addStackTrace', function (t) {
   t.strictEqual(sourceNode.frames, stackTraceObject.frames)
 
   const sourceNodeNodeStackTrace = new SourceNode(2)
-
   t.throws(
-    () => sourceNode.addStackTrace({ frames: [] }),
+    () => sourceNodeNodeStackTrace.addStackTrace({ frames: [] }),
     new TypeError('addStackTrace input must be a StackTrace instance')
   )
 
@@ -284,13 +283,13 @@ test('Source Node - sourceNode.addTraceEvent', function (t) {
 
   const sourceNodeNotTraceEvent = new SourceNode(2)
   t.throws(
-    () => sourceNode.addTraceEvent({ type: 'CUSTOM' }),
+    () => sourceNodeNotTraceEvent.addTraceEvent({ type: 'CUSTOM' }),
     new TypeError('addTraceEvent input must be a TraceEvent instance')
   )
 
   const sourceNodeBadTraceEvent = new SourceNode(2)
   t.throws(
-    () => sourceNode.addTraceEvent(traceEventBadObject),
+    () => sourceNodeBadTraceEvent.addTraceEvent(traceEventBadObject),
     new Error('unknown TraceEvent type value: bad')
   )
 
