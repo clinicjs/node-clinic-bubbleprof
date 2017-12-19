@@ -2,7 +2,6 @@
 
 const test = require('tap').test
 const path = require('path')
-const http = require('http')
 const async = require('async')
 const endpoint = require('endpoint')
 const CollectAndRead = require('./collect-and-read.js')
@@ -25,8 +24,8 @@ function runServer (name, callback) {
 
   // await result
   cmd.on('error', callback)
-  cmd.on('ready', function (stackTraceReader, traceEventsReader) {
-    analysis(stackTraceReader, traceEventsReader)
+  cmd.on('ready', function (stackTraceReader, traceEventReader) {
+    analysis(stackTraceReader, traceEventReader)
       .pipe(endpoint({ objectMode: true }, callback))
   })
 }
