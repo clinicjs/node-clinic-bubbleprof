@@ -10,7 +10,7 @@ const browserify = require('browserify')
 const streamTemplate = require('stream-template')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
-const TraceEventsDecoder = require('./format/trace-events-decoder.js')
+const TraceEventDecoder = require('./format/trace-event-decoder.js')
 
 class ClinicBubbleprof {
   collect (args, callback) {
@@ -48,7 +48,7 @@ class ClinicBubbleprof {
 
       // create directory and move files to that directory
       fs.rename(
-        'node_trace.1.log', paths['/traceevents'],
+        'node_trace.1.log', paths['/traceevent'],
         function (err) {
           if (err) return callback(err)
           callback(null, paths['/'])
@@ -66,11 +66,11 @@ class ClinicBubbleprof {
     const paths = getLoggingPaths(dataDirname.split('.')[0])
     const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
       .pipe(new StackTraceDecoder())
-    const traceEventsReader = fs.createReadStream(paths['/traceevents'])
-      .pipe(new TraceEventsDecoder())
+    const traceEventReader = fs.createReadStream(paths['/traceevent'])
+      .pipe(new TraceEventDecoder())
 
     // create dataFile
-    const dataFile = analysis(stackTraceReader, traceEventsReader)
+    const dataFile = analysis(stackTraceReader, traceEventReader)
       .pipe(new Stringify({
         seperator: ',\n',
         stringifier: JSON.stringify

@@ -8,7 +8,7 @@ const CollectAndRead = require('./collect-and-read.js')
 test('collect command produces data files with content', function (t) {
   const cmd = new CollectAndRead('-e', 'setTimeout(() => {}, 200)')
   cmd.on('error', t.ifError.bind(t))
-  cmd.on('ready', function (stackTraceReader, traceEventsReader) {
+  cmd.on('ready', function (stackTraceReader, traceEventReader) {
     async.parallel({
       stackTrace (done) {
         // collect tracked asyncIds
@@ -25,43 +25,43 @@ test('collect command produces data files with content', function (t) {
           }))
       },
 
-      traceEvents (done) {
-        // collect traceEvents for all asyncIds
-        traceEventsReader
+      traceEvent (done) {
+        // collect traceEvent for all asyncIds
+        traceEventReader
           .pipe(endpoint({ objectMode: true }, function (err, data) {
             if (err) return done(err)
 
-            const traceEventsMap = new Map()
+            const traceEventMap = new Map()
             for (const traceEvent of data) {
-              if (!traceEventsMap.has(traceEvent.asyncId)) {
-                traceEventsMap.set(traceEvent.asyncId, [])
+              if (!traceEventMap.has(traceEvent.asyncId)) {
+                traceEventMap.set(traceEvent.asyncId, [])
               }
-              traceEventsMap.get(traceEvent.asyncId).push(traceEvent)
+              traceEventMap.get(traceEvent.asyncId).push(traceEvent)
             }
 
-            done(null, traceEventsMap)
+            done(null, traceEventMap)
           }))
       }
     }, function (err, output) {
       if (err) return t.ifError(err)
 
       // filter untracked events out
-      for (const asyncId of output.traceEvents.keys()) {
+      for (const asyncId of output.traceEvent.keys()) {
         if (!output.stackTrace.has(asyncId)) {
-          output.traceEvents.delete(asyncId)
+          output.traceEvent.delete(asyncId)
         }
       }
 
-      // Expect all tracked asyncIds to be found in traceEvents
+      // Expect all tracked asyncIds to be found in traceEvent
       t.strictDeepEqual(
         Array.from(output.stackTrace.keys()).sort(),
-        Array.from(output.traceEvents.keys()).sort()
+        Array.from(output.traceEvent.keys()).sort()
       )
 
       // Get async operation types
       const asyncOperationTypes = []
-      for (const trackedTraceEvents of output.traceEvents.values()) {
-        asyncOperationTypes.push(trackedTraceEvents[0].type)
+      for (const trackedTraceEvent of output.traceEvent.values()) {
+        asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
       // Expect Timeout and TIMERWRAP to be there

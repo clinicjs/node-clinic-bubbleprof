@@ -8,8 +8,8 @@ const analysis = require('../analysis/index.js')
 test('collect-analysis pipeline', function (t) {
   const cmd = new CollectAndRead('-e', 'setTimeout(() => {}, 200)')
   cmd.on('error', t.ifError.bind(t))
-  cmd.on('ready', function (stackTraceReader, traceEventsReader) {
-    analysis(stackTraceReader, traceEventsReader)
+  cmd.on('ready', function (stackTraceReader, traceEventReader) {
+    analysis(stackTraceReader, traceEventReader)
       .pipe(endpoint({ objectMode: true }, function (err, nodes) {
         if (err) return t.ifError(err)
 

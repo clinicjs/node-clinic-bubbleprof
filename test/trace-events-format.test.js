@@ -2,7 +2,7 @@
 
 const test = require('tap').test
 const endpoint = require('endpoint')
-const TraceEventDecoder = require('../format/trace-events-decoder.js')
+const TraceEventDecoder = require('../format/trace-event-decoder.js')
 
 test('trace event decoder', function (t) {
   const init = {
@@ -57,9 +57,9 @@ test('trace event decoder', function (t) {
     if (err) return t.ifError(err)
 
     // Remove prototype constructor
-    const traceEvents = data.map((v) => Object.assign({}, v))
+    const traceEvent = data.map((v) => Object.assign({}, v))
 
-    t.strictDeepEqual(traceEvents, [{
+    t.strictDeepEqual(traceEvent, [{
       event: 'init',
       type: 'TYPENAME',
       asyncId: 2,

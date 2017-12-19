@@ -28,8 +28,8 @@ function runServer (name) {
   }, 200)
 
   // await result
-  cmd.on('ready', function (stackTraceReader, traceEventsReader) {
-    analysis(stackTraceReader, traceEventsReader)
+  cmd.on('ready', function (stackTraceReader, traceEventReader) {
+    analysis(stackTraceReader, traceEventReader)
       .pipe(new AggregateNodesToDprof())
       .pipe(process.stdout)
   })

@@ -9,7 +9,7 @@ const endpoint = require('endpoint')
 const getLoggingPaths = require('../collect/get-logging-paths.js')
 const ClinicBubbleprof = require('../index.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
-const TraceEventsDecoder = require('../format/trace-events-decoder.js')
+const TraceEventDecoder = require('../format/trace-event-decoder.js')
 
 const testServerSockPath = path.resolve(__dirname, '.test-server.sock')
 
@@ -42,11 +42,11 @@ class CollectAndRead extends events.EventEmitter {
 
         const stacktrace = fs.createReadStream(files['/stacktrace'])
           .pipe(new StackTraceDecoder())
-        const traceevents = fs.createReadStream(files['/traceevents'])
-          .pipe(new TraceEventsDecoder())
+        const traceevent = fs.createReadStream(files['/traceevent'])
+          .pipe(new TraceEventDecoder())
 
-        self._setupAutoCleanup(files, stacktrace, traceevents)
-        self.emit('ready', stacktrace, traceevents)
+        self._setupAutoCleanup(files, stacktrace, traceevent)
+        self.emit('ready', stacktrace, traceevent)
       })
     })
   }
@@ -63,7 +63,7 @@ class CollectAndRead extends events.EventEmitter {
     })
   }
 
-  _setupAutoCleanup (files, stacktrace, traceevents) {
+  _setupAutoCleanup (files, stacktrace, traceevent) {
     const self = this
 
     async.parallel({
@@ -76,8 +76,8 @@ class CollectAndRead extends events.EventEmitter {
         })
       },
       traveEvents (done) {
-        traceevents.once('end', function () {
-          fs.unlink(files['/traceevents'], function (err) {
+        traceevent.once('end', function () {
+          fs.unlink(files['/traceevent'], function (err) {
             if (err) return done(err)
             done(null)
           })

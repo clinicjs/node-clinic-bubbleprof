@@ -33,7 +33,7 @@ class TraceEvent {
   }
 }
 
-class TraceEventsDecoder extends stream.Transform {
+class TraceEventDecoder extends stream.Transform {
   constructor () {
     super({
       readableObjectMode: true,
@@ -56,4 +56,4 @@ class TraceEventsDecoder extends stream.Transform {
     callback(null)
   }
 }
-module.exports = TraceEventsDecoder
+module.exports = TraceEventDecoder
