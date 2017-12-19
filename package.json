@@ -6,7 +6,7 @@
   "scripts": {
     "test": "standard | snazzy && tap --no-cov test/*.test.js",
     "ci-lint": "standard | snazzy",
-    "ci-test": "tap --no-cov test/*.test.js",
+    "ci-test": "tap --cov test/*.test.js",
     "lint": "standard --fix | snazzy"
   },
   "devDependencies": {
