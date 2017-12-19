@@ -1,7 +1,7 @@
 'use strict'
 const stream = require('stream')
 
-class RestructureTcpSourceNodes extends stream.Transform {
+class RestructureNetSourceNodes extends stream.Transform {
   constructor () {
     super({
       readableObjectMode: true,
@@ -65,16 +65,15 @@ class RestructureTcpSourceNodes extends stream.Transform {
   }
 
   _saveNode (sourceNode) {
-    if (this._stroageByTriggerAsyncId.has(sourceNode.triggerAsyncId)) {
-      this._stroageByTriggerAsyncId.get(sourceNode.triggerAsyncId).push(sourceNode)
-    } else {
-      this._stroageByTriggerAsyncId.set(sourceNode.triggerAsyncId, [sourceNode])
+    if (!this._stroageByTriggerAsyncId.has(sourceNode.triggerAsyncId)) {
+      this._stroageByTriggerAsyncId.set(sourceNode.triggerAsyncId, [])
     }
+    this._stroageByTriggerAsyncId.get(sourceNode.triggerAsyncId).push(sourceNode)
   }
 
   _transform (sourceNode, encoding, callback) {
-    // If the triggerAsyncId is observed, then we have all the information
-    // for this node too.
+    // If the triggerAsyncId is observed, then we have all the required
+    // information for this SourceNode.
     if (this._observedAsyncIds.has(sourceNode.triggerAsyncId)) {
       this._processTree(sourceNode)
     } else {
@@ -85,12 +84,14 @@ class RestructureTcpSourceNodes extends stream.Transform {
   }
 
   _flush (callback) {
-    if (this._stroageByTriggerAsyncId.size > 0) {
-      callback(new Error('some nodes are without parent'))
-    } else {
-      callback(null)
+    for (const sourceNodes of this._stroageByTriggerAsyncId.values()) {
+      for (const sourceNode of sourceNodes) {
+        this.push(sourceNode)
+      }
     }
+
+    callback(null)
   }
 }
 
-module.exports = RestructureTcpSourceNodes
+module.exports = RestructureNetSourceNodes

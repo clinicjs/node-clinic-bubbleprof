@@ -12,7 +12,7 @@ const JoinAsRawEvent = require('./raw-event/join-as-raw-event.js')
 const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
-const RestructureTcpSourceNodes = require('./source/restructure-tcp-source-nodes.js')
+const RestructureNetSourceNodes = require('./source/restructure-net-source-nodes.js')
 
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
@@ -48,8 +48,8 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new CombineAsSourceNodes())
   // Remove SourceNode's that are not relevant.
     .pipe(new FilterSourceNodes())
-  // Restructure TCP source nodes and the socket children.
-    .pipe(new RestructureTcpSourceNodes())
+  // Restructure net. source nodes and the socket children.
+    .pipe(new RestructureNetSourceNodes())
   // Key each SourceNode with an identify hash.
     .pipe(new IdentifySourceNodes())
 
