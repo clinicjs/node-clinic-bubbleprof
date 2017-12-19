@@ -3,8 +3,8 @@
 const path = require('path')
 const async = require('async')
 const CollectAndRead = require('../test/collect-and-read.js')
+const inspectpoint = require('inspectpoint')
 const analysis = require('../analysis/index.js')
-const AggregateNodesToDprof = require('./aggregate-nodes-to-dprof.js')
 
 function runServer (name) {
   const serverPath = path.resolve(__dirname, '..', 'test', 'servers', name + '.js')
@@ -24,7 +24,7 @@ function runServer (name) {
   // await result
   cmd.on('ready', function (stackTraceReader, traceEventReader) {
     analysis(stackTraceReader, traceEventReader)
-      .pipe(new AggregateNodesToDprof())
+      .pipe(inspectpoint({ depth: null, colors: true }))
       .pipe(process.stdout)
   })
 }
