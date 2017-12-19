@@ -57,6 +57,10 @@ class FakeSourceNode extends SourceNode {
         timestamp: data.destroy
       }))
     }
+
+    if (data.identifier) {
+      this.setIdentifier(data.identifier)
+    }
   }
 }
 

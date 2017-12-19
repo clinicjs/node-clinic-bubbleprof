@@ -3,30 +3,20 @@
 const test = require('tap').test
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
-const SourceNode = require('../analysis/source/source-node.js')
-const StackTrace = require('../analysis/stack-trace/stack-trace.js')
-const TraceEvent = require('../analysis/trace-event/trace-event.js')
+const { FakeSourceNode } = require('./analysis-util')
 const CombineAsAggregateNodes = require('../analysis/aggregate/combine-as-aggregate-nodes.js')
 
 test('join raw events order', function (t) {
-  const serverNode = new SourceNode(2)
-  serverNode.setIdentifier('server.js')
-  serverNode.addStackTrace(new StackTrace({
+  const serverNode = new FakeSourceNode({
     asyncId: 2,
-    frames: [{ fileName: 'server.js' }]
-  }))
-  serverNode.addTraceEvent(new TraceEvent({
-    event: 'init',
-    type: 'SERVER',
-    asyncId: 2,
+    frames: [{ fileName: 'server.js' }],
+    identifier: 'server.js',
+    type: 'CUSTOM_SERVER',
     triggerAsyncId: 1,
-    timestamp: 1
-  }))
-  serverNode.addTraceEvent(new TraceEvent({
-    event: 'destroy',
-    asyncId: 2,
-    timestamp: 10
-  }))
+    executionAsyncId: 1,
+    init: 1,
+    destroy: 10
+  })
 
   const socketNodes = []
   const logNodes = []
@@ -36,65 +26,41 @@ test('join raw events order', function (t) {
     const logAsyncId = 4 + i * 3
     const endAsyncId = 5 + i * 3
 
-    const socketNode = new SourceNode(socketAsyncId)
-    socketNodes.push(socketNode)
-    socketNode.setIdentifier('server.js')
-    socketNode.addStackTrace(new StackTrace({
+    const socketNodeSocket = new FakeSourceNode({
       asyncId: socketAsyncId,
-      frames: [{ fileName: 'server.js' }]
-    }))
-    socketNode.addTraceEvent(new TraceEvent({
-      event: 'init',
-      type: 'SOCKET',
-      asyncId: socketAsyncId,
+      frames: [{ fileName: 'server.js' }],
+      identifier: 'server.js',
+      type: 'CUSTOM_SOCKET',
+      executionAsyncId: 0,
       triggerAsyncId: 2,
-      timestamp: 2 + i * 2
-    }))
-    socketNode.addTraceEvent(new TraceEvent({
-      event: 'destroy',
-      asyncId: socketAsyncId,
-      timestamp: 4 + i * 2
-    }))
+      init: 2 + i * 2,
+      destroy: 4 + i * 2
+    })
+    socketNodes.push(socketNodeSocket)
 
-    const logNode = new SourceNode(logAsyncId)
-    logNodes.push(logNode)
-    logNode.setIdentifier('log.js')
-    logNode.addStackTrace(new StackTrace({
+    const socketNodelog = new FakeSourceNode({
       asyncId: logAsyncId,
-      frames: [{ fileName: 'log.js' }]
-    }))
-    logNode.addTraceEvent(new TraceEvent({
-      event: 'init',
-      type: 'LOG',
-      asyncId: logAsyncId,
+      frames: [{ fileName: 'log.js' }],
+      identifier: 'log.js',
+      type: 'CUSTOM_LOG',
+      executionAsyncId: socketAsyncId,
       triggerAsyncId: socketAsyncId,
-      timestamp: 3 + i * 2
-    }))
-    logNode.addTraceEvent(new TraceEvent({
-      event: 'destroy',
-      asyncId: logAsyncId,
-      timestamp: 4 + i * 2
-    }))
+      init: 3 + i * 2,
+      destroy: 4 + i * 2
+    })
+    logNodes.push(socketNodelog)
 
-    const endNode = new SourceNode(endAsyncId)
-    endNodes.push(endNode)
-    endNode.setIdentifier('server.js')
-    endNode.addStackTrace(new StackTrace({
+    const socketNodeEnd = new FakeSourceNode({
       asyncId: endAsyncId,
-      frames: [{ fileName: 'server.js' }]
-    }))
-    endNode.addTraceEvent(new TraceEvent({
-      event: 'init',
-      type: 'END',
-      asyncId: endAsyncId,
+      frames: [{ fileName: 'server.js' }],
+      identifier: 'server.js',
+      type: 'CUSTOM_END',
+      executionAsyncId: logAsyncId,
       triggerAsyncId: socketAsyncId,
-      timestamp: 3 + i * 2
-    }))
-    endNode.addTraceEvent(new TraceEvent({
-      event: 'destroy',
-      asyncId: endAsyncId,
-      timestamp: 4 + i * 2
-    }))
+      init: 3 + i * 2,
+      destroy: 4 + i * 2
+    })
+    endNodes.push(socketNodeEnd)
   }
 
   const sourceNodes = [serverNode, ...socketNodes, ...logNodes, ...endNodes]
@@ -121,7 +87,7 @@ test('join raw events order', function (t) {
         children: [ 3 ],
         sources: [ serverNode.toJSON({ short: true }) ],
         mark: [null, null, null],
-        type: 'SERVER',
+        type: 'CUSTOM_SERVER',
         frames: [{ fileName: 'server.js' }]
       })
 
@@ -132,7 +98,7 @@ test('join raw events order', function (t) {
         children: [ 4, 5 ],
         sources: socketNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
-        type: 'SOCKET',
+        type: 'CUSTOM_SOCKET',
         frames: [{ fileName: 'server.js' }]
       })
 
@@ -143,7 +109,7 @@ test('join raw events order', function (t) {
         children: [ ],
         sources: logNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
-        type: 'LOG',
+        type: 'CUSTOM_LOG',
         frames: [{ fileName: 'log.js' }]
       })
 
@@ -154,7 +120,7 @@ test('join raw events order', function (t) {
         children: [ ],
         sources: endNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
-        type: 'END',
+        type: 'CUSTOM_END',
         frames: [{ fileName: 'server.js' }]
       })
 
