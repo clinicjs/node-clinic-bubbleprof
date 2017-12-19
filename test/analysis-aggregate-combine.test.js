@@ -6,7 +6,7 @@ const startpoint = require('startpoint')
 const { FakeSourceNode } = require('./analysis-util')
 const CombineAsAggregateNodes = require('../analysis/aggregate/combine-as-aggregate-nodes.js')
 
-test('join raw events order', function (t) {
+test('Aggregate Node - combine', function (t) {
   const serverNode = new FakeSourceNode({
     asyncId: 2,
     frames: [{ fileName: 'server.js' }],
