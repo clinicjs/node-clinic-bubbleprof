@@ -1,4 +1,5 @@
 
+const path = require('path')
 const http = require('http')
 
 let connections = 0
@@ -9,4 +10,4 @@ const server = http.createServer(function (req, res) {
   }
 })
 
-server.listen(18353)
+server.listen(path.resolve(__dirname, '..', '.test-server.sock'))

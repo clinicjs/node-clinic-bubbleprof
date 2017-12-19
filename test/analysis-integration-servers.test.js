@@ -13,19 +13,15 @@ function runServer (name, callback) {
   const cmd = new CollectAndRead(serverPath)
 
   // make two requests
-  setTimeout(function () {
-    async.map(
-      [0, 1],
-      function makeRequest (requestId, done) {
-        http.get('http://127.0.0.1:18353', function (res) {
-          res.pipe(endpoint(done))
-        })
-      },
-      function (err) {
-        if (err) return callback(err)
-      }
-    )
-  }, 200)
+  async.map(
+    [0, 1],
+    function makeRequest (requestId, done) {
+      cmd.request('/', done)
+    },
+    function (err) {
+      if (err) return callback(err)
+    }
+  )
 
   // await result
   cmd.on('error', callback)
