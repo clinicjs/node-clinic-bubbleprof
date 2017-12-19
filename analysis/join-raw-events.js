@@ -2,7 +2,7 @@
 const stream = require('stream')
 
 class JoinRawEvents extends stream.Readable {
-  constructor (stackTrace, traceEvents) {
+  constructor (stackTrace, traceEvent) {
     super({ objectMode: true })
 
     this._awaitRead = false
@@ -11,12 +11,12 @@ class JoinRawEvents extends stream.Readable {
     this._stackTraceAsyncId = 0
     this._stackTraceEnded = false
 
-    this._traceEvents = traceEvents
-    this._traceEventsAsyncId = 0
-    this._traceEventsEnded = false
+    this._traceEvent = traceEvent
+    this._traceEventAsyncId = 0
+    this._traceEventEnded = false
 
     this._stackTrace.once('end', () => this._stackTraceEnd())
-    this._traceEvents.once('end', () => this._traceEventsEnd())
+    this._traceEvent.once('end', () => this._traceEventEnd())
   }
 
   _stackTracePush (data) {
@@ -34,23 +34,23 @@ class JoinRawEvents extends stream.Readable {
     this._maybeEnded()
   }
 
-  _traceEventsPush (data) {
+  _traceEventPush (data) {
     this._awaitRead = false
-    this._traceEventsAsyncId = Math.max(this._traceEventsAsyncId, data.asyncId)
+    this._traceEventAsyncId = Math.max(this._traceEventAsyncId, data.asyncId)
 
     this.push({
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: data
     })
   }
 
-  _traceEventsEnd () {
-    this._traceEventsEnded = true
+  _traceEventEnd () {
+    this._traceEventEnded = true
     this._maybeEnded()
   }
 
   _maybeEnded () {
-    if (this._stackTraceEnded && this._traceEventsEnded) {
+    if (this._stackTraceEnded && this._traceEventEnded) {
       this.push(null)
     } else if (this._awaitRead) {
       // If more data is expected and only one stream ended, then make a manual
@@ -64,8 +64,8 @@ class JoinRawEvents extends stream.Readable {
 
     // the asyncId's are approximatively incrementing. Descide what
     // stream to read from by selecting the one where the asyncId is lowest
-    if (this._traceEventsEnded || (
-      this._stackTraceAsyncId < this._traceEventsAsyncId && !this._stackTraceEnded
+    if (this._traceEventEnded || (
+      this._stackTraceAsyncId < this._traceEventAsyncId && !this._stackTraceEnded
     )) {
       const data = this._stackTrace.read()
       if (data === null) {
@@ -78,15 +78,15 @@ class JoinRawEvents extends stream.Readable {
         return this._stackTracePush(data)
       }
     } else {
-      const data = this._traceEvents.read()
+      const data = this._traceEvent.read()
       if (data === null) {
-        this._traceEvents.once('readable', () => {
-          const data = this._traceEvents.read()
-          if (data !== null) return this._traceEventsPush(data)
+        this._traceEvent.once('readable', () => {
+          const data = this._traceEvent.read()
+          if (data !== null) return this._traceEventPush(data)
           // end event handler will call .push()
         })
       } else {
-        return this._traceEventsPush(data)
+        return this._traceEventPush(data)
       }
     }
   }

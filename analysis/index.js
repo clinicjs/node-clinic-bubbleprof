@@ -8,7 +8,7 @@ const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
 
-function analysis (stackTraceReader, traceEventsReader) {
+function analysis (stackTraceReader, traceEventReader) {
   // Overview:
   // The data progressing changes data structure a few times. The data
   // structures are transformed the following way:
@@ -19,7 +19,7 @@ function analysis (stackTraceReader, traceEventsReader) {
   // Join the two data streams. The streams are read such that the latest
   // asyncId from each stream are approximatly the same. The output data
   // is annotated with the source.
-  const result = new JoinRawEvents(stackTraceReader, traceEventsReader)
+  const result = new JoinRawEvents(stackTraceReader, traceEventReader)
 
   // SourceNode:
   // Combine the joined events into SourceNode's that combines all the data

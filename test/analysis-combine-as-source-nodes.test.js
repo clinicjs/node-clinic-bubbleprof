@@ -8,7 +8,7 @@ const CombineAsSourceNodes = require('../analysis/source/combine-as-source-nodes
 test('join raw events order', function (t) {
   const joined = startpoint([
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'init',
         type: 'HAS_STACK',
@@ -26,7 +26,7 @@ test('join raw events order', function (t) {
       }
     },
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'before',
         asyncId: 1,
@@ -34,7 +34,7 @@ test('join raw events order', function (t) {
       }
     },
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'after',
         asyncId: 1,
@@ -42,7 +42,7 @@ test('join raw events order', function (t) {
       }
     },
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'destroy',
         asyncId: 1,
@@ -50,7 +50,7 @@ test('join raw events order', function (t) {
       }
     },
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'init',
         type: 'NO_STACK',
@@ -61,7 +61,7 @@ test('join raw events order', function (t) {
       }
     },
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'destroy',
         asyncId: 2,
@@ -69,7 +69,7 @@ test('join raw events order', function (t) {
       }
     },
     {
-      type: 'traceEvents',
+      type: 'traceEvent',
       info: {
         event: 'init',
         type: 'NO_DESTROY',

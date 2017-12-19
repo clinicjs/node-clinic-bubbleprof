@@ -5,12 +5,12 @@ const path = require('path')
 function getLoggingPaths (idendifier) {
   const dirname = `${idendifier}.clinic-bubbleprof`
   const stackTraceFilename = `${idendifier}.clinic-bubbleprof-stacktrace`
-  const traceEventsFilename = `${idendifier}.clinic-bubbleprof-traceevents`
+  const traceEventFilename = `${idendifier}.clinic-bubbleprof-traceevent`
 
   return {
     '/': dirname,
     '/stacktrace': path.join(dirname, stackTraceFilename),
-    '/traceevents': path.join(dirname, traceEventsFilename)
+    '/traceevent': path.join(dirname, traceEventFilename)
   }
 }
 

@@ -25,7 +25,7 @@ class CombineAsSourceNodes extends stream.Transform {
     const node = this._nodes.get(asyncId)
     if (type === 'stackTrace') {
       node.addStackTrace(info)
-    } else if (type === 'traceEvents') {
+    } else if (type === 'traceEvent') {
       node.addTraceEvent(info)
     }
 
