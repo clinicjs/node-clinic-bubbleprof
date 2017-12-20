@@ -2,7 +2,7 @@
 const stream = require('stream')
 const BarrierNode = require('./barrier-node.js')
 
-class CombineAsBarrierNodes extends stream.Transform {
+class WrapAsBarrierNodes extends stream.Transform {
   constructor () {
     super({
       readableObjectMode: true,
@@ -19,4 +19,4 @@ class CombineAsBarrierNodes extends stream.Transform {
   }
 }
 
-module.exports = CombineAsBarrierNodes
+module.exports = WrapAsBarrierNodes

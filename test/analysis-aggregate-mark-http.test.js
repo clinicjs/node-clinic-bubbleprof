@@ -10,12 +10,14 @@ function createTreeStructure (serverWrapType, socketWrapType) {
   const aggregateNodeRoot = new FakeAggregateNode({
     aggregateId: 1,
     parentAggregateId: 0,
+    children: [2],
     isRoot: true
   })
 
   const aggregateNodeServer = new FakeAggregateNode({
     aggregateId: 2,
     parentAggregateId: 1, // server is created from the root node
+    children: [3],
     frames: [],
     mark: ['nodecore', null, null],
     type: serverWrapType
@@ -24,6 +26,7 @@ function createTreeStructure (serverWrapType, socketWrapType) {
   const aggregateNodeSocket = new FakeAggregateNode({
     aggregateId: 3,
     parentAggregateId: 2, // The server is the trigger
+    children: [4],
     frames: [],
     mark: ['nodecore', null, null],
     type: socketWrapType
@@ -33,6 +36,7 @@ function createTreeStructure (serverWrapType, socketWrapType) {
   const aggregateNodeHttpParser = new FakeAggregateNode({
     aggregateId: 4,
     parentAggregateId: 3,
+    children: [5],
     frames: [],
     mark: ['nodecore', null, null],
     type: 'HTTPPARSER'
@@ -42,6 +46,7 @@ function createTreeStructure (serverWrapType, socketWrapType) {
   const aggregateNodeReady = new FakeAggregateNode({
     aggregateId: 5,
     parentAggregateId: 4,
+    children: [6],
     frames: [],
     mark: ['nodecore', null, null],
     type: 'TickObject'
@@ -51,6 +56,7 @@ function createTreeStructure (serverWrapType, socketWrapType) {
   const aggregateNodeWriteWrap = new FakeAggregateNode({
     aggregateId: 6,
     parentAggregateId: 5,
+    children: [],
     frames: [],
     mark: ['nodecore', null, null],
     type: 'WRITEWRAP'
@@ -60,6 +66,7 @@ function createTreeStructure (serverWrapType, socketWrapType) {
   const aggregateNodeUnknownParent = new FakeAggregateNode({
     aggregateId: 11,
     parentAggregateId: 10, // Unknown parent
+    children: [],
     frames: [],
     mark: ['user', null, null],
     type: 'UNKNOWN'

@@ -27,14 +27,21 @@ class BarrierNode {
       return `<${options.stylize('BarrierNode', 'special')}>`
     }
 
-    const nodesPadding = ' '.repeat(8)
+    const padding = ' '.repeat(8)
     const nodesFormatted = this.nodes
       .map(function (aggregateNode) {
-        return nodesPadding + util.inspect(aggregateNode, nestedOptions)
+        return util.inspect(aggregateNode, nestedOptions)
           .split('\n')
-          .join('\n' + nodesPadding)
+          .join('\n' + padding)
       })
-      .join(',\n')
+
+    let inner
+    if (depth < 1) {
+       inner = nodesFormatted.join(', ')
+    } else {
+       inner = `\n${padding}` + nodesFormatted.join(`,\n${padding}`)
+    }
+
     const childrenFormatted = this.children
       .map((child) => options.stylize(child, 'number'))
       .join(', ')
@@ -42,7 +49,7 @@ class BarrierNode {
     return `<${options.stylize('BarrierNode', 'special')}` +
            ` isWrapper:${options.stylize(this.isWrapper, 'boolean')},` +
            ` children:[${childrenFormatted}],` +
-           ` nodes:[\n${nodesFormatted}]>`
+           ` nodes:[${inner}]>`
   }
 
   toJSON () {
@@ -95,7 +102,8 @@ class BarrierNode {
     // assert that all input children are already children
     for (const barrierChildNode of barrierChildrenNodes) {
       if (!this.children.includes(barrierChildNode.barrierId)) {
-        throw new Error(`${barrierChildNode.barrierId} is not an child of ${this.barrierId}`)
+        throw new Error(`BarrierNode ${barrierChildNode.barrierId} is not a ` +
+                        `child of BarrierNode ${this.barrierId}`)
       }
     }
 

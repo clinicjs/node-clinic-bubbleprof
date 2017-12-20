@@ -1,0 +1,418 @@
+'use strict'
+
+const test = require('tap').test
+const util = require('util')
+const BarrierNode = require('../analysis/barrier/barrier-node.js')
+const { FakeBarrierNode, FakeAggregateNode } = require('./analysis-util')
+
+test('Barrier Node - barrier.inspect', function (t) {
+  const barrierNodeWrapper = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM',
+      frames: [{
+        functionName: 'functionA',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 10
+      }, {
+        functionName: 'functionB',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 20
+      }]
+    }]
+  })
+
+  const barrierNodeCombined = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4, 6, 7],
+    isWrapper: false,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM_A',
+      frames: [{
+        functionName: 'functionA',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 10
+      }, {
+        functionName: 'functionB',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 20
+      }]
+    }, {
+      aggregateId: 5,
+      parentAggregateId: 1,
+      children: [6, 7],
+      type: 'CUSTOM_B',
+      frames: [{
+        functionName: 'functionA',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 10
+      }, {
+        functionName: 'functionB',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 20
+      }]
+    }]
+  })
+
+  t.strictEqual(
+    util.inspect(barrierNodeWrapper, { depth: null }),
+    '<BarrierNode isWrapper:true, children:[3, 4], nodes:[\n' +
+    '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
+                          ' parentAggregateId:1, sources.length:1,' +
+                          ' children:[3, 4], frames:<Frames [\n' +
+    '                 <Frame functionA fileName.js:10>,\n' +
+    '                 <Frame functionB fileName.js:20>]>>]>'
+  )
+
+  t.strictEqual(
+    util.inspect(barrierNodeWrapper, { depth: 3 }),
+    '<BarrierNode isWrapper:true, children:[3, 4], nodes:[\n' +
+    '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
+                          ' parentAggregateId:1, sources.length:1,' +
+                          ' children:[3, 4], frames:<Frames [\n' +
+    '                 <Frame functionA fileName.js:10>,\n' +
+    '                 <Frame functionB fileName.js:20>]>>]>'
+  )
+
+  t.strictEqual(
+    util.inspect(barrierNodeWrapper, { depth: 0 }),
+    '<BarrierNode isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
+  )
+
+  t.strictEqual(
+    util.inspect(barrierNodeWrapper, { depth: -1 }),
+    '<BarrierNode>'
+  )
+
+  t.strictEqual(
+    util.inspect(barrierNodeCombined, { depth: 3 }),
+    '<BarrierNode isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
+    '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
+                          ' parentAggregateId:1, sources.length:1,' +
+                          ' children:[3, 4], frames:<Frames [\n' +
+    '                 <Frame functionA fileName.js:10>,\n' +
+    '                 <Frame functionB fileName.js:20>]>>,\n' +
+    '        <AggregateNode type:CUSTOM_B, mark:<Mark null>, aggregateId:5,' +
+                          ' parentAggregateId:1, sources.length:1,' +
+                          ' children:[6, 7], frames:<Frames [\n' +
+    '                 <Frame functionA fileName.js:10>,\n' +
+    '                 <Frame functionB fileName.js:20>]>>]>'
+  )
+
+  t.strictEqual(
+    util.inspect(barrierNodeCombined, { depth: 0 }),
+    '<BarrierNode isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
+    '<AggregateNode>, <AggregateNode>' +
+    ']>'
+  )
+
+  t.end()
+})
+
+test('Barrier Node - barrier.toJSON', function (t) {
+  const barrierNode = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM',
+      mark: [null, null, null],
+      frames: []
+    }]
+  })
+
+  t.strictDeepEqual(barrierNode.toJSON(), {
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM',
+      mark: [null, null, null],
+      frames: [],
+      sources: [ barrierNode.nodes[0].sources[0].toJSON({ short: true }) ]
+    }]
+  })
+
+  t.end()
+})
+
+test('Barrier Node - barrier.unwrapNode', function (t) {
+  const barrierNodeWrapper = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      type: 'CUSTOM',
+      frames: []
+    }]
+  })
+
+  const barrierNodeNotWrapper = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [],
+    isWrapper: false,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      type: 'CUSTOM',
+      frames: []
+    }]
+  })
+
+
+  t.strictEqual(
+    barrierNodeWrapper.unwrapNode(),
+    barrierNodeWrapper.nodes[0]
+  )
+  t.throws(
+    () => barrierNodeNotWrapper.unwrapNode(),
+     new Error('trying to unwrap non-wrap barrierNode: 2')
+  )
+  t.end()
+})
+
+
+test('Barrier Node - barrier.makeBarrier', function (t) {
+  const barrierNode = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      type: 'CUSTOM',
+      frames: []
+    }]
+  })
+
+  t.strictEqual(barrierNode.isWrapper, true)
+  barrierNode.makeBarrier()
+  t.strictEqual(barrierNode.isWrapper, false)
+  t.end()
+})
+
+test('Barrier Node - barrier.initializeAsWrapper', function (t) {
+  const barrierNodeRoot = new BarrierNode(1, 0)
+  const barrierNodeNormal = new BarrierNode(2, 1)
+
+  const aggregateNodeRoot = new FakeAggregateNode({
+    aggregateId: 1,
+    parentAggregateId: 0,
+    children: [2],
+    isRoot: true
+  })
+  const aggregateNodeNormal = new FakeAggregateNode({
+    aggregateId: 2,
+    parentAggregateId: 1,
+    children: [3, 4],
+    type: 'CUSTOM',
+    frames: []
+  })
+
+  barrierNodeRoot.initializeAsWrapper(aggregateNodeRoot, [2])
+  t.strictEqual(barrierNodeRoot.isRoot, true)
+  t.strictDeepEqual(barrierNodeRoot.toJSON(), {
+    barrierId: 1,
+    parentBarrierId: 0,
+    children: [2],
+    isWrapper: true,
+    nodes: [ aggregateNodeRoot.toJSON() ]
+  })
+
+  barrierNodeNormal.initializeAsWrapper(aggregateNodeNormal, [3, 4])
+  t.strictEqual(barrierNodeNormal.isRoot, false)
+  t.strictDeepEqual(barrierNodeNormal.toJSON(), {
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4],
+    isWrapper: true,
+    nodes: [ aggregateNodeNormal.toJSON() ]
+  })
+
+
+
+  t.throws(
+    () => barrierNodeNormal.initializeAsWrapper(aggregateNodeNormal, [3, 4]),
+    new Error('can not reinitialize BarrierNode: 2')
+  )
+  t.end()
+})
+
+test('Barrier Node - barrier.initializeAsCombined', function (t) {
+  const barrierNode = new BarrierNode(2, 1)
+  const aggregateNodeA = new FakeAggregateNode({
+    aggregateId: 2,
+    parentAggregateId: 1,
+    children: [3, 4],
+    type: 'CUSTOM_A',
+    frames: []
+  })
+  const aggregateNodeB = new FakeAggregateNode({
+    aggregateId: 5,
+    parentAggregateId: 1,
+    children: [6, 7],
+    type: 'CUSTOM_B',
+    frames: []
+  })
+  barrierNode.initializeAsCombined(
+    [aggregateNodeA, aggregateNodeB],
+    [3, 4, 6, 7]
+  )
+
+  t.strictDeepEqual(barrierNode.toJSON(), {
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4, 6, 7],
+    isWrapper: false,
+    nodes: [ aggregateNodeA.toJSON(), aggregateNodeB.toJSON() ]
+  })
+  t.throws(
+    function () {
+      barrierNode.initializeAsCombined(
+        [aggregateNodeA, aggregateNodeB],
+        [3, 4, 6, 7]
+      )
+    },
+    new Error('can not reinitialize BarrierNode: 2')
+  )
+  t.end()
+})
+
+test('Barrier Node - barrier.combineChildren', function (t) {
+  const barrierNodeParent = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4, 5],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4, 5],
+      type: 'PARENT',
+      frames: []
+    }]
+  })
+
+  const barrierNodeCat1Node1 = new FakeBarrierNode({
+    barrierId: 3,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 3,
+      parentAggregateId: 1,
+      type: 'CATEGORY_1_NODE_1',
+      frames: []
+    }]
+  })
+
+  const barrierNodeCat1Node2 = new FakeBarrierNode({
+    barrierId: 4,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 4,
+      parentAggregateId: 1,
+      type: 'CATEGORY_1_NODE_2',
+      frames: []
+    }]
+  })
+
+  const barrierNodeCat2Node1 = new FakeBarrierNode({
+    barrierId: 5,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 5,
+      parentAggregateId: 1,
+      type: 'CATEGORY_2_NODE_1',
+      frames: []
+    }]
+  })
+
+  const barrierNodeOrphan = new FakeBarrierNode({
+    barrierId: 6,
+    parentBarrierId: 0,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 6,
+      parentAggregateId: 1,
+      type: 'ORPHAN',
+      frames: []
+    }]
+  })
+
+  const barrierNodeCat1Combined = barrierNodeParent.combineChildren(
+    [barrierNodeCat1Node1, barrierNodeCat1Node2]
+  )
+
+  t.strictDeepEqual(barrierNodeParent.toJSON(), {
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [5, 3],
+    isWrapper: true,
+    nodes: [ barrierNodeParent.nodes[0].toJSON() ]
+  })
+
+  t.strictDeepEqual(barrierNodeCat1Combined.toJSON(), {
+    barrierId: 3,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: false,
+    nodes: [
+      barrierNodeCat1Node1.nodes[0].toJSON(),
+      barrierNodeCat1Node2.nodes[0].toJSON()
+    ]
+  })
+
+  t.strictDeepEqual(barrierNodeCat2Node1.toJSON(), {
+    barrierId: 5,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: [ barrierNodeCat2Node1.nodes[0].toJSON() ]
+  })
+
+  t.throws(
+    function () {
+      barrierNodeParent.combineChildren(
+        [barrierNodeOrphan, barrierNodeCat1Node1]
+      )
+    },
+    new Error('BarrierNode 6 is not a child of BarrierNode 2')
+  )
+
+  t.end()
+})

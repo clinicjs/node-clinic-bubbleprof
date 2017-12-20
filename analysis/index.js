@@ -19,7 +19,7 @@ const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.
 const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.js')
 const MarkModuleAggregateNodes = require('./aggregate/mark-module-aggregate-nodes.js')
 
-const CombineAsBarrierNodes = require('./barrier/combine-as-barrier-nodes.js')
+const WrapAsBarrierNodes = require('./barrier/wrap-as-barrier-nodes.js')
 const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.js')
 const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
 
@@ -78,7 +78,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Finite-State-Machine.
   // * Try to express as much of the clustering logic using barriers.
   // NOTE: BFS ordering is maintained in the BarrierNodes too.
-   .pipe(new CombineAsBarrierNodes())
+   .pipe(new WrapAsBarrierNodes())
   // Create barriers where the user callSite is the same
    .pipe(new MakeSynchronousBarrierNodes(systemInfo))
   // Create barriers where one goes from user to external, or from external
