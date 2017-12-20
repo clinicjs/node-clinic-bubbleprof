@@ -2,10 +2,35 @@
 
 const util = require('util')
 const SourceNode = require('../source/source-node.js')
+const Frames = require('../stack-trace/frames.js')
 
 class Mark {
   constructor () {
     this.mark = [null, null, null] /* party, module, name */
+  }
+
+  format () {
+    if (this.mark[0] === null) {
+      return 'null'
+    } else if (this.mark[1] === null) {
+      return `${this.mark[0]}`
+    } else if (this.mark[2] === null) {
+      return `${this.mark[0]}.${this.mark[1]}`
+    } else {
+      return `${this.mark[0]}.${this.mark[1]}.${this.mark[2]}`
+    }
+  }
+
+  [util.inspect.custom] (depth, options) {
+    if (depth < 0) {
+      return `<${options.stylize('Mark', 'special')}>`
+    }
+
+    return `<${options.stylize('Mark', 'special')} ${options.stylize(this.format(), 'string')}>`
+  }
+
+  toJSON () {
+    return this.mark
   }
 
   set (index, value) {
@@ -23,30 +48,6 @@ class Mark {
 
     return this.mark[index]
   }
-
-  format () {
-    if (this.mark[0] === null) {
-      return 'null'
-    } else if (this.mark[1] === null) {
-      return `${this.mark[0]}`
-    } else if (this.mark[2] === null) {
-      return `${this.mark[0]}.${this.mark[1]}`
-    } else {
-      return `${this.mark[0]}.${this.mark[1]}.${this.mark[2]}`
-    }
-  }
-
-  toJSON () {
-    return this.mark
-  }
-
-  [util.inspect.custom] (depth, options) {
-    if (depth < 0) {
-      return `<${options.stylize('Mark', 'special')}>`
-    }
-
-    return `<${options.stylize('Mark', 'special')} ${options.stylize(this.format(), 'string')}>`
-  }
 }
 
 class AggregateNode {
@@ -59,7 +60,7 @@ class AggregateNode {
     this.isRoot = false
     this.mark = new Mark()
     this.type = null
-    this.frames = null
+    this.frames = new Frames([])
   }
 
   [util.inspect.custom] (depth, options) {
