@@ -64,11 +64,11 @@ class BarrierNode {
     }
   }
 
-  updateParentBarrierId(parentBarrierId) {
+  updateParentBarrierId (parentBarrierId) {
     this.parentBarrierId = parentBarrierId
   }
 
-  updateChildren(children) {
+  updateChildren (children) {
     this.children = children.sort((a, b) => a - b)
   }
 

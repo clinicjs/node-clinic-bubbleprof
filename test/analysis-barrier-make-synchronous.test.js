@@ -6,7 +6,7 @@ const startpoint = require('startpoint')
 const MakeSynchronousBarrierNodes = require('../analysis/barrier/make-synchronous-barrier-nodes.js')
 const { FakeBarrierNode, FakeSystemInfo } = require('./analysis-util')
 
-function createTreeStructure() {
+function createTreeStructure () {
   // root - 1
   //   parent - 2
   //      standalone barrier - 3
@@ -196,7 +196,7 @@ function createTreeStructure() {
   ]
 }
 
-function extractState(barrierNode) {
+function extractState (barrierNode) {
   return {
     barrierId: barrierNode.barrierId,
     parentBarrierId: barrierNode.parentBarrierId,
@@ -206,7 +206,7 @@ function extractState(barrierNode) {
   }
 }
 
-function checkTreeStructure(t, barrierNodes) {
+function checkTreeStructure (t, barrierNodes) {
   const [
     barrierNodeRoot,
     barrierNodeParent,
