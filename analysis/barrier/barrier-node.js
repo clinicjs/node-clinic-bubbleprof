@@ -1,5 +1,7 @@
 'use strict'
 
+const util = require('util')
+
 class BarrierNode {
   constructor (barrierId, parentBarrierId) {
     this.barrierId = barrierId
@@ -13,6 +15,34 @@ class BarrierNode {
     this.isWrapper = null
     this.nodes = []
     this.children = []
+  }
+
+  [util.inspect.custom] (depth, options) {
+    const nestedOptions = Object.assign({}, options, {
+      depth: depth === null ? null : depth - 1
+    })
+    if (depth === null) depth = Infinity
+
+    if (depth < 0) {
+      return `<${options.stylize('BarrierNode', 'special')}>`
+    }
+
+    const nodesPadding = ' '.repeat(8)
+    const nodesFormatted = this.nodes
+      .map(function (aggregateNode) {
+        return nodesPadding + util.inspect(aggregateNode, nestedOptions)
+          .split('\n')
+          .join('\n' + nodesPadding)
+      })
+      .join(',\n')
+    const childrenFormatted = this.children
+      .map((child) => options.stylize(child, 'number'))
+      .join(', ')
+
+    return `<${options.stylize('BarrierNode', 'special')}` +
+           ` isWrapper:${options.stylize(this.isWrapper, 'boolean')},` +
+           ` children:[${childrenFormatted}],` +
+           ` nodes:[\n${nodesFormatted}]>`
   }
 
   toJSON () {
