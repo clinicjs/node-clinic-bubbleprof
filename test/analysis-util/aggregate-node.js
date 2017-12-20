@@ -7,6 +7,10 @@ class FakeAggregateNode extends AggregateNode {
   constructor (data) {
     super(data.aggregateId, data.parentAggregateId)
 
+    if (data.isRoot) {
+      this.makeRoot()
+    }
+
     if (data.children) {
       for (const childAggregateId of data.children) {
         this.addChild(childAggregateId)

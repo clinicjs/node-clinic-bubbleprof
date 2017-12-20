@@ -70,7 +70,7 @@ function createTreeStructure (serverWrapType, socketWrapType) {
     destroy: 8
   })
 
-  // WRITEWRAP should have its execution context as its parent
+  // SourceNodes with an uknown parent are kept
   const sourceNodeUnknownParent = new FakeSourceNode({
     asyncId: 7,
     frames: [],

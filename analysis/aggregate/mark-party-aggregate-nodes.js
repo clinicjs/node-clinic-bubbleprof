@@ -12,7 +12,7 @@ class MarkPartyAggregateNodes extends stream.Transform {
   }
 
   _transform (aggregateNode, encoding, done) {
-    if (aggregateNode.mark.get(0) === 'root') {
+    if (aggregateNode.isRoot) {
       return done(null, aggregateNode)
     }
 
@@ -26,13 +26,20 @@ class MarkPartyAggregateNodes extends stream.Transform {
       return done(null, aggregateNode)
     }
 
+    // There are no frames, but the provider was not from nodecore. Assume
+    // it is created by an external module.
+    if (fileFrames.length === 0) {
+      aggregateNode.mark.set(0, 'external') // third party
+      return done(null, aggregateNode)
+    }
+
     // There is a stack, check if it is purely internal to nodecore.
     if (fileFrames.every((frame) => frame.isNodecore(this.systemInfo))) {
       aggregateNode.mark.set(0, 'nodecore') // second party
       return done(null, aggregateNode)
     }
 
-    // Analyse only users frames
+    // If frames are external (includes modecore), but not all are nodecore
     if (fileFrames.every((frame) => frame.isExternal(this.systemInfo))) {
       aggregateNode.mark.set(0, 'external') // third party
       return done(null, aggregateNode)

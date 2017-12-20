@@ -17,24 +17,18 @@ class MarkHttpAggregateNodes extends stream.Transform {
     if (aggregateNode.type === 'TCPSERVERWRAP' ||
         aggregateNode.type === 'PIPESERVERWRAP') {
       this._tcpServerNodeIds.add(aggregateNode.aggregateId)
-      if (aggregateNode.mark.get(0) === 'nodecore') {
-        aggregateNode.mark.set(1, 'net')
-        aggregateNode.mark.set(2, 'server')
-      }
+      aggregateNode.mark.set(1, 'net')
+      aggregateNode.mark.set(2, 'server')
     } else if (this._tcpServerNodeIds.has(aggregateNode.parentAggregateId) &&
                (aggregateNode.type === 'TCPWRAP' ||
                 aggregateNode.type === 'PIPEWRAP')) {
       this._tcpOnconnectionNodeIds.add(aggregateNode.aggregateId)
-      if (aggregateNode.mark.get(0) === 'nodecore') {
-        aggregateNode.mark.set(1, 'net')
-        aggregateNode.mark.set(2, 'onconnection')
-      }
+      aggregateNode.mark.set(1, 'net')
+      aggregateNode.mark.set(2, 'onconnection')
     } else if (this._tcpOnconnectionNodeIds.has(aggregateNode.parentAggregateId) &&
                aggregateNode.type === 'HTTPPARSER') {
-      if (aggregateNode.mark.get(0) === 'nodecore') {
-        aggregateNode.mark.set(1, 'net')
-        aggregateNode.mark.set(2, 'onrequest')
-      }
+      aggregateNode.mark.set(1, 'net')
+      aggregateNode.mark.set(2, 'onrequest')
     }
 
     done(null, aggregateNode)
