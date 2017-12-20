@@ -22,14 +22,14 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
       // don't merge child BarrierNodes that are already merged
       if (!childBarrierNode.isWrapper) continue
 
-      // get the first user call site
+      // get the earliest user call site
       const userFrames = childBarrierNode.unwrapNode()
         .frames.filter((frame) => !frame.isExternal(this._systemInfo))
 
       // don't merge if there are no user frames
       if (userFrames.length === 0) continue
 
-      // make the first call site the split point
+      // make the earliest call site the split point
       const userCallSite = userFrames.last()
       if (!maybeMerges.has(userCallSite.getPosition())) {
         maybeMerges.set(userCallSite.getPosition(), [ childBarrierNode ])
@@ -71,7 +71,9 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
     // check if parentBarrierId have been remapped. If so update
     // the parrentBarrierId
     if (this._barrierIdRewrite.has(barrierNode.parentBarrierId)) {
-      barrierNode.parentBarrierId = this._barrierIdRewrite.get(barrierNode.parentBarrierId)
+      barrierNode.updateParentBarrierId(
+        this._barrierIdRewrite.get(barrierNode.parentBarrierId)
+      )
     }
 
     // check if parent have all children avaliable in storage

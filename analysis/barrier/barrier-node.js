@@ -47,6 +47,8 @@ class BarrierNode {
       .join(', ')
 
     return `<${options.stylize('BarrierNode', 'special')}` +
+           ` barrierId:${options.stylize(this.barrierId, 'number')},` +
+           ` parentBarrierId:${options.stylize(this.parentBarrierId, 'number')},` +
            ` isWrapper:${options.stylize(this.isWrapper, 'boolean')},` +
            ` children:[${childrenFormatted}],` +
            ` nodes:[${inner}]>`
@@ -60,6 +62,14 @@ class BarrierNode {
       children: this.children,
       nodes: this.nodes.map((aggregateNode) => aggregateNode.toJSON())
     }
+  }
+
+  updateParentBarrierId(parentBarrierId) {
+    this.parentBarrierId = parentBarrierId
+  }
+
+  updateChildren(children) {
+    this.children = children.sort((a, b) => a - b)
   }
 
   unwrapNode () {
@@ -84,7 +94,7 @@ class BarrierNode {
     this.isRoot = aggregateNode.isRoot
     this.isWrapper = true
     this.nodes.push(aggregateNode)
-    this.children.push(...children)
+    this.updateChildren(children)
   }
 
   initializeAsCombined (nodes, children) {
@@ -95,7 +105,7 @@ class BarrierNode {
     this.initialized = true
     this.isWrapper = false
     this.nodes.push(...nodes)
-    this.children.push(...children)
+    this.updateChildren(children)
   }
 
   combineChildren (barrierChildrenNodes) {
@@ -118,7 +128,7 @@ class BarrierNode {
     }
 
     // remove children from this barrier
-    this.children = this.children.filter(
+    const newChildrenList = this.children.filter(
       (barrierChildId) => !barrierChildrenIds.includes(barrierChildId)
     )
 
@@ -131,7 +141,8 @@ class BarrierNode {
     )
 
     // add new combined barrier as a child
-    this.children.push(combinedChildBarrierNode.barrierId)
+    newChildrenList.push(combinedChildBarrierNode.barrierId)
+    this.updateChildren(newChildrenList)
 
     // return the new barrier, so it can be pushed to the data stream
     return combinedChildBarrierNode

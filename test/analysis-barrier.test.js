@@ -72,7 +72,8 @@ test('Barrier Node - barrier.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: null }),
-    '<BarrierNode isWrapper:true, children:[3, 4], nodes:[\n' +
+    '<BarrierNode barrierId:2, parentBarrierId:1,' +
+                ' isWrapper:true, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -82,7 +83,8 @@ test('Barrier Node - barrier.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: 3 }),
-    '<BarrierNode isWrapper:true, children:[3, 4], nodes:[\n' +
+    '<BarrierNode barrierId:2, parentBarrierId:1,' +
+                ' isWrapper:true, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -92,7 +94,8 @@ test('Barrier Node - barrier.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: 0 }),
-    '<BarrierNode isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
+    '<BarrierNode barrierId:2, parentBarrierId:1,' +
+                ' isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
   )
 
   t.strictEqual(
@@ -102,7 +105,8 @@ test('Barrier Node - barrier.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(barrierNodeCombined, { depth: 3 }),
-    '<BarrierNode isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
+    '<BarrierNode barrierId:2, parentBarrierId:1,' +
+                ' isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -117,8 +121,9 @@ test('Barrier Node - barrier.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(barrierNodeCombined, { depth: 0 }),
-    '<BarrierNode isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
-    '<AggregateNode>, <AggregateNode>' +
+    '<BarrierNode barrierId:2, parentBarrierId:1,' +
+                ' isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
+             '<AggregateNode>, <AggregateNode>' +
     ']>'
   )
 
@@ -157,6 +162,43 @@ test('Barrier Node - barrier.toJSON', function (t) {
     }]
   })
 
+  t.end()
+})
+
+test('Barrier Node - barrier.updateParentBarrierId', function (t) {
+  const barrierNode = new FakeBarrierNode({
+    barrierId: 3,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 3,
+      parentAggregateId: 2,
+      children: [],
+      type: 'CUSTOM',
+      mark: [null, null, null],
+      frames: []
+    }]
+  })
+  t.strictEqual(barrierNode.parentBarrierId, 2)
+  barrierNode.updateParentBarrierId(1)
+  t.strictEqual(barrierNode.parentBarrierId, 1)
+  t.end()
+})
+
+test('Barrier Node - barrier.updateChildren', function (t) {
+  const barrierNode = new FakeBarrierNode({
+    barrierId: 3,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: []
+  })
+  t.strictDeepEqual(barrierNode.children, [])
+  barrierNode.updateChildren([1, 5, 2])
+  t.strictDeepEqual(barrierNode.children, [1, 2, 5])
+  barrierNode.updateChildren([5, 1])
+  t.strictDeepEqual(barrierNode.children, [1, 5])
   t.end()
 })
 
@@ -377,7 +419,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
   t.strictDeepEqual(barrierNodeParent.toJSON(), {
     barrierId: 2,
     parentBarrierId: 1,
-    children: [5, 3],
+    children: [3, 5],
     isWrapper: true,
     nodes: [ barrierNodeParent.nodes[0].toJSON() ]
   })
