@@ -37,9 +37,9 @@ class BarrierNode {
 
     let inner
     if (depth < 1) {
-       inner = nodesFormatted.join(', ')
+      inner = nodesFormatted.join(', ')
     } else {
-       inner = `\n${padding}` + nodesFormatted.join(`,\n${padding}`)
+      inner = `\n${padding}` + nodesFormatted.join(`,\n${padding}`)
     }
 
     const childrenFormatted = this.children

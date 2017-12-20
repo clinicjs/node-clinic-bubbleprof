@@ -187,7 +187,6 @@ test('Barrier Node - barrier.unwrapNode', function (t) {
     }]
   })
 
-
   t.strictEqual(
     barrierNodeWrapper.unwrapNode(),
     barrierNodeWrapper.nodes[0]
@@ -198,7 +197,6 @@ test('Barrier Node - barrier.unwrapNode', function (t) {
   )
   t.end()
 })
-
 
 test('Barrier Node - barrier.makeBarrier', function (t) {
   const barrierNode = new FakeBarrierNode({
@@ -257,8 +255,6 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
     isWrapper: true,
     nodes: [ aggregateNodeNormal.toJSON() ]
   })
-
-
 
   t.throws(
     () => barrierNodeNormal.initializeAsWrapper(aggregateNodeNormal, [3, 4]),
