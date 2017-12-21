@@ -9,30 +9,23 @@ class CombineAsSourceNodes extends stream.Transform {
       writableObjectMode: true
     })
 
-    this._nodes = new Map()
+    this._storage = new Map()
   }
 
-  _transform (data, encoding, callback) {
-    const { type, info } = data
-    const asyncId = info.asyncId
-
-    // add node if necessary
-    if (!this._nodes.has(asyncId)) {
-      this._nodes.set(asyncId, new SourceNode(asyncId))
+  _transform (rawEvent, encoding, callback) {
+    // create new sourceNode if necessary
+    if (!this._storage.has(rawEvent.asyncId)) {
+      this._storage.set(rawEvent.asyncId, new SourceNode(rawEvent.asyncId))
     }
 
-    // add info to node
-    const node = this._nodes.get(asyncId)
-    if (type === 'stackTrace') {
-      node.addStackTrace(info)
-    } else if (type === 'traceEvent') {
-      node.addTraceEvent(info)
-    }
+    // add rawEvent to sourceNode
+    const sourceNode = this._storage.get(rawEvent.asyncId)
+    sourceNode.addRawEvent(rawEvent)
 
-    // push node if complete and cleanup
-    if (node.isComplete()) {
-      this._nodes.delete(asyncId)
-      this.push(node)
+    // push sourceNode if complete and cleanup
+    if (sourceNode.isComplete()) {
+      this._storage.delete(rawEvent.asyncId)
+      this.push(sourceNode)
     }
 
     callback(null)
@@ -40,9 +33,9 @@ class CombineAsSourceNodes extends stream.Transform {
 
   _flush (callback) {
     // push incomplete nodes and cleanup
-    for (const [asyncId, node] of this._nodes) {
-      this._nodes.delete(asyncId)
-      this.push(node)
+    for (const [asyncId, sourceNode] of this._storage) {
+      this._storage.delete(asyncId)
+      this.push(sourceNode)
     }
 
     callback(null)

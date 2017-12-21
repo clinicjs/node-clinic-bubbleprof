@@ -1,34 +1,6 @@
 'use strict'
 const stream = require('stream')
 
-function describeFrame (frame) {
-  // Get name
-  let name = frame.functionName ? frame.functionName : '<anonymous>'
-  if (frame.isEval) {
-    // no change
-  } else if (frame.isToplevel) {
-    // no change
-  } else if (frame.isConstructor) {
-    name = 'new ' + name
-  } else if (frame.isNative) {
-    name = 'native ' + name
-  } else {
-    name = frame.typeName + '.' + name
-  }
-
-  // Get position
-  let formatted = name
-  if (frame.isEval) {
-    formatted += ' ' + frame.evalOrigin
-  } else {
-    formatted += ' ' + frame.fileName
-    formatted += ':' + (frame.lineNumber > 0 ? frame.lineNumber : '')
-    formatted += (frame.columnNumber > 0 ? ':' + frame.columnNumber : '')
-  }
-
-  return formatted
-}
-
 class AggregateToDprof extends stream.Transform {
   constructor () {
     super({
@@ -47,7 +19,7 @@ class AggregateToDprof extends stream.Transform {
   }
 
   _transform (node, encoding, callback) {
-    if (node.nodeId === 1) {
+    if (node.aggregateId === 1) {
       this._rootChildren = node.children
       return callback(null)
     }
@@ -67,12 +39,12 @@ class AggregateToDprof extends stream.Transform {
                     .sort((a, b) => a - b)
 
     this._nodes.push({
-      name: `${node.type} <${node.mark}>`,
-      uid: node.nodeId,
-      parent: node.parentNodeId,
+      name: `${node.type} <${node.mark.format()}>`,
+      uid: node.aggregateId,
+      parent: node.parentAggregateId,
       stack: node.frames.map(function (frame) {
         return {
-          description: describeFrame(frame),
+          description: frame.format(),
           filename: frame.fileName,
           column: frame.columnNumber,
           line: frame.lineNumber
