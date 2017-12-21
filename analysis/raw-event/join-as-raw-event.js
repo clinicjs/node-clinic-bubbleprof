@@ -1,7 +1,8 @@
 'use strict'
 const stream = require('stream')
+const RawEvent = require('./raw-event.js')
 
-class JoinRawEvents extends stream.Readable {
+class JoinAsRawEvent extends stream.Readable {
   constructor (stackTrace, traceEvent) {
     super({ objectMode: true })
 
@@ -23,10 +24,7 @@ class JoinRawEvents extends stream.Readable {
     this._awaitRead = false
     this._stackTraceAsyncId = Math.max(this._stackTraceAsyncId, data.asyncId)
 
-    this.push({
-      type: 'stackTrace',
-      info: data
-    })
+    this.push(RawEvent.wrapStackTrace(data))
   }
 
   _stackTraceEnd () {
@@ -38,10 +36,7 @@ class JoinRawEvents extends stream.Readable {
     this._awaitRead = false
     this._traceEventAsyncId = Math.max(this._traceEventAsyncId, data.asyncId)
 
-    this.push({
-      type: 'traceEvent',
-      info: data
-    })
+    this.push(RawEvent.wrapTraceEvent(data))
   }
 
   _traceEventEnd () {
@@ -91,4 +86,4 @@ class JoinRawEvents extends stream.Readable {
     }
   }
 }
-module.exports = JoinRawEvents
+module.exports = JoinAsRawEvent

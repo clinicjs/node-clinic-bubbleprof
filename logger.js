@@ -3,12 +3,16 @@
 const fs = require('fs')
 const asyncHooks = require('async_hooks')
 const stackTrace = require('./collect/stack-trace.js')
+const systemInfo = require('./collect/system-info.js')
 const StackTraceEncoder = require('./format/stack-trace-encoder.js')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
 
 // create dirname
 const paths = getLoggingPaths(process.pid)
 fs.mkdirSync(paths['/'])
+
+// write system file
+fs.writeFileSync(paths['/systeminfo'], JSON.stringify(systemInfo(), null, 2))
 
 // setup encoded states file
 const encoder = new StackTraceEncoder()

@@ -11,30 +11,47 @@ module.exports = loaddata
 
 function wrapData (data) {
   return new Map(
-    data.map((node) => [node.nodeId, new AggregateNode(node)])
+    data.map((node) => [node.barrierId, new BarrierNode(node)])
   )
+}
+
+class BarrierNode {
+  constructor (node) {
+    this.isRoot = (node.barrierId === 1)
+
+    this.barrierId = node.barrierId
+    this.parentBarrierId = node.parentBarrierId
+
+    this.isWrapper = node.isWrapper
+    this.children = node.children
+    this.nodes = node.nodes
+      .map((aggregateNode) => new AggregateNode(aggregateNode))
+  }
+}
+
+class Mark {
+  constructor (mark) {
+    this.mark = mark
+  }
+
+  get (index) {
+    return this.mark[index]
+  }
 }
 
 class AggregateNode {
   constructor (node) {
-    this.root = (node.nodeId === 1)
+    this.isRoot = (node.aggregateId === 1)
 
-    this.nodeId = node.nodeId
-    this.parentNodeId = node.parentNodeId
+    this.aggregateId = node.aggregateId
+    this.parentAggregateId = node.parentAggregateId
     this.children = node.children
+
+    this.mark = new Mark(node.mark)
     this.type = node.type
 
-    if (this.root) {
-      this.frames = []
-      this.sources = []
-    } else {
-      this.frames = node.frames.map((frame) => new Frame(frame))
-      this.sources = node.sources.map((source) => new SourceNode(source))
-    }
-  }
-
-  stackTrace () {
-    return this.frames.map((frame) => frame.format()).join('\n')
+    this.frames = node.frames.map((frame) => new Frame(frame))
+    this.sources = node.sources.map((source) => new SourceNode(source))
   }
 }
 
@@ -84,7 +101,10 @@ class Frame {
 class SourceNode {
   constructor (source) {
     this.asyncId = source.asyncId
-    this.triggerAsyncId = source.triggerAsyncId
+    this.parentAsyncId = source.parentAsyncId
+    this.triggerAsyncId = source.parentAsyncId
+    this.executionAsyncId = source.parentAsyncId
+
     this.init = source.init
     this.before = source.before
     this.after = source.after

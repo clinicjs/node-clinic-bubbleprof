@@ -22,8 +22,8 @@ function runServer (name) {
   )
 
   // await result
-  cmd.on('ready', function (stackTraceReader, traceEventReader) {
-    analysis(stackTraceReader, traceEventReader)
+  cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
+    analysis(systemInfoReader, stackTraceReader, traceEventReader)
       .pipe(inspectpoint({ depth: null, colors: true }))
       .pipe(process.stdout)
   })
