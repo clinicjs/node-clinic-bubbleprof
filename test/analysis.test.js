@@ -156,11 +156,11 @@ test('Raw Event - join order', function (t) {
 
   const {
     systemInfo, stackTrace, traceEvent
-  } = createInputStream({ frameUser, frameExternal, frameNodecore})
+  } = createInputStream({ frameUser, frameExternal, frameNodecore })
 
   const {
     barrierNodeRoot, barrierNodeUser, barrierNodeExternal
-  } = createExpectedStructure({frameUser, frameExternal, frameNodecore})
+  } = createExpectedStructure({ frameUser, frameExternal, frameNodecore })
 
   analysis(systemInfo, stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, output) {
