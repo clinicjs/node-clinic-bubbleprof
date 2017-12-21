@@ -10,6 +10,16 @@ test('collect command produces data files with content', function (t) {
   cmd.on('error', t.ifError.bind(t))
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     async.parallel({
+      systemInfo (done) {
+        // collect tracked asyncIds
+        systemInfoReader
+          .pipe(endpoint({ objectMode: true }, function (err, data) {
+            if (err) return done(err)
+
+            done(null, data[0])
+          }))
+      },
+
       stackTrace (done) {
         // collect tracked asyncIds
         stackTraceReader
