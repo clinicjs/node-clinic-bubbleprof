@@ -134,7 +134,7 @@ function createExpectedStructure (frames) {
   return { barrierNodeRoot, barrierNodeUser, barrierNodeExternal }
 }
 
-test('Raw Event - join order', function (t) {
+test('Analysis - pipeline', function (t) {
   const frameUser = {
     functionName: 'userMain',
     isToplevel: true,
@@ -170,6 +170,17 @@ test('Raw Event - join order', function (t) {
       t.strictDeepEqual(output[1].toJSON(), barrierNodeUser.toJSON())
       t.strictDeepEqual(output[2].toJSON(), barrierNodeExternal.toJSON())
 
+      t.end()
+    }))
+})
+test('Analysis - pipeline with SystemInfo error', function (t) {
+  const systemInfo = startpoint(new Error('error'), { objectMode: true })
+  const stackTrace = startpoint([], { objectMode: true })
+  const traceEvent = startpoint([], { objectMode: true })
+
+  analysis(systemInfo, stackTrace, traceEvent)
+    .pipe(endpoint({ objectMode: true }, function (err, output) {
+      t.strictDeepEqual(err, new Error('error'))
       t.end()
     }))
 })
