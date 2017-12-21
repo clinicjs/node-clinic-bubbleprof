@@ -25,20 +25,20 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
 
     // If the node is already a barrier, there is no need to make it a barrier
     // again.
-    let foundInternal = false
-    let foundExternal = false
+    let foundInternalNodes = false
+    let foundExternalNodes = false
     for (const aggregateNode of barrierNode.nodes) {
       // If there are no frames, .every will still return true
       const isExternal = aggregateNode.frames
         .every((frame) => frame.isExternal(this._systemInfo))
 
-      if (isExternal) foundExternal = true
-      else foundInternal = true
+      if (isExternal) foundExternalNodes = true
+      else foundInternalNodes = true
     }
 
-    if (foundInternal && foundExternal) {
+    if (foundInternalNodes && foundExternalNodes) {
       this._placementStorage.set(barrierNode.barrierId, BOTH)
-    } else if (foundExternal) {
+    } else if (foundExternalNodes) {
       this._placementStorage.set(barrierNode.barrierId, EXTERNAL)
     } else {
       this._placementStorage.set(barrierNode.barrierId, USER)
