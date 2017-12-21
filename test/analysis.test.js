@@ -8,7 +8,7 @@ const { FakeSystemInfo, FakeSourceNode } = require('./analysis-util')
 const BarrierNode = require('../analysis/barrier/barrier-node.js')
 const AggregateNode = require('../analysis/aggregate/aggregate-node.js')
 
-function createInputStream(frames) {
+function createInputStream (frames) {
   const { frameUser, frameExternal, frameNodecore } = frames
 
   const stackTraceData = [
@@ -75,7 +75,7 @@ function createInputStream(frames) {
   return { systemInfo, stackTrace, traceEvent }
 }
 
-function createExpectedStructure(frames) {
+function createExpectedStructure (frames) {
   const { frameUser, frameExternal, frameNodecore } = frames
 
   const aggregateNodeRoot = new AggregateNode(1, 0)
