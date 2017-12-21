@@ -6,7 +6,7 @@ const startpoint = require('startpoint')
 const MakeExternalBarrierNode = require('../analysis/barrier/make-external-barrier-nodes.js')
 const { FakeBarrierNode, FakeSystemInfo } = require('./analysis-util')
 
-function createTreeStructure() {
+function createTreeStructure () {
   // root - 1
   //   parent (user) - 2
   //      child (external) - 5
@@ -98,7 +98,7 @@ function createTreeStructure() {
     }]
   })
 
-  function createSubtreeStructure(parentNode) {
+  function createSubtreeStructure (parentNode) {
     const barrierNodeChildUser = new FakeBarrierNode({
       barrierId: parentNode.children[0],
       parentBarrierId: parentNode.barrierId,
