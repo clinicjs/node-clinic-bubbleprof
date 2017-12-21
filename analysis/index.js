@@ -23,6 +23,8 @@ const WrapAsBarrierNodes = require('./barrier/wrap-as-barrier-nodes.js')
 const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.js')
 const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
 
+const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
+
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
   // The data progressing changes data structure a few times. The data
@@ -84,6 +86,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Create barriers where one goes from user to external, or from external
   // to user. External includes nodecore.
    .pipe(new MakeExternalBarrierNodes(systemInfo))
+
+  // ClusterNode:
+    .pipe(new CombineAsClusterNodes())
 
   return result
 }
