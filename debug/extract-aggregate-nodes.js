@@ -9,8 +9,8 @@ class ExtractAggregateNodes extends stream.Transform {
     })
   }
 
-  _transform (node, encoding, callback) {
-    for (const aggregateNode of node.nodes) {
+  _transform (clusterNode, encoding, callback) {
+    for (const aggregateNode of clusterNode.nodes) {
       this.push(aggregateNode)
     }
 
