@@ -23,6 +23,8 @@ const WrapAsBarrierNodes = require('./barrier/wrap-as-barrier-nodes.js')
 const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.js')
 const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
 
+const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
+
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
   // The data progressing changes data structure a few times. The data
@@ -84,6 +86,19 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Create barriers where one goes from user to external, or from external
   // to user. External includes nodecore.
    .pipe(new MakeExternalBarrierNodes(systemInfo))
+
+  // ClusterNode:
+  // BarrierNodes that are not wrappers marks the beginning of a new
+  // ClusterNode. BarrierNodes that are just wrappers for an AggregateNode
+  // are merged into the same ClusterNode as its parent.
+  // * As it is hard to guarantee that certain AggregateNode patterns
+  //   will appear in the same cluster, post manipulation will likely involve
+  //   all cluster nodes. This makes manipulation rather difficult, so try
+  //   and express as much of the clustering logic using BarrierNodes.
+  //   If this is not possible, try and create the BarrierNodes such that
+  //   the AggregateNode pattern is guaranteed to be in the same cluster.
+  // NOTE: BFS ordering is maintained in the ClusterNodes too.
+    .pipe(new CombineAsClusterNodes())
 
   return result
 }

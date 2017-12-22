@@ -11,18 +11,17 @@ module.exports = loaddata
 
 function wrapData (data) {
   return new Map(
-    data.map((node) => [node.barrierId, new BarrierNode(node)])
+    data.map((node) => [node.clusterId, new ClusterNode(node)])
   )
 }
 
-class BarrierNode {
+class ClusterNode {
   constructor (node) {
-    this.isRoot = (node.barrierId === 1)
+    this.isRoot = (node.clusterId === 1)
 
-    this.barrierId = node.barrierId
-    this.parentBarrierId = node.parentBarrierId
+    this.clusterId = node.clusterId
+    this.parentClusterId = node.parentClusterId
 
-    this.isWrapper = node.isWrapper
     this.children = node.children
     this.nodes = node.nodes
       .map((aggregateNode) => new AggregateNode(aggregateNode))
