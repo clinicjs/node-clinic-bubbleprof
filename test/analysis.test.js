@@ -6,6 +6,7 @@ const startpoint = require('startpoint')
 const analysis = require('../analysis/index.js')
 const { FakeSystemInfo, FakeSourceNode } = require('./analysis-util')
 const BarrierNode = require('../analysis/barrier/barrier-node.js')
+const ClusterNode = require('../analysis/cluster/cluster-node.js')
 const AggregateNode = require('../analysis/aggregate/aggregate-node.js')
 
 function createInputStream (frames) {
@@ -131,7 +132,16 @@ function createExpectedStructure (frames) {
   )
   barrierNodeExternal.makeBarrier()
 
-  return { barrierNodeRoot, barrierNodeUser, barrierNodeExternal }
+  const clusterNodeRoot = new ClusterNode(1, 0)
+  clusterNodeRoot.makeRoot()
+  clusterNodeRoot.addChild(2)
+  clusterNodeRoot.insertBarrierNode(barrierNodeRoot)
+  clusterNodeRoot.insertBarrierNode(barrierNodeUser)
+
+  const clusterNodeExternal = new ClusterNode(2, 1)
+  clusterNodeExternal.insertBarrierNode(barrierNodeExternal)
+
+  return { clusterNodeRoot, clusterNodeExternal }
 }
 
 test('Analysis - pipeline', function (t) {
@@ -159,16 +169,15 @@ test('Analysis - pipeline', function (t) {
   } = createInputStream({ frameUser, frameExternal, frameNodecore })
 
   const {
-    barrierNodeRoot, barrierNodeUser, barrierNodeExternal
+    clusterNodeRoot, clusterNodeExternal
   } = createExpectedStructure({ frameUser, frameExternal, frameNodecore })
 
   analysis(systemInfo, stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, output) {
       if (err) return t.ifError(err)
 
-      t.strictDeepEqual(output[0].toJSON(), barrierNodeRoot.toJSON())
-      t.strictDeepEqual(output[1].toJSON(), barrierNodeUser.toJSON())
-      t.strictDeepEqual(output[2].toJSON(), barrierNodeExternal.toJSON())
+      t.strictDeepEqual(output[0].toJSON(), clusterNodeRoot.toJSON())
+      t.strictDeepEqual(output[1].toJSON(), clusterNodeExternal.toJSON())
 
       t.end()
     }))
