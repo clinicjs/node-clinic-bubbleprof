@@ -19,13 +19,13 @@ class CombineAsClusterNodes extends stream.Transform {
     this._clusterNodeStroage.set(clusterNodeRoot.clusterId, clusterNodeRoot)
   }
 
-  _createClusterNode(parentClusterId) {
+  _createClusterNode (parentClusterId) {
     const clusterNode = new ClusterNode(this._clusterId++, parentClusterId)
     this._clusterNodeStroage.set(clusterNode.clusterId, clusterNode)
     return clusterNode
   }
 
-  _insertBarrierNode(clusterNode, barrierNode) {
+  _insertBarrierNode (clusterNode, barrierNode) {
     clusterNode.insertBarrierNode(barrierNode)
     this._clusterIdIndexByBarrierId.set(
       barrierNode.barrierId,
@@ -33,7 +33,7 @@ class CombineAsClusterNodes extends stream.Transform {
     )
   }
 
-  _transform(barrierNode, encoding, callback) {
+  _transform (barrierNode, encoding, callback) {
     if (barrierNode.isRoot) {
       const clusterNode = this._clusterNodeStroage.get(1)
       this._insertBarrierNode(clusterNode, barrierNode)

@@ -57,15 +57,15 @@ class ClusterNode {
     }
   }
 
-  makeRoot() {
+  makeRoot () {
     this.isRoot = true
   }
 
-  addChild(clusterId) {
+  addChild (clusterId) {
     this.children.push(clusterId)
   }
 
-  insertBarrierNode(barrierNode) {
+  insertBarrierNode (barrierNode) {
     this.nodes.push(...barrierNode.nodes)
     this.nodes.sort((a, b) => a.aggregateId - b.aggregateId)
   }

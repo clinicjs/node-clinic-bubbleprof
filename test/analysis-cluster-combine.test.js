@@ -121,7 +121,7 @@ function extractState (clusterNode) {
   }
 }
 
-function checkTreeStructure(t, clusterNodes) {
+function checkTreeStructure (t, clusterNodes) {
   // root - 1
   // . parent (user) - 2
   //   -- child (same origin) - 3
