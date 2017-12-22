@@ -88,6 +88,16 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
    .pipe(new MakeExternalBarrierNodes(systemInfo))
 
   // ClusterNode:
+  // BarrierNodes that are not wrappers marks the beginning of a new
+  // ClusterNode. BarrierNodes that are just wrappers for an AggregateNode
+  // are merged into the same ClusterNode as its parent.
+  // * As it is hard to guarantee that certain AggregateNode patterns
+  //   will appear in the same cluster, post manipulation will likely involve
+  //   all cluster nodes. This makes manipulation rather difficult, so try
+  //   and express as much of the clustering logic using BarrierNodes.
+  //   If this is not possible, try and create the BarrierNodes such that
+  //   the AggregateNode pattern is guaranteed to be in the same cluster.
+  // NOTE: BFS ordering is maintained in the ClusterNodes too.
     .pipe(new CombineAsClusterNodes())
 
   return result
