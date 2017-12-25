@@ -25,19 +25,21 @@ class Frame {
       this.isConstructor = true
     } else if (frame.isNative()) {
       this.isNative = true
-    } else if (frame.isEval()) {
-      this.isEval = true
     } else {
       this.typeName = frame.getTypeName()
     }
 
     // Get source
-    if (this.isEval) {
+    this.fileName = frame.getFileName() || ''
+    this.lineNumber = frame.getLineNumber() || 0
+    this.columnNumber = frame.getColumnNumber() || 0
+
+    // If the fileName is empty, the error could be from an eval. Check
+    // frame.isEval() to be sure. We check the `this.fileName` first to avoid
+    // the overhead from `frame.isEval()`
+    if (this.fileName === '' && frame.isEval()) {
+      this.isEval = true
       this.evalOrigin = frame.getEvalOrigin()
-    } else {
-      this.fileName = frame.getFileName() || ''
-      this.lineNumber = frame.getLineNumber() || 0
-      this.columnNumber = frame.getColumnNumber() || 0
     }
   }
 }
