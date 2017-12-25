@@ -5,6 +5,7 @@ const JSONStream = require('JSONStream')
 
 class TraceEvent {
   constructor (data) {
+    this.error = null
     const isCallback = data.name.slice(-'_CALLBACK'.length) === '_CALLBACK'
 
     if (data.ph === 'b' && !isCallback) {
@@ -16,7 +17,7 @@ class TraceEvent {
     } else if (data.ph === 'e' && isCallback) {
       this.event = 'after'
     } else {
-      throw new Error('invalid phase: ' + data.ph)
+      this.error = new Error('invalid trace-event phase: ' + data.ph)
     }
 
     this.type = isCallback ? data.name.slice(0, -'_CALLBACK'.length) : data.name
@@ -43,7 +44,11 @@ class TraceEventDecoder extends stream.Transform {
     // JSONStream is synchronous so there is no need to think about
     // backpresure
     this.parser = JSONStream.parse('traceEvents.*')
-    this.parser.on('data', (data) => this.push(new TraceEvent(data)))
+    this.parser.on('data', (data) => {
+      const traceEvent = new TraceEvent(data)
+      if (traceEvent.error) this.emit('error', traceEvent.error)
+      else this.push(traceEvent)
+    })
   }
 
   _transform (chunk, encoding, callback) {
