@@ -73,3 +73,22 @@ test('stack trace - constructor', function (t) {
 
   t.end()
 })
+
+test('stack trace - eval', function (t) {
+  const frames = eval('stackTrace()')
+
+  t.strictDeepEqual(Object.assign({}, frames[0]), {
+    functionName: 'eval',
+    typeName: '',
+    isEval: true,
+    isConstructor: false,
+    isNative: false,
+    isToplevel: true,
+    evalOrigin: `eval at <anonymous> (${__filename}:78:18)`,
+    fileName: '',
+    lineNumber: 1,
+    columnNumber: 1
+  })
+
+  t.end()
+})
