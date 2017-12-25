@@ -20,7 +20,7 @@ function produceExample (asyncId) {
   })(asyncId)
 }
 
-test('basic encoder-decoder works', function (t) {
+test('format - stack trace - basic encoder-decoder works', function (t) {
   const encoder = new StackTraceEncoder()
   const decoder = new StackTraceDecoder()
   encoder.pipe(decoder)
@@ -43,7 +43,7 @@ test('basic encoder-decoder works', function (t) {
   encoder.end()
 })
 
-test('partial decoding', function (t) {
+test('format - stack trace - partial decoding', function (t) {
   const encoder = new StackTraceEncoder()
   const decoder = new StackTraceDecoder()
 
