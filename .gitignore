@@ -1,3 +1,7 @@
+# clinic-bubbleprof specific
+*.clinic-bubbleprof
+*.clinic-bubbleprof.html
+
 # Logs
 logs
 *.log
