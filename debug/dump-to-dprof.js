@@ -8,8 +8,7 @@ const analysis = require('../analysis/index.js')
 const AggregateNodesToDprof = require('./aggregate-nodes-to-dprof.js')
 
 // Load data
-const pid = path.basename(process.argv[2], '.clinic-bubbleprof')
-const paths = getLoggingPaths(pid)
+const paths = getLoggingPaths({ path: process.argv[2] })
 const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
   .pipe(new StackTraceDecoder())
 const traceEventReader = fs.createReadStream(paths['/traceevent'])
