@@ -8,7 +8,7 @@ const StackTraceEncoder = require('./format/stack-trace-encoder.js')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
 
 // create dirname
-const paths = getLoggingPaths(process.pid)
+const paths = getLoggingPaths({ identifier: process.pid })
 fs.mkdirSync(paths['/'])
 
 // write system file

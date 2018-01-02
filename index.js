@@ -45,7 +45,7 @@ class ClinicBubbleprof {
       }
 
       // get filenames of logfiles
-      const paths = getLoggingPaths(proc.pid)
+      const paths = getLoggingPaths({ identifier: proc.pid })
 
       // create directory and move files to that directory
       fs.rename(
@@ -64,7 +64,7 @@ class ClinicBubbleprof {
     const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
 
     // Load data
-    const paths = getLoggingPaths(dataDirname.split('.')[0])
+    const paths = getLoggingPaths({ path: dataDirname })
     const systemInfoReader = fs.createReadStream(paths['/systeminfo'])
       .pipe(new SystemInfoDecoder())
     const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
