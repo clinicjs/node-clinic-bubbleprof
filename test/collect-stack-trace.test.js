@@ -75,7 +75,7 @@ test('stack trace - constructor', function (t) {
 })
 
 test('stack trace - eval', function (t) {
-  const frames = eval('stackTrace()')
+  const frames = eval('stackTrace()') // eslint-disable-line no-eval
 
   t.strictDeepEqual(Object.assign({}, frames[0]), {
     functionName: 'eval',
