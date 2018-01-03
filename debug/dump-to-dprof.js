@@ -1,6 +1,5 @@
 'use strict'
 const fs = require('fs')
-const path = require('path')
 const getLoggingPaths = require('../collect/get-logging-paths.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
 const TraceEventDecoder = require('../format/trace-event-decoder.js')
