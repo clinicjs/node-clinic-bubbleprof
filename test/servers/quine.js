@@ -16,4 +16,4 @@ const server = http.createServer(function request (req, res) {
   })
 })
 
-server.listen(path.resolve(__dirname, '..', '.server.sock'))
+server.listen(path.resolve(__dirname, '..', '.test-server.sock'))
