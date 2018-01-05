@@ -9,7 +9,7 @@ const analysis = require('../analysis/index.js')
 
 function runServer (name, callback) {
   const serverPath = path.resolve(__dirname, 'servers', name + '.js')
-  const cmd = new CollectAndRead(serverPath)
+  const cmd = new CollectAndRead({}, serverPath)
 
   // make two requests
   async.map(
