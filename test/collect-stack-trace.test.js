@@ -100,7 +100,9 @@ test('stack trace - native', function (t) {
   let frames = [];
   // sort is a V8 builtin, a stack trace from within sort thus have a
   // native call-site.
-  [1, 2].sort((a, b) => frames = stackTrace())
+  [1, 2].sort(function (a, b) {
+    frames = stackTrace()
+  })
 
   t.strictDeepEqual(Object.assign({}, frames[1]), {
     functionName: 'sort',
