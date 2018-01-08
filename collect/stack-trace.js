@@ -31,8 +31,12 @@ class Frame {
 
     // Get source
     this.fileName = frame.getFileName() || ''
-    this.lineNumber = frame.getLineNumber() || 0
-    this.columnNumber = frame.getColumnNumber() || 0
+    this.lineNumber = (
+      frame.getLineNumber() || /* istanbul ignore next: no known case */ 0
+    )
+    this.columnNumber = (
+      frame.getColumnNumber() || /* istanbul ignore next: no known case */ 0
+    )
 
     // If the fileName is empty, the error could be from an eval. Check
     // frame.isEval() to be sure. We check the `this.fileName` first to avoid
@@ -44,7 +48,7 @@ class Frame {
   }
 }
 
-function stackTrace (minSkip) {
+function stackTrace (skip) {
   // overwrite stack trace limit and formatting
   const restoreFormat = Error.prepareStackTrace
   const restoreLimit = Error.stackTraceLimit
@@ -64,12 +68,9 @@ function stackTrace (minSkip) {
   const frames = structuredStackTrace.map((frame) => new Frame(frame))
 
   // Don't include async_hooks frames
-  let skip = minSkip
-  for (; skip < frames.length; skip++) {
-    if (frames[skip].fileName !== 'async_hooks.js') {
-      break
-    }
-  }
-  return frames.slice(skip)
+  return frames.slice(skip).filter(function (frame) {
+    return (frame.fileName !== 'async_hooks.js' &&
+            frame.fileName !== 'internal/async_hooks.js')
+  })
 }
 module.exports = stackTrace

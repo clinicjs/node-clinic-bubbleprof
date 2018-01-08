@@ -1,7 +1,12 @@
 'use strict'
 
 const test = require('tap').test
+const bindings = require('bindings')
 const stackTrace = require('../collect/stack-trace.js')
+const { createHook } = require('async_hooks')
+const { nativeCall } = bindings('native_call')
+
+const HEADER_OFFSET = 9
 
 test('stack trace - function scope', function (t) {
   let frames = null;
@@ -18,7 +23,7 @@ test('stack trace - function scope', function (t) {
     isToplevel: true,
     evalOrigin: '',
     fileName: __filename,
-    lineNumber: 9,
+    lineNumber: 5 + HEADER_OFFSET,
     columnNumber: 14
   })
 
@@ -43,7 +48,7 @@ test('stack trace - method', function (t) {
     isToplevel: false,
     evalOrigin: '',
     fileName: __filename,
-    lineNumber: 31,
+    lineNumber: 27 + HEADER_OFFSET,
     columnNumber: 14
   })
 
@@ -67,7 +72,7 @@ test('stack trace - constructor', function (t) {
     isToplevel: false,
     evalOrigin: '',
     fileName: __filename,
-    lineNumber: 56,
+    lineNumber: 52 + HEADER_OFFSET,
     columnNumber: 21
   })
 
@@ -84,11 +89,53 @@ test('stack trace - eval', function (t) {
     isConstructor: false,
     isNative: false,
     isToplevel: true,
-    evalOrigin: `eval at <anonymous> (${__filename}:78:18)`,
+    evalOrigin: `eval at <anonymous> (${__filename}:${74 + HEADER_OFFSET}:18)`,
     fileName: '',
     lineNumber: 1,
     columnNumber: 1
   })
 
   t.end()
+})
+
+test('stack trace - native', function (t) {
+  let frames = [];
+  // sort is a V8 builtin, a stack trace from within sort thus have a
+  // native call-site.
+  [1, 2].sort((a, b) => frames = stackTrace())
+
+  t.strictDeepEqual(Object.assign({}, frames[1]), {
+    functionName: 'sort',
+    typeName: '',
+    isEval: false,
+    isConstructor: false,
+    isNative: true,
+    isToplevel: false,
+    evalOrigin: '',
+    fileName: 'native array.js',
+    lineNumber: 1,
+    columnNumber: 1
+  })
+
+  t.end()
+})
+
+test('stack trace - filter async_hooks', function (t) {
+  let frames = []
+  const hooks = createHook({
+    init () {
+      frames = stackTrace()
+    }
+  })
+
+  hooks.enable()
+  process.nextTick(function () {
+    hooks.disable()
+
+    t.ok(frames.every(function (frame) {
+      return (frame.fileName !== 'async_hooks.js' &&
+              frame.fileName !== 'internal/async_hooks.js')
+    }))
+    t.end()
+  })
 })
