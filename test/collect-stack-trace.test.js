@@ -1,12 +1,10 @@
 'use strict'
 
 const test = require('tap').test
-const bindings = require('bindings')
 const stackTrace = require('../collect/stack-trace.js')
 const { createHook } = require('async_hooks')
-const { nativeCall } = bindings('native_call')
 
-const HEADER_OFFSET = 9
+const HEADER_OFFSET = 7
 
 test('stack trace - function scope', function (t) {
   let frames = null;
