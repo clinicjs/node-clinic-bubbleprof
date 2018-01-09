@@ -69,13 +69,17 @@ test('Stack Trace - frame.isNodecore', function (t) {
     {
       isEval: true,
       evalOrigin: '/node_modules/external/index.js'
+    },
+    {
+      isNative: true,
+      fileName: 'native array.js'
     }
   ])
   const root = new FakeSystemInfo('/')
 
   t.strictDeepEqual(
     frames.map((frame) => frame.isNodecore(root)),
-    [ true, true, false, false ]
+    [ true, true, false, false, false ]
   )
   t.end()
 })
@@ -96,6 +100,10 @@ test('Stack Trace - frame.isExternal', function (t) {
       evalOrigin: '/node_modules/external/index.js'
     },
     {
+      isNative: true,
+      fileName: 'native array.js'
+    },
+    {
       fileName: '/user/internal/index.js'
     },
     {
@@ -108,12 +116,12 @@ test('Stack Trace - frame.isExternal', function (t) {
 
   t.strictDeepEqual(
     frames.map((frame) => frame.isExternal(root)),
-    [ true, true, true, true, false, true ]
+    [ true, true, true, true, true, false, true ]
   )
 
   t.strictDeepEqual(
     frames.map((frame) => frame.isExternal(modules)),
-    [ true, true, true, true, false, false ]
+    [ true, true, true, true, true, false, false ]
   )
 
   t.end()

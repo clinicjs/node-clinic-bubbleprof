@@ -34,8 +34,8 @@ class Frame {
 
   isNodecore (systemInfo) {
     const fileName = this.fileName
-    // evals are not in nodecore
-    if (this.isEval) return false
+    // evals and natives are not in nodecore
+    if (this.isEval || this.isNative) return false
 
     if (fileName.startsWith(`internal${systemInfo.pathSeperator}`)) {
       return true
@@ -64,6 +64,8 @@ class Frame {
     // Properly evals are from an external module.
     // NOTE: Consider parseing evalOrigin
     if (this.isEval) return true
+    // Properly natives are from external modules too.
+    if (this.isNative) return true
 
     // If the remaining path contains node_modules it is external
     return this.getFileNameWithoutModuleDirectory(systemInfo)
