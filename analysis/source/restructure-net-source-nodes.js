@@ -16,7 +16,7 @@ class RestructureNetSourceNodes extends stream.Transform {
     this._connectionAsyncIds = new Set()
 
     // Save source nodes with unobserved triggerAsyncId for later
-    this._stroageByTriggerAsyncId = new Map()
+    this._storageByTriggerAsyncId = new Map()
   }
 
   _processNode (sourceNode) {
@@ -56,19 +56,19 @@ class RestructureNetSourceNodes extends stream.Transform {
 
       // Add children of the newly updated node to the queue and delete them
       // from storage.
-      if (this._stroageByTriggerAsyncId.has(sourceNode.asyncId)) {
-        const children = this._stroageByTriggerAsyncId.get(sourceNode.asyncId)
-        this._stroageByTriggerAsyncId.delete(sourceNode.asyncId)
+      if (this._storageByTriggerAsyncId.has(sourceNode.asyncId)) {
+        const children = this._storageByTriggerAsyncId.get(sourceNode.asyncId)
+        this._storageByTriggerAsyncId.delete(sourceNode.asyncId)
         queue.push(...children)
       }
     }
   }
 
   _saveNode (sourceNode) {
-    if (!this._stroageByTriggerAsyncId.has(sourceNode.triggerAsyncId)) {
-      this._stroageByTriggerAsyncId.set(sourceNode.triggerAsyncId, [])
+    if (!this._storageByTriggerAsyncId.has(sourceNode.triggerAsyncId)) {
+      this._storageByTriggerAsyncId.set(sourceNode.triggerAsyncId, [])
     }
-    this._stroageByTriggerAsyncId.get(sourceNode.triggerAsyncId).push(sourceNode)
+    this._storageByTriggerAsyncId.get(sourceNode.triggerAsyncId).push(sourceNode)
   }
 
   _transform (sourceNode, encoding, callback) {
@@ -84,7 +84,7 @@ class RestructureNetSourceNodes extends stream.Transform {
   }
 
   _flush (callback) {
-    for (const sourceNodes of this._stroageByTriggerAsyncId.values()) {
+    for (const sourceNodes of this._storageByTriggerAsyncId.values()) {
       for (const sourceNode of sourceNodes) {
         this.push(sourceNode)
       }
