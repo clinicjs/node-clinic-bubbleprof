@@ -2,6 +2,7 @@
 
 const test = require('tap').test
 const util = require('util')
+const crypto = require('crypto')
 const StackTrace = require('../analysis/stack-trace/stack-trace.js')
 const TraceEvent = require('../analysis/trace-event/trace-event.js')
 const RawEvent = require('../analysis/raw-event/raw-event.js')
@@ -27,6 +28,12 @@ test('Source Node - sourceNode.inspect', function (t) {
     util.inspect(sourceNode),
     '<SourceNode type:CUSTOM, asyncId:2, parentAsyncId:1,' +
     ' triggerAsyncId:1, executionAsyncId:0, identifier:null>'
+  )
+  sourceNode.setIdentifier('string will be the id')
+  t.strictEqual(
+    util.inspect(sourceNode),
+    '<SourceNode type:CUSTOM, asyncId:2, parentAsyncId:1,' +
+    ' triggerAsyncId:1, executionAsyncId:0, identifier:66e4917ca59cec24>'
   )
   t.end()
 })
@@ -128,11 +135,25 @@ test('Source Node - sourceNode.makeRoot', function (t) {
 
 test('Source Node - sourceNode.setIdentifier', function (t) {
   const sourceNode = new FakeSourceNode({ asyncId: 2 })
-  sourceNode.setIdentifier('string will be hashed')
+
+  t.strictEqual(
+    sourceNode.hash(),
+    null
+  )
+  t.strictEqual(
+    sourceNode.toJSON().identifier,
+    null
+  )
+
+  sourceNode.setIdentifier('string will be the id')
 
   t.strictEqual(
     sourceNode.toJSON().identifier,
-    '6acf67129f52ba03567d4189016f4c2b'
+    'string will be the id'
+  )
+  t.strictEqual(
+    sourceNode.hash(),
+    crypto.createHash('sha256').update('string will be the id').digest('hex')
   )
 
   t.end()

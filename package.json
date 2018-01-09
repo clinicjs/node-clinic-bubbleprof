@@ -26,7 +26,6 @@
     "async": "^2.5.0",
     "browserify": "^14.5.0",
     "endpoint": "^0.4.5",
-    "murmurhash-native": "^3.2.1",
     "protocol-buffers": "^3.2.1",
     "pump": "^1.0.2",
     "stream-template": "0.0.4",

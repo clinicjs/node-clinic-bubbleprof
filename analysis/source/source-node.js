@@ -1,7 +1,7 @@
 'use strict'
 
 const util = require('util')
-const { murmurHash128 } = require('murmurhash-native')
+const crypto = require('crypto')
 const Frames = require('../stack-trace/frames.js')
 const StackTrace = require('../stack-trace/stack-trace.js')
 const TraceEvent = require('../trace-event/trace-event.js')
@@ -37,7 +37,11 @@ class SourceNode {
            ` parentAsyncId:${options.stylize(this.parentAsyncId, 'number')},` +
            ` triggerAsyncId:${options.stylize(this.triggerAsyncId, 'number')},` +
            ` executionAsyncId:${options.stylize(this.executionAsyncId, 'number')},` +
-           ` identifier:${options.stylize(this.identifier, 'special')}>`
+           ` identifier:${options.stylize(this.identifier && this.hash().slice(0, 16), 'special')}>`
+  }
+
+  hash () {
+    return this.identifier && crypto.createHash('sha256').update(this.identifier).digest('hex')
   }
 
   toJSON ({short} = {short: false}) {
@@ -67,7 +71,7 @@ class SourceNode {
   }
 
   setIdentifier (identifier) {
-    this.identifier = murmurHash128(identifier)
+    this.identifier = identifier
   }
 
   setParentAsyncId (asyncId) {
