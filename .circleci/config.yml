@@ -48,6 +48,13 @@ jobs:
           at: ~/
       - run: npm run ci-test
 
+  coverage:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: npm run ci-cov
+
 workflows:
   version: 2
   build-lint-test:
@@ -59,3 +66,7 @@ workflows:
       - test:
           requires:
             - build
+      - coverage:
+          requires:
+            - lint
+            - test

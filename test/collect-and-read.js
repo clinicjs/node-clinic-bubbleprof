@@ -4,6 +4,7 @@ const fs = require('fs')
 const http = require('http')
 const path = require('path')
 const async = require('async')
+const rimraf = require('rimraf')
 const events = require('events')
 const endpoint = require('endpoint')
 const getLoggingPaths = require('../collect/get-logging-paths.js')
@@ -28,7 +29,7 @@ function waitForFile (filepath, timeout, callback) {
 }
 
 class CollectAndRead extends events.EventEmitter {
-  constructor (...args) {
+  constructor (options, ...args) {
     super()
     const self = this
     const tool = new ClinicBubbleprof()
@@ -37,18 +38,18 @@ class CollectAndRead extends events.EventEmitter {
       if (err && err.code !== 'ENOENT') return self.emit('error', err)
 
       tool.collect([process.execPath, ...args], function (err, dirname) {
+        self.files = getLoggingPaths({ path: dirname })
+
         if (err) return self.emit('error', err)
 
-        const files = getLoggingPaths({ path: dirname })
-
-        const systeminfo = fs.createReadStream(files['/systeminfo'])
+        const systeminfo = fs.createReadStream(self.files['/systeminfo'])
           .pipe(new SystemInfoDecoder())
-        const stacktrace = fs.createReadStream(files['/stacktrace'])
+        const stacktrace = fs.createReadStream(self.files['/stacktrace'])
           .pipe(new StackTraceDecoder())
-        const traceevent = fs.createReadStream(files['/traceevent'])
+        const traceevent = fs.createReadStream(self.files['/traceevent'])
           .pipe(new TraceEventDecoder())
 
-        self._setupAutoCleanup(files, systeminfo, stacktrace, traceevent)
+        self._setupAutoCleanup(systeminfo, stacktrace, traceevent)
         self.emit('ready', systeminfo, stacktrace, traceevent)
       })
     })
@@ -66,13 +67,17 @@ class CollectAndRead extends events.EventEmitter {
     })
   }
 
-  _setupAutoCleanup (files, systeminfo, stacktrace, traceevent) {
+  cleanup () {
+    rimraf.sync(this.files['/'])
+  }
+
+  _setupAutoCleanup (systeminfo, stacktrace, traceevent) {
     const self = this
 
     async.parallel({
       systemInfo (done) {
         systeminfo.once('end', function () {
-          fs.unlink(files['/systeminfo'], function (err) {
+          fs.unlink(self.files['/systeminfo'], function (err) {
             if (err) return done(err)
             done(null)
           })
@@ -80,7 +85,7 @@ class CollectAndRead extends events.EventEmitter {
       },
       stackTraces (done) {
         stacktrace.once('end', function () {
-          fs.unlink(files['/stacktrace'], function (err) {
+          fs.unlink(self.files['/stacktrace'], function (err) {
             if (err) return done(err)
             done(null)
           })
@@ -88,7 +93,7 @@ class CollectAndRead extends events.EventEmitter {
       },
       traveEvents (done) {
         traceevent.once('end', function () {
-          fs.unlink(files['/traceevent'], function (err) {
+          fs.unlink(self.files['/traceevent'], function (err) {
             if (err) return done(err)
             done(null)
           })
@@ -97,7 +102,7 @@ class CollectAndRead extends events.EventEmitter {
     }, function (err, output) {
       if (err) return self.emit('error', err)
 
-      fs.rmdir(files['/'], function (err) {
+      fs.rmdir(self.files['/'], function (err) {
         if (err) return self.emit('error', err)
       })
     })

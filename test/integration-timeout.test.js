@@ -6,7 +6,7 @@ const CollectAndRead = require('./collect-and-read.js')
 const analysis = require('../analysis/index.js')
 
 test('collect-analysis pipeline', function (t) {
-  const cmd = new CollectAndRead('-e', 'setTimeout(() => {}, 200)')
+  const cmd = new CollectAndRead({}, '-e', 'setTimeout(() => {}, 200)')
   cmd.on('error', t.ifError.bind(t))
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     analysis(systemInfoReader, stackTraceReader, traceEventReader)
