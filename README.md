@@ -4,6 +4,8 @@
 
 Programmable interface to [clinic][12] bubbleprof
 
+![banner](logo.png)
+
 ## License
 [MIT](https://tldrlegal.com/license/mit-license)
 
