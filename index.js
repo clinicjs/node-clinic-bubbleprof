@@ -68,6 +68,7 @@ class ClinicBubbleprof {
     const fakeDataPath = path.join(__dirname, 'visualizer', 'data.json')
     const stylePath = path.join(__dirname, 'visualizer', 'style.css')
     const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
+    const nearFormLogoPath = path.join(__dirname, 'visualizer', 'nearform-logo.svg')
 
     // Load data
     const paths = getLoggingPaths({ path: dataDirname })
@@ -85,6 +86,9 @@ class ClinicBubbleprof {
       seperator: ',\n',
       stringifier: JSON.stringify
     }))
+
+    // add logos
+    const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
 
     // create script-file stream
     const b = browserify({
@@ -108,7 +112,7 @@ class ClinicBubbleprof {
       <meta charset="utf8">
       <title>Clinic Bubbleprof</title>
       <style>${styleFile}</style>
-      <div id="banner"></div>
+      <div id="banner">${nearFormLogoFile}</div>
       <script>${scriptFile}</script>
     `
 
