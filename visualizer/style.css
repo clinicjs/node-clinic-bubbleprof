@@ -45,6 +45,13 @@ html #banner {
   position: relative;
 }
 
+#banner svg:last-child {
+  position: absolute;
+  height: 40px;
+  right: 28px;
+  top: 13px;
+}
+
 #banner::after {
   content: 'BubbleProf';
   font-size: 14pt;
