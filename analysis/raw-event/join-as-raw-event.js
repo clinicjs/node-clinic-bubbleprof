@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 const RawEvent = require('./raw-event.js')
 
 class JoinAsRawEvent extends stream.Readable {

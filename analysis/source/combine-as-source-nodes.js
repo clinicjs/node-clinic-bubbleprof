@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 const SourceNode = require('./source-node.js')
 
 class CombineAsSourceNodes extends stream.Transform {

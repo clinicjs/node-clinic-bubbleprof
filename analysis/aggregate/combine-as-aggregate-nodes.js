@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 const AggregateNode = require('./aggregate-node.js')
 
 class CombineAsAggregateNodes extends stream.Transform {

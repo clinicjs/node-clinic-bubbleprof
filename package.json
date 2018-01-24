@@ -28,7 +28,8 @@
     "endpoint": "^0.4.5",
     "protocol-buffers": "^3.2.1",
     "pump": "^1.0.2",
-    "stream-template": "0.0.4",
+    "pumpify": "^1.4.0",
+    "stream-template": "0.0.6",
     "streaming-json-stringify": "^3.1.0"
   }
 }

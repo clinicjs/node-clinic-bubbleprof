@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 const TraceEvent = require('./trace-event.js')
 
 class WrapAsTraceEvent extends stream.Transform {

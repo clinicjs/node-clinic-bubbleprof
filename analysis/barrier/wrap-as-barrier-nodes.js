@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 const BarrierNode = require('./barrier-node.js')
 
 class WrapAsBarrierNodes extends stream.Transform {
