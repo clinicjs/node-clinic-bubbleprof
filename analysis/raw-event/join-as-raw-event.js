@@ -15,7 +15,6 @@ class JoinAsRawEvent extends stream.Readable {
     this._traceEvent = traceEvent
     this._traceEventAsyncId = 0
     this._traceEventEnded = false
-
     this._stackTrace.once('end', () => this._stackTraceEnd())
     this._traceEvent.once('end', () => this._traceEventEnd())
   }
