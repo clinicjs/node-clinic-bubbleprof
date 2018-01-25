@@ -4,6 +4,8 @@
 
 Programmable interface to [clinic][12] bubbleprof
 
+![banner](logo.png)
+
 ## License
 [GPL 3.0](LICENSE)
 
