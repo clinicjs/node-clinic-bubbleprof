@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 const pump = require('pump')
 const { spawn } = require('child_process')
@@ -38,6 +39,11 @@ class ClinicBubbleprof {
     process.once('SIGINT', () => proc.kill('SIGINT'))
 
     proc.once('exit', function (code, signal) {
+      // Windows exit code STATUS_CONTROL_C_EXIT 0xC000013A returns 3221225786
+      // if not caught. See https://msdn.microsoft.com/en-us/library/cc704588.aspx
+      /* istanbul ignore next: windows hack */
+      if (code === 3221225786 && os.platform() === 'win32') signal = 'SIGINT'
+
       // the process did not exit normally
       if (code !== 0 && signal !== 'SIGINT') {
         if (code !== null) {
