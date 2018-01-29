@@ -24,6 +24,7 @@ const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.
 const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
 
 const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
+const TagClusterNodes = require('./cluster/tag-cluster-nodes.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
@@ -99,6 +100,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   //   the AggregateNode pattern is guaranteed to be in the same cluster.
   // NOTE: BFS ordering is maintained in the ClusterNodes too.
     .pipe(new CombineAsClusterNodes())
+  // Tag each cluster node based on what it contains. Fx, http, tcp,
+// unix-socket, server etc
+    .pipe(new TagClusterNodes())
 
   return result
 }

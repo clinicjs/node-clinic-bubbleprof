@@ -10,6 +10,7 @@ class ClusterNode {
     this.isRoot = false
     this.nodes = []
     this.children = []
+    this.tags = []
   }
 
   [util.inspect.custom] (depth, options) {
@@ -37,6 +38,10 @@ class ClusterNode {
       inner = `\n${padding}` + nodesFormatted.join(`,\n${padding}`)
     }
 
+    const tagsFormatted = this.tags
+      .map(tag => options.stylize(tag, 'string'))
+      .join(', ')
+
     const childrenFormatted = this.children
       .map((child) => options.stylize(child, 'number'))
       .join(', ')
@@ -44,6 +49,7 @@ class ClusterNode {
     return `<${options.stylize('ClusterNode', 'special')}` +
            ` clusterId:${options.stylize(this.clusterId, 'number')},` +
            ` parentClusterId:${options.stylize(this.parentClusterId, 'number')},` +
+           ` tags:[${tagsFormatted}],` +
            ` children:[${childrenFormatted}],` +
            ` nodes:[${inner}]>`
   }
