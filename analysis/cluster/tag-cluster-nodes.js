@@ -24,6 +24,7 @@ class TagClusterNodes extends stream.Transform {
       return cb()
     }
 
+    const self = this
     const types = nodes.map(node => node.type)
     const parent = this._clusters.get(data.parentClusterId)
 
@@ -34,26 +35,60 @@ class TagClusterNodes extends stream.Transform {
       data.tags.push('server', 'tcp')
     }
     if (types.includes('HTTPPARSER')) {
-      data.tags.push('http')
-      // TODO: maybe needs to propagate to ancestors also?
-      if (parent.tags.includes('server') || parent.tags.includes('connection')) {
-        parent.tags.push('http')
-      }
+      const serverAncestor = ancestor('server')
+      const connectionAncestor = ancestor('connection')
+      if (serverAncestor) serverAncestor.tags.unshift('http')
+      if (connectionAncestor) connectionAncestor.tags.unshift('http')
+      data.tags.push('http', 'connection')
+    }
+    if (types.includes('SHUTDOWNWRAP')) {
+      inherits('http')
+      data.tags.push('connection')
+      data.tags.push('end')
     }
     if (types.includes('PIPEWRAP')) {
-      data.tags.push('connection', 'unix-socket')
-      if (parent.tags.includes('http')) {
-        data.tags.push('http')
-      }
+      inherits('http')
+      data.tags.push('connection', 'create', 'unix-socket')
     }
     if (types.includes('TCPCONNECTWRAP')) {
-      data.tags.push('connection', 'tcp')
-      if (parent.tags.includes('http')) {
-        data.tags.push('http')
+      inherits('http')
+      data.tags.push('connection', 'create', 'tcp')
+    }
+    if (types.includes('PIPECONNECTWRAP')) {
+      inherits('http')
+      data.tags.push('connection', 'create', 'unix-socket')
+    }
+    if (types.includes('FSREQWRAP')) {
+      data.tags.push('fs')
+    }
+    if (types.includes('WRITEWRAP')) {
+      const connectionAncestor = ancestor('connection')
+      if (connectionAncestor) {
+        if (connectionAncestor.tags.includes('http')) data.tags.push('http')
+        data.tags.push('connection')
       }
+      data.tags.push('write')
     }
 
     cb()
+
+    function ancestor (type) {
+      var parent = self._clusters.get(data.parentClusterId)
+
+      while (parent) {
+        if (parent.tags.includes(type)) {
+          return parent
+        }
+        parent = self._clusters.get(parent.parentClusterId)
+      }
+
+      return null
+    }
+
+    function inherits (type) {
+      if (data.tags.includes(type)) return
+      if (ancestor(type)) data.tags.push(type)
+    }
   }
 
   _flush (cb) {
@@ -67,5 +102,8 @@ class TagClusterNodes extends stream.Transform {
 module.exports = TagClusterNodes
 
 function interestingNode (node) {
-  return node.type && node.type !== 'Timeout' && node.type !== 'TickObject'
+  return node.type &&
+    node.type !== 'Timeout' &&
+    node.type !== 'TickObject' &&
+    node.type !== 'Immediate'
 }
