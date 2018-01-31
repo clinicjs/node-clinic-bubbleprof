@@ -63,6 +63,7 @@ class ClinicBubbleprof {
       fs.rename(
         'node_trace.1.log', paths['/traceevent'],
         function (err) {
+          /* istanbul ignore if: the node_trace file should always exists */
           if (err) return callback(err, paths['/'])
           callback(null, paths['/'])
         }

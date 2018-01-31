@@ -56,3 +56,10 @@ process.once('beforeexit', function () {
   hook.disable()
   encoder.end()
 })
+
+// NOTE: Workaround until https://github.com/nodejs/node/issues/18476 is solved
+skipThis = true
+process.on('SIGINT', function () {
+  if (process.listenerCount('SIGINT') === 1) process.exit(0)
+})
+skipThis = false
