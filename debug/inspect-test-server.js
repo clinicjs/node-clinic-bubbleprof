@@ -6,6 +6,8 @@ const CollectAndRead = require('../test/collect-and-read.js')
 const inspectpoint = require('inspectpoint')
 const analysis = require('../analysis/index.js')
 
+const quiet = process.argv.includes('--quiet')
+
 function runServer (name) {
   const serverPath = path.resolve(__dirname, '..', 'test', 'servers', name + '.js')
   const cmd = new CollectAndRead({}, serverPath)
@@ -23,9 +25,15 @@ function runServer (name) {
 
   // await result
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
-    analysis(systemInfoReader, stackTraceReader, traceEventReader)
-      .pipe(inspectpoint({ depth: null, colors: true }))
-      .pipe(process.stdout)
+    const stream = analysis(systemInfoReader, stackTraceReader, traceEventReader)
+
+    if (quiet) {
+      stream.resume()
+    } else {
+      stream
+        .pipe(inspectpoint({ depth: null, colors: true }))
+        .pipe(process.stdout)
+    }
   })
 }
 
