@@ -27,17 +27,12 @@ function createTreeStructure () {
       children: [ 12 ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'createLargeLinkStructure',
+       [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
-         { functionName: 'onRoute',
-           isToplevel: true,
-           fileName: '/node_modules/restify/lib/server.js',
-           lineNumber: 939,
-           columnNumber: 24 },
-         { functionName: 'find',
+         { functionName: 'maybeCache',
            typeName: 'Router',
            fileName: '/node_modules/restify/lib/router.js',
            lineNumber: 436,
@@ -50,17 +45,12 @@ function createTreeStructure () {
       children: [ 13 ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'createLargeLinkStructure',
+       [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
-         { functionName: 'onRoute',
-           isToplevel: true,
-           fileName: '/node_modules/restify/lib/server.js',
-           lineNumber: 939,
-           columnNumber: 24 },
-         { functionName: 'find',
+         { functionName: 'maybeCache',
            typeName: 'Router',
            fileName: '/node_modules/restify/lib/router.js',
            lineNumber: 551,
@@ -73,15 +63,11 @@ function createTreeStructure () {
       children: [ 14 ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'createLargeLinkStructure',
+       [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
            lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
+           columnNumber: 3 } ]
     }),
 
     new FakeAggregateNode({
@@ -90,15 +76,11 @@ function createTreeStructure () {
       children: [ 15 ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'createLargeLinkStructure',
+       [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
            lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
+           columnNumber: 3 } ]
     }),
 
     new FakeAggregateNode({
@@ -107,15 +89,11 @@ function createTreeStructure () {
       children: [ ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'createLargeLinkStructure',
+       [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
            lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
+           columnNumber: 3 } ]
     }),
 
     new FakeAggregateNode({
@@ -124,15 +102,11 @@ function createTreeStructure () {
       children: [ ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'createLargeLinkStructure',
+       [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
            lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
+           columnNumber: 3 } ]
     })
   ]
 
