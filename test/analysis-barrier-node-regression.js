@@ -30,17 +30,17 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { functionName: 'onRoute',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/node_modules/restify/lib/server.js',
+           fileName: '/node_modules/restify/lib/server.js',
            lineNumber: 939,
            columnNumber: 24 },
          { functionName: 'find',
            typeName: 'Router',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/node_modules/restify/lib/router.js',
+           fileName: '/node_modules/restify/lib/router.js',
            lineNumber: 436,
            columnNumber: 9 } ]
     }),
@@ -54,17 +54,17 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { functionName: 'onRoute',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/node_modules/restify/lib/server.js',
+           fileName: '/node_modules/restify/lib/server.js',
            lineNumber: 939,
            columnNumber: 24 },
          { functionName: 'find',
            typeName: 'Router',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/node_modules/restify/lib/router.js',
+           fileName: '/node_modules/restify/lib/router.js',
            lineNumber: 551,
            columnNumber: 9 } ]
     }),
@@ -78,11 +78,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -96,11 +96,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -114,11 +114,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -132,11 +132,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -150,11 +150,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -168,11 +168,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -186,11 +186,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     }),
@@ -204,11 +204,11 @@ function createTreeStructure () {
       frames:
        [ { functionName: 'createLargeLinkStructure',
            isToplevel: true,
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 9,
            columnNumber: 3 },
          { typeName: 'Immediate',
-           fileName: '/Users/Andreas/Sites/clinic/node_modules/@nearform/clinic-bubbleprof/test/servers/bug.js',
+           fileName: '/servers/bug.js',
            lineNumber: 13,
            columnNumber: 7 } ]
     })
@@ -217,12 +217,11 @@ function createTreeStructure () {
   return startpoint(data.sort((a, b) => a.aggregateId - b.aggregateId), { objectMode: true })
 }
 
-const systemInfo = new FakeSystemInfo(path.resolve(__dirname, 'servers'))
+const systemInfo = new FakeSystemInfo('/servers')
 
 createTreeStructure()
   .pipe(new WrapAsBarrierNodes())
   .pipe(new MakeSynchronousBarrierNodes(systemInfo))
-  .pipe(new MakeExternalBarrierNodes(systemInfo))
   .pipe(new CombineAsClusterNodes())
   .pipe(inspectpoint({ depth: null, colors: true }))
   .pipe(process.stdout)
