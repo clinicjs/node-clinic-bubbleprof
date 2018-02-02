@@ -25,7 +25,6 @@ function createTreeStructure () {
       aggregateId: 10,
       parentAggregateId: 1,
       children: [ 12 ],
-      mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
        [ { functionName: 'createLargeLinkStructure',
@@ -49,7 +48,6 @@ function createTreeStructure () {
       aggregateId: 11,
       parentAggregateId: 1,
       children: [ 13 ],
-      mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
        [ { functionName: 'createLargeLinkStructure',
@@ -73,7 +71,6 @@ function createTreeStructure () {
       aggregateId: 12,
       parentAggregateId: 10,
       children: [ 14 ],
-      mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
        [ { functionName: 'createLargeLinkStructure',
@@ -91,7 +88,6 @@ function createTreeStructure () {
       aggregateId: 13,
       parentAggregateId: 11,
       children: [ 15 ],
-      mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
        [ { functionName: 'createLargeLinkStructure',
@@ -109,7 +105,6 @@ function createTreeStructure () {
       aggregateId: 14,
       parentAggregateId: 12,
       children: [ ],
-      mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
        [ { functionName: 'createLargeLinkStructure',
@@ -127,7 +122,6 @@ function createTreeStructure () {
       aggregateId: 15,
       parentAggregateId: 13,
       children: [ ],
-      mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
        [ { functionName: 'createLargeLinkStructure',
