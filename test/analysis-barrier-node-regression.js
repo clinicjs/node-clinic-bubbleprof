@@ -33,7 +33,7 @@ function createTreeStructure () {
            lineNumber: 9 },
          { functionName: 'maybeCache',
            typeName: 'Router',
-           fileName: '/node_modules/restify/lib/router.js',
+           fileName: '/node_modules/external-server/router.js',
            lineNumber: 436 } ]
     }),
 
@@ -49,7 +49,7 @@ function createTreeStructure () {
            lineNumber: 9 },
          { functionName: 'maybeCache',
            typeName: 'Router',
-           fileName: '/node_modules/restify/lib/router.js',
+           fileName: '/node_modules/external-server/router.js',
            lineNumber: 551 } ]
     }),
 
