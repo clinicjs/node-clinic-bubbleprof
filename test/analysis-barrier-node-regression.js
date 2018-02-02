@@ -30,13 +30,11 @@ function createTreeStructure () {
        [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 },
+           lineNumber: 9 },
          { functionName: 'maybeCache',
            typeName: 'Router',
            fileName: '/node_modules/restify/lib/router.js',
-           lineNumber: 436,
-           columnNumber: 9 } ]
+           lineNumber: 436 } ]
     }),
 
     new FakeAggregateNode({
@@ -48,13 +46,11 @@ function createTreeStructure () {
        [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 },
+           lineNumber: 9 },
          { functionName: 'maybeCache',
            typeName: 'Router',
            fileName: '/node_modules/restify/lib/router.js',
-           lineNumber: 551,
-           columnNumber: 9 } ]
+           lineNumber: 551 } ]
     }),
 
     new FakeAggregateNode({
@@ -66,8 +62,7 @@ function createTreeStructure () {
        [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 } ]
+           lineNumber: 9 } ]
     }),
 
     new FakeAggregateNode({
@@ -79,8 +74,7 @@ function createTreeStructure () {
        [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 } ]
+           lineNumber: 9 } ]
     }),
 
     new FakeAggregateNode({
@@ -92,8 +86,7 @@ function createTreeStructure () {
        [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 } ]
+           lineNumber: 9 } ]
     }),
 
     new FakeAggregateNode({
@@ -105,8 +98,7 @@ function createTreeStructure () {
        [ { functionName: 'recursiveFunction',
            isToplevel: true,
            fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 } ]
+           lineNumber: 9 } ]
     })
   ]
 
