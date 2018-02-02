@@ -108,7 +108,7 @@ function createTreeStructure () {
     new FakeAggregateNode({
       aggregateId: 14,
       parentAggregateId: 12,
-      children: [ 16 ],
+      children: [ ],
       mark: [ 'user', null, null ],
       type: 'Immediate',
       frames:
@@ -126,78 +126,6 @@ function createTreeStructure () {
     new FakeAggregateNode({
       aggregateId: 15,
       parentAggregateId: 13,
-      children: [ 17 ],
-      mark: [ 'user', null, null ],
-      type: 'Immediate',
-      frames:
-       [ { functionName: 'createLargeLinkStructure',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
-    }),
-
-    new FakeAggregateNode({
-      aggregateId: 16,
-      parentAggregateId: 14,
-      children: [ 18 ],
-      mark: [ 'user', null, null ],
-      type: 'Immediate',
-      frames:
-       [ { functionName: 'createLargeLinkStructure',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
-    }),
-
-    new FakeAggregateNode({
-      aggregateId: 17,
-      parentAggregateId: 15,
-      children: [ 19 ],
-      mark: [ 'user', null, null ],
-      type: 'Immediate',
-      frames:
-       [ { functionName: 'createLargeLinkStructure',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
-    }),
-
-    new FakeAggregateNode({
-      aggregateId: 18,
-      parentAggregateId: 16,
-      children: [ ],
-      mark: [ 'user', null, null ],
-      type: 'Immediate',
-      frames:
-       [ { functionName: 'createLargeLinkStructure',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9,
-           columnNumber: 3 },
-         { typeName: 'Immediate',
-           fileName: '/servers/bug.js',
-           lineNumber: 13,
-           columnNumber: 7 } ]
-    }),
-
-    new FakeAggregateNode({
-      aggregateId: 19,
-      parentAggregateId: 17,
       children: [ ],
       mark: [ 'user', null, null ],
       type: 'Immediate',
