@@ -13,6 +13,7 @@ class BarrierNode {
     this.initialized = false
     this.isRoot = false
     this.isWrapper = null
+    this.name = null
     this.nodes = []
     this.children = []
   }
@@ -49,6 +50,7 @@ class BarrierNode {
     return `<${options.stylize('BarrierNode', 'special')}` +
            ` barrierId:${options.stylize(this.barrierId, 'number')},` +
            ` parentBarrierId:${options.stylize(this.parentBarrierId, 'number')},` +
+           ` name:${options.stylize(this.name, 'string')}` +
            ` isWrapper:${options.stylize(this.isWrapper, 'boolean')},` +
            ` children:[${childrenFormatted}],` +
            ` nodes:[${inner}]>`
@@ -58,6 +60,7 @@ class BarrierNode {
     return {
       barrierId: this.barrierId,
       parentBarrierId: this.parentBarrierId,
+      name: this.name,
       isWrapper: this.isWrapper,
       children: this.children,
       nodes: this.nodes.map((aggregateNode) => aggregateNode.toJSON())
