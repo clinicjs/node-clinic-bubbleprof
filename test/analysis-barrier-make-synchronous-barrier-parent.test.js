@@ -26,14 +26,14 @@ function createTreeStructure () {
       children: [ 12 ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'recursiveFunction',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9 },
-         { functionName: 'maybeCache',
-           typeName: 'Router',
-           fileName: '/node_modules/external-server/router.js',
-           lineNumber: 436 } ]
+      [ { functionName: 'recursiveFunction',
+        isToplevel: true,
+        fileName: '/servers/bug.js',
+        lineNumber: 9 },
+      { functionName: 'maybeCache',
+        typeName: 'Router',
+        fileName: '/node_modules/external-server/router.js',
+        lineNumber: 436 } ]
     }),
 
     new FakeAggregateNode({
@@ -42,14 +42,14 @@ function createTreeStructure () {
       children: [ 13 ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'recursiveFunction',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9 },
-         { functionName: 'maybeCache',
-           typeName: 'Router',
-           fileName: '/node_modules/external-server/router.js',
-           lineNumber: 551 } ]
+      [ { functionName: 'recursiveFunction',
+        isToplevel: true,
+        fileName: '/servers/bug.js',
+        lineNumber: 9 },
+      { functionName: 'maybeCache',
+        typeName: 'Router',
+        fileName: '/node_modules/external-server/router.js',
+        lineNumber: 551 } ]
     }),
 
     // These two AggregateNode both have the "external-server" barrierNode
@@ -63,10 +63,10 @@ function createTreeStructure () {
       children: [ ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'recursiveFunction',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9 } ]
+      [ { functionName: 'recursiveFunction',
+        isToplevel: true,
+        fileName: '/servers/bug.js',
+        lineNumber: 9 } ]
     }),
 
     new FakeAggregateNode({
@@ -75,17 +75,17 @@ function createTreeStructure () {
       children: [ ],
       type: 'Immediate',
       frames:
-       [ { functionName: 'recursiveFunction',
-           isToplevel: true,
-           fileName: '/servers/bug.js',
-           lineNumber: 9 } ]
+      [ { functionName: 'recursiveFunction',
+        isToplevel: true,
+        fileName: '/servers/bug.js',
+        lineNumber: 9 } ]
     })
   ]
 
   return startpoint(data, { objectMode: true })
 }
 
-function getBarrierNodeEssentials(barrierNode) {
+function getBarrierNodeEssentials (barrierNode) {
   return {
     barrierId: barrierNode.barrierId,
     children: barrierNode.children,
