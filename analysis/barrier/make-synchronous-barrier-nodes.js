@@ -23,18 +23,21 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
       if (!childBarrierNode.isWrapper) continue
 
       // get the earliest user call site
-      const userFrames = childBarrierNode.unwrapNode()
-        .frames.filter((frame) => !frame.isExternal(this._systemInfo))
+      const aggregateNode = childBarrierNode.unwrapNode()
+      const userFrames = aggregateNode.frames
+        .filter((frame) => !frame.isExternal(this._systemInfo))
 
       // don't merge if there are no user frames
       if (userFrames.length === 0) continue
 
       // make the earliest call site the split point
       const userCallSite = userFrames.last()
-      if (!maybeMerges.has(userCallSite.getPosition())) {
-        maybeMerges.set(userCallSite.getPosition(), [ childBarrierNode ])
+      // Ensure that the new barrierNodes have the same aggregateNode parent.
+      const mergeIdentifier = `${aggregateNode.parentAggregateId}\f${userCallSite.getPosition()}`
+      if (!maybeMerges.has(mergeIdentifier)) {
+        maybeMerges.set(mergeIdentifier, [ childBarrierNode ])
       } else {
-        maybeMerges.get(userCallSite.getPosition()).push(childBarrierNode)
+        maybeMerges.get(mergeIdentifier).push(childBarrierNode)
       }
     }
 
