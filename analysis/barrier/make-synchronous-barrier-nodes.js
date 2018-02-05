@@ -32,6 +32,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
 
       // make the earliest call site the split point
       const userCallSite = userFrames.last()
+      // Ensure that the new barrierNodes have the same aggregateNode parent.
       const mergeIdentifier = `${aggregateNode.parentAggregateId}\f${userCallSite.getPosition()}`
       if (!maybeMerges.has(mergeIdentifier)) {
         maybeMerges.set(mergeIdentifier, [ childBarrierNode ])
