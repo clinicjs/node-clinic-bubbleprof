@@ -1,7 +1,7 @@
 const stream = require('stream')
 
 class NameBarrierNodes extends stream.Transform {
-  constructor(systemInfo) {
+  constructor (systemInfo) {
     super({
       readableObjectMode: true,
       writableObjectMode: true
@@ -9,151 +9,258 @@ class NameBarrierNodes extends stream.Transform {
 
     this.systemInfo = systemInfo
 
+    this._aggregateNodes = new Map()
+    this._types = new Map()
+    this._needsChildren = new Set()
     this._queued = []
-    this._barrierNodes = new Map()
-    this._tags = new Map()
-    this._root = null
   }
 
-  _transform (data, enc, cb) {
-    if (data.isRoot) this._root = data
-    this._queued.push(data)
-    this._barrierNodes.set(data.barrierId, data)
+  _blocked (barrierNode) {
+    if (!this._needsChildren.size) return false
 
-    const tags = []
-    this._tags.set(data, tags)
+    const self = this
 
-    // forward the tags explicitly to the root node if child of the root
-    // fixes issue where the root does not get named
-    if (data.parentBarrierId === 1) {
-      this._tags.set(this._root, tags)
+    return barrierNode.children
+      .map(id => self._aggregateNodes.get(id))
+      .some(blocked)
+
+    function blocked (aggregateNode) {
+      if (!aggregateNode) return true
+      return aggregateNode.children
+        .map(id => self._aggregateNodes.get(id))
+        .some(blocked)
+    }
+  }
+
+  _drainQueue () {
+    while (this._queued.length && !this._blocked(this._queued[0])) {
+      if (this._needsChildren.size) {
+        for (const aggregateNode of this._queued[0].nodes) {
+          this._needsChildren.delete(aggregateNode)
+        }
+      }
+      this._nameNode(this._queued.shift())
+    }
+  }
+
+  _transform (barrierNode, enc, cb) {
+    for (const aggregateNode of barrierNode.nodes) {
+      this._aggregateNodes.set(aggregateNode.aggregateId, aggregateNode)
+
+      const types = groupType(aggregateNode)
+
+      if (types.includes('server') || types.includes('connection') || types.includes('root')) {
+        // if root, we need a child to try and name it. also wait for children to see if we can
+        // detect if this is a http server/connection
+        this._needsChildren.add(aggregateNode)
+      }
     }
 
-    const nodes = data.nodes.filter(interestingNode)
-    if (!nodes.length) {
-      this._barrierNodes.set(data.barrierId, this._barrierNodes.get(data.parentBarrierId))
+    this._drainQueue()
+
+    if (this._queued.length || this._blocked(barrierNode)) {
+      this._queued.push(barrierNode)
       return cb()
     }
 
-    const self = this
-    const types = nodes.map(node => node.type)
-    const parent = this._barrierNodes.get(data.parentBarrierId)
-
-    if (types.includes('PIPESERVERWRAP')) {
-      tags.push('server', 'unix-socket')
-    }
-    if (types.includes('TCPSERVERWRAP')) {
-      tags.push('server', 'tcp')
-    }
-    if (types.includes('HTTPPARSER')) {
-      const serverAncestor = ancestor('server')
-      const connectionAncestor = ancestor('connection')
-      if (serverAncestor) serverAncestor.unshift('http')
-      if (connectionAncestor) connectionAncestor.unshift('http')
-      tags.push('http', 'connection')
-    }
-    if (types.includes('SHUTDOWNWRAP')) {
-      inherits('http')
-      tags.push('connection')
-      tags.push('end')
-    }
-    if (types.includes('PIPEWRAP')) {
-      inherits('http')
-      tags.push('connection', 'create', 'unix-socket')
-    }
-    if (types.includes('TCPCONNECTWRAP')) {
-      inherits('http')
-      tags.push('connection', 'create', 'tcp')
-    }
-    if (types.includes('PIPECONNECTWRAP')) {
-      inherits('http')
-      tags.push('connection', 'create', 'unix-socket')
-    }
-    if (types.includes('FSREQWRAP')) {
-      tags.push('fs')
-    }
-    if (types.includes('WRITEWRAP')) {
-      const connectionAncestor = ancestor('connection')
-      if (connectionAncestor) {
-        if (connectionAncestor.includes('http')) tags.push('http')
-        tags.push('connection')
-      }
-      tags.push('write')
-    }
-
-    cb()
-
-    function ancestor (type) {
-      let parent = self._barrierNodes.get(data.parentBarrierId)
-
-      while (parent) {
-        const parentTags = self._tags.get(parent)
-        if (parentTags.includes(type)) {
-          return parentTags
-        }
-        parent = self._barrierNodes.get(parent.parentBarrierId)
-      }
-
-      return null
-    }
-
-    function inherits (type) {
-      if (tags.includes(type)) return
-      if (ancestor(type)) tags.push(type)
-    }
-  }
-
-  _flush(cb) {
-    for (let node of this._queued) {
-      this._nameNode(node)
-      this.push(node)
-    }
+    this._nameNode(barrierNode)
     cb()
   }
 
-  _nameNode(barrierNode) {
-    if (barrierNode.isWrapper && !barrierNode.isRoot) return
+  _getTypes (node) {
+    if (!node) return []
+    const types = this._types.get(node)
+    return types || groupType(node)
+  }
 
-    const aggregateNode = getFirstNode(barrierNode.nodes)
-    const frames = aggregateNode.frames.filter(frame => frame.fileName)
-    const tags = this._tags.get(barrierNode)
-    const isNodecore = frames.every(frame => frame.isNodecore(this.systemInfo))
+  _setTypes (node, types) {
+    this._types.set(node, types)
+  }
 
-    // if we have tags, but no frames we still wanna tag this with nodecore + tags
-    if (!frames.length && !tags.length) return
+  _pushType (node, types, type) {
+    types.push(type)
+    this._setTypes(node, types)
+  }
 
-    if (isNodecore) {
-      // extract more info
-      barrierNode.name = 'nodecore' + tags.map(tag => '.' + tag).join('')
+  _getChild (node, filterTypes) {
+    if (!node) return null
+
+    for (const id of node.children) {
+      const child = this._aggregateNodes.get(id)
+      if (!child) continue
+
+      const childTypes = this._getTypes(child)
+      if (filterTypes.every(type => childTypes.includes(type))) {
+        return child
+      }
+    }
+
+    return null
+  }
+
+  _getAncestor (node, filterTypes) {
+    let parent = this._aggregateNodes.get(node.parentAggregateId)
+    while (parent) {
+      const parentTypes = this._getTypes(parent)
+      if (filterTypes.every(type => parentTypes.includes(type))) {
+        return parent
+      }
+      parent = this._aggregateNodes.get(parent.parentAggregateId)
+    }
+  }
+
+  _swapRootWithChild (aggregateNode) {
+    // swap root types for the first child, otherwise the root is type less
+    if (aggregateNode.type || !aggregateNode.children.length) return aggregateNode
+    return this._aggregateNodes.get(aggregateNode.children[0])
+  }
+
+  _updateTypes (aggregateNode) {
+    const types = this._getTypes(aggregateNode)
+
+    // if server see if there is an immedidate child with created connection
+    // and see if that child has a http parser. if so we are an http server
+    if (types.includes('server')) {
+      const connection = this._getChild(aggregateNode, ['connection', 'create'])
+      const http = this._getChild(connection, ['http'])
+
+      if (http) this._pushType(aggregateNode, types, 'http')
+      return types
+    }
+
+    // if a connection is created, see if an immediate child is a http parser
+    // and tag us as http as well if so.
+    if (types.includes('connection') && types.includes('create')) {
+      const http = this._getChild(aggregateNode, ['http'])
+
+      if (http) this._pushType(aggregateNode, types, 'http')
+      return types
+    }
+
+    // any connection operation, find the creation ancestor node and see if that
+    // is a http connecion. if so, so are we.
+    if (types.includes('connection')) {
+      const create = this._getAncestor(aggregateNode, ['connection', 'create'])
+      const createTypes = this._getTypes(create)
+
+      if (createTypes.includes('http')) this._pushType(aggregateNode, types, 'http')
+      return types
+    }
+
+    return types
+  }
+
+  _nameAggregateNode (aggregateNode) {
+    aggregateNode = this._swapRootWithChild(aggregateNode)
+
+    const moduleName = getModuleName(aggregateNode, this.systemInfo)
+    const typeName = toName(this._updateTypes(aggregateNode))
+
+    const name = []
+    if (moduleName) name.push('module', moduleName)
+    if (typeName) name.push(typeName)
+
+    return name.join('.')
+  }
+
+  _nameNode (barrierNode) {
+    if (barrierNode.isWrapper && !barrierNode.isRoot) {
+      this.push(barrierNode)
       return
     }
 
-    const isExternal = frames.every(frame => frame.isExternal(this.systemInfo))
-    if (isExternal) {
-      const firstModule = aggregateNode.frames
-        .filter((frame) => !frame.isNodecore(this.systemInfo))
-        .map((frame) => frame.getModuleName(this.systemInfo))
-        .pop()
+    const names = barrierNode.nodes
+      .map(node => this._nameAggregateNode(node))
+      .filter(noDups())
+      .filter(val => val) // no falsy values
 
-      barrierNode.name = 'external' + (firstModule ? '.' + firstModule.name : '')
-      return
-    }
+    // maximum 4 parts ...
+    if (names.length > 4) barrierNode.name = names.slice(0, 4).join(' + ') + '...'
+    else barrierNode.name = names.join(' + ')
 
-    barrierNode.name = 'user'
+    this.push(barrierNode)
   }
 }
 
 module.exports = NameBarrierNodes
 
-function getFirstNode (nodes) {
-  if (nodes.length === 1) return nodes[0]
-  if (nodes[0].type) return nodes[0]
-  return nodes[1]
+function noDups () {
+  const seen = new Set()
+  return function (val) {
+    if (seen.has(val)) return false
+    seen.add(val)
+    return true
+  }
 }
 
-function interestingNode (node) {
-  return node.type &&
-    node.type !== 'Timeout' &&
-    node.type !== 'TickObject' &&
-    node.type !== 'Immediate'
+function getModuleName (aggregateNode, sysInfo) {
+  const frames = aggregateNode.frames.filter(frame => frame.fileName)
+
+  if (isExternal(frames, sysInfo)) {
+    const firstModule = aggregateNode.frames
+      .filter((frame) => !frame.isNodecore(sysInfo))
+      .map((frame) => frame.getModuleName(sysInfo).name)
+      .pop()
+
+    if (firstModule) return firstModule
+  }
+
+  return null
+}
+
+function isExternal (frames, sysInfo) {
+  return frames.every(frame => frame.isExternal(sysInfo))
+}
+
+function groupType (node) {
+  if (!node.type) return ['root']
+  switch (node.type) {
+    case 'SHUTDOWNWRAP':
+      return ['connection', 'end']
+    case 'WRITEWRAP':
+      return ['connection', 'write']
+    case 'TickObject':
+      return ['nextTick']
+    case 'Immediate':
+      return ['setImmediate']
+    case 'Timeout':
+      return ['timeout']
+    case 'TCPWRAP':
+    case 'PIPEWRAP':
+      return ['connection', 'create']
+    case 'TCPCONNECTWRAP':
+    case 'PIPECONNECTWRAP':
+      return ['connection', 'connect', 'create']
+    case 'HTTPPARSER':
+      return ['http']
+    case 'TCPSERVERWRAP':
+    case 'PIPESERVERWRAP':
+      return ['server']
+    case 'FSREQWRAP':
+      return ['fs']
+    default:
+      return []
+  }
+}
+
+function toName (types) {
+  if (types.includes('server')) {
+    return types.includes('http') ? 'http.server' : 'server'
+  }
+
+  if (types.includes('connection')) {
+    let name = 'connection'
+    if (types.includes('http')) name = 'http.' + name
+    if (types.includes('write')) return name + '.write'
+    if (types.includes('end')) return name + '.end'
+    if (types.includes('connect')) return name + '.connect'
+    return name
+  }
+
+  if (types.includes('fs')) return 'fs'
+  if (types.includes('nextTick')) return 'nextTick'
+  if (types.includes('setImmediate')) return 'setImmediate'
+  if (types.includes('timeout')) return 'timeout'
+
+  return ''
 }
