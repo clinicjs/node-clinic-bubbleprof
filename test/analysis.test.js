@@ -137,9 +137,11 @@ function createExpectedStructure (frames) {
   clusterNodeRoot.addChild(2)
   clusterNodeRoot.insertBarrierNode(barrierNodeRoot)
   clusterNodeRoot.insertBarrierNode(barrierNodeUser)
+  clusterNodeRoot.name = ''
 
   const clusterNodeExternal = new ClusterNode(2, 1)
   clusterNodeExternal.insertBarrierNode(barrierNodeExternal)
+  clusterNodeExternal.name = 'module.external'
 
   return { clusterNodeRoot, clusterNodeExternal }
 }

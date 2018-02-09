@@ -47,7 +47,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: null }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames [\n' +
@@ -62,7 +62,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 3 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames [\n' +
@@ -77,7 +77,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 2 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames [<Frame>, <Frame>]>>,\n' +
@@ -88,7 +88,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 1 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames>>,\n' +
@@ -99,7 +99,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 0 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[' +
       '<AggregateNode>, <AggregateNode>]>'
   )
 
@@ -128,6 +128,7 @@ test('Cluster Node - cluster.toJSON', function (t) {
   t.strictDeepEqual(clusterNode.toJSON(), {
     clusterId: 2,
     parentClusterId: 1,
+    name: null,
     children: [3, 4],
     nodes: [{
       aggregateId: 2,

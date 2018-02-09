@@ -73,7 +73,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: null }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' isWrapper:true, children:[3, 4], nodes:[\n' +
+                ' name:null isWrapper:true, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -84,7 +84,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: 3 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' isWrapper:true, children:[3, 4], nodes:[\n' +
+                ' name:null isWrapper:true, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -95,7 +95,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: 0 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
+                ' name:null isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
   )
 
   t.strictEqual(
@@ -106,7 +106,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeCombined, { depth: 3 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
+                ' name:null isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -122,7 +122,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeCombined, { depth: 0 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
+                ' name:null isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
              '<AggregateNode>, <AggregateNode>' +
     ']>'
   )
@@ -150,6 +150,7 @@ test('Barrier Node - barrier.toJSON', function (t) {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 4],
+    name: null,
     isWrapper: true,
     nodes: [{
       aggregateId: 2,
@@ -284,6 +285,7 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
     barrierId: 1,
     parentBarrierId: 0,
     children: [2],
+    name: null,
     isWrapper: true,
     nodes: [ aggregateNodeRoot.toJSON() ]
   })
@@ -294,6 +296,7 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 4],
+    name: null,
     isWrapper: true,
     nodes: [ aggregateNodeNormal.toJSON() ]
   })
@@ -330,6 +333,7 @@ test('Barrier Node - barrier.initializeAsCombined', function (t) {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 4, 6, 7],
+    name: null,
     isWrapper: false,
     nodes: [ aggregateNodeA.toJSON(), aggregateNodeB.toJSON() ]
   })
@@ -420,6 +424,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 5],
+    name: null,
     isWrapper: true,
     nodes: [ barrierNodeParent.nodes[0].toJSON() ]
   })
@@ -428,6 +433,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     barrierId: 3,
     parentBarrierId: 2,
     children: [],
+    name: null,
     isWrapper: false,
     nodes: [
       barrierNodeCat1Node1.nodes[0].toJSON(),
@@ -439,6 +445,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     barrierId: 5,
     parentBarrierId: 2,
     children: [],
+    name: null,
     isWrapper: true,
     nodes: [ barrierNodeCat2Node1.nodes[0].toJSON() ]
   })
