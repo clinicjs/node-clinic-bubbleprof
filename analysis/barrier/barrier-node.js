@@ -56,6 +56,10 @@ class BarrierNode {
            ` nodes:[${inner}]>`
   }
 
+  setName (name) {
+    this.name = name
+  }
+
   toJSON () {
     return {
       barrierId: this.barrierId,

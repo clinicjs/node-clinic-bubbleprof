@@ -11,81 +11,38 @@ class NameBarrierNodes extends stream.Transform {
 
     this._aggregateNodes = new Map()
     this._types = new Map()
-    this._needsChildren = new Set()
     this._queued = []
   }
 
-  _blocked (barrierNode) {
-    if (!this._needsChildren.size) return false
-
-    const self = this
-
-    return barrierNode.children
-      .map(id => self._aggregateNodes.get(id))
-      .some(blocked)
-
-    function blocked (aggregateNode) {
-      if (!aggregateNode) return true
-      return aggregateNode.children
-        .map(id => self._aggregateNodes.get(id))
-        .some(blocked)
-    }
-  }
-
-  _drainQueue () {
-    while (this._queued.length && !this._blocked(this._queued[0])) {
-      if (this._needsChildren.size) {
-        for (const aggregateNode of this._queued[0].nodes) {
-          this._needsChildren.delete(aggregateNode)
-        }
-      }
-      this._nameNode(this._queued.shift())
-    }
-  }
-
   _transform (barrierNode, enc, cb) {
+    this._queued.push(barrierNode)
     for (const aggregateNode of barrierNode.nodes) {
       this._aggregateNodes.set(aggregateNode.aggregateId, aggregateNode)
-
-      const types = groupType(aggregateNode)
-
-      if (types.includes('server') || types.includes('connection') || types.includes('root')) {
-        // if root, we need a child to try and name it. also wait for children to see if we can
-        // detect if this is a http server/connection
-        this._needsChildren.add(aggregateNode)
-      }
     }
-
-    this._drainQueue()
-
-    if (this._queued.length || this._blocked(barrierNode)) {
-      this._queued.push(barrierNode)
-      return cb()
-    }
-
-    this._nameNode(barrierNode)
     cb()
   }
 
-  _getTypes (node) {
-    if (!node) return []
-    const types = this._types.get(node)
-    return types || groupType(node)
+  _flush (cb) {
+    for (const barrierNode of this._queued) {
+      barrierNode.setName(this._getBarrierName(barrierNode))
+      this.push(barrierNode)
+    }
+    cb()
   }
 
-  _setTypes (node, types) {
-    this._types.set(node, types)
+  _getTypes (aggregateNode) {
+    if (!aggregateNode) return []
+    let types = this._types.get(aggregateNode)
+    if (types) return types
+    types = groupType(aggregateNode)
+    this._types.set(aggregateNode, types)
+    return types
   }
 
-  _pushType (node, types, type) {
-    types.push(type)
-    this._setTypes(node, types)
-  }
+  _getChild (aggregateNode, filterTypes) {
+    if (!aggregateNode) return null
 
-  _getChild (node, filterTypes) {
-    if (!node) return null
-
-    for (const id of node.children) {
+    for (const id of aggregateNode.children) {
       const child = this._aggregateNodes.get(id)
       if (!child) continue
 
@@ -98,8 +55,8 @@ class NameBarrierNodes extends stream.Transform {
     return null
   }
 
-  _getAncestor (node, filterTypes) {
-    let parent = this._aggregateNodes.get(node.parentAggregateId)
+  _getAncestor (aggregateNode, filterTypes) {
+    let parent = this._aggregateNodes.get(aggregateNode.parentAggregateId)
     while (parent) {
       const parentTypes = this._getTypes(parent)
       if (filterTypes.every(type => parentTypes.includes(type))) {
@@ -110,9 +67,15 @@ class NameBarrierNodes extends stream.Transform {
   }
 
   _swapRootWithChild (aggregateNode) {
-    // swap root types for the first child, otherwise the root is type less
+    // swap root types for the first child that is a server, otherwise the root is type less
     if (aggregateNode.type || !aggregateNode.children.length) return aggregateNode
-    return this._aggregateNodes.get(aggregateNode.children[0])
+
+    for (const child of aggregateNode.children) {
+      const childNode = this._aggregateNodes.get(child)
+      if (this._getTypes(childNode).includes('server')) return childNode
+    }
+
+    return aggregateNode
   }
 
   _updateTypes (aggregateNode) {
@@ -124,7 +87,7 @@ class NameBarrierNodes extends stream.Transform {
       const connection = this._getChild(aggregateNode, ['connection', 'create'])
       const http = this._getChild(connection, ['http'])
 
-      if (http) this._pushType(aggregateNode, types, 'http')
+      if (http) types.push('http')
       return types
     }
 
@@ -133,7 +96,7 @@ class NameBarrierNodes extends stream.Transform {
     if (types.includes('connection') && types.includes('create')) {
       const http = this._getChild(aggregateNode, ['http'])
 
-      if (http) this._pushType(aggregateNode, types, 'http')
+      if (http) types.push('http')
       return types
     }
 
@@ -143,7 +106,7 @@ class NameBarrierNodes extends stream.Transform {
       const create = this._getAncestor(aggregateNode, ['connection', 'create'])
       const createTypes = this._getTypes(create)
 
-      if (createTypes.includes('http')) this._pushType(aggregateNode, types, 'http')
+      if (createTypes.includes('http')) types.push('http')
       return types
     }
 
@@ -153,32 +116,26 @@ class NameBarrierNodes extends stream.Transform {
   _nameAggregateNode (aggregateNode) {
     aggregateNode = this._swapRootWithChild(aggregateNode)
 
+    const types = this._updateTypes(aggregateNode)
     const moduleName = getModuleName(aggregateNode, this.systemInfo)
-    const typeName = toName(this._updateTypes(aggregateNode))
-
+    const typeName = toName(types)
     const name = []
+
     if (moduleName) name.push('module', moduleName)
     if (typeName) name.push(typeName)
 
     return name.join('.')
   }
 
-  _nameNode (barrierNode) {
-    if (barrierNode.isWrapper && !barrierNode.isRoot) {
-      this.push(barrierNode)
-      return
-    }
-
+  _getBarrierName (barrierNode) {
     const names = barrierNode.nodes
-      .map(node => this._nameAggregateNode(node))
+      .map(aggregateNode => this._nameAggregateNode(aggregateNode))
       .filter(noDups())
       .filter(val => val) // no falsy values
 
     // maximum 4 parts ...
-    if (names.length > 4) barrierNode.name = names.slice(0, 4).join(' + ') + '...'
-    else barrierNode.name = names.join(' + ')
-
-    this.push(barrierNode)
+    if (names.length <= 4) return names.join(' + ')
+    return names.slice(0, 4).join(' + ') + '...'
   }
 }
 
@@ -262,5 +219,5 @@ function toName (types) {
   if (types.includes('setImmediate')) return 'setImmediate'
   if (types.includes('timeout')) return 'timeout'
 
-  return ''
+  return 'miscellaneous'
 }
