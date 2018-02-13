@@ -64,6 +64,17 @@ class NameBarrierNodes extends stream.Transform {
       }
       parent = this._aggregateNodes.get(parent.parentAggregateId)
     }
+    return null
+  }
+
+  _getParent (aggregateNode, filterTypes) {
+    let parent = this._aggregateNodes.get(aggregateNode.parentAggregateId)
+    if (!parent) return null
+    const parentTypes = this._getTypes(parent)
+    if (filterTypes.every(type => parentTypes.includes(type))) {
+      return parent
+    }
+    return null
   }
 
   _swapRootWithChild (aggregateNode) {
@@ -84,10 +95,11 @@ class NameBarrierNodes extends stream.Transform {
     // if server see if there is an immedidate child with created connection
     // and see if that child has a http parser. if so we are an http server
     if (types.includes('server')) {
+      const http = this._getChild(aggregateNode, ['http'])
       const connection = this._getChild(aggregateNode, ['connection', 'create'])
-      const http = this._getChild(connection, ['http'])
+      const httpConnection = this._getChild(connection, ['http'])
 
-      if (http) types.push('http')
+      if (http || httpConnection) types.push('http')
       return types
     }
 
@@ -95,8 +107,10 @@ class NameBarrierNodes extends stream.Transform {
     // and tag us as http as well if so.
     if (types.includes('connection') && types.includes('create')) {
       const http = this._getChild(aggregateNode, ['http'])
+      const httpServer = !types.includes('connect') &&
+        this._getParent(aggregateNode, ['http', 'server'])
 
-      if (http) types.push('http')
+      if (http || httpServer) types.push('http')
       return types
     }
 
@@ -105,7 +119,6 @@ class NameBarrierNodes extends stream.Transform {
     if (types.includes('connection')) {
       const create = this._getAncestor(aggregateNode, ['connection', 'create'])
       const createTypes = this._getTypes(create)
-
       if (createTypes.includes('http')) types.push('http')
       return types
     }
@@ -134,6 +147,7 @@ class NameBarrierNodes extends stream.Transform {
       .filter(val => val) // no falsy values
 
     // maximum 4 parts ...
+    if (!names.length) return 'miscellaneous'
     if (names.length <= 4) return names.join(' + ')
     return names.slice(0, 4).join(' + ') + '...'
   }
@@ -172,6 +186,10 @@ function isExternal (frames, sysInfo) {
 function groupType (node) {
   if (!node.type) return ['root']
   switch (node.type) {
+    case 'PROMISE':
+      return ['promise']
+    case 'RANDOMBYTESREQUEST':
+      return ['random-bytes']
     case 'SHUTDOWNWRAP':
       return ['connection', 'end']
     case 'WRITEWRAP':
@@ -214,10 +232,13 @@ function toName (types) {
     return name
   }
 
+  if (types.includes('http')) return 'http'
   if (types.includes('fs')) return 'fs'
   if (types.includes('nextTick')) return 'nextTick'
   if (types.includes('setImmediate')) return 'setImmediate'
   if (types.includes('timeout')) return 'timeout'
+  if (types.includes('promise')) return 'promise'
+  if (types.includes('random-bytes')) return 'random-bytes'
 
-  return 'miscellaneous'
+  return ''
 }
