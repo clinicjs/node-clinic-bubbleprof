@@ -31,7 +31,6 @@ class NameBarrierNodes extends stream.Transform {
   }
 
   _getTypes (aggregateNode) {
-    if (!aggregateNode) return []
     let types = this._types.get(aggregateNode)
     if (types) return types
     types = groupType(aggregateNode)
@@ -40,19 +39,14 @@ class NameBarrierNodes extends stream.Transform {
   }
 
   _getChild (aggregateNode, filterTypes) {
-    if (!aggregateNode) return null
-
+    if (!aggregateNode) return
     for (const id of aggregateNode.children) {
       const child = this._aggregateNodes.get(id)
-      if (!child) continue
-
       const childTypes = this._getTypes(child)
       if (filterTypes.every(type => childTypes.includes(type))) {
         return child
       }
     }
-
-    return null
   }
 
   _getAncestor (aggregateNode, filterTypes) {
@@ -64,17 +58,14 @@ class NameBarrierNodes extends stream.Transform {
       }
       parent = this._aggregateNodes.get(parent.parentAggregateId)
     }
-    return null
   }
 
   _getParent (aggregateNode, filterTypes) {
-    let parent = this._aggregateNodes.get(aggregateNode.parentAggregateId)
-    if (!parent) return null
+    const parent = this._aggregateNodes.get(aggregateNode.parentAggregateId)
     const parentTypes = this._getTypes(parent)
     if (filterTypes.every(type => parentTypes.includes(type))) {
       return parent
     }
-    return null
   }
 
   _swapRootWithChild (aggregateNode) {
@@ -149,7 +140,7 @@ class NameBarrierNodes extends stream.Transform {
     // maximum 4 parts ...
     if (!names.length) return 'miscellaneous'
     if (names.length <= 4) return names.join(' + ')
-    return names.slice(0, 4).join(' + ') + '...'
+    return names.slice(0, 4).join(' + ') + ' + ...'
   }
 }
 
