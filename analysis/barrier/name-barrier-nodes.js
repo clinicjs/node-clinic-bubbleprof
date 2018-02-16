@@ -109,7 +109,7 @@ class NameBarrierNodes extends stream.Transform {
     // is a http connecion. if so, so are we.
     if (types.includes('connection')) {
       const create = this._getAncestor(aggregateNode, ['connection', 'create'])
-      const createTypes = create ? this._getTypes(create) : []
+      const createTypes = this._getTypes(create)
       if (createTypes.includes('http')) types.push('http')
       return types
     }
