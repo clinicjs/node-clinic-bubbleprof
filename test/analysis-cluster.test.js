@@ -47,7 +47,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: null }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames [\n' +
@@ -62,7 +62,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 3 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames [\n' +
@@ -77,7 +77,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 2 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames [<Frame>, <Frame>]>>,\n' +
@@ -88,7 +88,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 1 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[\n' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3], frames:<Frames>>,\n' +
@@ -99,7 +99,7 @@ test('Cluster Node - cluster.inspect', function (t) {
 
   t.strictEqual(
     util.inspect(clusterNode, { depth: 0 }),
-    '<ClusterNode clusterId:2, parentClusterId:1, children:[3, 4], nodes:[' +
+    '<ClusterNode clusterId:2, parentClusterId:1, name:null, children:[3, 4], nodes:[' +
       '<AggregateNode>, <AggregateNode>]>'
   )
 
@@ -128,6 +128,7 @@ test('Cluster Node - cluster.toJSON', function (t) {
   t.strictDeepEqual(clusterNode.toJSON(), {
     clusterId: 2,
     parentClusterId: 1,
+    name: null,
     children: [3, 4],
     nodes: [{
       aggregateId: 2,
@@ -209,6 +210,62 @@ test('Cluster Node - cluster.insertBarrierNode', function (t) {
   t.strictDeepEqual(
     clusterNodeBackward.nodes.map((aggregateNode) => aggregateNode.aggregateId),
     [2, 3, 6]
+  )
+
+  t.end()
+})
+
+test('Cluster Node - name from barrier node', function (t) {
+  const barrierNodeCombined = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [4],
+    isWrapper: false,
+    name: 'barrier-combined',
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM_A',
+      frames: []
+    }, {
+      aggregateId: 3,
+      parentAggregateId: 1,
+      children: [6, 7],
+      type: 'CUSTOM_B',
+      frames: []
+    }]
+  })
+
+  const barrierNodeWrapper = new FakeBarrierNode({
+    barrierId: 6,
+    parentBarrierId: 2,
+    children: [8],
+    isWrapper: true,
+    name: 'barrier-wrapper',
+    nodes: [{
+      aggregateId: 6,
+      parentAggregateId: 3,
+      children: [8],
+      type: 'CUSTOM',
+      frames: []
+    }]
+  })
+
+  const clusterNodeForward = new ClusterNode(2, 1)
+  clusterNodeForward.insertBarrierNode(barrierNodeCombined)
+  clusterNodeForward.insertBarrierNode(barrierNodeWrapper)
+  t.strictEqual(clusterNodeForward.name, 'barrier-combined')
+
+  const clusterNodeBackward = new ClusterNode(2, 1)
+  clusterNodeBackward.insertBarrierNode(barrierNodeWrapper)
+  clusterNodeBackward.insertBarrierNode(barrierNodeCombined)
+  t.strictEqual(clusterNodeForward.name, 'barrier-combined')
+
+  t.strictEqual(
+    util.inspect(clusterNodeForward, { depth: 0 }),
+    '<ClusterNode clusterId:2, parentClusterId:1, name:barrier-combined, children:[], nodes:[' +
+      '<AggregateNode>, <AggregateNode>, <AggregateNode>]>'
   )
 
   t.end()

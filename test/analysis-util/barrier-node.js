@@ -9,6 +9,10 @@ class FakeBarrierNode extends BarrierNode {
 
     const nodes = data.nodes.map((nodeData) => new FakeAggregateNode(nodeData))
 
+    if (data.name) {
+      this.setName(data.name)
+    }
+
     if (data.nodes.length === 1) {
       this.initializeAsWrapper(nodes[0], data.children)
       if (!data.isWrapper) this.makeBarrier()

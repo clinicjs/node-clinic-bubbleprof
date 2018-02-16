@@ -10,6 +10,7 @@ class ClusterNode {
     this.isRoot = false
     this.nodes = []
     this.children = []
+    this.name = null
   }
 
   [util.inspect.custom] (depth, options) {
@@ -44,6 +45,7 @@ class ClusterNode {
     return `<${options.stylize('ClusterNode', 'special')}` +
            ` clusterId:${options.stylize(this.clusterId, 'number')},` +
            ` parentClusterId:${options.stylize(this.parentClusterId, 'number')},` +
+           ` name:${options.stylize(this.name, 'string')},` +
            ` children:[${childrenFormatted}],` +
            ` nodes:[${inner}]>`
   }
@@ -52,6 +54,7 @@ class ClusterNode {
     return {
       clusterId: this.clusterId,
       parentClusterId: this.parentClusterId,
+      name: this.name,
       children: this.children,
       nodes: this.nodes.map((aggregateNode) => aggregateNode.toJSON())
     }
@@ -66,6 +69,7 @@ class ClusterNode {
   }
 
   insertBarrierNode (barrierNode) {
+    if ((barrierNode.isRoot || !barrierNode.isWrapper) && !this.name) this.name = barrierNode.name
     this.nodes.push(...barrierNode.nodes)
     this.nodes.sort((a, b) => a.aggregateId - b.aggregateId)
   }
