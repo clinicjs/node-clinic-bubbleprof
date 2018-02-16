@@ -214,3 +214,59 @@ test('Cluster Node - cluster.insertBarrierNode', function (t) {
 
   t.end()
 })
+
+test('Cluster Node - name from barrier node', function (t) {
+  const barrierNodeCombined = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [4],
+    isWrapper: false,
+    name: 'barrier-combined',
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM_A',
+      frames: []
+    }, {
+      aggregateId: 3,
+      parentAggregateId: 1,
+      children: [6, 7],
+      type: 'CUSTOM_B',
+      frames: []
+    }]
+  })
+
+  const barrierNodeWrapper = new FakeBarrierNode({
+    barrierId: 6,
+    parentBarrierId: 2,
+    children: [8],
+    isWrapper: true,
+    name: 'barrier-wrapper',
+    nodes: [{
+      aggregateId: 6,
+      parentAggregateId: 3,
+      children: [8],
+      type: 'CUSTOM',
+      frames: []
+    }]
+  })
+
+  const clusterNodeForward = new ClusterNode(2, 1)
+  clusterNodeForward.insertBarrierNode(barrierNodeCombined)
+  clusterNodeForward.insertBarrierNode(barrierNodeWrapper)
+  t.strictEqual(clusterNodeForward.name, 'barrier-combined')
+
+  const clusterNodeBackward = new ClusterNode(2, 1)
+  clusterNodeBackward.insertBarrierNode(barrierNodeWrapper)
+  clusterNodeBackward.insertBarrierNode(barrierNodeCombined)
+  t.strictEqual(clusterNodeForward.name, 'barrier-combined')
+
+  t.strictEqual(
+    util.inspect(clusterNodeForward, { depth: 0 }),
+    '<ClusterNode clusterId:2, parentClusterId:1, name:barrier-combined, children:[], nodes:[' +
+      '<AggregateNode>, <AggregateNode>, <AggregateNode>]>'
+  )
+
+  t.end()
+})

@@ -70,10 +70,46 @@ test('Barrier Node - barrier.inspect', function (t) {
     }]
   })
 
+  const barrierNodeNamed = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [3, 4],
+    isWrapper: true,
+    name: 'a-barrier-node',
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [3, 4],
+      type: 'CUSTOM',
+      frames: [{
+        functionName: 'functionA',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 10
+      }, {
+        functionName: 'functionB',
+        isToplevel: true,
+        fileName: 'fileName.js',
+        lineNumber: 20
+      }]
+    }]
+  })
+
+  t.strictEqual(
+    util.inspect(barrierNodeNamed, { depth: null }),
+    '<BarrierNode barrierId:2, parentBarrierId:1,' +
+                ' name:a-barrier-node, isWrapper:true, children:[3, 4], nodes:[\n' +
+    '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
+                          ' parentAggregateId:1, sources.length:1,' +
+                          ' children:[3, 4], frames:<Frames [\n' +
+    '                 <Frame functionA fileName.js:10>,\n' +
+    '                 <Frame functionB fileName.js:20>]>>]>'
+  )
+
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: null }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' name:null isWrapper:true, children:[3, 4], nodes:[\n' +
+                ' name:null, isWrapper:true, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -84,7 +120,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: 3 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' name:null isWrapper:true, children:[3, 4], nodes:[\n' +
+                ' name:null, isWrapper:true, children:[3, 4], nodes:[\n' +
     '        <AggregateNode type:CUSTOM, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -95,7 +131,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeWrapper, { depth: 0 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' name:null isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
+                ' name:null, isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
   )
 
   t.strictEqual(
@@ -106,7 +142,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeCombined, { depth: 3 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' name:null isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
+                ' name:null, isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
     '        <AggregateNode type:CUSTOM_A, mark:<Mark null>, aggregateId:2,' +
                           ' parentAggregateId:1, sources.length:1,' +
                           ' children:[3, 4], frames:<Frames [\n' +
@@ -122,7 +158,7 @@ test('Barrier Node - barrier.inspect', function (t) {
   t.strictEqual(
     util.inspect(barrierNodeCombined, { depth: 0 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
-                ' name:null isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
+                ' name:null, isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
              '<AggregateNode>, <AggregateNode>' +
     ']>'
   )
@@ -184,6 +220,23 @@ test('Barrier Node - barrier.updateParentBarrierId', function (t) {
   t.strictEqual(barrierNode.parentBarrierId, 2)
   barrierNode.updateParentBarrierId(1)
   t.strictEqual(barrierNode.parentBarrierId, 1)
+  t.end()
+})
+
+test('Barrier Node - barrier.setName', function (t) {
+  const barrierNode = new FakeBarrierNode({
+    barrierId: 3,
+    parentBarrierId: 2,
+    children: [],
+    isWrapper: true,
+    nodes: []
+  })
+
+  t.strictEqual(barrierNode.name, null)
+  barrierNode.setName('barrier-name')
+  t.strictEqual(barrierNode.name, 'barrier-name')
+  barrierNode.setName('new-barrier-name')
+  t.strictEqual(barrierNode.name, 'new-barrier-name')
   t.end()
 })
 

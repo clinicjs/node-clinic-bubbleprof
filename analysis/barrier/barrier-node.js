@@ -50,7 +50,7 @@ class BarrierNode {
     return `<${options.stylize('BarrierNode', 'special')}` +
            ` barrierId:${options.stylize(this.barrierId, 'number')},` +
            ` parentBarrierId:${options.stylize(this.parentBarrierId, 'number')},` +
-           ` name:${options.stylize(this.name, 'string')}` +
+           ` name:${options.stylize(this.name, 'string')},` +
            ` isWrapper:${options.stylize(this.isWrapper, 'boolean')},` +
            ` children:[${childrenFormatted}],` +
            ` nodes:[${inner}]>`

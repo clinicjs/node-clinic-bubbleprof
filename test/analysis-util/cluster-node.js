@@ -7,6 +7,10 @@ class FakeClusterNode extends CluterNode {
   constructor (data) {
     super(data.clusterId, data.parentClusterId)
 
+    if (data.name) {
+      this.setName(data.name)
+    }
+
     if (data.isRoot) {
       this.makeRoot()
     }

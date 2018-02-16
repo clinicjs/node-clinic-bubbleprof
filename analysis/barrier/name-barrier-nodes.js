@@ -70,7 +70,7 @@ class NameBarrierNodes extends stream.Transform {
 
   _swapRootWithChild (aggregateNode) {
     // swap root types for the first child that is a server, otherwise the root is type less
-    if (aggregateNode.type || !aggregateNode.children.length) return aggregateNode
+    if (!aggregateNode.isRoot) return aggregateNode
 
     for (const child of aggregateNode.children) {
       const childNode = this._aggregateNodes.get(child)
@@ -109,7 +109,7 @@ class NameBarrierNodes extends stream.Transform {
     // is a http connecion. if so, so are we.
     if (types.includes('connection')) {
       const create = this._getAncestor(aggregateNode, ['connection', 'create'])
-      const createTypes = this._getTypes(create)
+      const createTypes = create ? this._getTypes(create) : []
       if (createTypes.includes('http')) types.push('http')
       return types
     }

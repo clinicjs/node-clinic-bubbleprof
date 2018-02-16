@@ -69,7 +69,7 @@ class ClusterNode {
   }
 
   insertBarrierNode (barrierNode) {
-    if (!this.nodes.length) this.name = barrierNode.name
+    if ((barrierNode.isRoot || !barrierNode.isWrapper) && !this.name) this.name = barrierNode.name
     this.nodes.push(...barrierNode.nodes)
     this.nodes.sort((a, b) => a.aggregateId - b.aggregateId)
   }
