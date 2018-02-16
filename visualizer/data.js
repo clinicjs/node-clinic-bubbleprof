@@ -21,6 +21,7 @@ class ClusterNode {
 
     this.clusterId = node.clusterId
     this.parentClusterId = node.parentClusterId
+    this.name = node.name
 
     this.children = node.children
     this.nodes = node.nodes

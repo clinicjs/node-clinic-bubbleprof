@@ -22,6 +22,7 @@ const MarkModuleAggregateNodes = require('./aggregate/mark-module-aggregate-node
 const WrapAsBarrierNodes = require('./barrier/wrap-as-barrier-nodes.js')
 const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.js')
 const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-nodes.js')
+const NameBarrierNodes = require('./barrier/name-barrier-nodes.js')
 
 const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
 
@@ -86,6 +87,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Create barriers where one goes from user to external, or from external
   // to user. External includes nodecore.
    .pipe(new MakeExternalBarrierNodes(systemInfo))
+  // Populates .name for each barrier node with a name corresponding
+  // to what the node represents. Fx, nodecore.http.server or external.my-module
+   .pipe(new NameBarrierNodes(systemInfo))
 
   // ClusterNode:
   // BarrierNodes that are not wrappers marks the beginning of a new
