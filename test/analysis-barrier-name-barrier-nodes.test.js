@@ -203,8 +203,8 @@ test('Barrier Node - set name with multiple modules in stack', function (t) {
     t.deepEquals(names, [
       'miscellaneous',
       'setImmediate',
-      'external.other-external',
-      'setImmediate + external.other-external'
+      'external > other-external',
+      'setImmediate + external > other-external'
     ])
     t.end()
   })
@@ -312,8 +312,8 @@ test('Barrier Node - set name with too many modules in stack', function (t) {
     t.deepEquals(names, [
       'miscellaneous',
       'setImmediate',
-      '...b.c.d.e',
-      'setImmediate + ...b.c.d.e'
+      '(...) > c > d > e',
+      'setImmediate + (...) > c > d > e'
     ])
     t.end()
   })
