@@ -98,11 +98,234 @@ test('Barrier Node - set name', function (t) {
     t.deepEquals(names, [
       'miscellaneous',
       'setImmediate',
-      'module.external.nextTick',
-      'setImmediate + module.external.nextTick'
+      'external',
+      'setImmediate + external'
     ])
     t.end()
   })
+})
+
+test('Barrier Node - set name with multiple modules in stack', function (t) {
+  const frameUser = {
+    functionName: 'userMain',
+    isToplevel: true,
+    fileName: '/user/main.js',
+    lineNumber: 10
+  }
+  const frameExternal = {
+    functionName: 'external',
+    isToplevel: true,
+    fileName: '/node_modules/external/index.js',
+    lineNumber: 10
+  }
+  const frameOtherExternal = {
+    functionName: 'external',
+    isToplevel: true,
+    fileName: '/node_modules/other-external/index.js',
+    lineNumber: 10
+  }
+  const frameNodecore = {
+    functionName: 'nodecore',
+    isToplevel: true,
+    fileName: 'internal/process.js',
+    lineNumber: 10
+  }
+
+  const barrierNodeRoot = new FakeBarrierNode({
+    barrierId: 1,
+    parentBarrierId: 0,
+    children: [2, 3, 4],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 1,
+      parentAggregateId: 0,
+      children: [2, 3, 4],
+      isRoot: true
+    }]
+  })
+
+  const barrierNodeParentUser = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [6, 7],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [6, 7],
+      type: 'Immediate',
+      frames: [ frameUser, frameExternal, frameNodecore ]
+    }]
+  })
+
+  const barrierNodeParentExternal = new FakeBarrierNode({
+    barrierId: 3,
+    parentBarrierId: 1,
+    children: [8, 9],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 3,
+      parentAggregateId: 1,
+      children: [8, 9],
+      type: 'TickObject',
+      frames: [ frameExternal, frameExternal, frameOtherExternal, frameNodecore ]
+    }]
+  })
+
+  const barrierNodeParentBoth = new FakeBarrierNode({
+    barrierId: 4,
+    parentBarrierId: 1,
+    children: [10, 11],
+    isWrapper: false,
+    nodes: [{
+      aggregateId: 4,
+      parentAggregateId: 1,
+      children: [10],
+      type: 'Immediate',
+      frames: [ frameUser, frameExternal, frameNodecore ]
+    }, {
+      aggregateId: 5,
+      parentAggregateId: 1,
+      children: [11],
+      type: 'TickObject',
+      frames: [ frameExternal, frameExternal, frameOtherExternal, frameNodecore ]
+    }]
+  })
+
+  pipeline([
+    barrierNodeRoot,
+    barrierNodeParentUser,
+    barrierNodeParentExternal,
+    barrierNodeParentBoth
+  ], function (err, names) {
+    if (err) return t.ifError(err)
+
+    t.deepEquals(names, [
+      'miscellaneous',
+      'setImmediate',
+      'external.other-external',
+      'setImmediate + external.other-external'
+    ])
+    t.end()
+  })
+})
+
+test('Barrier Node - set name with too many modules in stack', function (t) {
+  const frameUser = {
+    functionName: 'userMain',
+    isToplevel: true,
+    fileName: '/user/main.js',
+    lineNumber: 10
+  }
+  const frameNodecore = {
+    functionName: 'nodecore',
+    isToplevel: true,
+    fileName: 'internal/process.js',
+    lineNumber: 10
+  }
+
+  const barrierNodeRoot = new FakeBarrierNode({
+    barrierId: 1,
+    parentBarrierId: 0,
+    children: [2, 3, 4],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 1,
+      parentAggregateId: 0,
+      children: [2, 3, 4],
+      isRoot: true
+    }]
+  })
+
+  const barrierNodeParentUser = new FakeBarrierNode({
+    barrierId: 2,
+    parentBarrierId: 1,
+    children: [6, 7],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 2,
+      parentAggregateId: 1,
+      children: [6, 7],
+      type: 'Immediate',
+      frames: [ frameUser, external('a'), frameNodecore ]
+    }]
+  })
+
+  const barrierNodeParentExternal = new FakeBarrierNode({
+    barrierId: 3,
+    parentBarrierId: 1,
+    children: [8, 9],
+    isWrapper: true,
+    nodes: [{
+      aggregateId: 3,
+      parentAggregateId: 1,
+      children: [8, 9],
+      type: 'TickObject',
+      frames: [
+        external('a'),
+        external('a'),
+        external('b'),
+        external('c'),
+        external('d'),
+        external('e'),
+        frameNodecore
+      ]
+    }]
+  })
+
+  const barrierNodeParentBoth = new FakeBarrierNode({
+    barrierId: 4,
+    parentBarrierId: 1,
+    children: [10, 11],
+    isWrapper: false,
+    nodes: [{
+      aggregateId: 4,
+      parentAggregateId: 1,
+      children: [10],
+      type: 'Immediate',
+      frames: [ frameUser, external('a'), frameNodecore ]
+    }, {
+      aggregateId: 5,
+      parentAggregateId: 1,
+      children: [11],
+      type: 'TickObject',
+      frames: [
+        external('a'),
+        external('a'),
+        external('b'),
+        external('c'),
+        external('d'),
+        external('e'),
+        frameNodecore
+      ]
+    }]
+  })
+
+  pipeline([
+    barrierNodeRoot,
+    barrierNodeParentUser,
+    barrierNodeParentExternal,
+    barrierNodeParentBoth
+  ], function (err, names) {
+    if (err) return t.ifError(err)
+
+    t.deepEquals(names, [
+      'miscellaneous',
+      'setImmediate',
+      '...b.c.d.e',
+      'setImmediate + ...b.c.d.e'
+    ])
+    t.end()
+  })
+
+  function external (name) {
+    return {
+      functionName: 'external',
+      isToplevel: true,
+      fileName: `/node_modules/${name}/index.js`,
+      lineNumber: 10
+    }
+  }
 })
 
 test('Barrier Node - set long name', function (t) {

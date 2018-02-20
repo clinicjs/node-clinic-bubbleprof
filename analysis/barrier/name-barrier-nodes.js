@@ -121,14 +121,12 @@ class NameBarrierNodes extends stream.Transform {
     aggregateNode = this._swapRootWithChild(aggregateNode)
 
     const types = this._updateTypes(aggregateNode)
-    const moduleName = getModuleName(aggregateNode, this.systemInfo)
+    const moduleNames = getModuleNames(aggregateNode, this.systemInfo)
     const typeName = toName(types)
-    const name = []
+    const prefix = moduleNames.length > 4 ? '...' : ''
 
-    if (moduleName) name.push('module', moduleName)
-    if (typeName) name.push(typeName)
-
-    return name.join('.')
+    if (moduleNames.length) return prefix + moduleNames.slice(-4).join('.')
+    return typeName
   }
 
   _getBarrierName (barrierNode) {
@@ -155,19 +153,22 @@ function noDups () {
   }
 }
 
-function getModuleName (aggregateNode, sysInfo) {
+function getModuleNames (aggregateNode, sysInfo) {
   const frames = aggregateNode.frames.filter(frame => frame.fileName)
 
   if (isExternal(frames, sysInfo)) {
-    const firstModule = aggregateNode.frames
+    const modules = aggregateNode.frames
       .filter((frame) => !frame.isNodecore(sysInfo))
       .map((frame) => frame.getModuleName(sysInfo).name)
-      .pop()
 
-    if (firstModule) return firstModule
+    if (!modules.length || !modules[modules.length - 1]) return []
+
+    return modules
+      .filter(name => name)
+      .filter(noDups())
   }
 
-  return null
+  return []
 }
 
 function isExternal (frames, sysInfo) {
