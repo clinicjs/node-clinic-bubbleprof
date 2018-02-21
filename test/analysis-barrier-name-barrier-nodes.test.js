@@ -312,8 +312,8 @@ test('Barrier Node - set name with too many modules in stack', function (t) {
     t.deepEquals(names, [
       'miscellaneous',
       'setImmediate',
-      '(...) > c > d > e',
-      'setImmediate + (...) > c > d > e'
+      '... > c > d > e',
+      'setImmediate + ... > c > d > e'
     ])
     t.end()
   })

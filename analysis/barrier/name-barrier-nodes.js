@@ -123,7 +123,7 @@ class NameBarrierNodes extends stream.Transform {
     const types = this._updateTypes(aggregateNode)
     const moduleNames = getModuleNames(aggregateNode, this.systemInfo)
     const typeName = toName(types)
-    const prefix = moduleNames.length > 3 ? '(...) > ' : ''
+    const prefix = moduleNames.length > 3 ? '... > ' : ''
 
     if (moduleNames.length) return prefix + moduleNames.slice(-3).join(' > ')
     return typeName
