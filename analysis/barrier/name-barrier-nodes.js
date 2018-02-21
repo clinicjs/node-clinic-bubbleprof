@@ -159,11 +159,12 @@ function getModuleNames (aggregateNode, sysInfo) {
   if (isExternal(frames, sysInfo)) {
     const modules = aggregateNode.frames
       .filter((frame) => !frame.isNodecore(sysInfo))
-      .map((frame) => frame.getModuleName(sysInfo).name)
+      .map((frame) => frame.getModuleName(sysInfo))
 
     if (!modules.length || !modules[modules.length - 1]) return []
 
     return modules
+      .map(mod => mod && mod.name)
       .filter(name => name)
       .filter(noDups())
   }
