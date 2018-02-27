@@ -52,7 +52,7 @@ const hook = asyncHooks.createHook({
 hook.enable()
 
 // before process exits, flush the encoded data to the sample file
-process.once('beforeexit', function () {
+process.once('beforeExit', function () {
   hook.disable()
   encoder.end()
 })
