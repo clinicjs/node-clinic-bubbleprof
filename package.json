@@ -8,7 +8,8 @@
     "ci-lint": "standard | snazzy",
     "ci-test": "tap test/*.test.js",
     "ci-cov": "tap --100 test/*.test.js",
-    "lint": "standard --fix | snazzy"
+    "lint": "standard --fix | snazzy",
+    "visualize-all": "node debug/visualize-all.js"
   },
   "devDependencies": {
     "express": "^4.16.2",
