@@ -55,16 +55,16 @@ class LineCoordinates {
         problem: '>',
         acceptableAngle: LineCoordinates.enforceDegreesRange(acceptableRange + parentDegrees)
       }
-    } else if (relativeDegrees < 0 - acceptableRange) {
+    }
+    if (relativeDegrees < 0 - acceptableRange) {
       // This relative angle is too low
       return {
         problem: '<',
         acceptableAngle: LineCoordinates.enforceDegreesRange(0 - acceptableRange + parentDegrees)
       }
-    } else {
-      // This relative angle is fine
-      return false
     }
+    // This relative angle is fine
+    return false
   }
 
   static lineEndpoints ({length, radians, x1, y1}) {
@@ -80,15 +80,19 @@ class LineCoordinates {
   static radiansFromXY ({x1, y1, x2, y2}) {
     return Math.atan2(y2 - y1, x2 - x1)
   }
+
   static radiansToDegrees (radians) {
     return radians * 57.2957795
   }
+
   static degreesToRadians (degrees) {
     return degrees / 57.2957795
   }
+
   static reverseRadians (radians) {
     return radians - Math.PI
   }
+
   static enforceDegreesRange (degrees) {
     // Keep angles between -180 and 180
     if (degrees < -180) degrees += 360

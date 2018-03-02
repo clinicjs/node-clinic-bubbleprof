@@ -70,11 +70,15 @@ test('Line Coordinates - LineCoordinates.isAngleBackwards', function (t) {
 })
 
 test('Line Coordinates - Reverse and adjust a line', function (t) {
-  let spec = { x1: 0, y1: 0, length: 10, degrees: 360 }
+  const spec = { x1: 0, y1: 0, length: 10, degrees: 360 }
   const line1 = new LineCoordinates(spec)
 
-  spec.radians = LineCoordinates.reverseRadians(line1.radians)
-  const line2 = new LineCoordinates(spec)
+  const line2 = new LineCoordinates({
+    radians: LineCoordinates.reverseRadians(line1.radians),
+    x1: line1.x2,
+    y1: line1.y2,
+    length: line1.length
+  })
   t.equal(roundNum(line2.degrees), -180)
 
   line2.preventBackwardsAngle(line1.degrees)
@@ -84,7 +88,7 @@ test('Line Coordinates - Reverse and adjust a line', function (t) {
 })
 
 test('Line Coordinates - .preventBackwardsAngle without parent', function (t) {
-  let spec = { x1: 0, y1: 0, length: 10, degrees: 90 }
+  const spec = { x1: 0, y1: 0, length: 10, degrees: 90 }
   const line = new LineCoordinates(spec)
   line.preventBackwardsAngle()
   t.equal(spec.degrees, line.degrees)
