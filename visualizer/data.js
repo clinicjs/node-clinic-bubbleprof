@@ -2,9 +2,10 @@
 
 const data = require('./data.json') // base64 encoded source file
 
-function loaddata (callback) {
+// 'data = data' optional arg allows json to be passed in for browserless tests
+function loaddata (callback, json = data) {
   setTimeout(function () {
-    callback(null, wrapData(data))
+    callback(null, wrapData(json))
   })
 }
 module.exports = loaddata
@@ -131,7 +132,7 @@ class CallbackEvent {
     this.syncTime = this.after - this.before
     this.rawDelay = this.before - this.delayStart
     this.adjustedDelays = new Map()
-   
+
     this.source = source
   }
 }
