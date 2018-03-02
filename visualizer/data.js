@@ -11,6 +11,10 @@ function loaddata (callback, json = data) {
 module.exports = loaddata
 
 function wrapData (data) {
+  if (!data.map) {
+    console.warn('No valid data found, data.json contains', typeof data, data)
+    return new Map()
+  }
   return new Map(
     data.map((node) => [node.clusterId, new ClusterNode(node)])
   )
