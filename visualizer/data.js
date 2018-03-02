@@ -51,7 +51,13 @@ class AggregateNode {
     this.mark = new Mark(node.mark)
     this.type = node.type
 
-    this.frames = node.frames.map((frame) => new Frame(frame))
+    this.frames = node.frames.map((frame) => {
+      const frameItem = new Frame(frame)
+      return {
+        formatted: frameItem.format(),
+        data: frameItem
+      }
+    })
     this.sources = node.sources.map((source) => new SourceNode(source))
   }
 }
