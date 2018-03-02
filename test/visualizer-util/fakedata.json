@@ -1,0 +1,51 @@
+[
+{"clusterId":1,"parentClusterId":0,"name":"miscellaneous","children":[2],"nodes":[{"aggregateId":1,"parentAggregateId":0,"children":[2],"mark":["root",null,null],"type":null,"frames":[],"sources":[{"asyncId":1,"parentAsyncId":null,"triggerAsyncId":null,"executionAsyncId":null,"init":null,"before":[],"after":[],"destroy":null}]}]},
+{
+  "clusterId":2,
+  "parentClusterId":1,
+  "name":"fake-cluster",
+  "children":[],
+  "nodes":[
+    {
+      "aggregateId":2,
+      "parentAggregateId":1,
+      "children":[],
+      "mark":["user",null,null],
+      "type":"RANDOMBYTESREQUEST",
+      "frames":[
+        {
+          "functionName": "fake-native-frame",
+          "isNative":true
+        },
+        {
+          "functionName": "FakeConstructor",
+          "isConstructor": true,
+          "fileName": "/fake/nameless/frame.fk",
+          "lineNumber": 12,
+          "columnNumber": 34
+        },
+        {
+          "typeName": "fakeType",
+          "fileName":"/fake/nameless/frame.fk",
+          "lineNumber": 43,
+          "columnNumber": 21
+        },
+        {
+          "isEval": true,
+          "evalOrigin": "/fake/eval/frame"
+        }
+      ],
+    "sources":[
+      {
+        "asyncId":23,
+        "parentAsyncId":1,
+        "triggerAsyncId":1,
+        "executionAsyncId":1,
+        "init":6783514.515,
+        "before":[],
+        "after":[],
+        "destroy":null
+      }
+    ]
+  }]}
+]
