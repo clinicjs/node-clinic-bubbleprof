@@ -9,14 +9,8 @@ function roundNum (num, places = 5) {
 }
 
 test('Line Coordinates - throw on invalid arguments', function (t) {
-  /* eslint-disable no-new */
-  try { new LineCoordinates() } catch (ex) {
-    t.equal(ex.message, 'Invalid arguments')
-  }
-  /* eslint-disable no-new */
-  try { new LineCoordinates({}) } catch (ex) {
-    t.equal(ex.message, 'x1 and y1 of new LineCoordinates must be numeric')
-  }
+  t.throws(() => new LineCoordinates(), new Error('x1 and y1 of new LineCoordinates must be numeric'))
+  t.throws(() => new LineCoordinates({}), new Error('x1 and y1 of new LineCoordinates must be numeric'))
 
   const validArgSets = [
     { x1: 0, y1: 0, x2: 1, y2: 1 },
@@ -26,26 +20,20 @@ test('Line Coordinates - throw on invalid arguments', function (t) {
   const errorByArg = {
     x1: 'x1 and y1 of new LineCoordinates must be numeric',
     y1: 'x1 and y1 of new LineCoordinates must be numeric',
-    x2: 'x2 and y2 of new LineCoordinates must be numeric',
-    y2: 'x2 and y2 of new LineCoordinates must be numeric'
+    x2: 'length or (x2, y2) of new LineCoordinates must be numeric',
+    y2: 'length or (x2, y2) of new LineCoordinates must be numeric',
+    length: 'length or (x2, y2) of new LineCoordinates must be numeric',
+    radians: 'radians or degrees of new LineCoordinates must be numeric',
+    degrees: 'radians or degrees of new LineCoordinates must be numeric'
   }
   for (const argSet of validArgSets) {
     for (const arg of Object.keys(argSet)) {
       const spec = Object.assign({}, argSet)
-      /* eslint-disable no-new */
-      try { new LineCoordinates(spec) } catch (ex) {
-        t.fail('Should not throw', ex)
-      }
+      t.doesNotThrow(() => new LineCoordinates(spec))
       spec[arg] = 'string'
-      /* eslint-disable no-new */
-      try { new LineCoordinates(spec) } catch (ex) {
-        t.equal(ex.message, errorByArg[arg] || 'Invalid arguments')
-      }
+      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg] || 'Invalid arguments'))
       delete spec[arg]
-      /* eslint-disable no-new */
-      try { new LineCoordinates(spec) } catch (ex) {
-        t.equal(ex.message, errorByArg[arg] || 'Invalid arguments')
-      }
+      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg] || 'Invalid arguments'))
     }
   }
 
