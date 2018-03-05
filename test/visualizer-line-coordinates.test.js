@@ -31,9 +31,9 @@ test('Line Coordinates - throw on invalid arguments', function (t) {
       const spec = Object.assign({}, argSet)
       t.doesNotThrow(() => new LineCoordinates(spec))
       spec[arg] = 'string'
-      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg] || 'Invalid arguments'))
+      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg]))
       delete spec[arg]
-      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg] || 'Invalid arguments'))
+      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg]))
     }
   }
 
