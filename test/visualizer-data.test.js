@@ -8,22 +8,22 @@ const fakeJson = require('./visualizer-util/fakedata.json')
 
 function validateData (data) {
   for (const [clusterId, clusterNode] of data) {
-    if (!clusterNode.name) return false
-    if (clusterId <= clusterNode.parentClusterId) return false
+    if (!clusterNode.name) return `1: fails on clusterId ${clusterId}`
+    if (clusterId <= clusterNode.parentClusterId) return `2: fails on clusterId ${clusterId}`
 
     for (const aggregateNode of clusterNode.nodes) {
-      if (!aggregateNode.mark.get(0)) return false
-      if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return false
-      if (!aggregateNode.isRoot && !aggregateNode.type) return false
+      if (!aggregateNode.mark.get(0)) return `3:  fails on aggregateId ${aggregateNode.aggregateId}`
+      if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `4: fails on aggregateId ${aggregateNode.aggregateId}`
+      if (!aggregateNode.isRoot && !aggregateNode.type) return `5: fails on aggregateId ${aggregateNode.aggregateId}`
 
       for (const sourceNode of aggregateNode.sources) {
-        if (!sourceNode.asyncId) return false
-        if (sourceNode.after.length !== sourceNode.callbackEvents.length) return false
-        if (sourceNode.asyncId <= sourceNode.parentAsyncId) return false
+        if (!sourceNode.asyncId) return `6: fails with no sourceNode id, aggregateId ${aggregateNode.aggregateId}`
+        if (sourceNode.after.length !== sourceNode.callbackEvents.length) return `7:  fails on asyncId ${sourceNode.asyncId}`
+        if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `8: fails on asyncId ${sourceNode.asyncId}`
       }
     }
   }
-  return true
+  return 'Pass'
 }
 
 test('Visualizer data - examples/slow-io sample json', function (t) {
@@ -31,7 +31,7 @@ test('Visualizer data - examples/slow-io sample json', function (t) {
     t.ifError(err)
 
     t.equals(data.size, 33)
-    t.ok(validateData(data))
+    t.equals(validateData(data), 'Pass')
 
     t.end()
   }, slowioJson)
@@ -42,7 +42,7 @@ test('Visualizer data - acmeair sample json', function (t) {
     t.ifError(err)
 
     t.equals(data.size, 24)
-    t.ok(validateData(data))
+    t.equals(validateData(data), 'Pass')
 
     t.end()
   }, acmeairJson)
