@@ -8,6 +8,12 @@ const endpoint = require('endpoint')
 const CollectAndRead = require('./collect-and-read.js')
 
 test('cmd - collect - external SIGINT is relayed', function (t) {
+  if (process.platform === 'win32') {
+    t.pass('Cannot relay SIGINT on windows programatically, skipping...')
+    t.end()
+    return
+  }
+
   const child = spawn(
     process.execPath, [
       path.resolve(__dirname, 'cmd-collect-exit-sigint.script.js')
