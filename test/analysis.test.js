@@ -132,7 +132,7 @@ function createExpectedStructure (frames) {
     aggregateNodeExternal.children
   )
   barrierNodeExternal.makeBarrier()
-  barrierNodeExternal.setName('module.external')
+  barrierNodeExternal.setName('external')
 
   const clusterNodeRoot = new ClusterNode(1, 0)
   clusterNodeRoot.makeRoot()
