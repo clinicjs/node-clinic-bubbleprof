@@ -3,12 +3,12 @@
 const data = require('./data.json') // base64 encoded source file
 
 // 'data = data' optional arg allows json to be passed in for browserless tests
-function loaddata (callback, json = data) {
+function loadData (callback, json = data) {
   setTimeout(function () {
     callback(null, wrapData(json))
   })
 }
-module.exports = loaddata
+module.exports = loadData
 
 function wrapData (data) {
   if (!data.map) {
