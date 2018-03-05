@@ -1,22 +1,41 @@
 'use strict'
 
+function isNumber (num) {
+  return typeof num === 'number' && !Number.isNaN(num)
+}
+
 class LineCoordinates {
   constructor (args) {
     // Args must contain x1, y1, and either x2 & x2 or length & angle (radians or degrees)
 
+    if (!args) {
+      throw new Error('Invalid arguments')
+    }
+
+    if (!isNumber(args.x1) || !isNumber(args.y1)) {
+      throw new Error('x1 and y1 of new LineCoordinates must be numeric')
+    }
+
     this.x1 = args.x1
     this.y1 = args.y1
 
-    if ('radians' in args) {
+    const x2y2Valid = isNumber(args.x2) && isNumber(args.y2)
+
+    if (isNumber(args.radians)) {
       this.applyRadians(args.radians)
-    } else if ('degrees' in args) {
+    } else if (isNumber(args.degrees)) {
       this.applyDegrees(args.degrees)
     } else {
+      if (!x2y2Valid) {
+        throw new Error('x2 and y2 of new LineCoordinates must be numeric')
+      }
       this.applyRadians(LineCoordinates.radiansFromXY(args))
     }
-    this.length = ('length' in args) ? args.length : LineCoordinates.lineLengthFromXY(args)
+    this.length = (isNumber(args.length)) ? args.length : LineCoordinates.lineLengthFromXY(args)
 
-    if (!('x2' in args) || !('y2' in args)) Object.assign(args, LineCoordinates.lineEndpoints(this))
+    if (!x2y2Valid) {
+      Object.assign(args, LineCoordinates.lineEndpoints(this))
+    }
     this.x2 = args.x2
     this.y2 = args.y2
   }
