@@ -13,9 +13,13 @@ const SystemInfoDecoder = require('../format/system-info-decoder.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
 const TraceEventDecoder = require('../format/trace-event-decoder.js')
 
-const testServerSockPath = path.resolve(__dirname, '.test-server.sock')
+const sock = process.platform === 'win32'
+  ? '\\\\.\\pipe\\test-server\\' + path.resolve(__dirname)
+  : path.resolve(__dirname, 'test-server.sock')
 
 function waitForFile (filepath, timeout, callback) {
+  if (process.platform === 'win32') return setTimeout(callback, timeout)
+
   fs.access(filepath, function (err) {
     if (!err) return callback(null)
     if (timeout <= 0) {
@@ -28,13 +32,18 @@ function waitForFile (filepath, timeout, callback) {
   })
 }
 
+function unlinkSock (sockPath, callback) {
+  if (process.platform === 'win32') return process.nextTick(callback)
+  fs.unlink(sockPath, callback)
+}
+
 class CollectAndRead extends events.EventEmitter {
   constructor (options, ...args) {
     super()
     const self = this
     const tool = new ClinicBubbleprof()
 
-    fs.unlink(testServerSockPath, function (err) {
+    unlinkSock(sock, function (err) {
       if (err && err.code !== 'ENOENT') return self.emit('error', err)
 
       tool.collect([process.execPath, ...args], function (err, dirname) {
@@ -56,10 +65,10 @@ class CollectAndRead extends events.EventEmitter {
   }
 
   request (href, callback) {
-    waitForFile(testServerSockPath, 1000, function (err) {
+    waitForFile(sock, 1000, function (err) {
       if (err) return callback(err)
       http.get({
-        socketPath: testServerSockPath,
+        socketPath: sock,
         path: href
       }, function (res) {
         res.pipe(endpoint(callback))
