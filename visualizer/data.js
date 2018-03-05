@@ -2,14 +2,19 @@
 
 const data = require('./data.json') // base64 encoded source file
 
-function loaddata (callback) {
+// 'data = data' optional arg allows json to be passed in for browserless tests
+function loadData (callback, json = data) {
   setTimeout(function () {
-    callback(null, wrapData(data))
+    callback(null, wrapData(json))
   })
 }
-module.exports = loaddata
+module.exports = loadData
 
 function wrapData (data) {
+  if (!data.map) {
+    console.warn('No valid data found, data.json contains', typeof data, data)
+    return new Map()
+  }
   return new Map(
     data.map((node) => [node.clusterId, new ClusterNode(node)])
   )
@@ -50,7 +55,13 @@ class AggregateNode {
     this.mark = new Mark(node.mark)
     this.type = node.type
 
-    this.frames = node.frames.map((frame) => new Frame(frame))
+    this.frames = node.frames.map((frame) => {
+      const frameItem = new Frame(frame)
+      return {
+        formatted: frameItem.format(),
+        data: frameItem
+      }
+    })
     this.sources = node.sources.map((source) => new SourceNode(source))
   }
 }
@@ -109,5 +120,29 @@ class SourceNode {
     this.before = source.before
     this.after = source.after
     this.destroy = source.destroy
+
+    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(source, callKey))
+  }
+}
+
+// The callback functions represented by a sourceNode's unique async_id
+// may be called any number of times. To calculate delays and busy time
+// we need to look at each call to these callbacks, relative to its source
+class CallbackEvent {
+  constructor (source, callKey) {
+    // Timestamp when this became the next call to this callback
+    this.delayStart = callKey === 0 ? source.init : source.after[callKey - 1]
+
+    // Timestamp when this callback call begins
+    this.before = source.before[callKey]
+
+    // Timestamp when this callback call completes
+    this.after = source.after[callKey]
+
+    this.syncTime = this.after - this.before
+    this.rawDelay = this.before - this.delayStart
+    this.adjustedDelays = new Map()
+
+    this.source = source
   }
 }
