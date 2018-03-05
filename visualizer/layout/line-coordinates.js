@@ -1,52 +1,24 @@
 'use strict'
 
-const validArgSets = [
-  '{x1, y1, x2, y2}',
-  '{x1, y1, length, radians}',
-  '{x1, y1, length, degrees}'
-].join(', ')
-const ERRORS = {
-  EINVAL: new Error('Invalid set of arguments. Valid sets include: ' + validArgSets)
-}
-
 class LineCoordinates {
   constructor (args) {
-    if (!args) {
-      throw LineCoordinates.ERRORS.EINVAL
-    }
+    // Args must contain x1, y1, and either x2 & x2 or length & angle (radians or degrees)
 
-    const { x1, y1, length, radians, degrees } = args
-    let { x2, y2 } = args
+    this.x1 = args.x1
+    this.y1 = args.y1
 
-    const hasValidArgSet = [
-      !isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2),
-      !isNaN(x1) && !isNaN(y1) && !isNaN(length) && !isNaN(radians),
-      !isNaN(x1) && !isNaN(y1) && !isNaN(length) && !isNaN(degrees)
-    ].find(isTrue => isTrue)
-
-    if (!hasValidArgSet) {
-      throw LineCoordinates.ERRORS.EINVAL
-    }
-
-    this.x1 = x1
-    this.y1 = y1
-
-    if (radians) {
-      this.applyRadians(radians)
-    } else if (degrees) {
-      this.applyDegrees(degrees)
+    if ('radians' in args) {
+      this.applyRadians(args.radians)
+    } else if ('degrees' in args) {
+      this.applyDegrees(args.degrees)
     } else {
       this.applyRadians(LineCoordinates.radiansFromXY(args))
     }
-    this.length = length || LineCoordinates.lineLengthFromXY(args)
+    this.length = ('length' in args) ? args.length : LineCoordinates.lineLengthFromXY(args)
 
-    if (!x2 || !y2) {
-      const endpoints = LineCoordinates.lineEndpoints(this)
-      x2 = endpoints.x2
-      y2 = endpoints.y2
-    }
-    this.x2 = x2
-    this.y2 = y2
+    if (!('x2' in args) || !('y2' in args)) Object.assign(args, LineCoordinates.lineEndpoints(this))
+    this.x2 = args.x2
+    this.y2 = args.y2
   }
 
   applyRadians (radians) {
@@ -127,10 +99,6 @@ class LineCoordinates {
     if (degrees < -180) degrees += 360
     if (degrees > 180) degrees -= 360
     return degrees
-  }
-
-  static get ERRORS () {
-    return ERRORS
   }
 }
 
