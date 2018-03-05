@@ -6,23 +6,24 @@ const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
 
-function validateData (data, t) {
+function validateData (data) {
   for (const [clusterId, clusterNode] of data) {
-    t.ok(clusterNode.name)
-    t.ok(clusterId > clusterNode.parentClusterId)
+    if (!clusterNode.name) return false
+    if (clusterId <= clusterNode.parentClusterId) return false
 
     for (const aggregateNode of clusterNode.nodes) {
-      t.ok(aggregateNode.mark.get(0))
-      t.ok(aggregateNode.aggregateId > aggregateNode.parentAggregateId)
-      if (!aggregateNode.isRoot) t.ok(aggregateNode.type)
+      if (!aggregateNode.mark.get(0)) return false
+      if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return false
+      if (!aggregateNode.isRoot && !aggregateNode.type) return false
 
       for (const sourceNode of aggregateNode.sources) {
-        t.ok(sourceNode.asyncId)
-        t.equals(sourceNode.after.length, sourceNode.callbackEvents.length)
-        t.ok(sourceNode.asyncId > sourceNode.parentAsyncId)
+        if (!sourceNode.asyncId) return false
+        if (sourceNode.after.length !== sourceNode.callbackEvents.length) return false
+        if (sourceNode.asyncId <= sourceNode.parentAsyncId) return false
       }
     }
   }
+  return true
 }
 
 test('Visualizer data - examples/slow-io sample json', function (t) {
@@ -30,7 +31,7 @@ test('Visualizer data - examples/slow-io sample json', function (t) {
     t.ifError(err)
 
     t.equals(data.size, 33)
-    validateData(data, t)
+    t.ok(validateData(data))
 
     t.end()
   }, slowioJson)
@@ -41,7 +42,7 @@ test('Visualizer data - acmeair sample json', function (t) {
     t.ifError(err)
 
     t.equals(data.size, 24)
-    validateData(data, t)
+    t.ok(validateData(data))
 
     t.end()
   }, acmeairJson)
