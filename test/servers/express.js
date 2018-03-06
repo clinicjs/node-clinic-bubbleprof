@@ -2,11 +2,9 @@
 
 const path = require('path')
 const express = require('express')
+const xsock = require('cross-platform-sock')
 
-const sock = process.platform === 'win32'
-  ? '\\\\.\\pipe\\test-server\\' + path.resolve(__dirname, '..')
-  : path.resolve(__dirname, '../test-server.sock')
-
+const sock = xsock(path.join(__dirname, '../test-server.sock'))
 const app = express()
 const server = app.listen(sock)
 

@@ -3,10 +3,9 @@
 const fs = require('fs')
 const path = require('path')
 const http = require('http')
+const xsock = require('cross-platform-sock')
 
-const sock = process.platform === 'win32'
-  ? '\\\\.\\pipe\\test-server\\' + path.resolve(__dirname, '..')
-  : path.resolve(__dirname, '../test-server.sock')
+const sock = xsock(path.join(__dirname, '../test-server.sock'))
 
 let connections = 0
 const server = http.createServer(function request (req, res) {
