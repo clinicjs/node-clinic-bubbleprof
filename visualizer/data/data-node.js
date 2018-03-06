@@ -34,6 +34,23 @@ class DataNode {
     // Reference to settings on data map
     this.settings = settings
 
+    this.stats = new Map()
+    this.stats.set(this.settings.averaging, {
+      within: 0, // TODO: set as null initially then replace with calculated stat
+      between: 0 // TODO: set as null initially then replace with calculated stat
+    })
+  }
+  // statType must be 'within' or 'between'
+  getStat (statType) {
+    const stat = this.stats.get(this.settings.averaging)[statType]
+    if (!isNumber(stat))
+      throw new Error(`Stat ${this.settings.averaging}.${statType} is not a number: `, this.stats.get(this.settings.averaging)[statType], this)
+
+    return stat
+  }
+  setStat (statType) {
+    // Define most of this logic in a setStat method on each class, which uses
+    // super to share logic that can be shared
   }
 }
 
