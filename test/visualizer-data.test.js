@@ -30,6 +30,8 @@ test('Visualizer data - examples/slow-io sample json', function (t) {
   loadData((err, data) => {
     t.ifError(err)
 
+    t.equals(data.settings.averaging, 'mean')
+
     t.equals(data.size, 33)
     t.equals(validateData(data), 'Pass')
 
@@ -41,11 +43,13 @@ test('Visualizer data - acmeair sample json', function (t) {
   loadData((err, data) => {
     t.ifError(err)
 
+    t.equals(data.settings.averaging, 'median')
+
     t.equals(data.size, 24)
     t.equals(validateData(data), 'Pass')
 
     t.end()
-  }, acmeairJson)
+  }, acmeairJson, { averaging: 'median' })
 })
 
 test('Visualizer data - fake json', function (t) {
