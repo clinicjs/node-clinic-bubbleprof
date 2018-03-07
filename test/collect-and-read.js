@@ -7,15 +7,18 @@ const async = require('async')
 const rimraf = require('rimraf')
 const events = require('events')
 const endpoint = require('endpoint')
+const xsock = require('cross-platform-sock')
 const getLoggingPaths = require('../collect/get-logging-paths.js')
 const ClinicBubbleprof = require('../index.js')
 const SystemInfoDecoder = require('../format/system-info-decoder.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
 const TraceEventDecoder = require('../format/trace-event-decoder.js')
 
-const testServerSockPath = path.resolve(__dirname, '.test-server.sock')
+const sock = xsock(path.join(__dirname, 'test-server.sock'))
 
 function waitForFile (filepath, timeout, callback) {
+  if (process.platform === 'win32') return setTimeout(callback, timeout)
+
   fs.access(filepath, function (err) {
     if (!err) return callback(null)
     if (timeout <= 0) {
@@ -34,7 +37,7 @@ class CollectAndRead extends events.EventEmitter {
     const self = this
     const tool = new ClinicBubbleprof()
 
-    fs.unlink(testServerSockPath, function (err) {
+    xsock.unlink(sock, function (err) {
       if (err && err.code !== 'ENOENT') return self.emit('error', err)
 
       tool.collect([process.execPath, ...args], function (err, dirname) {
@@ -56,10 +59,10 @@ class CollectAndRead extends events.EventEmitter {
   }
 
   request (href, callback) {
-    waitForFile(testServerSockPath, 1000, function (err) {
+    waitForFile(sock, 1000, function (err) {
       if (err) return callback(err)
       http.get({
-        socketPath: testServerSockPath,
+        socketPath: sock,
         path: href
       }, function (res) {
         res.pipe(endpoint(callback))

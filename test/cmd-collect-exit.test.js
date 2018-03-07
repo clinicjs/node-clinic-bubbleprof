@@ -7,7 +7,7 @@ const { spawn } = require('child_process')
 const endpoint = require('endpoint')
 const CollectAndRead = require('./collect-and-read.js')
 
-test('cmd - collect - external SIGINT is relayed', function (t) {
+testNotWindows('cmd - collect - external SIGINT is relayed', function (t) {
   const child = spawn(
     process.execPath, [
       path.resolve(__dirname, 'cmd-collect-exit-sigint.script.js')
@@ -56,3 +56,7 @@ test('cmd - collect - non-success exit code causes error', function (t) {
     t.end()
   })
 })
+
+function testNotWindows (msg, fn) {
+  if (process.platform !== 'win32') test(msg, fn)
+}
