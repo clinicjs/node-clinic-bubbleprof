@@ -35,7 +35,7 @@ class CollectAndRead extends events.EventEmitter {
   constructor (options, ...args) {
     super()
     const self = this
-    const tool = new ClinicBubbleprof()
+    const tool = this.tool = new ClinicBubbleprof(options)
 
     xsock.unlink(sock, function (err) {
       if (err && err.code !== 'ENOENT') return self.emit('error', err)
