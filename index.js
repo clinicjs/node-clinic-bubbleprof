@@ -1,5 +1,6 @@
 'use strict'
 
+const events = require('events')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
@@ -14,7 +15,13 @@ const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 
-class ClinicBubbleprof {
+class ClinicBubbleprof extends events.EventEmitter {
+  constructor (settings = {}) {
+    super()
+
+    this.detectPort = !!settings.detectPort
+  }
+
   collect (args, callback) {
     const samplerPath = path.resolve(__dirname, 'logger.js')
 
@@ -23,14 +30,27 @@ class ClinicBubbleprof {
       '-r', samplerPath,
       '--trace-events-enabled', '--trace-event-categories', 'node.async_hooks'
     ]
+
+    const stdio = ['inherit', 'inherit', 'inherit']
+
+    if (this.detectPort) {
+      const detectPortPath = path.resolve(__dirname, 'detect-port.js')
+      logArgs.push('-r', detectPortPath)
+      stdio.push('pipe')
+    }
+
     const proc = spawn(args[0], args.slice(1), {
-      stdio: 'inherit',
+      stdio,
       env: Object.assign({}, process.env, {
         NODE_OPTIONS: logArgs.join(' ') + (
           process.env.NODE_OPTIONS ? ' ' + process.env.NODE_OPTIONS : ''
         )
       })
     })
+
+    if (this.detectPort) {
+      proc.stdio[3].once('data', data => this.emit('port', Number(data), proc))
+    }
 
     // get filenames of logfiles
     const paths = getLoggingPaths({ identifier: proc.pid })
