@@ -226,7 +226,7 @@ const expectedAggregateResults = new Map(Object.entries({
     async: 4,
     sync: 0.5,
     raw: 4
-  },
+  }
 }))
 
 const clusterNodes = new Map(Object.entries(dummyClusterNodes))
