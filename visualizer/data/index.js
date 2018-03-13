@@ -2,7 +2,7 @@
 
 const data = require('../data.json') // base64 encoded source file
 
-const wrapData = require('./data-node.js').wrapData
+const { wrapData } = require('./data-node.js')
 
 // 'json = data' optional arg allows json to be passed in for browserless tests
 function loadData (callback, json = data, settings = {}) {
