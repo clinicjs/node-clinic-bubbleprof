@@ -177,7 +177,7 @@ function isExternal (frames, sysInfo) {
 }
 
 function groupType (node) {
-  if (!node.type) return ['root']
+  if (!node || !node.type) return ['root']
   switch (node.type) {
     case 'PROMISE':
       return ['promise']

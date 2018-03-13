@@ -1,6 +1,7 @@
 'use strict'
 
 const test = require('tap').test
+const path = require('path')
 const getLoggingPaths = require('../collect/get-logging-paths.js')
 
 test('Collect - logging path - identifier', function (t) {
@@ -8,21 +9,21 @@ test('Collect - logging path - identifier', function (t) {
 
   t.strictDeepEqual(paths, {
     '/': '1062.clinic-bubbleprof',
-    '/systeminfo': '1062.clinic-bubbleprof/1062.clinic-bubbleprof-systeminfo',
-    '/stacktrace': '1062.clinic-bubbleprof/1062.clinic-bubbleprof-stacktrace',
-    '/traceevent': '1062.clinic-bubbleprof/1062.clinic-bubbleprof-traceevent'
+    '/systeminfo': path.normalize('1062.clinic-bubbleprof/1062.clinic-bubbleprof-systeminfo'),
+    '/stacktrace': path.normalize('1062.clinic-bubbleprof/1062.clinic-bubbleprof-stacktrace'),
+    '/traceevent': path.normalize('1062.clinic-bubbleprof/1062.clinic-bubbleprof-traceevent')
   })
   t.end()
 })
 
 test('Collect - logging path - path', function (t) {
-  const paths = getLoggingPaths({ path: '/root/1062.clinic-bubbleprof' })
+  const paths = getLoggingPaths({ path: path.normalize('/root/1062.clinic-bubbleprof') })
 
   t.strictDeepEqual(paths, {
-    '/': '/root/1062.clinic-bubbleprof',
-    '/systeminfo': '/root/1062.clinic-bubbleprof/1062.clinic-bubbleprof-systeminfo',
-    '/stacktrace': '/root/1062.clinic-bubbleprof/1062.clinic-bubbleprof-stacktrace',
-    '/traceevent': '/root/1062.clinic-bubbleprof/1062.clinic-bubbleprof-traceevent'
+    '/': path.normalize('/root/1062.clinic-bubbleprof'),
+    '/systeminfo': path.normalize('/root/1062.clinic-bubbleprof/1062.clinic-bubbleprof-systeminfo'),
+    '/stacktrace': path.normalize('/root/1062.clinic-bubbleprof/1062.clinic-bubbleprof-stacktrace'),
+    '/traceevent': path.normalize('/root/1062.clinic-bubbleprof/1062.clinic-bubbleprof-traceevent')
   })
   t.end()
 })
