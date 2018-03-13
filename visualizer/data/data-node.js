@@ -6,23 +6,30 @@ function isNumber (num) {
   return typeof num === 'number' && !Number.isNaN(num)
 }
 
-function wrapData (data, settings) {
+function validateKey (key, validOptions) {
+  if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {
+    throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
+  }
+}
+
+function wrapData (data, settings = {}) {
   if (!data.map) {
-    throw new Error(`No valid data found, data.json is ${typeof data}`, data)
+    throw new Error(`No valid data found, data.json is typeof ${typeof data}`)
   }
 
   const defaultSettings = {
-    averaging: 'mean', // across callbackEvents. Alternatives: 'median', 'sum'
+    averaging: 'mean', // to be applied to callbackEvents within a sourceNode
     quantileRange: 99, // set null to keep all outliers
     idleOnly: false // if true, discounts async delays while sync process blocks event loop
   }
 
   settings = Object.assign(defaultSettings, settings)
+  validateKey(settings.averaging, ['mean', 'median', 'sum'])
 
   const dataWrap = new Map(
     data.map((node) => [node.clusterId, new ClusterNode(node, settings)])
   )
-  CallbackEvent.identifyOverlaps()
+  CallbackEvent.identifyOverlaps(dataWrap)
 
   dataWrap.settings = settings
 
@@ -36,19 +43,40 @@ class DataNode {
 
     this.stats = new Map()
     this.stats.set(this.settings.averaging, {
-      within: 0, // TODO: set as null initially then replace with calculated stat
-      between: 0 // TODO: set as null initially then replace with calculated stat
+      between: 0, // TODO: set as null initially then replace with calculated stat
+      within: 0 // TODO: set as null initially then replace with calculated stat
     })
-  }
-  // statType must be 'within' or 'between'
-  getStat (statType) {
-    const stat = this.stats.get(this.settings.averaging)[statType]
-    if (!isNumber(stat))
-      throw new Error(`Stat ${this.settings.averaging}.${statType} is not a number: `, this.stats.get(this.settings.averaging)[statType], this)
 
+    // Pre-averaging stats based on removing node-specific overlaps only
+    Object.assign(this.stats, {
+      sync: 0,
+      async: {
+        between: 0,
+        within: 0
+      }
+    })
+
+    this.rawTotals = {
+      sync: 0,
+      async: {
+        between: 0,
+        within: 0
+      }
+    }
+  }
+  getStat (statType) {
+    validateKey(statType, ['within', 'between'])
+
+    const stat = this.stats.get(this.settings.averaging)[statType]
+    if (!isNumber(stat)) {
+      const statLabel = `${this.settings.averaging}.${statType}`
+      const nodeLabel = `${this.prototype.constructor} ${this.id}`
+      throw new Error(`Stat ${statLabel} of ${nodeLabel} is not a number: is ${stat}, typeof ${typeof stat}`)
+    }
     return stat
   }
   setStat (statType) {
+    // TODO.
     // Define most of this logic in a setStat method on each class, which uses
     // super to share logic that can be shared
   }
@@ -57,6 +85,7 @@ class DataNode {
 class ClusterNode extends DataNode {
   constructor (node, settings) {
     super(settings)
+
     this.isRoot = (node.clusterId === 1)
 
     this.clusterId = node.clusterId
@@ -64,10 +93,15 @@ class ClusterNode extends DataNode {
     this.name = node.name
 
     this.children = node.children
-    this.nodes = node.nodes
-      .map((aggregateNode) => new AggregateNode(aggregateNode, settings))
-
-    console.log(`clusterId ${this.clusterId}'s stats are within: ${this.getStat('within')} between: ${this.getStat('between')}`)
+    this.nodes = new Map(
+      node.nodes.map((aggregateNode) => [
+        aggregateNode.aggregateId,
+        new AggregateNode(aggregateNode, this)
+      ])
+    )
+  }
+  get id () {
+    return this.clusterId
   }
 }
 
@@ -82,13 +116,15 @@ class Mark {
 }
 
 class AggregateNode extends DataNode {
-  constructor (node, settings) {
-    super(settings)
+  constructor (node, clusterNode) {
+    super(clusterNode.settings)
+
     this.isRoot = (node.aggregateId === 1)
 
     this.aggregateId = node.aggregateId
     this.parentAggregateId = node.parentAggregateId
     this.children = node.children
+    this.clusterNode = clusterNode
 
     this.mark = new Mark(node.mark)
     this.type = node.type
@@ -100,7 +136,10 @@ class AggregateNode extends DataNode {
         data: frameItem
       }
     })
-    this.sources = node.sources.map((source) => new SourceNode(source, settings))
+    this.sources = node.sources.map((source) => new SourceNode(source, this))
+  }
+  get id () {
+    return this.aggregateId
   }
 }
 
@@ -148,8 +187,8 @@ class Frame {
 }
 
 class SourceNode extends DataNode {
-  constructor (source, settings) {
-    super(settings)
+  constructor (source, aggregateNode) {
+    super(aggregateNode.settings)
 
     this.asyncId = source.asyncId
     this.parentAsyncId = source.parentAsyncId
@@ -161,7 +200,12 @@ class SourceNode extends DataNode {
     this.after = source.after
     this.destroy = source.destroy
 
-    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(source, callKey))
+    this.aggregateNode = aggregateNode
+
+    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(this, callKey))
+  }
+  get id () {
+    return this.asyncId
   }
 }
 
