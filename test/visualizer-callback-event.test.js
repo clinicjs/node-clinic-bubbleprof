@@ -31,7 +31,6 @@ class TestClusterNode {
     this.nodes = new Map()
     this.nodeIds = new Set(clusterNode.nodes ? clusterNode.nodes : [])
     this.stats = emptyStats()
-    return this
   }
 }
 
@@ -40,7 +39,6 @@ class TestAggregateNode {
     Object.assign(this, aggregateNodes.get(aggregateId))
     this.id = this.aggregateId = aggregateId
     this.stats = emptyStats()
-    return this
   }
 }
 
@@ -52,7 +50,7 @@ for (const [clusterId] of clusterNodes) {
   clusterNodes.set(clusterId, new TestClusterNode(clusterId))
 }
 
-for (let dummyEvent of dummyCallbackEvents) {
+for (const dummyEvent of dummyCallbackEvents) {
   dummyEvent.init = dummyEvent.delayStart
   dummyEvent.before = [dummyEvent.before]
   dummyEvent.after = [dummyEvent.after]
