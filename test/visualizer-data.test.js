@@ -2,7 +2,6 @@
 
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
-const { wrapData } = require('../visualizer/data/data-node.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
