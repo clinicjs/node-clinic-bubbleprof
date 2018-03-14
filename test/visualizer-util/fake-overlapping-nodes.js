@@ -63,6 +63,8 @@ const dummyAggregateNodes = {
  *        letter = async delay (.delayStart -> .before)
  *             ▓ = sync processing (.before -> .after)
  *
+ *  Each character below represents 0.5 units of time
+ *
  *  i=   | Time -------->      ⒑                  ⒛
  *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9  Totals:
  *  -----|-------------------------------------------------------------
@@ -86,7 +88,7 @@ const dummyAggregateNodes = {
  *  -----|------------------------------------------------------------
  *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
  *
- *  Correct times based on the above:                                   Expected
+ *  Flattened times (times when any event is busy) based on the above:  Expected
  *  -----|------------------------------------------------------------  results (ms):
  *       | Flattened async by aggregate node:
  *      a|       aaaaaaaaaaaaaaaaaaaaaaaaaaaaa     aa             a     16
@@ -110,10 +112,10 @@ const dummyAggregateNodes = {
  *  -----|------------------------------------------------------------
  *       | Flattened sync by aggregate node:
  *      a|                             aaa    aaa    aa            a     4.5
- *      b|                               b   b                           1
+ *      b|                               b                               0.5
  *      c|                                       cccccc                  3
  *      d|                                             ddd   d           2
- *      e|                                                 eee           1.5
+ *      e|                                   e             eee           2
  *      f|                                                       ff      1
  *      g|                                                          g    0.5
  *      h|                                                           h   0.5
@@ -125,7 +127,7 @@ const dummyAggregateNodes = {
  *
  * Raw async stats:
  *  A. between: 0, within: 26.5; B. between: 7, within: 10; C. between: 13.5, within: 0
- *  a: 21, b: 2.5, c: 3.5, d: 7, e: 4.5, f: 6, g: 4, h: 4
+ *  a: 21, b: 2.5, c: 3.5, d: 7, e: 5.5, f: 6, g: 4, h: 4
  *
  * Raw sync stats:
  * A: 10, B: 3.5, C: 3
