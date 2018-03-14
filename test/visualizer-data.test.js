@@ -1,7 +1,8 @@
 'use strict'
 
 const test = require('tap').test
-const loadData = require('../visualizer/data.js')
+const loadData = require('../visualizer/data/index.js')
+const { wrapData } = require('../visualizer/data/data-node.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
@@ -11,8 +12,8 @@ function validateData (data) {
     if (!clusterNode.name) return `1: fails on clusterId ${clusterId}`
     if (clusterId <= clusterNode.parentClusterId) return `2: fails on clusterId ${clusterId}`
 
-    for (const aggregateNode of clusterNode.nodes) {
-      if (!aggregateNode.mark.get(0)) return `3:  fails on aggregateId ${aggregateNode.aggregateId}`
+    for (const [, aggregateNode] of clusterNode.nodes) {
+      if (!aggregateNode.mark || !aggregateNode.mark.get(0)) return `3:  fails on aggregateId ${aggregateNode.aggregateId}`
       if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `4: fails on aggregateId ${aggregateNode.aggregateId}`
       if (!aggregateNode.isRoot && !aggregateNode.type) return `5: fails on aggregateId ${aggregateNode.aggregateId}`
 
@@ -63,11 +64,9 @@ test('Visualizer data - fake json', function (t) {
 })
 
 test('Visualizer data - empty data file', function (t) {
-  loadData((err, data) => {
-    t.ifError(err)
+  t.throws(() => {
+    loadData(() => {})
+  }, new Error(`No valid data found, data.json is typeof string`))
 
-    t.equals(data.size, 0)
-
-    t.end()
-  })
+  t.end()
 })

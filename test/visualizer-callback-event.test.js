@@ -25,9 +25,11 @@ function emptyStats (stop) {
 
 class TestClusterNode {
   constructor (clusterId) {
-    Object.assign(this, clusterNodes.get(clusterId))
+    const clusterNode = clusterNodes.get(clusterId)
+    Object.assign(this, clusterNode)
     this.id = this.clusterId = clusterId
     this.nodes = new Map()
+    this.nodeIds = new Set(clusterNode.nodes ? clusterNode.nodes : [])
     this.stats = emptyStats()
     return this
   }

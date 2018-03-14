@@ -29,7 +29,7 @@ function wrapData (data, settings = {}) {
   const dataWrap = new Map(
     data.map((node) => [node.clusterId, new ClusterNode(node, settings)])
   )
-  CallbackEvent.identifyOverlaps(dataWrap)
+  CallbackEvent.processAllCallbackEvents(dataWrap)
 
   dataWrap.settings = settings
 
@@ -93,6 +93,9 @@ class ClusterNode extends DataNode {
     this.name = node.name
 
     this.children = node.children
+
+    this.nodeIds = new Set(Object.keys(node.nodes))
+
     this.nodes = new Map(
       node.nodes.map((aggregateNode) => [
         aggregateNode.aggregateId,
@@ -126,6 +129,7 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
+    if (!node.mark) console.log('!!!!!!!!!', node, clusterNode)
     this.mark = new Mark(node.mark)
     this.type = node.type
 

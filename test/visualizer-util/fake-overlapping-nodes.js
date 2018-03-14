@@ -22,9 +22,9 @@ const dummyCallbackEvents = [
 ]
 
 const dummyClusterNodes = {
-  A: {},
-  B: {parentClusterId: 'A'},
-  C: {parentClusterId: 'A'}
+  A: {nodes: ['root', 'a', 'b', 'c']},
+  B: {nodes: ['d', 'f', 'g'], parentClusterId: 'A'},
+  C: {nodes: ['e', 'h'], parentClusterId: 'A'}
 }
 
 const dummyAggregateNodes = {

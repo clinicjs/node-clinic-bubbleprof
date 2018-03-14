@@ -29,18 +29,13 @@ class CallbackEvent {
     // Timestamp when this callback call completes
     this.after = source.after[callKey]
 
+    this.aggregateNode = this.sourceNode.aggregateNode
+    this.clusterNode = this.sourceNode.aggregateNode.clusterNode
+
     const parentAggregateId = this.aggregateNode.parentAggregateId
-    this.isBetweenClusters = parentAggregateId && !this.clusterNode.nodes.has(parentAggregateId)
+    this.isBetweenClusters = this.clusterNode.nodes && parentAggregateId && !this.clusterNode.nodeIds.has(parentAggregateId)
 
     allCallbackEvents.push(this)
-  }
-
-  get aggregateNode () {
-    return this.sourceNode.aggregateNode
-  }
-
-  get clusterNode () {
-    return this.sourceNode.aggregateNode.clusterNode
   }
 
   static processAllCallbackEvents () {
@@ -130,7 +125,8 @@ function applyInterval (interval, clusterStatsItem, aggregateStatsItem, isBetwee
 
 function flattenInterval (interval, intervals) {
   // Clone interval data so we can mutate it without causing cross-referencing problems
-  let newInterval = {...interval}
+  // Can't use {...interval} spread operator because fails acorn.js parser
+  let newInterval = Object.assign({}, interval)
 
   // If we've already found intervals for this node, walk backwards through them,
   // flattening against this new one as we go, until we hit a gap
