@@ -1,6 +1,7 @@
 'use strict'
 
 const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
+const { Stem } = require('./stems.js')
 const { validateKey } = require('./validation.js')
 
 class DataSet {
@@ -43,7 +44,13 @@ class DataSet {
     this.callbackEvents = null
   }
   calculateStems () {
-    // TODO: is implemented in ui-B2
+    const nodeByType = { ClusterNode: this.clusterNodes, AggregateNode: this.aggregateNodes }
+    for (const [, clusterNode] of this.clusterNodes) {
+      clusterNode.stem = new Stem(clusterNode, nodeByType)
+      for (const [, aggregateNode] of clusterNode.nodes) {
+        aggregateNode.stem = new Stem(aggregateNode, nodeByType)
+      }
+    }
   }
 }
 

@@ -19,7 +19,6 @@ const dummyCallbackEvents = [
 
   // Attaches to .before and .after arrays of sources[2] on aggregateId e, instead of adding new entry to .sources[]
   { i: 12, /* gets delayStart of 24.5 */ before: 25, after: 25.5, aggregateId: 'e', clusterId: 'C', sourceKey: 2 },
-
   { i: 13, delayStart: 21, before: 27, after: 28, aggregateId: 'f', clusterId: 'B' },
   { i: 14, delayStart: 27.5, before: 28, after: 28.5, aggregateId: 'a', clusterId: 'A' },
   { i: 15, delayStart: 24.5, before: 28.5, after: 29, aggregateId: 'g', clusterId: 'B' },
