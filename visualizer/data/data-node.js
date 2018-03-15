@@ -94,7 +94,7 @@ class ClusterNode extends DataNode {
 
     this.children = node.children
 
-    this.nodeIds = new Set(Object.keys(node.nodes))
+    this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
 
     this.nodes = new Map(
       node.nodes.map((aggregateNode) => [

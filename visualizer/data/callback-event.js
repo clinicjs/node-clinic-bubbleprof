@@ -33,7 +33,7 @@ class CallbackEvent {
     this.clusterNode = this.sourceNode.aggregateNode.clusterNode
 
     const parentAggregateId = this.aggregateNode.parentAggregateId
-    this.isBetweenClusters = this.clusterNode.nodes && parentAggregateId && !this.clusterNode.nodeIds.has(parentAggregateId)
+    this.isBetweenClusters = parentAggregateId && !this.clusterNode.nodeIds.has(parentAggregateId)
 
     allCallbackEvents.push(this)
   }
