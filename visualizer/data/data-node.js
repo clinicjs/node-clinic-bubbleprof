@@ -43,8 +43,8 @@ class DataNode {
 
     this.stats = new Map()
     this.stats.set(this.settings.averaging, {
-      between: 0, // TODO: set as null initially then replace with calculated stat
-      within: 0 // TODO: set as null initially then replace with calculated stat
+      between: 0,
+      within: 0
     })
 
     // Pre-averaging stats based on removing node-specific overlaps only
@@ -129,7 +129,6 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
-    if (!node.mark) console.log('!!!!!!!!!', node, clusterNode)
     this.mark = new Mark(node.mark)
     this.type = node.type
 
