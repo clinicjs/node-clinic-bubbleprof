@@ -1,45 +1,56 @@
 'use strict'
 
-const CallbackEvent = require('./callback-event.js')
+const { CallbackEvent, CallbackEventsArray } = require('./callback-event.js')
+const { isNumber, validateKey } = require('./validation.js')
 
-function isNumber (num) {
-  return typeof num === 'number' && !Number.isNaN(num)
-}
+class DataSet {
+  constructor (data, settings = {}) {
+    if (!data.map) {
+      throw new Error(`No valid data found, data.json is typeof ${typeof data}`)
+    }
 
-function validateKey (key, validOptions) {
-  if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {
-    throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
+    const defaultSettings = {
+      averaging: 'mean', // to be applied to callbackEvents within a sourceNode
+      quantileRange: 99, // set null to keep all outliers
+      idleOnly: false // if true, discounts async delays while sync process blocks event loop
+    }
+
+    settings = Object.assign(defaultSettings, settings)
+    validateKey(settings.averaging, ['mean', 'median', 'sum'])
+    this.settings = settings
+
+    // Array of CallbackEvents is temporary for calculating stats on other nodes
+    this.callbackEventsArray = new CallbackEventsArray() // CallbackEvents are created and pushed within SourceNode constructor
+
+    // Source, Aggregate and Cluster Node maps persist in memory throughout
+    this.sourceNodes = new Map() // SourceNodes are created and .set within AggregateNode constructor
+    this.aggregateNodes = new Map() // AggregateNodes are created and .set within ClusterNode constructor
+    this.clusterNodes = new Map(
+      data.map((node) => [node.clusterId, new ClusterNode(node, this)])
+    )
+    this.processData()
   }
-}
-
-function wrapData (data, settings = {}) {
-  if (!data.map) {
-    throw new Error(`No valid data found, data.json is typeof ${typeof data}`)
+  processData () {
+    this.calculateFlattenedStats()
+    this.calculateStems()
   }
-
-  const defaultSettings = {
-    averaging: 'mean', // to be applied to callbackEvents within a sourceNode
-    quantileRange: 99, // set null to keep all outliers
-    idleOnly: false // if true, discounts async delays while sync process blocks event loop
+  getByNodeType (nodeType, nodeId) {
+    validateKey(nodeType, ['sourceNodes', 'aggregateNodes', 'clusterNodes'])
+    return this[nodeType].get()
   }
-
-  settings = Object.assign(defaultSettings, settings)
-  validateKey(settings.averaging, ['mean', 'median', 'sum'])
-
-  const dataWrap = new Map(
-    data.map((node) => [node.clusterId, new ClusterNode(node, settings)])
-  )
-  CallbackEvent.processAllCallbackEvents(dataWrap)
-
-  dataWrap.settings = settings
-
-  return dataWrap
+  calculateFlattenedStats () {
+    this.callbackEventsArray.processAll()
+    delete this.callbackEventsArray
+  }
+  calculateStems () {
+  }
 }
 
 class DataNode {
-  constructor (settings) {
+  constructor (dataSet) {
     // Reference to settings on data map
-    this.settings = settings
+    this.settings = dataSet.settings
+    this.dataSet = dataSet
 
     this.stats = new Map()
     this.stats.set(this.settings.averaging, {
@@ -83,8 +94,8 @@ class DataNode {
 }
 
 class ClusterNode extends DataNode {
-  constructor (node, settings) {
-    super(settings)
+  constructor (node, dataSet) {
+    super(dataSet)
 
     this.isRoot = (node.clusterId === 1)
 
@@ -120,7 +131,7 @@ class Mark {
 
 class AggregateNode extends DataNode {
   constructor (node, clusterNode) {
-    super(clusterNode.settings)
+    super(clusterNode.dataSet)
 
     this.isRoot = (node.aggregateId === 1)
 
@@ -191,7 +202,7 @@ class Frame {
 
 class SourceNode extends DataNode {
   constructor (source, aggregateNode) {
-    super(aggregateNode.settings)
+    super(aggregateNode.dataSet)
 
     this.asyncId = source.asyncId
     this.parentAsyncId = source.parentAsyncId
@@ -205,7 +216,7 @@ class SourceNode extends DataNode {
 
     this.aggregateNode = aggregateNode
 
-    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(this, callKey))
+    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(callKey, this))
   }
   get id () {
     return this.asyncId
@@ -213,7 +224,7 @@ class SourceNode extends DataNode {
 }
 
 module.exports = {
-  wrapData,
+  DataSet,
   ClusterNode,
   AggregateNode,
   SourceNode

@@ -10,11 +10,11 @@ const dummyCallbackEvents = [
   { i: 5, delayStart: 18, before: 19.5, after: 22, aggregateId: 'c', clusterId: 'A' },
   { i: 6, delayStart: 18.5, before: 20, after: 21.5, aggregateId: 'c', clusterId: 'A' },
   { i: 7, delayStart: 20, before: 21, after: 22, aggregateId: 'a', clusterId: 'A' },
-  { i: 8, delayStart: 16, before: 22, after: 23.5, aggregateId: 'd', clusterId: 'B' },
+  { i: 8, delayStart: 16, before: 22, after: 23.5, aggregateId: 'd', clusterId: 'B' }, // sources[0]
   { i: 9, delayStart: 20, before: 24, after: 25.5, aggregateId: 'e', clusterId: 'C' },
-  { i: 10, delayStart: 23.5, before: 24, after: 24.5, aggregateId: 'e', clusterId: 'C' },
-  { i: 11, delayStart: 24, before: 25, after: 25.5, aggregateId: 'd', clusterId: 'B' },
-  { i: 12, delayStart: 24.5, before: 25, after: 25.5, aggregateId: 'e', clusterId: 'C' },
+  { i: 10, delayStart: 23.5, before: 24, after: 24.5, aggregateId: 'e', clusterId: 'C' }, // sources[2]
+  { i: 11, /* delayStart to be 24 */  before: 25, after: 25.5, aggregateId: 'd', clusterId: 'B', sourceKey: 0 },
+  { i: 12, /* delayStart to be 24.5 */ before: 25, after: 25.5, aggregateId: 'e', clusterId: 'C', sourceKey: 2 },
   { i: 13, delayStart: 21, before: 27, after: 28, aggregateId: 'f', clusterId: 'B' },
   { i: 14, delayStart: 27.5, before: 28, after: 28.5, aggregateId: 'a', clusterId: 'A' },
   { i: 15, delayStart: 24.5, before: 28.5, after: 29, aggregateId: 'g', clusterId: 'B' },
@@ -73,7 +73,7 @@ const dummyAggregateNodes = {
  * [14]Aw|                                                        a▓    raw:  0.5
  * [13]Bw|                                           ffffffffffff▓▓     raw:  6
  * [12]Cb|                                                  e▓          raw:  0.5
- * [11]Bb|                                                 dd▓          raw:  1
+ * [11]Bb|                                                ddd▓          raw:  1.5
  * [10]Cb|                                                e▓            raw:  0.5
  *  [9]Cb|                                         eeeeeeee▓▓▓          raw:  4
  *  [8]Bb|                                 dddddddddddd▓▓▓              raw:  6
@@ -94,7 +94,7 @@ const dummyAggregateNodes = {
  *      a|       aaaaaaaaaaaaaaaaaaaaaaaaaaaaa     aa             a     16
  *      b|                           bbbb                                2
  *      c|                                     cccc                      2
- *      d|                                 dddddddddddd    dd            7
+ *      d|                                 dddddddddddd   ddd            7.5
  *      e|                                  e      eeeeeeeee             5
  *      f|                                           ffffffffffff        6
  *      g|                                                  gggggggg     4
@@ -102,7 +102,7 @@ const dummyAggregateNodes = {
  *  -----|------------------------------------------------------------
  *       | Flattened async BETWEEN (b) cluster nodes:
  *      A|                                                               0
- *      B|                                 BBBBBBBBBBBB    BB            7
+ *      B|                                 BBBBBBBBBBBB   BBB            7.5
  *      C|                                  C      CCCCCCCC CCCCCCCCC    9
  *  -----|------------------------------------------------------------
  *       | Flattened async WITHIN (w) cluster nodes:
@@ -126,8 +126,8 @@ const dummyAggregateNodes = {
  *      C|                                  C              CCC       C   2.5
  *
  * Raw async stats:
- *  A. between: 0, within: 26.5; B. between: 7, within: 10; C. between: 13.5, within: 0
- *  a: 21, b: 2.5, c: 3.5, d: 7, e: 5.5, f: 6, g: 4, h: 4
+ *  A. between: 0, within: 26.5; B. between: 9, within: 10; C. between: 13.5, within: 0
+ *  a: 21, b: 2.5, c: 3.5, d: 9, e: 5.5, f: 6, g: 4, h: 4
  *
  * Raw sync stats:
  * A: 10, B: 3.5, C: 3
@@ -153,13 +153,13 @@ const expectedClusterResults = new Map(Object.entries({
   B: {
     async: {
       within: 7.5,
-      between: 7
+      between: 7.5
     },
     sync: 3.5,
     rawTotals: {
       async: {
         within: 10,
-        between: 7
+        between: 7.5
       },
       sync: 3.5
     }
@@ -204,9 +204,9 @@ const expectedAggregateResults = new Map(Object.entries({
     rawSync: 4.5
   },
   d: {
-    async: 7,
+    async: 7.5,
     sync: 2,
-    raw: 7
+    raw: 7.5
   },
   e: {
     async: 5,

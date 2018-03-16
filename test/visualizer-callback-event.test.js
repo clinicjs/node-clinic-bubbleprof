@@ -1,7 +1,7 @@
 'use strict'
 
 const test = require('tap').test
-const CallbackEvent = require('../visualizer/data/callback-event.js')
+const { DataSet } = require('../visualizer/data/data-node.js')
 const {
   clusterNodes,
   aggregateNodes,
@@ -12,25 +12,11 @@ const {
 
 // Prepare fake data:
 
-function emptyStats (stop) {
-  return {
-    async: {
-      between: 0,
-      within: 0
-    },
-    sync: 0,
-    rawTotals: stop ? null : emptyStats(true)
-  }
-}
-
 class TestClusterNode {
   constructor (clusterId) {
     const clusterNode = clusterNodes.get(clusterId)
     Object.assign(this, clusterNode)
     this.id = this.clusterId = clusterId
-    this.nodes = new Map()
-    this.nodeIds = new Set(clusterNode.nodes ? clusterNode.nodes : [])
-    this.stats = emptyStats()
   }
 }
 
@@ -38,32 +24,47 @@ class TestAggregateNode {
   constructor (aggregateId) {
     Object.assign(this, aggregateNodes.get(aggregateId))
     this.id = this.aggregateId = aggregateId
-    this.stats = emptyStats()
+    this.mark = this.mark || ['dummy', undefined, undefined]
+    this.frames = this.frames || []
+    this.type = this.type || 'dummyType'
+    this.sources = []
   }
 }
+
+const nodesArray = []
 
 for (const [aggregateId] of aggregateNodes) {
   aggregateNodes.set(aggregateId, new TestAggregateNode(aggregateId))
 }
 
-for (const [clusterId] of clusterNodes) {
+for (const [clusterId, clusterNode] of clusterNodes) {
+  for (var i = 0; i < clusterNode.nodes.length; i++) {
+    const aggregateId = clusterNode.nodes[i]
+    clusterNode.nodes[i] = aggregateNodes.get(aggregateId)
+  }
   clusterNodes.set(clusterId, new TestClusterNode(clusterId))
+  nodesArray.push(clusterNodes.get(clusterId))
 }
 
 for (const dummyEvent of dummyCallbackEvents) {
-  dummyEvent.init = dummyEvent.delayStart
-  dummyEvent.before = [dummyEvent.before]
-  dummyEvent.after = [dummyEvent.after]
-
-  dummyEvent.aggregateNode = aggregateNodes.get(dummyEvent.aggregateId)
-
-  dummyEvent.aggregateNode.clusterNode = clusterNodes.get(dummyEvent.clusterId)
-  dummyEvent.aggregateNode.clusterNode.nodes.set(dummyEvent.aggregateId, dummyEvent.aggregateNode)
-
-  new CallbackEvent(dummyEvent, 0) // eslint-disable-line no-new
+  const aggregateNode = aggregateNodes.get(dummyEvent.aggregateId)
+  if (typeof dummyEvent.sourceKey !== 'undefined') {
+    // Add this to an existing source
+    const source = aggregateNode.sources[dummyEvent.sourceKey]
+    source.before.push(dummyEvent.before)
+    source.after.push(dummyEvent.after)
+  } else {
+    // Create a new source
+    aggregateNode.sources.push({
+      init: dummyEvent.delayStart,
+      before: [dummyEvent.before],
+      after: [dummyEvent.after],
+      destroy: dummyEvent.destory || dummyEvent.after + Math.random() * 3
+    })
+  }
 }
 
-CallbackEvent.processAllCallbackEvents()
+const dataSet = new DataSet(nodesArray)
 
 // Fake data prepared.
 // Run tests:
@@ -99,7 +100,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
 test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
 
-  for (const [clusterId, clusterNode] of clusterNodes) {
+  for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
     const expected = expectedClusterResults.get(clusterId)
 
     errorMessage += compare(clusterNode, ['stats', 'async', 'within'], expected)
@@ -118,7 +119,7 @@ test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
 
 test('Visualizer data - AggregateNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
-  for (const [aggregateId, aggregateNode] of aggregateNodes) {
+  for (const [aggregateId, aggregateNode] of dataSet.aggregateNodes) {
     const expected = expectedAggregateResults.get(aggregateId)
 
     errorMessage += compare(aggregateNode, ['stats', 'async', 'between'], expected, ['async'])

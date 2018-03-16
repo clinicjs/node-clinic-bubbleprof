@@ -7,7 +7,7 @@ const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
 
 function validateData (data) {
-  for (const [clusterId, clusterNode] of data) {
+  for (const [clusterId, clusterNode] of data.clusterNodes) {
     if (!clusterNode.name) return `1: fails on clusterId ${clusterId}`
     if (clusterId <= clusterNode.parentClusterId) return `2: fails on clusterId ${clusterId}`
 
@@ -32,7 +32,7 @@ test('Visualizer data - examples/slow-io sample json', function (t) {
 
     t.equals(data.settings.averaging, 'mean')
 
-    t.equals(data.size, 33)
+    t.equals(data.clusterNodes.size, 33)
     t.equals(validateData(data), 'Pass')
 
     t.end()
@@ -45,7 +45,7 @@ test('Visualizer data - acmeair sample json', function (t) {
 
     t.equals(data.settings.averaging, 'median')
 
-    t.equals(data.size, 24)
+    t.equals(data.clusterNodes.size, 24)
     t.equals(validateData(data), 'Pass')
 
     t.end()
@@ -56,7 +56,7 @@ test('Visualizer data - fake json', function (t) {
   loadData((err, data) => {
     t.ifError(err)
 
-    t.equals(data.size, 2)
+    t.equals(data.clusterNodes.size, 2)
 
     t.end()
   }, fakeJson)
