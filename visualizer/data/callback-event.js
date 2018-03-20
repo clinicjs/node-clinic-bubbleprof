@@ -99,7 +99,7 @@ class TemporaryStatsItem {
 class IntervalsArray extends Array {
   pushAndFlatten (interval) {
     // Clone interval data to mutate it without cross-referencing between cluster and aggregate
-    let newInterval = new Interval(interval.start, interval.end, interval.isBetween)
+    const newInterval = new Interval(interval.start, interval.end, interval.isBetween)
 
     // If we've already found intervals for this node, walk backwards through them,
     // flattening against this new one as we go, until we hit a gap

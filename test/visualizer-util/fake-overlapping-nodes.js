@@ -4,17 +4,22 @@ const dummyCallbackEvents = [
   { i: 'root', delayStart: undefined, before: undefined, after: undefined, aggregateId: 'root', clusterId: 'A' },
   { i: 0, delayStart: 9, before: 14, after: 15.5, aggregateId: 'a', clusterId: 'A' },
   { i: 1, delayStart: 13, before: 15, after: 15.5, aggregateId: 'b', clusterId: 'A' },
-  { i: 2, delayStart: 16.5, before: 17, after: 17.5, aggregateId: 'e', clusterId: 'C' },
+  { i: 2, delayStart: 16.5, before: 17, after: 17.5, aggregateId: 'e', clusterId: 'C' }, // is sources[0] on aggregateId e
   { i: 3, delayStart: 3, before: 17.5, after: 19, aggregateId: 'a', clusterId: 'A' },
   { i: 4, delayStart: 18.5, before: 19, after: 19.5, aggregateId: 'c', clusterId: 'A' },
   { i: 5, delayStart: 18, before: 19.5, after: 22, aggregateId: 'c', clusterId: 'A' },
   { i: 6, delayStart: 18.5, before: 20, after: 21.5, aggregateId: 'c', clusterId: 'A' },
   { i: 7, delayStart: 20, before: 21, after: 22, aggregateId: 'a', clusterId: 'A' },
-  { i: 8, delayStart: 16, before: 22, after: 23.5, aggregateId: 'd', clusterId: 'B' }, // sources[0]
-  { i: 9, delayStart: 20, before: 24, after: 25.5, aggregateId: 'e', clusterId: 'C' },
-  { i: 10, delayStart: 23.5, before: 24, after: 24.5, aggregateId: 'e', clusterId: 'C' }, // sources[2]
-  { i: 11, /* delayStart to be 24 */  before: 25, after: 25.5, aggregateId: 'd', clusterId: 'B', sourceKey: 0 },
-  { i: 12, /* delayStart to be 24.5 */ before: 25, after: 25.5, aggregateId: 'e', clusterId: 'C', sourceKey: 2 },
+  { i: 8, delayStart: 16, before: 22, after: 23.5, aggregateId: 'd', clusterId: 'B' }, // is sources[0] on aggregateId d
+  { i: 9, delayStart: 20, before: 24, after: 25.5, aggregateId: 'e', clusterId: 'C' }, // is sources[1] on aggregateId e
+  { i: 10, delayStart: 23.5, before: 24, after: 24.5, aggregateId: 'e', clusterId: 'C' }, // is sources[2] on aggregateId e
+
+  // Attaches to .before and .after arrays of sources[0] on aggregateId d, instead of adding new entry to .sources[]
+  { i: 11, /* gets delayStart of 24 */ before: 25, after: 25.5, aggregateId: 'd', clusterId: 'B', sourceKey: 0 },
+
+  // Attaches to .before and .after arrays of sources[2] on aggregateId e, instead of adding new entry to .sources[]
+  { i: 12, /* gets delayStart of 24.5 */ before: 25, after: 25.5, aggregateId: 'e', clusterId: 'C', sourceKey: 2 },
+
   { i: 13, delayStart: 21, before: 27, after: 28, aggregateId: 'f', clusterId: 'B' },
   { i: 14, delayStart: 27.5, before: 28, after: 28.5, aggregateId: 'a', clusterId: 'A' },
   { i: 15, delayStart: 24.5, before: 28.5, after: 29, aggregateId: 'g', clusterId: 'B' },
