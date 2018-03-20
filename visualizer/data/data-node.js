@@ -36,7 +36,7 @@ class DataSet {
   }
   getByNodeType (nodeType, nodeId) {
     validateKey(nodeType, ['sourceNodes', 'aggregateNodes', 'clusterNodes'])
-    return this[nodeType].get()
+    return this[nodeType].get(nodeId)
   }
   calculateFlattenedStats () {
     this.callbackEventsArray.processAll()
@@ -75,6 +75,8 @@ class DataNode {
       }
     }
   }
+  /*
+  // TODO: use and create tests for this in ui-A3
   getStat (statType) {
     validateKey(statType, ['within', 'between'])
 
@@ -91,6 +93,7 @@ class DataNode {
     // Define most of this logic in a setStat method on each class, which uses
     // super to share logic that can be shared
   }
+  */
 }
 
 class ClusterNode extends DataNode {

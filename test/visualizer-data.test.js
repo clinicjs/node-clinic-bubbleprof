@@ -6,24 +6,45 @@ const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
 
+function validateClusterNode (clusterNode) {
+  if (!clusterNode.name) return `1: fails on clusterId ${clusterNode.clusterId}`
+  if (clusterNode.clusterId <= clusterNode.parentClusterId) return `2: fails on clusterId ${clusterNode.clusterId}`
+  return ''
+}
+
+function validateAggregateNode (aggregateNode) {
+  if (!aggregateNode.mark || !aggregateNode.mark.get(0)) return `3: fails on aggregateId ${aggregateNode.aggregateId}`
+  if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `4: fails on aggregateId ${aggregateNode.aggregateId}`
+  if (!aggregateNode.isRoot && !aggregateNode.type) return `5: fails on aggregateId ${aggregateNode.aggregateId}`
+  return ''
+}
+
+function validateSourceNode (sourceNode) {
+  if (!sourceNode.id) return `6: fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}`
+  if (sourceNode.after.length !== sourceNode.callbackEvents.length) return `7: fails on asyncId ${sourceNode.asyncId}`
+  if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `8: fails on asyncId ${sourceNode.asyncId}`
+  return ''
+}
+
 function validateData (data) {
-  for (const [clusterId, clusterNode] of data.clusterNodes) {
-    if (!clusterNode.name) return `1: fails on clusterId ${clusterId}`
-    if (clusterId <= clusterNode.parentClusterId) return `2: fails on clusterId ${clusterId}`
+  let result = ''
+
+  for (const [, clusterNode] of data.clusterNodes) {
+    result += validateClusterNode(clusterNode)
 
     for (const [, aggregateNode] of clusterNode.nodes) {
-      if (!aggregateNode.mark || !aggregateNode.mark.get(0)) return `3:  fails on aggregateId ${aggregateNode.aggregateId}`
-      if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `4: fails on aggregateId ${aggregateNode.aggregateId}`
-      if (!aggregateNode.isRoot && !aggregateNode.type) return `5: fails on aggregateId ${aggregateNode.aggregateId}`
+      result += validateAggregateNode(aggregateNode)
 
       for (const sourceNode of aggregateNode.sources) {
-        if (!sourceNode.asyncId) return `6: fails with no sourceNode id, aggregateId ${aggregateNode.aggregateId}`
-        if (sourceNode.after.length !== sourceNode.callbackEvents.length) return `7:  fails on asyncId ${sourceNode.asyncId}`
-        if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `8: fails on asyncId ${sourceNode.asyncId}`
+        result += validateSourceNode(sourceNode)
       }
     }
   }
-  return 'Pass'
+  result += validateClusterNode(data.getByNodeType('clusterNodes', 1))
+  result += validateAggregateNode(data.getByNodeType('aggregateNodes', 1))
+  result += validateSourceNode(data.getByNodeType('sourceNodes', 1))
+
+  return result || 'Pass'
 }
 
 test('Visualizer data - examples/slow-io sample json', function (t) {
