@@ -1,7 +1,7 @@
 'use strict'
 
 const { CallbackEvent, CallbackEventsArray } = require('./callback-event.js')
-const { isNumber, validateKey } = require('./validation.js')
+const { validateKey } = require('./validation.js')
 
 class DataSet {
   constructor (data, settings = {}) {
@@ -23,8 +23,8 @@ class DataSet {
     this.callbackEventsArray = new CallbackEventsArray() // CallbackEvents are created and pushed within SourceNode constructor
 
     // Source, Aggregate and Cluster Node maps persist in memory throughout
-    this.sourceNodes = new Map() // SourceNodes are created and .set within AggregateNode constructor
-    this.aggregateNodes = new Map() // AggregateNodes are created and .set within ClusterNode constructor
+    this.sourceNodes = new Map() // SourceNodes are created from AggregateNode constructor and set in their own constructor
+    this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
     this.clusterNodes = new Map(
       data.map((node) => [node.clusterId, new ClusterNode(node, this)])
     )
@@ -136,7 +136,7 @@ class AggregateNode extends DataNode {
   constructor (node, clusterNode) {
     super(clusterNode.dataSet)
 
-    this.isRoot = (node.aggregateId === 1)
+    this.isRoot = (node.isRoot || node.aggregateId === 1)
 
     this.aggregateId = node.aggregateId
     this.parentAggregateId = node.parentAggregateId
@@ -154,6 +154,8 @@ class AggregateNode extends DataNode {
       }
     })
     this.sources = node.sources.map((source) => new SourceNode(source, this))
+
+    this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
   get id () {
     return this.aggregateId
@@ -220,6 +222,8 @@ class SourceNode extends DataNode {
     this.aggregateNode = aggregateNode
 
     this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(callKey, this))
+
+    this.dataSet.sourceNodes.set(this.asyncId, this)
   }
   get id () {
     return this.asyncId

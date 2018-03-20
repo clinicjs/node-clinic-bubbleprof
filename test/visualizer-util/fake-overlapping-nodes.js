@@ -33,7 +33,7 @@ const dummyClusterNodes = {
 }
 
 const dummyAggregateNodes = {
-  root: {},
+  root: {isRoot: true},
   a: {parentAggregateId: 'root'},
   b: {parentAggregateId: 'root'},
   c: {parentAggregateId: 'a'},

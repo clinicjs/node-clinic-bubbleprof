@@ -126,11 +126,13 @@ test('Visualizer data - AggregateNode stats from CallbackEvents', function (t) {
     errorMessage += compare(aggregateNode, ['stats', 'async', 'within'], { alwaysZero: 0 }, ['alwaysZero'])
     errorMessage += compare(aggregateNode, ['stats', 'sync'], expected)
 
-    errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'async', 'between'], expected, ['raw'])
-    errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'async', 'within'], { alwaysZero: 0 }, ['alwaysZero'])
+    if (!aggregateNode.isRoot) {
+      errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'async', 'between'], expected, ['raw'])
+      errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'async', 'within'], { alwaysZero: 0 }, ['alwaysZero'])
 
-    if (typeof expected.rawSync === 'undefined') expected.rawSync = expected.sync
-    errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'sync'], expected, ['rawSync'])
+      if (typeof expected.rawSync === 'undefined') expected.rawSync = expected.sync
+      errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'sync'], expected, ['rawSync'])
+    }
   }
   errorMessage = errorMessage || 'Pass'
   t.equals(errorMessage, 'Pass')
