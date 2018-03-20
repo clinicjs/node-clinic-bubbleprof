@@ -65,7 +65,15 @@ test('Visualizer data - fake json', function (t) {
 test('Visualizer data - empty data file', function (t) {
   t.throws(() => {
     loadData(() => {})
-  }, new Error(`No valid data found, data.json is typeof string`))
+  }, new Error('No valid data found, data.json is typeof string'))
+
+  t.end()
+})
+
+test('Visualizer data - invalid settings', function (t) {
+  t.throws(() => {
+    loadData(() => {}, { map: () => {} }, { averaging: 'mode' })
+  }, new Error('Invalid key "mode" passed, valid types are: mean, median, sum'))
 
   t.end()
 })
