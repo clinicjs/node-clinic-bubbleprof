@@ -1,6 +1,6 @@
 'use strict'
 
-const { CallbackEvent, CallbackEventsArray } = require('./callback-event.js')
+const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
 const { validateKey } = require('./validation.js')
 
 class DataSet {
@@ -20,7 +20,7 @@ class DataSet {
     this.settings = settings
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
-    this.callbackEventsArray = new CallbackEventsArray() // CallbackEvents are created and pushed within SourceNode constructor
+    this.callbackEvents = new AllCallbackEvents() // CallbackEvents are created and pushed within SourceNode constructor
 
     // Source, Aggregate and Cluster Node maps persist in memory throughout
     this.sourceNodes = new Map() // SourceNodes are created from AggregateNode constructor and set in their own constructor
@@ -39,10 +39,11 @@ class DataSet {
     return this[nodeType].get(nodeId)
   }
   calculateFlattenedStats () {
-    this.callbackEventsArray.processAll()
-    delete this.callbackEventsArray
+    this.callbackEvents.processAll()
+    this.callbackEvents = null
   }
   calculateStems () {
+    // TODO: is implemented in ui-B2
   }
 }
 

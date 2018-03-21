@@ -9,8 +9,6 @@ class CallbackEvent {
   constructor (callKey, source) {
     const dataSet = source.dataSet
 
-    this.sourceNode = source
-
     // Timestamp when this became the next call to this callback
     this.delayStart = callKey === 0 ? source.init : source.after[callKey - 1]
 
@@ -20,25 +18,29 @@ class CallbackEvent {
     // Timestamp when this callback call completes
     this.after = source.after[callKey]
 
-    this.aggregateNode = this.sourceNode.aggregateNode
-    this.clusterNode = this.sourceNode.aggregateNode.clusterNode
+    this.sourceNode = source
+    this.aggregateNode = source.aggregateNode
+    this.clusterNode = source.aggregateNode.clusterNode
 
     const parentAggregateId = this.aggregateNode.parentAggregateId
     this.isBetweenClusters = parentAggregateId && !this.clusterNode.nodeIds.has(parentAggregateId)
 
-    dataSet.callbackEventsArray.push(this)
+    dataSet.callbackEvents.array.push(this)
   }
 }
 
 // These temporary arrays of all CallbackEvents in a DataSet are to be used to calculate stats, then deleted / garbage collected
-class CallbackEventsArray extends Array {
+class AllCallbackEvents {
+  constructor () {
+    this.array = []
+  }
   processAll () {
     const clusterStats = new Map()
     const aggregateStats = new Map()
 
-    this.sort((a, b) => a.before - b.before)
+    this.array.sort((a, b) => a.before - b.before)
 
-    for (const callbackEvent of this) {
+    for (const callbackEvent of this.array) {
       const { delayStart, before, after, isBetweenClusters, aggregateNode, clusterNode } = callbackEvent
 
       if (!areNumbers([delayStart, before, after])) {
@@ -69,10 +71,10 @@ class CallbackEventsArray extends Array {
 class TemporaryStatsItem {
   constructor (node) {
     this.intervals = {
-      sync: new IntervalsArray(),
+      sync: new FlattenedIntervals(),
       async: {
-        between: new IntervalsArray(),
-        within: new IntervalsArray()
+        between: new FlattenedIntervals(),
+        within: new FlattenedIntervals()
       }
     }
     this.rawTotals = {
@@ -92,22 +94,25 @@ class TemporaryStatsItem {
     statsTarget.sync = this.intervals.sync.getFlattenedTotal()
     statsTarget.async.between = this.intervals.async.between.getFlattenedTotal()
     statsTarget.async.within = this.intervals.async.within.getFlattenedTotal()
-    delete this.intervals
+    this.intervals = null
   }
 }
 
-class IntervalsArray extends Array {
+class FlattenedIntervals {
+  constructor () {
+    this.array = []
+  }
   pushAndFlatten (interval) {
     // Clone interval data to mutate it without cross-referencing between cluster and aggregate
     const newInterval = new Interval(interval.start, interval.end, interval.isBetween)
 
     // If we've already found intervals for this node, walk backwards through them,
     // flattening against this new one as we go, until we hit a gap
-    for (var i = this.length - 1; i >= 0; i--) {
-      const earlierInterval = this[i]
+    for (var i = this.array.length - 1; i >= 0; i--) {
+      const earlierInterval = this.array[i]
 
       if (newInterval.start < earlierInterval.end) {
-        this.pop()
+        this.array.pop()
         newInterval.start = Math.min(earlierInterval.start, newInterval.start)
         newInterval.end = Math.max(earlierInterval.end, newInterval.end)
       } else {
@@ -115,11 +120,11 @@ class IntervalsArray extends Array {
         break
       }
     }
-    this.push(newInterval)
+    this.array.push(newInterval)
   }
   getFlattenedTotal () {
     let total = 0
-    for (const interval of this) {
+    for (const interval of this.array) {
       total += interval.duration
     }
     return total
@@ -156,5 +161,5 @@ class Interval {
 
 module.exports = {
   CallbackEvent,
-  CallbackEventsArray
+  AllCallbackEvents
 }
