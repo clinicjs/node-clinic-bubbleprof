@@ -52,7 +52,6 @@ class Stem {
     }
   }
   getTotalStemLength (scale = 1) {
-    // Check the cache
     if (!isNumber(this._totalStemLengthByScale[scale])) {
       // All lines and circumferences are meant to represent same value / pixel ratio => so simply multiply all by same scale
       this._totalStemLengthByScale[scale] = (this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter) * scale
