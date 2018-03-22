@@ -2,101 +2,15 @@
 
 const test = require('tap').test
 const { DataSet } = require('../visualizer/data/data-node.js')
-const { GCKey, getGCCount } = require('gckey')
 const {
-  clusterNodes,
-  aggregateNodes,
-  dummyCallbackEvents,
+  fakeNodes,
   expectedClusterResults,
   expectedAggregateResults
-} = require('./visualizer-util/fake-overlapping-nodes.js')
-
-if (typeof global.gc !== 'function') throw new Error('This test must be run with the --expose-gc flag')
-
-// Prepare fake data:
-
-class TestClusterNode {
-  constructor (clusterId) {
-    const clusterNode = clusterNodes.get(clusterId)
-    Object.assign(this, clusterNode)
-    this.id = this.clusterId = clusterId
-  }
-}
-
-class TestAggregateNode {
-  constructor (aggregateId) {
-    Object.assign(this, aggregateNodes.get(aggregateId))
-    this.id = this.aggregateId = aggregateId
-    this.mark = this.mark || ['dummy', undefined, undefined]
-    this.frames = this.frames || []
-    this.type = this.type || 'dummyType'
-    this.sources = []
-  }
-}
-
-const nodesArray = []
-
-for (const [aggregateId] of aggregateNodes) {
-  aggregateNodes.set(aggregateId, new TestAggregateNode(aggregateId))
-}
-
-for (const [clusterId, clusterNode] of clusterNodes) {
-  for (var i = 0; i < clusterNode.nodes.length; i++) {
-    const aggregateId = clusterNode.nodes[i]
-    clusterNode.nodes[i] = aggregateNodes.get(aggregateId)
-  }
-  clusterNodes.set(clusterId, new TestClusterNode(clusterId))
-  nodesArray.push(clusterNodes.get(clusterId))
-}
-
-for (const dummyEvent of dummyCallbackEvents) {
-  const aggregateNode = aggregateNodes.get(dummyEvent.aggregateId)
-  if (typeof dummyEvent.sourceKey !== 'undefined') {
-    // Add this to an existing source
-    const source = aggregateNode.sources[dummyEvent.sourceKey]
-    source.before.push(dummyEvent.before)
-    source.after.push(dummyEvent.after)
-  } else {
-    // Create a new source
-    aggregateNode.sources.push({
-      init: dummyEvent.delayStart,
-      before: [dummyEvent.before],
-      after: [dummyEvent.after],
-      destroy: dummyEvent.destory || dummyEvent.after + Math.random() * 3
-    })
-  }
-}
+} = require('./visualizer-util/prepare-fake-nodes.js')
 
 // Create real DataSet from fake data
-const dataSet = new DataSet(nodesArray)
-
-// Add GCkeys so we can count how many items are garbage collected
-for (const callbackEvent of dataSet.callbackEvents.array) {
-  const gcKey = new GCKey()
-  callbackEvent.gcTracker = gcKey
-}
-
-{ // Confirm that GCkey is working correctly - each of these should increase gc count by 1
-  const throwAway = new GCKey()
-  if (throwAway) {
-    const testTracker = new GCKey()
-    dataSet.testTracker = testTracker
-  }
-}
-const callbackEventsGCExpected = dataSet.callbackEvents.array.length + 2
-
-// This should free up all the tracked objects for garbage collection
+const dataSet = new DataSet(fakeNodes)
 dataSet.processData()
-dataSet.testTracker = null
-
-setImmediate(() => {
-  test('Visualizer data - ensure callbackEvents are garbage collected', function (t) {
-    global.gc()
-    const amountGarbageCollected = getGCCount()
-    t.equals(amountGarbageCollected, callbackEventsGCExpected)
-    t.end()
-  })
-})
 
 // Fake data prepared.
 // Run tests:
