@@ -2,7 +2,7 @@
 
 const { isNumber } = require('./validation.js')
 
-function getNodePath (node, nodeByType) {
+function getNodeAncestorIds (node, nodeByType) {
   const parent = node.getParentNode()
   return parent ? [...parent.stem.ancestors.ids, parent.id] : []
 }
@@ -16,7 +16,7 @@ class Stem {
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
-      ids: getNodePath(node, nodeByType)
+      ids: getNodeAncestorIds(node, nodeByType)
     }
     // this.ownBetween = node.getStat('between') // TODO: uncomment as soon as averaging is implemented
     this.ownBetween = node.stats.async.between
