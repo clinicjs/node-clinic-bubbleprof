@@ -33,6 +33,7 @@ test('Visualizer data - stems - calculates length based on ancestors', function 
     }
     const sum = (a, b) => a + b
     const totalAncestorsLength = stem.ancestors.ids.map(toOwnLength).reduce(sum, 0)
+    // Floating point precision acting up here, hence `.toFixed()` both sides
     t.equal((totalStemLength - totalAncestorsLength).toFixed(8), (stem.ownBetween + stem.ownDiameter).toFixed(8))
 
     t.end()
