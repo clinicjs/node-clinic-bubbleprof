@@ -2,12 +2,8 @@
 
 const { isNumber } = require('./validation.js')
 
-function getNodeParentId (node) {
-  return node.parentClusterId || node.parentAggregateId
-}
-
 function getNodePath (node, nodeByType) {
-  const parent = nodeByType[node.constructor.name].get(getNodeParentId(node))
+  const parent = node.getParentNode()
   return parent ? [...parent.stem.ancestors.ids, parent.id] : []
 }
 
@@ -30,7 +26,7 @@ class Stem {
     this._totalStemLengthByScale = {}
 
     for (let ancestor of this.ancestors.ids) {
-      ancestor = nodeByType[node.constructor.name].get(ancestor)
+      ancestor = node.getSameType(ancestor)
       this.ancestors.totalBetween += ancestor.stem.ownBetween
       this.ancestors.totalDiameter += ancestor.stem.ownDiameter
     }

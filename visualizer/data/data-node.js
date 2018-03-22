@@ -254,9 +254,9 @@ class SourceNode extends DataNode {
   get id () {
     return this.asyncId
   }
-  get parentId () {
-    return this.parentAsyncId
-  }
+  // get parentId () {
+  //   return this.parentAsyncId
+  // }
 }
 
 module.exports = {
