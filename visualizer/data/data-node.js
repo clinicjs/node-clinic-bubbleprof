@@ -28,7 +28,6 @@ class DataSet {
     this.clusterNodes = new Map(
       data.map((node) => [node.clusterId, new ClusterNode(node, this)])
     )
-    this.processData()
   }
   processData () {
     this.calculateFlattenedStats()
@@ -222,7 +221,10 @@ class SourceNode extends DataNode {
 
     this.aggregateNode = aggregateNode
 
-    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(callKey, this))
+    source.before.forEach((value, callKey) => {
+      const callbackEvent = new CallbackEvent(callKey, this)
+      this.dataSet.callbackEvents.array.push(callbackEvent)
+    })
 
     this.dataSet.sourceNodes.set(this.asyncId, this)
   }
