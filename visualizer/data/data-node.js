@@ -1,7 +1,7 @@
 'use strict'
 
 const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
-const { validateKey } = require('./validation.js')
+const { validateKey, isNumber } = require('./validation.js')
 
 class DataSet {
   constructor (data, settings = {}) {
@@ -35,8 +35,12 @@ class DataSet {
     this.calculateStems()
   }
   getByNodeType (nodeType, nodeId) {
-    validateKey(nodeType, ['sourceNodes', 'aggregateNodes', 'clusterNodes'])
-    return this[nodeType].get(nodeId)
+    // nodeTypes match someNode.constructor.name
+    validateKey(nodeType, ['SourceNode', 'AggregateNode', 'ClusterNode'])
+    if (!isNumber(nodeId)) return null
+    // Turn constructor names like ClusterNode into corresponding map keys like clusterNodes
+    const mapKey = nodeType.slice(0, 1).toLowerCase() + nodeType.slice(1) + 's'
+    return this[mapKey].get(nodeId)
   }
   calculateFlattenedStats () {
     this.callbackEvents.processAll()
@@ -95,6 +99,14 @@ class DataNode {
     // super to share logic that can be shared
   }
   */
+
+  getParentNode () {
+    return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
+  }
+
+  getSameType (nodeId) {
+    return this.dataSet.getByNodeType(this.constructor.name, nodeId)
+  }
 }
 
 class ClusterNode extends DataNode {
@@ -120,6 +132,9 @@ class ClusterNode extends DataNode {
   }
   get id () {
     return this.clusterId
+  }
+  get parentId () {
+    return this.parentClusterId
   }
 }
 
@@ -160,6 +175,9 @@ class AggregateNode extends DataNode {
   }
   get id () {
     return this.aggregateId
+  }
+  get parentId () {
+    return this.parentAggregateId
   }
 }
 
@@ -228,6 +246,9 @@ class SourceNode extends DataNode {
   }
   get id () {
     return this.asyncId
+  }
+  get parentId () {
+    return this.parentAsyncId
   }
 }
 
