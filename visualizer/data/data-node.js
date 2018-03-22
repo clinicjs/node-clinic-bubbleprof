@@ -2,6 +2,7 @@
 
 const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
 const { validateKey, isNumber } = require('./validation.js')
+const { Stem } = require('./stems.js')
 
 class DataSet {
   constructor (data, settings = {}) {
@@ -47,7 +48,13 @@ class DataSet {
     this.callbackEvents = null
   }
   calculateStems () {
-    // TODO: is implemented in ui-B2
+    const nodeByType = { ClusterNode: this.clusterNodes, AggregateNode: this.aggregateNodes }
+    for (const [, clusterNode] of this.clusterNodes) {
+      clusterNode.stem = new Stem(clusterNode, nodeByType)
+      for (const [, aggregateNode] of clusterNode.nodes) {
+        aggregateNode.stem = new Stem(aggregateNode, nodeByType)
+      }
+    }
   }
 }
 
