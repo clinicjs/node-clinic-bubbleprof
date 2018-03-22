@@ -49,9 +49,9 @@ class DataSet {
   }
   calculateStems () {
     const nodeByType = { ClusterNode: this.clusterNodes, AggregateNode: this.aggregateNodes }
-    for (const [, clusterNode] of this.clusterNodes) {
+    for (const clusterNode of this.clusterNodes.values()) {
       clusterNode.stem = new Stem(clusterNode, nodeByType)
-      for (const [, aggregateNode] of clusterNode.nodes) {
+      for (const aggregateNode of clusterNode.nodes.values()) {
         aggregateNode.stem = new Stem(aggregateNode, nodeByType)
       }
     }
