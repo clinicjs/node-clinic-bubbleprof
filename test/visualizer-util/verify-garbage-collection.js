@@ -10,9 +10,9 @@ const { GCKey, getGCCount } = require('gckey')
  * Use and modify them if you suspect there is a possible memory leak or garbage collection issue
  *
  * To run:
- *   1: Copy the gckey directory in this directory to node_modules
- *   2: `npm install` in the node_modules/gckey directory to compile
- *   3: Run this script directly with the --expose-gc with any necessary modifications
+ *   1: Clone https://github.com/jasnell/gckey.git into node_modules
+ *   2: `npm install` in node_modules/gckey to compile
+ *   3: Run this test script with the --expose-gc
  */
 
 if (typeof global.gc !== 'function') throw new Error('This test must be run with the --expose-gc flag')
