@@ -2,7 +2,7 @@
 
 const { isNumber } = require('./validation.js')
 
-function getNodeAncestorIds (node, nodeByType) {
+function getNodeAncestorIds (node) {
   const parent = node.getParentNode()
   return parent ? [...parent.stem.ancestors.ids, parent.id] : []
 }
@@ -12,11 +12,11 @@ function calculateRadius (circumference) {
 }
 
 class Stem {
-  constructor (node, nodeByType) {
+  constructor (node) {
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
-      ids: getNodeAncestorIds(node, nodeByType)
+      ids: getNodeAncestorIds(node)
     }
     // this.ownBetween = node.getStat('between') // TODO: uncomment as soon as averaging is implemented
     this.ownBetween = node.stats.async.between
