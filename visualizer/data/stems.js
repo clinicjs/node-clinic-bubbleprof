@@ -25,8 +25,8 @@ class Stem {
 
     this._totalStemLengthByScale = {}
 
-    for (let ancestor of this.ancestors.ids) {
-      ancestor = node.getSameType(ancestor)
+    for (const ancestorId of this.ancestors.ids) {
+      const ancestor = node.getSameType(ancestorId)
       this.ancestors.totalBetween += ancestor.stem.ownBetween
       this.ancestors.totalDiameter += ancestor.stem.ownDiameter
     }
