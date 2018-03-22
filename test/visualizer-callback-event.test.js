@@ -11,7 +11,7 @@ const {
   expectedAggregateResults
 } = require('./visualizer-util/fake-overlapping-nodes.js')
 
-// This test must be run with the --expose-gc flag
+if (typeof global.gc !== 'function') throw new Error('This test must be run with the --expose-gc flag')
 
 // Prepare fake data:
 
@@ -78,8 +78,10 @@ for (const callbackEvent of dataSet.callbackEvents.array) {
 
 { // Confirm that GCkey is working correctly - each of these should increase gc count by 1
   const throwAway = new GCKey()
-  const testTracker = new GCKey()
-  dataSet.testTracker = testTracker
+  if (throwAway) {
+    const testTracker = new GCKey()
+    dataSet.testTracker = testTracker
+  }
 }
 const callbackEventsGCExpected = dataSet.callbackEvents.array.length + 2
 
@@ -89,7 +91,7 @@ dataSet.testTracker = null
 
 setImmediate(() => {
   test('Visualizer data - ensure callbackEvents are garbage collected', function (t) {
-    gc()
+    global.gc()
     const amountGarbageCollected = getGCCount()
     t.equals(amountGarbageCollected, callbackEventsGCExpected)
     t.end()
