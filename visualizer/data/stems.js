@@ -2,29 +2,14 @@
 
 const { isNumber } = require('./validation.js')
 
-function getNodeId (node) {
-  return node.clusterId || node.aggregateId
-}
-
 function getNodeParentId (node) {
   return node.parentClusterId || node.parentAggregateId
 }
 
-function memoize (fn) {
-  fn._cache = fn._cache || new Map()
-  return (...args) => {
-    if (fn._cache.get(args[0]) === undefined) {
-      fn._cache.set(args[0], fn(...args))
-    }
-    return fn._cache.get(args[0])
-  }
+function getNodePath (node, nodeByType) {
+  const parent = nodeByType[node.constructor.name].get(getNodeParentId(node))
+  return parent ? [...parent.stem.ancestors.ids, parent.id] : []
 }
-
-const getNodePath = memoize((node, nodeByType) => {
-  const path = [getNodeId(node)]
-  const ancestor = nodeByType[node.constructor.name].get(getNodeParentId(node))
-  return ancestor ? getNodePath(ancestor, nodeByType).concat(path) : path
-})
 
 function calculateRadius (circumference) {
   return circumference / (2 * Math.PI)
@@ -32,11 +17,10 @@ function calculateRadius (circumference) {
 
 class Stem {
   constructor (node, nodeByType) {
-    this.pathToNode = getNodePath(node, nodeByType)
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
-      path: this.pathToNode.slice(0, -1)
+      ids: getNodePath(node, nodeByType)
     }
     // this.ownBetween = node.getStat('between') // TODO: uncomment as soon as averaging is implemented
     this.ownBetween = node.stats.async.between
@@ -45,7 +29,7 @@ class Stem {
 
     this._totalStemLengthByScale = {}
 
-    for (let ancestor of this.ancestors.path) {
+    for (let ancestor of this.ancestors.ids) {
       ancestor = nodeByType[node.constructor.name].get(ancestor)
       this.ancestors.totalBetween += ancestor.stem.ownBetween
       this.ancestors.totalDiameter += ancestor.stem.ownDiameter

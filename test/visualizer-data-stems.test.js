@@ -18,13 +18,13 @@ test('Visualizer data - stems - calculates between and diameter based on stats',
   }, slowioJson)
 })
 
-test('Visualizer data - stems - calculates length based on ancestor path', function (t) {
+test('Visualizer data - stems - calculates length based on ancestors', function (t) {
   loadData((err, data) => {
     t.ifError(err)
 
     const stem = data.clusterNodes.get(16).stem
     const totalStemLength = stem.getTotalStemLength()
-    t.deepEqual(stem.ancestors.path, [ 1, 5, 7, 8, 10 ])
+    t.deepEqual(stem.ancestors.ids, [ 1, 5, 7, 8, 10 ])
     t.equal(totalStemLength, 21793.56387518604)
 
     const toOwnLength = id => {
@@ -32,7 +32,7 @@ test('Visualizer data - stems - calculates length based on ancestor path', funct
       return ancestorStem.ownBetween + ancestorStem.ownDiameter
     }
     const sum = (a, b) => a + b
-    const totalAncestorsLength = stem.ancestors.path.map(toOwnLength).reduce(sum, 0)
+    const totalAncestorsLength = stem.ancestors.ids.map(toOwnLength).reduce(sum, 0)
     t.equal((totalStemLength - totalAncestorsLength).toFixed(8), (stem.ownBetween + stem.ownDiameter).toFixed(8))
 
     t.end()
