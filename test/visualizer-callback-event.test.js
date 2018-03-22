@@ -2,6 +2,7 @@
 
 const test = require('tap').test
 const { DataSet } = require('../visualizer/data/data-node.js')
+const { GCKey, getGCCount } = require('gckey')
 const {
   clusterNodes,
   aggregateNodes,
@@ -9,6 +10,8 @@ const {
   expectedClusterResults,
   expectedAggregateResults
 } = require('./visualizer-util/fake-overlapping-nodes.js')
+
+// This test must be run with the --expose-gc flag
 
 // Prepare fake data:
 
@@ -64,7 +67,34 @@ for (const dummyEvent of dummyCallbackEvents) {
   }
 }
 
+// Create real DataSet from fake data
 const dataSet = new DataSet(nodesArray)
+
+// Add GCkeys so we can count how many items are garbage collected
+for (const callbackEvent of dataSet.callbackEvents.array) {
+  const gcKey = new GCKey()
+  callbackEvent.gcTracker = gcKey
+}
+
+{ // Confirm that GCkey is working correctly - each of these should increase gc count by 1
+  const throwAway = new GCKey()
+  const testTracker = new GCKey()
+  dataSet.testTracker = testTracker
+}
+const callbackEventsGCExpected = dataSet.callbackEvents.array.length + 2
+
+// This should free up all the tracked objects for garbage collection
+dataSet.processData()
+dataSet.testTracker = null
+
+setImmediate(() => {
+  test('Visualizer data - ensure callbackEvents are garbage collected', function (t) {
+    gc()
+    const amountGarbageCollected = getGCCount()
+    t.equals(amountGarbageCollected, callbackEventsGCExpected)
+    t.end()
+  })
+})
 
 // Fake data prepared.
 // Run tests:
