@@ -25,7 +25,7 @@ test('Visualizer data - stems - calculates length based on ancestors', function 
     const stem = data.clusterNodes.get(16).stem
     const totalStemLength = stem.getTotalStemLength()
     t.deepEqual(stem.ancestors.ids, [ 1, 5, 7, 8, 10 ])
-    t.equal(totalStemLength, 21793.56387518604)
+    t.equal(totalStemLength.toFixed(8), '21793.56387519')
 
     const toOwnLength = id => {
       const ancestorStem = data.clusterNodes.get(id).stem
