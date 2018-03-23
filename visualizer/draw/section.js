@@ -1,6 +1,6 @@
 'use strict'
 
-const d3 = require('./d3.js')
+const d3 = require('./d3-subset.js')
 
 class Section {
   constructor (id) {
