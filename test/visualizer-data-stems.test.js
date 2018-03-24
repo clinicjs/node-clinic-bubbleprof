@@ -2,7 +2,7 @@
 
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
-const { isNumber } = require('../visualizer/data/validation.js')
+const { isNumber } = require('../visualizer/validation.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 
 test('Visualizer data - stems - calculates between and diameter based on stats', function (t) {

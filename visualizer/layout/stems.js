@@ -1,6 +1,6 @@
 'use strict'
 
-const { isNumber } = require('./validation.js')
+const { isNumber } = require('../validation.js')
 
 function getNodeAncestorIds (node) {
   const parent = node.getParentNode()

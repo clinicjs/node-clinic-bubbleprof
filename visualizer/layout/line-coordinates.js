@@ -1,8 +1,6 @@
 'use strict'
 
-function isNumber (num) {
-  return typeof num === 'number' && !Number.isNaN(num)
-}
+const { isNumber } = require('../validation.js')
 
 class LineCoordinates {
   constructor (args) {

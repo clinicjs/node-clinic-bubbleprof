@@ -1,7 +1,7 @@
 'use strict'
 
 const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
-const { validateKey, isNumber } = require('./validation.js')
+const { validateKey, isNumber } = require('../validation.js')
 const generateLayout = require('../layout/index.js')
 
 class DataSet {
