@@ -53,7 +53,9 @@ for (const dummyEvent of dummyCallbackEvents) {
       init: dummyEvent.delayStart,
       before: [dummyEvent.before],
       after: [dummyEvent.after],
-      destroy: dummyEvent.destory || dummyEvent.after + Math.random() * 3
+      // .destroy isn't currently used in these tests or defined in test data,
+      // if it's undefined give it a valid random value for completeness
+      destroy: dummyEvent.destroy || dummyEvent.after + Math.random()
     })
   }
 }
