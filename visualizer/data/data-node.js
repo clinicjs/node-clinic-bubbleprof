@@ -2,7 +2,6 @@
 
 const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
 const { validateKey, isNumber } = require('../validation.js')
-const generateLayout = require('../layout/index.js')
 
 class DataSet {
   constructor (data, settings = {}) {
