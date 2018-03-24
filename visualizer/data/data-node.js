@@ -33,7 +33,6 @@ class DataSet {
   }
   processData () {
     this.calculateFlattenedStats()
-    generateLayout(this)
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
