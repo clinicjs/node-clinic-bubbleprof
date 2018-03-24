@@ -2,7 +2,7 @@
   "name": "@nearform/clinic-bubbleprof",
   "description": "Programmable interface to clinic bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "scripts": {
     "test": "standard | snazzy && tap --no-cov test/*.test.js",
     "ci-lint": "standard | snazzy",
@@ -12,6 +12,7 @@
     "visualize-all": "node debug/visualize-all.js"
   },
   "devDependencies": {
+    "cross-platform-sock": "^1.0.0",
     "express": "^4.16.2",
     "inspectpoint": "^0.2.2",
     "rimraf": "^2.6.2",
@@ -27,6 +28,7 @@
     "async": "^2.5.0",
     "browserify": "^14.5.0",
     "endpoint": "^0.4.5",
+    "on-net-listen": "^1.0.0",
     "protocol-buffers": "^3.2.1",
     "pump": "^1.0.2",
     "stream-template": "0.0.4",

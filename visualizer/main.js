@@ -1,6 +1,6 @@
 'use strict'
 
-const loadData = require('./data.js')
+const loadData = require('./data/index.js')
 
 loadData(function maybeDone (err, data) {
   if (err) throw err

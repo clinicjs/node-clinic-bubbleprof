@@ -3,6 +3,9 @@
 const fs = require('fs')
 const path = require('path')
 const http = require('http')
+const xsock = require('cross-platform-sock')
+
+const sock = xsock(path.join(__dirname, '../test-server.sock'))
 
 let connections = 0
 const server = http.createServer(function request (req, res) {
@@ -16,4 +19,4 @@ const server = http.createServer(function request (req, res) {
   })
 })
 
-server.listen(path.resolve(__dirname, '..', '.test-server.sock'))
+server.listen(sock)
