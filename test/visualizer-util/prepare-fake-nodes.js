@@ -60,6 +60,14 @@ for (const dummyEvent of dummyCallbackEvents) {
   }
 }
 
+for (const expected of expectedClusterResults.values()) {
+  expected.withinValue = expected.async.within + expected.sync
+}
+
+for (const expected of expectedAggregateResults.values()) {
+  expected.withinValue = expected.sync
+}
+
 module.exports = {
   fakeNodes,
   expectedClusterResults,

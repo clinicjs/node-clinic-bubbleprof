@@ -83,13 +83,12 @@ class TemporaryStatsItem {
     this.node = node
   }
   applyIntervalsTotals () {
-    const statsTarget = this.node.stats
+    this.node.stats.rawTotals = this.rawTotals
 
-    statsTarget.rawTotals = this.rawTotals
-
-    statsTarget.sync = this.intervals.sync.getFlattenedTotal()
-    statsTarget.async.between = this.intervals.async.between.getFlattenedTotal()
-    statsTarget.async.within = this.intervals.async.within.getFlattenedTotal()
+    const syncTotal = this.intervals.sync.getFlattenedTotal()
+    this.node.stats.sync = syncTotal
+    this.node.stats.async.between = this.intervals.async.between.getFlattenedTotal()
+    this.node.stats.async.within = this.intervals.async.within.getFlattenedTotal()
     this.intervals = null
   }
 }

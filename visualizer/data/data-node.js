@@ -64,20 +64,22 @@ class DataNode {
     this.settings = dataSet.settings
     this.dataSet = dataSet
 
-    this.stats = new Map()
-    this.stats.set(this.settings.averaging, {
-      between: 0,
-      within: 0
-    })
+    this._syncStat = 0
+    this._asyncBetweenStat = 0
+    this._asyncWithinStat = 0
 
-    // Pre-averaging stats based on removing node-specific overlaps only
-    Object.assign(this.stats, {
-      sync: 0,
+    const node = this
+    this.stats = {
+      set sync (num) { node._syncStat = node.validateStat(num, 'stats.sync') },
+      get sync () { return node._syncStat || 0 },
       async: {
-        between: 0,
-        within: 0
+        set between (num) { node._asyncBetweenStat = node.validateStat(num, 'stats.async.between') },
+        get between () { return node._asyncBetweenStat || 0 },
+
+        set within (num) { node._asyncWithinStat = node.validateStat(num, 'stats.async.within') },
+        get within () { return node._asyncWithinStat || 0 }
       }
-    })
+    }
 
     this.rawTotals = {
       sync: 0,
@@ -87,25 +89,9 @@ class DataNode {
       }
     }
   }
-  /*
-  // TODO: use and create tests for this in ui-A3
-  getStat (statType) {
-    validateKey(statType, ['within', 'between'])
 
-    const stat = this.stats.get(this.settings.averaging)[statType]
-    if (!isNumber(stat)) {
-      const statLabel = `${this.settings.averaging}.${statType}`
-      const nodeLabel = `${this.prototype.constructor} ${this.id}`
-      throw new Error(`Stat ${statLabel} of ${nodeLabel} is not a number: is ${stat}, typeof ${typeof stat}`)
-    }
-    return stat
-  }
-  setStat (statType) {
-    // TODO.
-    // Define most of this logic in a setStat method on each class, which uses
-    // super to share logic that can be shared
-  }
-  */
+  get withinValue () { return this._syncStat + this._asyncWithinStat }
+  get betweenValue () { return this._asyncBetweenStat }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
@@ -113,6 +99,11 @@ class DataNode {
 
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.constructor.name, nodeId)
+  }
+
+  validateStat (num, statType) {
+    if (!isNumber(num)) throw new Error(`Tried to set ${typeof num} "${num}" to ${this.constructor.name} ${this.id} ${statType}, should be number`)
+    return num
   }
 }
 

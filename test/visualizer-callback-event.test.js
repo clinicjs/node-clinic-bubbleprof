@@ -43,7 +43,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
   return `Error: ${dataNode.constructor.name} ${dataNode.id} ${resultKeysString} is ${actualValue}, expected ${expectedValue}. \n`
 }
 
-test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
+test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
 
   for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
@@ -52,6 +52,9 @@ test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
     errorMessage += compare(clusterNode, ['stats', 'async', 'within'], expected)
     errorMessage += compare(clusterNode, ['stats', 'async', 'between'], expected)
     errorMessage += compare(clusterNode, ['stats', 'sync'], expected)
+
+    errorMessage += compare(clusterNode, ['betweenValue'], expected, ['async', 'between'])
+    errorMessage += compare(clusterNode, ['withinValue'], expected, ['withinValue'])
 
     errorMessage += compare(clusterNode, ['stats', 'rawTotals', 'async', 'within'], expected)
     errorMessage += compare(clusterNode, ['stats', 'rawTotals', 'async', 'between'], expected)
@@ -63,7 +66,7 @@ test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
   t.end()
 })
 
-test('Visualizer data - AggregateNode stats from CallbackEvents', function (t) {
+test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
   for (const [aggregateId, aggregateNode] of dataSet.aggregateNodes) {
     const expected = expectedAggregateResults.get(aggregateId)
@@ -82,5 +85,13 @@ test('Visualizer data - AggregateNode stats from CallbackEvents', function (t) {
   }
   errorMessage = errorMessage || 'Pass'
   t.equals(errorMessage, 'Pass')
+  t.end()
+})
+
+test('Visualizer CallbackEvents - Invalid data item', function (t) {
+  t.throws(() => {
+    dataSet.clusterNodes.values().next().value.stats.sync = '14%'
+  }, new Error('Tried to set string "14%" to ClusterNode A stats.sync, should be number'))
+
   t.end()
 })
