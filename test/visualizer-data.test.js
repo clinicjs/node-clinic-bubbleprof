@@ -39,9 +39,9 @@ function validateData (data) {
       }
     }
   }
-  result += validateClusterNode(data.getByNodeType('clusterNodes', 1))
-  result += validateAggregateNode(data.getByNodeType('aggregateNodes', 1))
-  result += validateSourceNode(data.getByNodeType('sourceNodes', 1))
+  result += validateClusterNode(data.getByNodeType('ClusterNode', 1))
+  result += validateAggregateNode(data.getByNodeType('AggregateNode', 1))
+  result += validateSourceNode(data.getByNodeType('SourceNode', 1))
 
   return result || 'Pass'
 }
