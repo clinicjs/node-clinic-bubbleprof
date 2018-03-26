@@ -12,7 +12,7 @@ class Layout {
 
     // Create instance now, place references in appropriate getters while generating stems & connections,
     // then run .setScaleFactor() to calculate scale factor after stems have been calculated
-    this.scale = new Scale(dataSet, this.settings.scaleSettings)
+    this.scale = new Scale(dataSet, this.settings)
 
     this.clusterConnections = []
     this.aggregateConnections = new Map() // map of arrays, one array of agg connections per clusterId
