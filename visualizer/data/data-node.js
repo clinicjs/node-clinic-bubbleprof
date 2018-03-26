@@ -22,7 +22,6 @@ class DataSet {
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents() // CallbackEvents are created and pushed within SourceNode constructor
-
     // Source, Aggregate and Cluster Node maps persist in memory throughout
     this.sourceNodes = new Map() // SourceNodes are created from AggregateNode constructor and set in their own constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
