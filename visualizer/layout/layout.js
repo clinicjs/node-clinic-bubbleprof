@@ -25,22 +25,26 @@ class Layout {
   generate () {
     for (const [clusterId, clusterNode] of this.dataSet.clusterNodes) {
       clusterNode.stem = new Stem(clusterNode)
+
       if (clusterNode.parentClusterId) {
-        const parentClusterNode = clusterNode.getParentNode()
-        const connection = new Connection(parentNode, clusterNode, this.scale)
-        this.clusterConnections.push(new Connection(parentNode, clusterNode, this.scale))
+        this.addConnection(clusterNode, this.clusterConnections)
         this.aggregateConnections.set(clusterId, [])
       }
+
       for (const aggregateNode of clusterNode.nodes.values()) {
         aggregateNode.stem = new Stem(aggregateNode)
+
         if (aggregateNode.parentAggregateId) {
-          const parentAggregateNode = aggregateNode.getParentNode()
-          const connection = new Connection(parentAggregateNode, aggregateNode, this.scale)
-          this.aggregateConnections.get(clusterId).push(connection)
+          this.addConnection(aggregateNode, this.aggregateConnections.get(clusterId))
         }
       }
     }
     this.scale.setScaleFactor(this.dataSet)
+  }
+
+  addConnection (targetNode, connectionArray) {
+    sourceNode = targetNode.getParentNode()
+    connectionArray.push(new Connection(sourceNode, targetNode, this.scale)
   }
 }
 
