@@ -22,14 +22,12 @@ class DataSet {
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents() // CallbackEvents are created and pushed within SourceNode constructor
-
     // Source, Aggregate and Cluster Node maps persist in memory throughout
     this.sourceNodes = new Map() // SourceNodes are created from AggregateNode constructor and set in their own constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
     this.clusterNodes = new Map(
       data.map((node) => [node.clusterId, new ClusterNode(node, this)])
     )
-    this.processData()
   }
   processData () {
     this.calculateFlattenedStats()
@@ -248,7 +246,10 @@ class SourceNode extends DataNode {
 
     this.aggregateNode = aggregateNode
 
-    this.callbackEvents = source.before.map((value, callKey) => new CallbackEvent(callKey, this))
+    source.before.forEach((value, callKey) => {
+      const callbackEvent = new CallbackEvent(callKey, this)
+      this.dataSet.callbackEvents.array.push(callbackEvent)
+    })
 
     this.dataSet.sourceNodes.set(this.asyncId, this)
   }
