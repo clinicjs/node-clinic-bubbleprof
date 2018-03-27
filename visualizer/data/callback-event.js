@@ -7,8 +7,6 @@ const { areNumbers } = require('./validation.js')
 // we need to look at each call to these callbacks, relative to its source
 class CallbackEvent {
   constructor (callKey, source) {
-    const dataSet = source.dataSet
-
     // Timestamp when this became the next call to this callback
     this.delayStart = callKey === 0 ? source.init : source.after[callKey - 1]
 
@@ -24,8 +22,6 @@ class CallbackEvent {
 
     const parentAggregateId = this.aggregateNode.parentAggregateId
     this.isBetweenClusters = parentAggregateId && !this.clusterNode.nodeIds.has(parentAggregateId)
-
-    dataSet.callbackEvents.array.push(this)
   }
 }
 
