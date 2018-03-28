@@ -44,11 +44,11 @@ class AllCallbackEvents {
         continue
       }
 
-      const aggregateId = aggregateNode.id
+      const aggregateId = aggregateNode.getId()
       if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
       const aggregateStatsItem = aggregateStats.get(aggregateId)
 
-      const clusterId = clusterNode.id
+      const clusterId = clusterNode.getId()
       if (!clusterStats.has(clusterId)) clusterStats.set(clusterId, new TemporaryStatsItem(clusterNode))
       const clusterStatsItem = clusterStats.get(clusterId)
 
