@@ -92,8 +92,8 @@ class DataNode {
     }
   }
 
-  get withinValue () { return this._syncStat + this._asyncWithinStat }
-  get betweenValue () { return this._asyncBetweenStat }
+  getWithinValue () { return this._syncStat + this._asyncWithinStat }
+  getBetweenValue () { return this._asyncBetweenStat }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.getParentId())

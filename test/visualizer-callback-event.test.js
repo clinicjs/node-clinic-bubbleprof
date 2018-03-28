@@ -56,8 +56,8 @@ test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', functi
     errorMessage += compare(clusterNode, ['stats', 'async', 'getBetween()'], expected, ['async', 'between'])
     errorMessage += compare(clusterNode, ['stats', 'getSync()'], expected, ['sync'])
 
-    errorMessage += compare(clusterNode, ['betweenValue'], expected, ['async', 'between'])
-    errorMessage += compare(clusterNode, ['withinValue'], expected, ['withinValue'])
+    errorMessage += compare(clusterNode, ['getBetweenValue()'], expected, ['async', 'between'])
+    errorMessage += compare(clusterNode, ['getWithinValue()'], expected, ['withinValue'])
 
     errorMessage += compare(clusterNode, ['stats', 'rawTotals', 'async', 'within'], expected)
     errorMessage += compare(clusterNode, ['stats', 'rawTotals', 'async', 'between'], expected)
