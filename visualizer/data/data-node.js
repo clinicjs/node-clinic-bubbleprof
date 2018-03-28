@@ -96,7 +96,7 @@ class DataNode {
   getBetweenValue () { return this._asyncBetweenStat }
 
   getParentNode () {
-    return this.dataSet.getByNodeType(this.constructor.name, this.getParentId())
+    return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
   }
 
   getSameType (nodeId) {
@@ -133,7 +133,7 @@ class ClusterNode extends DataNode {
   getId () {
     return this.clusterId
   }
-  getParentId () {
+  get parentId () {
     return this.parentClusterId
   }
 }
@@ -176,7 +176,7 @@ class AggregateNode extends DataNode {
   getId () {
     return this.aggregateId
   }
-  getParentId () {
+  get parentId () {
     return this.parentAggregateId
   }
 }
