@@ -18,10 +18,8 @@ class Stem {
       totalDiameter: 0,
       ids: getNodeAncestorIds(node)
     }
-    // this.ownBetween = node.getStat('between') // TODO: uncomment as soon as averaging is implemented
-    this.ownBetween = node.stats.async.getBetween()
-    // this.ownDiameter = calculateRadius(node.getStat('within')) * 2 // TODO: uncomment as soon as averaging is implemented
-    this.ownDiameter = calculateRadius(node.stats.async.getWithin()) * 2
+    this.ownBetween = node.getBetweenValue()
+    this.ownDiameter = calculateRadius(node.getWithinValue()) * 2
 
     this._totalStemLengthByScale = {}
 
