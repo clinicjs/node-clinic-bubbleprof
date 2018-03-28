@@ -63,23 +63,21 @@ class DataNode {
     this.settings = dataSet.settings
     this.dataSet = dataSet
 
-    this._syncStat = 0
-    this._asyncBetweenStat = 0
-    this._asyncWithinStat = 0
-
     const node = this
     this.stats = {
       // For nodes whose sourceNodes contain no callbackEvents (.before and .after arrays are empty), these
       // setters are never called so default 0 values are accessed. Such cases are rare but valid, e.g. root
       // TODO: give examples of some of the async_hook types that often have no callbackEvents.
-      setSync (num) { node._syncStat = node.validateStat(num, 'stats.sync') },
-      getSync () { return node._syncStat },
-      async: {
-        setBetween (num) { node._asyncBetweenStat = node.validateStat(num, 'stats.async.between') },
-        getBetween () { return node._asyncBetweenStat },
 
-        setWithin (num) { node._asyncWithinStat = node.validateStat(num, 'stats.async.within') },
-        getWithin () { return node._asyncWithinStat }
+      sync: 0,
+      setSync (num) { node.stats.sync = node.validateStat(num, 'stats.sync') },
+
+      async: {
+        between: 0,
+        setBetween (num) { node.stats.async.between = node.validateStat(num, 'stats.async.between') },
+
+        within: 0,
+        setWithin (num) { node.stats.async.within = node.validateStat(num, 'stats.async.within') },
       }
     }
 
@@ -92,8 +90,8 @@ class DataNode {
     }
   }
 
-  getWithinValue () { return this._syncStat + this._asyncWithinStat }
-  getBetweenValue () { return this._asyncBetweenStat }
+  getWithinValue () { return this.stats.sync + this.stats.async.within }
+  getBetweenValue () { return this.stats.async.between }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
