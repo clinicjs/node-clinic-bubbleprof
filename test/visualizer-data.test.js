@@ -97,3 +97,15 @@ test('Visualizer data - invalid settings', function (t) {
 
   t.end()
 })
+
+test('Visualizer data - access invalid node id', function (t) {
+  loadData((err, data) => {
+    t.ifError(err)
+
+    t.equal(data.getByNodeType('ClusterNode', 'string'), null)
+
+    t.end()
+  }, slowioJson)
+
+  t.end()
+})
