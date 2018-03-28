@@ -131,17 +131,17 @@ class Interval {
     this.end = end
     this.isBetween = isBetween
   }
-  get clusterDataType () {
+  getClusterDataType () {
     return this.isBetween ? 'between' : 'within'
   }
   getDuration () {
     return this.end - this.start
   }
   applyAsync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.async[this.clusterDataType] += this.getDuration()
+    clusterStatsItem.rawTotals.async[this.getClusterDataType()] += this.getDuration()
     aggregateStatsItem.rawTotals.async.between += this.getDuration()
 
-    clusterStatsItem.intervals.async[this.clusterDataType].pushAndFlatten(this)
+    clusterStatsItem.intervals.async[this.getClusterDataType()].pushAndFlatten(this)
     aggregateStatsItem.intervals.async.between.pushAndFlatten(this)
   }
   applySync (clusterStatsItem, aggregateStatsItem) {
