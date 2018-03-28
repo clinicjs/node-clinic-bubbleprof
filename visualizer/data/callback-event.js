@@ -119,7 +119,7 @@ class FlattenedIntervals {
   getFlattenedTotal () {
     let total = 0
     for (const interval of this.array) {
-      total += interval.duration
+      total += interval.getDuration()
     }
     return total
   }
@@ -134,19 +134,19 @@ class Interval {
   get clusterDataType () {
     return this.isBetween ? 'between' : 'within'
   }
-  get duration () {
+  getDuration () {
     return this.end - this.start
   }
   applyAsync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.async[this.clusterDataType] += this.duration
-    aggregateStatsItem.rawTotals.async.between += this.duration
+    clusterStatsItem.rawTotals.async[this.clusterDataType] += this.getDuration()
+    aggregateStatsItem.rawTotals.async.between += this.getDuration()
 
     clusterStatsItem.intervals.async[this.clusterDataType].pushAndFlatten(this)
     aggregateStatsItem.intervals.async.between.pushAndFlatten(this)
   }
   applySync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.sync += this.duration
-    aggregateStatsItem.rawTotals.sync += this.duration
+    clusterStatsItem.rawTotals.sync += this.getDuration()
+    aggregateStatsItem.rawTotals.sync += this.getDuration()
 
     clusterStatsItem.intervals.sync.pushAndFlatten(this)
     aggregateStatsItem.intervals.sync.pushAndFlatten(this)
