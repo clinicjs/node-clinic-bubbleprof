@@ -86,8 +86,8 @@ class TemporaryStatsItem {
     this.node.stats.rawTotals = this.rawTotals
 
     this.node.stats.setSync(this.intervals.sync.getFlattenedTotal())
-    this.node.stats.async.between = this.intervals.async.between.getFlattenedTotal()
-    this.node.stats.async.within = this.intervals.async.within.getFlattenedTotal()
+    this.node.stats.async.setBetween(this.intervals.async.between.getFlattenedTotal())
+    this.node.stats.async.setWithin(this.intervals.async.within.getFlattenedTotal())
     this.intervals = null
   }
 }

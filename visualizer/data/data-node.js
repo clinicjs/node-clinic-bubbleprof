@@ -75,11 +75,11 @@ class DataNode {
       setSync (num) { node._syncStat = node.validateStat(num, 'stats.sync') },
       getSync () { return node._syncStat },
       async: {
-        set between (num) { node._asyncBetweenStat = node.validateStat(num, 'stats.async.between') },
-        get between () { return node._asyncBetweenStat },
+        setBetween (num) { node._asyncBetweenStat = node.validateStat(num, 'stats.async.between') },
+        getBetween () { return node._asyncBetweenStat },
 
-        set within (num) { node._asyncWithinStat = node.validateStat(num, 'stats.async.within') },
-        get within () { return node._asyncWithinStat }
+        setWithin (num) { node._asyncWithinStat = node.validateStat(num, 'stats.async.within') },
+        getWithin () { return node._asyncWithinStat }
       }
     }
 

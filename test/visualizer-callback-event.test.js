@@ -52,8 +52,8 @@ test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', functi
   for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
     const expected = expectedClusterResults.get(clusterId)
 
-    errorMessage += compare(clusterNode, ['stats', 'async', 'within'], expected)
-    errorMessage += compare(clusterNode, ['stats', 'async', 'between'], expected)
+    errorMessage += compare(clusterNode, ['stats', 'async', 'getWithin()'], expected, ['async', 'within'])
+    errorMessage += compare(clusterNode, ['stats', 'async', 'getBetween()'], expected, ['async', 'between'])
     errorMessage += compare(clusterNode, ['stats', 'getSync()'], expected, ['sync'])
 
     errorMessage += compare(clusterNode, ['betweenValue'], expected, ['async', 'between'])
@@ -74,8 +74,8 @@ test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', func
   for (const [aggregateId, aggregateNode] of dataSet.aggregateNodes) {
     const expected = expectedAggregateResults.get(aggregateId)
 
-    errorMessage += compare(aggregateNode, ['stats', 'async', 'between'], expected, ['async'])
-    errorMessage += compare(aggregateNode, ['stats', 'async', 'within'], { alwaysZero: 0 }, ['alwaysZero'])
+    errorMessage += compare(aggregateNode, ['stats', 'async', 'getBetween()'], expected, ['async'])
+    errorMessage += compare(aggregateNode, ['stats', 'async', 'getWithin()'], { alwaysZero: 0 }, ['alwaysZero'])
     errorMessage += compare(aggregateNode, ['stats', 'getSync()'], expected, ['sync'])
 
     if (!aggregateNode.isRoot) {

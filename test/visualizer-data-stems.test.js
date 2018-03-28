@@ -11,8 +11,8 @@ test('Visualizer data - stems - calculates between and diameter based on stats',
 
     const node = data.clusterNodes.get(16)
     const stem = node.stem
-    t.equal(stem.ownBetween, node.stats.async.between)
-    t.equal(stem.ownDiameter, node.stats.async.within / Math.PI)
+    t.equal(stem.ownBetween, node.stats.async.getBetween())
+    t.equal(stem.ownDiameter, node.stats.async.getWithin() / Math.PI)
 
     t.end()
   }, slowioJson)
