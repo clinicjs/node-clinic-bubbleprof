@@ -19,13 +19,16 @@ function validateNumber (num) {
   return (typeof num === 'number' && !Number.isNaN(num)) ? num : `not a number (${num}, typeof ${typeof num})`
 }
 
+// For example, passing ({ a: { a1: 'foo', a2: 'bar'}, b: null }, ['a', 'a2']) returns 'bar'
+// For example, passing ({ a: { a1: 'foo', getA2: () => bar}, b: null }, ['a', 'getA2()']) returns 'bar'
 function applyArrayOfObjectKeys (obj, arr) {
-  // For example, passing ({ a: { a1: 'foo', a2: 'bar'}, b: null }, ['a', 'a2']) returns 'bar'
   const key = arr.shift()
+  const fnName = key.includes('()') ? key.split('()')[0] : null
+  const descendant = fnName ? obj[fnName]() : obj[key]
   if (arr.length) {
-    return applyArrayOfObjectKeys(obj[key], arr)
+    return applyArrayOfObjectKeys(descendant, arr)
   }
-  return obj[key]
+  return descendant
 }
 
 function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
@@ -35,7 +38,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
   }
   const resultKeysString = resultKeysArray.join('.')
 
-  const actualValue = applyArrayOfObjectKeys(dataNode, resultKeysArray)
+  const actualValue = applyArrayOfObjectKeys(dataNode, [...resultKeysArray])
   const expectedValue = applyArrayOfObjectKeys(expected, expectedKeysArray)
 
   if (validateNumber(actualValue) === expectedValue) return ''
@@ -43,15 +46,18 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
   return `Error: ${dataNode.constructor.name} ${dataNode.id} ${resultKeysString} is ${actualValue}, expected ${expectedValue}. \n`
 }
 
-test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
+test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
 
   for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
     const expected = expectedClusterResults.get(clusterId)
 
-    errorMessage += compare(clusterNode, ['stats', 'async', 'within'], expected)
-    errorMessage += compare(clusterNode, ['stats', 'async', 'between'], expected)
+    errorMessage += compare(clusterNode, ['stats', 'async', 'within'], expected, ['async', 'within'])
+    errorMessage += compare(clusterNode, ['stats', 'async', 'between'], expected, ['async', 'between'])
     errorMessage += compare(clusterNode, ['stats', 'sync'], expected)
+
+    errorMessage += compare(clusterNode, ['getBetweenTime()'], expected, ['async', 'between'])
+    errorMessage += compare(clusterNode, ['getWithinTime()'], expected, ['withinValue'])
 
     errorMessage += compare(clusterNode, ['stats', 'rawTotals', 'async', 'within'], expected)
     errorMessage += compare(clusterNode, ['stats', 'rawTotals', 'async', 'between'], expected)
@@ -63,7 +69,7 @@ test('Visualizer data - ClusterNode stats from CallbackEvents', function (t) {
   t.end()
 })
 
-test('Visualizer data - AggregateNode stats from CallbackEvents', function (t) {
+test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
   for (const [aggregateId, aggregateNode] of dataSet.aggregateNodes) {
     const expected = expectedAggregateResults.get(aggregateId)
@@ -82,5 +88,13 @@ test('Visualizer data - AggregateNode stats from CallbackEvents', function (t) {
   }
   errorMessage = errorMessage || 'Pass'
   t.equals(errorMessage, 'Pass')
+  t.end()
+})
+
+test('Visualizer CallbackEvents - Invalid data item', function (t) {
+  t.throws(() => {
+    dataSet.clusterNodes.values().next().value.stats.setSync('14%')
+  }, new Error('Tried to set string "14%" to ClusterNode A stats.sync, should be number'))
+
   t.end()
 })

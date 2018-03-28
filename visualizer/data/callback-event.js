@@ -83,13 +83,11 @@ class TemporaryStatsItem {
     this.node = node
   }
   applyIntervalsTotals () {
-    const statsTarget = this.node.stats
+    this.node.stats.rawTotals = this.rawTotals
 
-    statsTarget.rawTotals = this.rawTotals
-
-    statsTarget.sync = this.intervals.sync.getFlattenedTotal()
-    statsTarget.async.between = this.intervals.async.between.getFlattenedTotal()
-    statsTarget.async.within = this.intervals.async.within.getFlattenedTotal()
+    this.node.stats.setSync(this.intervals.sync.getFlattenedTotal())
+    this.node.stats.async.setBetween(this.intervals.async.between.getFlattenedTotal())
+    this.node.stats.async.setWithin(this.intervals.async.within.getFlattenedTotal())
     this.intervals = null
   }
 }
@@ -121,7 +119,7 @@ class FlattenedIntervals {
   getFlattenedTotal () {
     let total = 0
     for (const interval of this.array) {
-      total += interval.duration
+      total += interval.getDuration()
     }
     return total
   }
@@ -133,22 +131,22 @@ class Interval {
     this.end = end
     this.isBetween = isBetween
   }
-  get clusterDataType () {
+  getClusterDataType () {
     return this.isBetween ? 'between' : 'within'
   }
-  get duration () {
+  getDuration () {
     return this.end - this.start
   }
   applyAsync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.async[this.clusterDataType] += this.duration
-    aggregateStatsItem.rawTotals.async.between += this.duration
+    clusterStatsItem.rawTotals.async[this.getClusterDataType()] += this.getDuration()
+    aggregateStatsItem.rawTotals.async.between += this.getDuration()
 
-    clusterStatsItem.intervals.async[this.clusterDataType].pushAndFlatten(this)
+    clusterStatsItem.intervals.async[this.getClusterDataType()].pushAndFlatten(this)
     aggregateStatsItem.intervals.async.between.pushAndFlatten(this)
   }
   applySync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.sync += this.duration
-    aggregateStatsItem.rawTotals.sync += this.duration
+    clusterStatsItem.rawTotals.sync += this.getDuration()
+    aggregateStatsItem.rawTotals.sync += this.getDuration()
 
     clusterStatsItem.intervals.sync.pushAndFlatten(this)
     aggregateStatsItem.intervals.sync.pushAndFlatten(this)

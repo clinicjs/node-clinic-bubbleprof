@@ -60,6 +60,16 @@ for (const dummyEvent of dummyCallbackEvents) {
   }
 }
 
+// Attach pre-computed withins to fake ClusterNodes
+for (const expected of expectedClusterResults.values()) {
+  expected.withinValue = expected.async.within + expected.sync
+}
+
+// Attach pre-computed withins to fake AggregateNodes
+for (const expected of expectedAggregateResults.values()) {
+  expected.withinValue = expected.sync
+}
+
 module.exports = {
   fakeNodes,
   expectedClusterResults,
