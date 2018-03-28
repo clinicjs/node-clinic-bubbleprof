@@ -20,7 +20,7 @@ function validateAggregateNode (aggregateNode) {
 }
 
 function validateSourceNode (sourceNode) {
-  if (!sourceNode.getId()) return `6: fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}`
+  if (!sourceNode.id) return `6: fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}`
   if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `7: fails on asyncId ${sourceNode.asyncId}`
   return ''
 }

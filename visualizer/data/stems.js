@@ -4,7 +4,7 @@ const { isNumber } = require('./validation.js')
 
 function getNodeAncestorIds (node) {
   const parent = node.getParentNode()
-  return parent ? [...parent.stem.ancestors.ids, parent.getId()] : []
+  return parent ? [...parent.stem.ancestors.ids, parent.id] : []
 }
 
 function calculateRadius (circumference) {

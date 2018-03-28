@@ -43,7 +43,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
 
   if (validateNumber(actualValue) === expectedValue) return ''
 
-  return `Error: ${dataNode.constructor.name} ${dataNode.getId()} ${resultKeysString} is ${actualValue}, expected ${expectedValue}. \n`
+  return `Error: ${dataNode.constructor.name} ${dataNode.id} ${resultKeysString} is ${actualValue}, expected ${expectedValue}. \n`
 }
 
 test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {

@@ -104,7 +104,7 @@ class DataNode {
   }
 
   validateStat (num, statType) {
-    if (!isNumber(num)) throw new Error(`Tried to set ${typeof num} "${num}" to ${this.constructor.name} ${this.getId()} ${statType}, should be number`)
+    if (!isNumber(num)) throw new Error(`Tried to set ${typeof num} "${num}" to ${this.constructor.name} ${this.id} ${statType}, should be number`)
     return num
   }
 }
@@ -130,7 +130,7 @@ class ClusterNode extends DataNode {
       ])
     )
   }
-  getId () {
+  get id () {
     return this.clusterId
   }
   get parentId () {
@@ -173,7 +173,7 @@ class AggregateNode extends DataNode {
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
-  getId () {
+  get id () {
     return this.aggregateId
   }
   get parentId () {
@@ -247,7 +247,7 @@ class SourceNode extends DataNode {
 
     this.dataSet.sourceNodes.set(this.asyncId, this)
   }
-  getId () {
+  get id () {
     return this.asyncId
   }
 }
