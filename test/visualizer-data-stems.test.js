@@ -14,8 +14,8 @@ test('Visualizer data - stems - calculates between and diameter based on stats',
 
     const node = data.clusterNodes.get(16)
     const stem = node.stem
-    t.equal(stem.ownBetween, node.stats.async.between)
-    t.equal(stem.ownDiameter, node.stats.async.within / Math.PI)
+    t.equal(stem.ownBetween, node.getBetweenTime())
+    t.equal(stem.ownDiameter, node.getWithinTime() / Math.PI)
 
     t.end()
   }, slowioJson)
@@ -30,7 +30,7 @@ test('Visualizer data - stems - calculates length based on ancestors', function 
     const stem = data.clusterNodes.get(16).stem
     const totalStemLength = stem.getTotalStemLength()
     t.deepEqual(stem.ancestors.ids, [ 1, 5, 7, 8, 10 ])
-    t.equal(totalStemLength.toFixed(8), '21793.56387519')
+    t.equal(totalStemLength.toFixed(8), '21897.14445863')
 
     const toOwnLength = id => {
       const ancestorStem = data.clusterNodes.get(id).stem
