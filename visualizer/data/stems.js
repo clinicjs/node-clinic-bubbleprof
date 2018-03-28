@@ -18,8 +18,8 @@ class Stem {
       totalDiameter: 0,
       ids: getNodeAncestorIds(node)
     }
-    this.ownBetween = node.getBetweenValue()
-    this.ownDiameter = calculateRadius(node.getWithinValue()) * 2
+    this.ownBetween = node.getBetweenTime()
+    this.ownDiameter = calculateRadius(node.getWithinTime()) * 2
 
     this._totalStemLengthByScale = {}
 

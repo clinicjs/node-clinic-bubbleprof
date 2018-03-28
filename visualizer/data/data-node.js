@@ -77,7 +77,7 @@ class DataNode {
         setBetween (num) { node.stats.async.between = node.validateStat(num, 'stats.async.between') },
 
         within: 0,
-        setWithin (num) { node.stats.async.within = node.validateStat(num, 'stats.async.within') },
+        setWithin (num) { node.stats.async.within = node.validateStat(num, 'stats.async.within') }
       }
     }
 
@@ -90,8 +90,8 @@ class DataNode {
     }
   }
 
-  getWithinValue () { return this.stats.sync + this.stats.async.within }
-  getBetweenValue () { return this.stats.async.between }
+  getWithinTime () { return this.stats.sync + this.stats.async.within }
+  getBetweenTime () { return this.stats.async.between }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
