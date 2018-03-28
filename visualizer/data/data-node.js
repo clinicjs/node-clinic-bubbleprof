@@ -72,8 +72,8 @@ class DataNode {
       // For nodes whose sourceNodes contain no callbackEvents (.before and .after arrays are empty), these
       // setters are never called so default 0 values are accessed. Such cases are rare but valid, e.g. root
       // TODO: give examples of some of the async_hook types that often have no callbackEvents.
-      set sync (num) { node._syncStat = node.validateStat(num, 'stats.sync') },
-      get sync () { return node._syncStat },
+      setSync (num) { node._syncStat = node.validateStat(num, 'stats.sync') },
+      getSync () { return node._syncStat },
       async: {
         set between (num) { node._asyncBetweenStat = node.validateStat(num, 'stats.async.between') },
         get between () { return node._asyncBetweenStat },

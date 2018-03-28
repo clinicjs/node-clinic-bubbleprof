@@ -19,13 +19,16 @@ function validateNumber (num) {
   return (typeof num === 'number' && !Number.isNaN(num)) ? num : `not a number (${num}, typeof ${typeof num})`
 }
 
+// For example, passing ({ a: { a1: 'foo', a2: 'bar'}, b: null }, ['a', 'a2']) returns 'bar'
+// For example, passing ({ a: { a1: 'foo', getA2: () => bar}, b: null }, ['a', 'getA2()']) returns 'bar'
 function applyArrayOfObjectKeys (obj, arr) {
-  // For example, passing ({ a: { a1: 'foo', a2: 'bar'}, b: null }, ['a', 'a2']) returns 'bar'
   const key = arr.shift()
+  const fnName = key.includes('()') ? key.split('()')[0] : null
+  const descendant = fnName ? obj[fnName]() : obj[key]
   if (arr.length) {
-    return applyArrayOfObjectKeys(obj[key], arr)
+    return applyArrayOfObjectKeys(descendant, arr)
   }
-  return obj[key]
+  return descendant
 }
 
 function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
@@ -35,7 +38,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
   }
   const resultKeysString = resultKeysArray.join('.')
 
-  const actualValue = applyArrayOfObjectKeys(dataNode, resultKeysArray)
+  const actualValue = applyArrayOfObjectKeys(dataNode, [...resultKeysArray])
   const expectedValue = applyArrayOfObjectKeys(expected, expectedKeysArray)
 
   if (validateNumber(actualValue) === expectedValue) return ''
@@ -51,7 +54,7 @@ test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', functi
 
     errorMessage += compare(clusterNode, ['stats', 'async', 'within'], expected)
     errorMessage += compare(clusterNode, ['stats', 'async', 'between'], expected)
-    errorMessage += compare(clusterNode, ['stats', 'sync'], expected)
+    errorMessage += compare(clusterNode, ['stats', 'getSync()'], expected, ['sync'])
 
     errorMessage += compare(clusterNode, ['betweenValue'], expected, ['async', 'between'])
     errorMessage += compare(clusterNode, ['withinValue'], expected, ['withinValue'])
@@ -73,7 +76,7 @@ test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', func
 
     errorMessage += compare(aggregateNode, ['stats', 'async', 'between'], expected, ['async'])
     errorMessage += compare(aggregateNode, ['stats', 'async', 'within'], { alwaysZero: 0 }, ['alwaysZero'])
-    errorMessage += compare(aggregateNode, ['stats', 'sync'], expected)
+    errorMessage += compare(aggregateNode, ['stats', 'getSync()'], expected, ['sync'])
 
     if (!aggregateNode.isRoot) {
       errorMessage += compare(aggregateNode, ['stats', 'rawTotals', 'async', 'between'], expected, ['raw'])
@@ -90,7 +93,7 @@ test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', func
 
 test('Visualizer CallbackEvents - Invalid data item', function (t) {
   t.throws(() => {
-    dataSet.clusterNodes.values().next().value.stats.sync = '14%'
+    dataSet.clusterNodes.values().next().value.stats.setSync('14%')
   }, new Error('Tried to set string "14%" to ClusterNode A stats.sync, should be number'))
 
   t.end()
