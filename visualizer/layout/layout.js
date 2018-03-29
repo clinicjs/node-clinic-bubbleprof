@@ -1,5 +1,9 @@
 'use strict'
 
+const Scale = require('./scale.js')
+const { Stem } = require('./stems.js')
+const Connection = require('./connections.js')
+
 class Layout {
   constructor (dataSet, settings) {
     const defaultSettings = {
@@ -28,9 +32,9 @@ class Layout {
 
       if (clusterNode.parentClusterId) {
         this.addConnection(clusterNode, this.clusterConnections)
-        this.aggregateConnections.set(clusterId, [])
       }
 
+      this.aggregateConnections.set(clusterId, [])
       for (const aggregateNode of clusterNode.nodes.values()) {
         aggregateNode.stem = new Stem(aggregateNode)
 
@@ -43,8 +47,8 @@ class Layout {
   }
 
   addConnection (targetNode, connectionArray) {
-    sourceNode = targetNode.getParentNode()
-    connectionArray.push(new Connection(sourceNode, targetNode, this.scale)
+    const sourceNode = targetNode.getParentNode()
+    connectionArray.push(new Connection(sourceNode, targetNode, this.scale))
   }
 }
 

@@ -7,20 +7,15 @@ const generateLayout = require('./layout/index.js')
 // ...which creates an instance of BubbleprofUi from ./draw-ui/bubbleprof-ui.js
 // ...which creates from many subclasses
 
-loadData(function maybeDone (err, data) {
-  if (err) throw err
-  window.data = data
-  console.log('data is exposed on window.data')
+const dataSet = loadData()
+window.data = dataSet
+console.log('data is exposed on window.data')
 
-  generateLayout(function (err, layout) {
-    if (err) throw err
-      window.layout = layout
-      console.log('layout is exposed on window.layout')
+const layout = generateLayout(dataSet)
+window.layout = layout
+console.log('layout is exposed on window.layout')
 
-      // TODO: then continue to draw, based on ui-E1 branch but made consistent, like:
-      //
-      // drawUi(function (err, ui)) {
-      //   some action on complete e.g. hide a loading status bar
-      // }, layout)
-  }, data)
-})
+// TODO: then continue to draw, based on ui-E1 branch but made consistent, like:
+//
+// const ui = drawUi()
+// some action on complete e.g. hide a loading status bar

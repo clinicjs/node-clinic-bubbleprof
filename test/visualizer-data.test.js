@@ -25,10 +25,10 @@ function validateSourceNode (sourceNode) {
   return ''
 }
 
-function validateData (data) {
+function validateData (dataSet) {
   let result = ''
 
-  for (const [, clusterNode] of data.clusterNodes) {
+  for (const [, clusterNode] of dataSet.clusterNodes) {
     result += validateClusterNode(clusterNode)
 
     for (const [, aggregateNode] of clusterNode.nodes) {
@@ -39,52 +39,46 @@ function validateData (data) {
       }
     }
   }
-  result += validateClusterNode(data.getByNodeType('ClusterNode', 1))
-  result += validateAggregateNode(data.getByNodeType('AggregateNode', 1))
-  result += validateSourceNode(data.getByNodeType('SourceNode', 1))
+  result += validateClusterNode(dataSet.getByNodeType('ClusterNode', 1))
+  result += validateAggregateNode(dataSet.getByNodeType('AggregateNode', 1))
+  result += validateSourceNode(dataSet.getByNodeType('SourceNode', 1))
 
   return result || 'Pass'
 }
 
 test('Visualizer data - examples/slow-io sample json', function (t) {
-  loadData((err, data) => {
-    t.ifError(err)
+  const dataSet = loadData(slowioJson)
 
-    t.equals(data.settings.averaging, 'mean')
+  t.equals(dataSet.settings.averaging, 'mean')
 
-    t.equals(data.clusterNodes.size, 33)
-    t.equals(validateData(data), 'Pass')
+  t.equals(dataSet.clusterNodes.size, 33)
+  t.equals(validateData(dataSet), 'Pass')
 
-    t.end()
-  }, slowioJson)
+  t.end()
 })
 
 test('Visualizer data - acmeair sample json', function (t) {
-  loadData((err, data) => {
-    t.ifError(err)
+  const dataSet = loadData(acmeairJson, { averaging: 'median' })
 
-    t.equals(data.settings.averaging, 'median')
+  t.equals(dataSet.settings.averaging, 'median')
 
-    t.equals(data.clusterNodes.size, 24)
-    t.equals(validateData(data), 'Pass')
+  t.equals(dataSet.clusterNodes.size, 24)
+  t.equals(validateData(dataSet), 'Pass')
 
-    t.end()
-  }, acmeairJson, { averaging: 'median' })
+  t.end()
 })
 
 test('Visualizer data - fake json', function (t) {
-  loadData((err, data) => {
-    t.ifError(err)
+  const dataSet = loadData(fakeJson)
 
-    t.equals(data.clusterNodes.size, 2)
+  t.equals(dataSet.clusterNodes.size, 2)
 
-    t.end()
-  }, fakeJson)
+  t.end()
 })
 
 test('Visualizer data - empty data file', function (t) {
   t.throws(() => {
-    loadData(() => {})
+    loadData()
   }, new Error('No valid data found, data.json is typeof string'))
 
   t.end()
@@ -92,18 +86,16 @@ test('Visualizer data - empty data file', function (t) {
 
 test('Visualizer data - invalid settings', function (t) {
   t.throws(() => {
-    loadData(() => {}, { map: () => {} }, { averaging: 'mode' })
+    loadData({ map: () => {} }, { averaging: 'mode' })
   }, new Error('Invalid key "mode" passed, valid types are: mean, median, sum'))
 
   t.end()
 })
 
 test('Visualizer data - access invalid node id', function (t) {
-  loadData((err, data) => {
-    t.ifError(err)
+  const dataSet = loadData(slowioJson)
 
-    t.equal(data.getByNodeType('ClusterNode', 'string'), null)
+  t.equal(dataSet.getByNodeType('ClusterNode', 'string'), null)
 
-    t.end()
-  }, slowioJson)
+  t.end()
 })

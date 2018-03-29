@@ -10,7 +10,7 @@ class Scale {
     this.settings = Object.assign(defaultSettings, settings)
   }
 
-  setScaleFactor() {
+  setScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
 
@@ -18,7 +18,7 @@ class Scale {
   }
 
   getLineLength (dataValue) {
-    return dataValue * this.scale
+    return dataValue * this.scaleFactor
   }
 
   getCircleRadius (dataValue) {
