@@ -1,8 +1,7 @@
 'use strict'
 
 const { CallbackEvent, AllCallbackEvents } = require('./callback-event.js')
-const { validateKey, isNumber } = require('./validation.js')
-const { Stem } = require('./stems.js')
+const { validateKey, isNumber } = require('../validation.js')
 
 class DataSet {
   constructor (data, settings = {}) {
@@ -31,7 +30,6 @@ class DataSet {
   }
   processData () {
     this.calculateFlattenedStats()
-    this.calculateStems()
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
@@ -46,14 +44,6 @@ class DataSet {
   calculateFlattenedStats () {
     this.callbackEvents.processAll()
     this.callbackEvents = null
-  }
-  calculateStems () {
-    for (const clusterNode of this.clusterNodes.values()) {
-      clusterNode.stem = new Stem(clusterNode)
-      for (const aggregateNode of clusterNode.nodes.values()) {
-        aggregateNode.stem = new Stem(aggregateNode)
-      }
-    }
   }
 }
 

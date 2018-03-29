@@ -1,14 +1,11 @@
 'use strict'
 
-const { isNumber } = require('./validation.js')
+const { isNumber } = require('../validation.js')
+const { radiusFromCircumference } = require('./scale.js')
 
 function getNodeAncestorIds (node) {
   const parent = node.getParentNode()
   return parent ? [...parent.stem.ancestors.ids, parent.id] : []
-}
-
-function calculateRadius (circumference) {
-  return circumference / (2 * Math.PI)
 }
 
 class Stem {
@@ -19,7 +16,7 @@ class Stem {
       ids: getNodeAncestorIds(node)
     }
     this.ownBetween = node.getBetweenTime()
-    this.ownDiameter = calculateRadius(node.getWithinTime()) * 2
+    this.ownDiameter = radiusFromCircumference(node.getWithinTime()) * 2
 
     this._totalStemLengthByScale = {}
 
