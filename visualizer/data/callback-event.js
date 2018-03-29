@@ -1,6 +1,6 @@
 'use strict'
 
-const { areNumbers } = require('./validation.js')
+const { areNumbers } = require('../validation.js')
 
 // The callback functions represented by a sourceNode's unique async_id
 // may be called any number of times. To calculate delays and busy time

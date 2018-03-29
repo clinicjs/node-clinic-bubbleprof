@@ -2,12 +2,15 @@
 
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
-const { isNumber } = require('../visualizer/data/validation.js')
+const { isNumber } = require('../visualizer/validation.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
+const generateLayout = require('../visualizer/layout/index.js')
 
 test('Visualizer data - stems - calculates between and diameter based on stats', function (t) {
   loadData((err, data) => {
     t.ifError(err)
+
+    generateLayout(data)
 
     const node = data.clusterNodes.get(16)
     const stem = node.stem
@@ -21,6 +24,8 @@ test('Visualizer data - stems - calculates between and diameter based on stats',
 test('Visualizer data - stems - calculates length based on ancestors', function (t) {
   loadData((err, data) => {
     t.ifError(err)
+
+    generateLayout(data)
 
     const stem = data.clusterNodes.get(16).stem
     const totalStemLength = stem.getTotalStemLength()
@@ -43,6 +48,8 @@ test('Visualizer data - stems - calculates length based on ancestors', function 
 test('Visualizer data - stems - caches length by scale', function (t) {
   loadData((err, data) => {
     t.ifError(err)
+
+    generateLayout(data)
 
     const stem = data.clusterNodes.get(16).stem
     t.equal(stem.getTotalStemLength(), stem._totalStemLengthByScale[1])
