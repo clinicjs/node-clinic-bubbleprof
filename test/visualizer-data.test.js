@@ -106,6 +106,4 @@ test('Visualizer data - access invalid node id', function (t) {
 
     t.end()
   }, slowioJson)
-
-  t.end()
 })
