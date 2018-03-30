@@ -25,9 +25,9 @@ class Stem {
       this.ancestors.totalDiameter += ancestor.stem.ownDiameter
     }
   }
-  getTotalStemLength (scale = 1) {
+  getTotalStemLength () {
     // All lines and circumferences are meant to represent same value / pixel ratio => so simply multiply all by same scale
-    return (this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter) * scale
+    return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
   }
 }
 
