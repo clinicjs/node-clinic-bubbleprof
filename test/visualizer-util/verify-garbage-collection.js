@@ -1,5 +1,5 @@
 const test = require('tap').test
-const { DataSet } = require('../../visualizer/data/data-node.js')
+const DataSet = require('../../visualizer/data/dataset.js')
 const {
   fakeNodes
 } = require('./prepare-fake-nodes.js')
