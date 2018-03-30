@@ -1,14 +1,12 @@
 'use strict'
 
-const { areNumbers } = require('./validation.js')
+const { areNumbers } = require('../validation.js')
 
 // The callback functions represented by a sourceNode's unique async_id
 // may be called any number of times. To calculate delays and busy time
 // we need to look at each call to these callbacks, relative to its source
 class CallbackEvent {
   constructor (callKey, source) {
-    const dataSet = source.dataSet
-
     // Timestamp when this became the next call to this callback
     this.delayStart = callKey === 0 ? source.init : source.after[callKey - 1]
 
@@ -24,8 +22,6 @@ class CallbackEvent {
 
     const parentAggregateId = this.aggregateNode.parentAggregateId
     this.isBetweenClusters = parentAggregateId && !this.clusterNode.nodeIds.has(parentAggregateId)
-
-    dataSet.callbackEvents.array.push(this)
   }
 }
 
@@ -87,13 +83,11 @@ class TemporaryStatsItem {
     this.node = node
   }
   applyIntervalsTotals () {
-    const statsTarget = this.node.stats
+    this.node.stats.rawTotals = this.rawTotals
 
-    statsTarget.rawTotals = this.rawTotals
-
-    statsTarget.sync = this.intervals.sync.getFlattenedTotal()
-    statsTarget.async.between = this.intervals.async.between.getFlattenedTotal()
-    statsTarget.async.within = this.intervals.async.within.getFlattenedTotal()
+    this.node.stats.setSync(this.intervals.sync.getFlattenedTotal())
+    this.node.stats.async.setBetween(this.intervals.async.between.getFlattenedTotal())
+    this.node.stats.async.setWithin(this.intervals.async.within.getFlattenedTotal())
     this.intervals = null
   }
 }
@@ -125,7 +119,7 @@ class FlattenedIntervals {
   getFlattenedTotal () {
     let total = 0
     for (const interval of this.array) {
-      total += interval.duration
+      total += interval.getDuration()
     }
     return total
   }
@@ -137,22 +131,22 @@ class Interval {
     this.end = end
     this.isBetween = isBetween
   }
-  get clusterDataType () {
+  getClusterDataType () {
     return this.isBetween ? 'between' : 'within'
   }
-  get duration () {
+  getDuration () {
     return this.end - this.start
   }
   applyAsync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.async[this.clusterDataType] += this.duration
-    aggregateStatsItem.rawTotals.async.between += this.duration
+    clusterStatsItem.rawTotals.async[this.getClusterDataType()] += this.getDuration()
+    aggregateStatsItem.rawTotals.async.between += this.getDuration()
 
-    clusterStatsItem.intervals.async[this.clusterDataType].pushAndFlatten(this)
+    clusterStatsItem.intervals.async[this.getClusterDataType()].pushAndFlatten(this)
     aggregateStatsItem.intervals.async.between.pushAndFlatten(this)
   }
   applySync (clusterStatsItem, aggregateStatsItem) {
-    clusterStatsItem.rawTotals.sync += this.duration
-    aggregateStatsItem.rawTotals.sync += this.duration
+    clusterStatsItem.rawTotals.sync += this.getDuration()
+    aggregateStatsItem.rawTotals.sync += this.getDuration()
 
     clusterStatsItem.intervals.sync.pushAndFlatten(this)
     aggregateStatsItem.intervals.sync.pushAndFlatten(this)
