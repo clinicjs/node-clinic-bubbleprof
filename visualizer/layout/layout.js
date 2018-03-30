@@ -1,7 +1,7 @@
 'use strict'
 
 const Scale = require('./scale.js')
-const { Stem } = require('./stems.js')
+const Stem = require('./stems.js')
 const Connection = require('./connections.js')
 
 class Layout {
@@ -20,8 +20,6 @@ class Layout {
 
     this.clusterConnections = []
     this.aggregateConnections = new Map() // Map of arrays, one array of agg connections per clusterId
-
-    // this.layoutStructure = new ClumpedPyramidLayout(...) // TODO in ui-D2
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
