@@ -35,7 +35,4 @@ class Stem {
   }
 }
 
-module.exports = {
-  Stem
-  // ClumpedPyramidLayout will be added and exported in delivery for ui-D2
-}
+module.exports = Stem

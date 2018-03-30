@@ -1,23 +1,24 @@
 'use strict'
 
 class Scale {
-  constructor (data, settings = {}) {
+  constructor (dataSet, settings = {}) {
     const defaultSettings = {
       lineWidth: 2.5,
       labelMinimumSpace: 14
     }
+    this.dataSet = dataSet
     this.settings = Object.assign(defaultSettings, settings)
   }
 
-  setScale (data) {
+  setScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
 
-    this.scale = 1 // To be replaced with autoscaling logic based on stem length data.
+    this.scaleFactor = 1 // To be replaced with autoscaling logic based on stem length data.
   }
 
   getLineLength (dataValue) {
-    return dataValue * this.scale
+    return dataValue * this.scaleFactor
   }
 
   getCircleRadius (dataValue) {

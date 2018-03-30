@@ -1,19 +1,14 @@
 'use strict'
 
-const { Stem } = require('./stems.js')
+const Layout = require('./layout.js')
 
-function generateLayout (dataSet) {
-  generateStems(dataSet)
-  // TODO: next layout steps here in sequence: sort, scale, allocate, etc
-}
+function generateLayout (dataSet, settings) {
+  const layout = new Layout(dataSet, settings)
 
-function generateStems (dataSet) {
-  for (const clusterNode of dataSet.clusterNodes.values()) {
-    clusterNode.stem = new Stem(clusterNode)
-    for (const aggregateNode of clusterNode.nodes.values()) {
-      aggregateNode.stem = new Stem(aggregateNode)
-    }
-  }
+  // Two steps here so we can hook in modifications to the properties before proceeding
+  // e.g. for tests etc similar to with data/index.js
+  layout.generate()
+  return layout
 }
 
 module.exports = generateLayout

@@ -3,11 +3,10 @@
 const loadData = require('./data/index.js')
 const generateLayout = require('./layout/index.js')
 
-loadData(function maybeDone (err, data) {
-  if (err) throw err
-  window.data = data
-  console.log('data is exposed on window.data')
+const dataSet = loadData()
+window.data = dataSet
+console.log('data is exposed on window.data')
 
-  generateLayout(data)
-  // TODO: then continue to draw as in ui-E1 branch
-})
+const layout = generateLayout(dataSet)
+window.layout = layout
+console.log('layout is exposed on window.layout')
