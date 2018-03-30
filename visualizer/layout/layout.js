@@ -19,10 +19,9 @@ class Layout {
     this.scale = new Scale(dataSet, this.settings)
 
     this.clusterConnections = []
-    this.aggregateConnections = new Map() // map of arrays, one array of agg connections per clusterId
-    // If we need an array of stems, it can go here
+    this.aggregateConnections = new Map() // Map of arrays, one array of agg connections per clusterId
 
-    // this.layoutStructure = new ClumpedPyramidLayout(...) ?
+    // this.layoutStructure = new ClumpedPyramidLayout(...) // TODO in ui-D2
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
