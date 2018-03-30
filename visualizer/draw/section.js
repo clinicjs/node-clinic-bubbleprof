@@ -20,7 +20,7 @@ class Section {
   addContent (identifier, item) {
     this.content.set(item, identifier)
   }
-  initializeElements () {
+  initializeElements (dataSet, layout) {
     this.wrapper = d3.select('body').append('section')
       .attr('id', this.id)
 
@@ -43,7 +43,7 @@ class Section {
     }
 
     for (const item of this.content.values()) {
-      item.initializeElements()
+      item.initializeElements(dataSet, layout)
     }
   }
   draw () {

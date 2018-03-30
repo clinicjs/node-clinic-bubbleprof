@@ -18,7 +18,7 @@ class BubbleprofUI {
     this.layout = layout
 
     for (const section of this.sections.values()) {
-      section.initialiseElements()
+      section.initialiseElements(dataSet, layout)
     }
   }
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
