@@ -2,7 +2,6 @@
 
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
-const { isNumber } = require('../visualizer/validation.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const generateLayout = require('../visualizer/layout/index.js')
 
@@ -35,19 +34,6 @@ test('Visualizer layout - stems - calculates length based on ancestors', functio
   const totalAncestorsLength = stem.ancestors.ids.map(toOwnLength).reduce(sum, 0)
   // Floating point precision acting up here, hence `.toFixed()` both sides
   t.equal((totalStemLength - totalAncestorsLength).toFixed(8), (stem.ownBetween + stem.ownDiameter).toFixed(8))
-
-  t.end()
-})
-
-test('Visualizer layout - stems - caches length by scale', function (t) {
-  const dataSet = loadData(slowioJson)
-  generateLayout(dataSet)
-
-  const stem = dataSet.clusterNodes.get(16).stem
-  t.equal(stem.getTotalStemLength(), stem._totalStemLengthByScale[1])
-  t.ok(isNumber(stem.getTotalStemLength()))
-  t.equal(stem.getTotalStemLength(5), stem._totalStemLengthByScale[5])
-  t.ok(isNumber(stem.getTotalStemLength(5)))
 
   t.end()
 })

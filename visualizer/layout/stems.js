@@ -1,6 +1,5 @@
 'use strict'
 
-const { isNumber } = require('../validation.js')
 const { radiusFromCircumference } = require('./scale.js')
 
 function getNodeAncestorIds (node) {
@@ -26,12 +25,9 @@ class Stem {
       this.ancestors.totalDiameter += ancestor.stem.ownDiameter
     }
   }
-  getTotalStemLength (scale = 1) {
-    if (!isNumber(this._totalStemLengthByScale[scale])) {
-      // All lines and circumferences are meant to represent same value / pixel ratio => so simply multiply all by same scale
-      this._totalStemLengthByScale[scale] = (this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter) * scale
-    }
-    return this._totalStemLengthByScale[scale]
+  getTotalStemLength () {
+    // All lines and circumferences are meant to represent same value / pixel ratio => so simply multiply all by same scale
+    return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
   }
 }
 
