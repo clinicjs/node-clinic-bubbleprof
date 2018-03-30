@@ -15,13 +15,6 @@ function validateKey (key, validOptions) {
     throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
   }
 }
-function requiredEntries (obj, keysArray) {
-  for (const key of keysArray) {
-    if (typeof obj[key] === 'undefined') {
-      throw new Error(`Required key "${key}" is undefined in object with keys ${Object.keys(obj)}`)
-    }
-  }
-}
 
 module.exports = {
   isNumber,

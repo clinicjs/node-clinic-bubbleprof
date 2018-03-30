@@ -1,40 +1,19 @@
 'use strict'
 
-const Section = require('./section.js')
+const BubbleprofUI = require('./bubbleprof-ui.js')
 
-class BubbleprofUI {
-  constructor (dataSet) {
-    this.dataSet = dataSet
+function drawOuterUI () {
+  // Initial DOM drawing that is independent of data
 
-    // Main divisions of the page
-    this.sections = new Map(Object.entries({
-      header: new Section('header'),
-      sideBar: new Section('side-bar'),
-      nodeLink: new Section('node-link'),
-      footer: new Section('footer')
-    }))
+  const sections = ['header', 'side-bar', 'node-link', 'footer']
+  const ui = new BubbleprofUI(sections)
 
-    const footerCollapseHTML = 'Recommendation <span class="up-down-collapse-arrow"></span>'
-    this.sections.footer.makeCollapsible(footerCollapseHTML, 'div', 'bar', true)
+  const footerCollapseHTML = 'Recommendation <span class="up-down-collapse-arrow"></span>'
+  ui.sections.footer.makeCollapsible(footerCollapseHTML, 'div', 'bar', true)
+  ui.sections.sideBar.makeCollapsible('✕', 'span', 'close-x', false)
 
-    this.sections.sideBar.makeCollapsible('✕', 'span', 'close-x', false)
-  }
-  // For all UI item instances, keep initial DOM element creation in initializeElements() method
-  // so that browser paint etc can happen around the same time, minimising reflows
-  initializeElements () {
-    for (const section of this.sections.values()) {
-      section.initialiseElements()
-    }
-  }
-  // For all UI item instances, keep updates and changes to DOM elements in draw() method
-  // so that browser paint etc can happen around the same time, minimising reflows
-  draw () {
-    for (const section of this.sections.values()) {
-      section.draw()
-    }
-  }
+  // TODO: add other boilerplate content and loading graphic
+  return ui
 }
 
-module.exports = {
-  BubbleprofUI
-}
+module.exports = drawOuterUI
