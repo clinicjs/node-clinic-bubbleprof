@@ -15,9 +15,15 @@ function validateKey (key, validOptions) {
     throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
   }
 }
+function isInstanceOf (obj, arr) {
+  let result = false
+  arr.forEach((constructorFunc) => { if (obj instanceof constructorFunc) result = true })
+  return result
+}
 
 module.exports = {
   isNumber,
   areNumbers,
-  validateKey
+  validateKey,
+  isInstanceOf
 }

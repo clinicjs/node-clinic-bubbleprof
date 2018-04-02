@@ -9,10 +9,18 @@ function drawOuterUI () {
   const ui = new BubbleprofUI(sections)
 
   const footerCollapseHTML = 'Recommendation <span class="up-down-collapse-arrow"></span>'
-  ui.sections.footer.makeCollapsible(footerCollapseHTML, 'div', 'bar', true)
-  ui.sections.sideBar.makeCollapsible('✕', 'span', 'close-x', false)
+
+  ui.sections.get('footer').addCollapseControl(true, {
+    htmlContent: footerCollapseHTML,
+    classNames: 'bar'
+  })
+  ui.sections.get('side-bar').addCollapseControl()
+
+  ui.sections.get('node-link').addLoadingAnimation()
+
 
   // TODO: add other boilerplate content and loading graphic
+  ui.initializeElements()
   return ui
 }
 

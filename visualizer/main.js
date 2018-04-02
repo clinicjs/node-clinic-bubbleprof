@@ -18,6 +18,4 @@ window.layout = layout
 console.log('layout is exposed on window.layout')
 
 /* istanbul ignore next */
-ui.initialiseElements(dataSet, layout)
-/* istanbul ignore next */
-ui.draw()
+ui.setData(dataSet, layout)

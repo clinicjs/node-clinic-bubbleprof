@@ -1,6 +1,6 @@
 'use strict'
 
-const Section = require('./section.js')
+const HtmlContent = require('./html-content.js')
 
 class BubbleprofUI {
   constructor (sections) {
@@ -8,19 +8,27 @@ class BubbleprofUI {
     this.sections = new Map()
 
     for (const sectionName of sections) {
-      this.sections.set(sectionName, new Section(sectionName))
+      this.sections.set(sectionName, new HtmlContent(undefined, {
+        htmlElementType: 'section',
+        id: sectionName
+      }, this))
     }
   }
   // For all UI item instances, keep initial DOM element creation in initializeElements() method
   // so that browser paint etc can happen around the same time, minimising reflows
-  initializeElements (dataSet, layout) {
-    this.dataSet = dataSet
-    this.layout = layout
-
+  initializeElements () {
     for (const section of this.sections.values()) {
-      section.initialiseElements(dataSet, layout)
+      section.initializeElements()
     }
   }
+
+  setData (dataSet, layout) {
+    const redraw = dataSet !== this.dataSet || layout !== this.layout
+    this.dataSet = dataSet
+    this.layout = layout
+    if (redraw) this.draw()
+  }
+
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
   // so that browser paint etc can happen around the same time, minimising reflows
   draw () {
