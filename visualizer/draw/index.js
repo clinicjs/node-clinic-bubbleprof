@@ -1,6 +1,8 @@
 'use strict'
 
 const BubbleprofUI = require('./bubbleprof-ui.js')
+const HoverBox = require('./hover-box.js')
+const SvgContainer = require('./svg-container.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -16,10 +18,11 @@ function drawOuterUI () {
   })
   ui.sections.get('side-bar').addCollapseControl()
 
-  ui.sections.get('node-link').addLoadingAnimation()
+  ui.sections.get('node-link')
+    .addLoadingAnimation()
+    .addContent(SvgContainer)
+    .addContent(HoverBox)
 
-
-  // TODO: add other boilerplate content and loading graphic
   ui.initializeElements()
   return ui
 }

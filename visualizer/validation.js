@@ -20,10 +20,20 @@ function isInstanceOf (obj, arr) {
   arr.forEach((constructorFunc) => { if (obj instanceof constructorFunc) result = true })
   return result
 }
+function uniqueMapKey (key, map) {
+  let counter = 0
+  function keyWithIncrement () {
+    counter ++
+    const newKey = `${key}_${counter}`
+    return map.has(newKey) ? keyWithIncrement() : newKey
+  }
+  return map.has(key) ? keyWithIncrement(key + '_') : key
+}
 
 module.exports = {
   isNumber,
   areNumbers,
   validateKey,
-  isInstanceOf
+  isInstanceOf,
+  uniqueMapKey
 }

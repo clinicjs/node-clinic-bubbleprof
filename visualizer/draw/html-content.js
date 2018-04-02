@@ -1,7 +1,7 @@
 'use strict'
 
 const d3 = require('./d3-subset.js')
-const { isInstanceOf } = require('../validation.js')
+const { isInstanceOf, uniqueMapKey } = require('../validation.js')
 
 // Base class for HTML content, extended by specific types of UI item
 // Only initializeElement() and draw() modify the DOM
@@ -15,13 +15,13 @@ class HtmlContent {
     this.parentContent = parentContent
     this.ui = ui
 
-    const defaults = {
+    const defaultProperties = {
       id: null,
       htmlElementType: 'div',
       htmlContent: '',
       classNames: ''
     }
-    this.contentProperties = Object.assign(defaults, contentProperties)
+    this.contentProperties = Object.assign(defaultProperties, contentProperties)
 
     this.isHidden = false
     this.isCollapsed = this.collapseControl = null
@@ -30,27 +30,29 @@ class HtmlContent {
     this.contentIds = []
   }
 
-  appendContent (identifier, item) {
-    this.content.set(item, identifier)
-    this.contentIds.push(identifier)
-  }
+  addContent (ContentClass, contentProperties = {}, prepend = false) {
+    const item = new ContentClass(this, contentProperties)
+    const identifier = uniqueMapKey(contentProperties.id || ContentClass.constructor.name, this.content)
 
-  prependContent (identifier, item) {
-    this.content.set(item, identifier)
-    this.contentIds.unshift(identifier)
+    this.content.set(identifier, item)
+    this.contentIds[prepend ? 'unshift' : 'push'](identifier)
+    return this
   }
 
   addCollapseControl (collapsedByDefault = false, contentProperties = {}) {
     this.isCollapsed = collapsedByDefault
     this.collapseControl = new CollapseControl(this, contentProperties)
+    return this
   }
 
   toggleCollapse () {
     this.isCollapsed = !this.isCollapsed
+    return this
   }
 
   addLoadingAnimation (contentProperties = {}) {
     this.loadingAnimation = new LoadingAnimation(this, contentProperties)
+    return this
   }
 
   // Initial creation of elements independent of data and layout, before .setData() is called

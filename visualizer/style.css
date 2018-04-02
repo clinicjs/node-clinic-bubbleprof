@@ -123,8 +123,10 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 .loading-indicator:after {
   width: 120px;
   height: 120px;
-  margin: 80px auto;
-  position: relative;
+  position: absolute;
+  left: 50%;
+  margin: 80px 0 0 -60px;
+  z-index: 3;
 }
 .loading-indicator:before {
   content: "";
@@ -138,7 +140,7 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   animation: loading 1.6s infinite linear;
 }
 .loading-indicator:after {
-  content: "LOADING";
+  content: "Loading";
   font-size: 14pt;
   font-variant: all-small-caps;
   font-weight: bold;
@@ -147,8 +149,7 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 
   display: block;
   position: absolute;
-  top: -29px;
-  left: 0;
+  top: 50px;
 }
 @keyframes loading {
   0% {
