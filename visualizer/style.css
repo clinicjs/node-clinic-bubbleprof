@@ -39,16 +39,19 @@ html * {
   box-sizing: border-box;
 }
 
-html #banner {
-  /* light text on dark background doesn't look so good in the browser compared
-     to graphical design tools. This is because graphical design tools uses
-     antialiasing, where browsers uses subpixel rendering. To make it look
-     like in the design tool, use antialiased font rendering. More details,
-     especially on why this is a bad idea:
+html #banner, html #header, html #node-link, html #side-bar, html #footer .bar {
+  /* Light text on dark background in the browser looks blocky. To make it smoother
+     and clearer, we use antialiased font rendering in dark theme. More details,
+     especially on why this is a bad idea for dark text on light backgrounds:
        http://usabilitypost.com/2012/11/05/stop-fixing-font-smoothing/
   */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.light-theme #header, html.light-theme #node-link, html.light-theme #side-bar {
+  -webkit-font-smoothing: unset;
+  -moz-osx-font-smoothing: unset;
 }
 
 /* Banner layout */
@@ -71,6 +74,7 @@ html #banner {
   font-size: 14pt;
   font-weight: lighter;
   color: var(--banner-text-color);
+
   display: block;
   margin-left: 35px;
   line-height: 65px;
@@ -93,20 +97,21 @@ html #banner {
 }
 
 #footer .bar .text {
-  margin-left: 37px;
-  font-variant: small-caps;
-  text-transform: lowercase;
   font-size: 14pt;
+  font-variant: all-small-caps;
+  font-weight: bold;
+  color: var(--pure-white);
+
+  margin-left: 37px;
   line-height: 64px;
   float: left;
-  color: var(--pure-white);
 }
 
 #footer .bar .arrow {
   float: left;
-  margin: 14px 10px;
-  height: 36px;
-  width: 36px;
+  margin: 16px 10px;
+  height: 34px;
+  width: 34px;
   background-image: var(--down-white-chevron-arrow);
   background-size: cover;
 }
@@ -134,13 +139,16 @@ html #banner {
 }
 .loading-indicator:after {
   content: "LOADING";
-  font-size: 15px;
+  font-size: 14pt;
+  font-variant: all-small-caps;
+  font-weight: bold;
   color: var(--nearform-red);
+  text-align: center;
+
   display: block;
   position: absolute;
-  top: -25px;
+  top: -29px;
   left: 0;
-  text-align: center;
 }
 @keyframes loading {
   0% {
