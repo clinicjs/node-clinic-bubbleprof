@@ -113,10 +113,8 @@ class CollapseControl extends HtmlContent {
 
 class LoadingAnimation extends HtmlContent {
   initializeElements () {
-    if (!this.contentProperties.htmlContent) {
-      this.contentProperties.htmlContent = '<div class="loading-indicator"></div>'
-    }
     super.initializeElements()
+    this.d3Element.classed('loading-indicator', true)
   }
   // TODO: listen for 'loaded' event then hide
 }
