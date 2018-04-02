@@ -1,6 +1,5 @@
-
-/* Define colors */
 html {
+  /* Define colors */
   --main-bg-color: rgb(27, 30, 39);
 
   --banner-text-color: rgb(255, 255, 255);
@@ -8,6 +7,14 @@ html {
 
   --nearform-red: #ED1828;
   --nearform-grey: #797A7C;
+
+  --pure-white: rgb(255, 255, 255);
+
+  --cyan-highlight: rgb(96, 147, 208);
+  --cyan: rgb(63, 125, 198);
+
+  /* Define simple SVG icons */
+  --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
 }
 
 /* Main layout */
@@ -26,6 +33,10 @@ body {
 
 html {
   font-family: sans-serif;
+}
+
+html * {
+  box-sizing: border-box;
 }
 
 html #banner {
@@ -63,6 +74,41 @@ html #banner {
   display: block;
   margin-left: 35px;
   line-height: 65px;
+}
+
+#footer {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  z-index: 2;
+}
+
+#footer .bar {
+  border-top: 1px solid var(--cyan-highlight);
+  background: var(--cyan);
+  overflow: hidden;
+  cursor: pointer;
+  height: 65px;
+  width: 100%;
+}
+
+#footer .bar .text {
+  margin-left: 37px;
+  font-variant: small-caps;
+  text-transform: lowercase;
+  font-size: 14pt;
+  line-height: 64px;
+  float: left;
+  color: var(--pure-white);
+}
+
+#footer .bar .arrow {
+  float: left;
+  margin: 14px 10px;
+  height: 36px;
+  width: 36px;
+  background-image: var(--down-white-chevron-arrow);
+  background-size: cover;
 }
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8

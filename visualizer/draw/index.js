@@ -8,7 +8,7 @@ function drawOuterUI () {
   const sections = ['header', 'side-bar', 'node-link', 'footer']
   const ui = new BubbleprofUI(sections)
 
-  const footerCollapseHTML = 'Recommendation <span class="up-down-collapse-arrow"></span>'
+  const footerCollapseHTML = '<div class="text">How to use this</div><div class="arrow"></div>'
 
   ui.sections.get('footer').addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
