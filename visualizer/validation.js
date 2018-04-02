@@ -15,11 +15,15 @@ function validateKey (key, validOptions) {
     throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
   }
 }
+// Currently only used in /draw code
+/* istanbul ignore next */
 function isInstanceOf (obj, arr) {
   let result = false
   arr.forEach((constructorFunc) => { if (obj instanceof constructorFunc) result = true })
   return result
 }
+// Currently only used in /draw code
+/* istanbul ignore next */
 function uniqueMapKey (key, map) {
   let counter = 0
   function keyWithIncrement () {
