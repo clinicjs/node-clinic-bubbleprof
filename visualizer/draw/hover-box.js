@@ -1,6 +1,6 @@
 'use strict'
 
-const d3 = require('./d3-subset.js')
+// const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
 
 class HoverBox extends HtmlContent {

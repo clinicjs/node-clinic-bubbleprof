@@ -23,7 +23,7 @@ function isInstanceOf (obj, arr) {
 function uniqueMapKey (key, map) {
   let counter = 0
   function keyWithIncrement () {
-    counter ++
+    counter++
     const newKey = `${key}_${counter}`
     return map.has(newKey) ? keyWithIncrement() : newKey
   }

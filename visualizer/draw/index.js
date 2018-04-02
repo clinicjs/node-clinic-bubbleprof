@@ -20,7 +20,7 @@ function drawOuterUI () {
 
   ui.sections.get('node-link')
     .addLoadingAnimation()
-    .addContent(SvgContainer)
+    .addContent(SvgContainer, {id: 'node-link-svg'}, {})
     .addContent(HoverBox)
 
   ui.initializeElements()
