@@ -79,11 +79,11 @@ class Positioning {
 // 1    | 6 (including Root)             | first=center        | longest=first=n/a
 // 2    | 2                              | nextPyramidSide=rhs | first-in-clump=n/a
 // 3    | 3                              | nextPyramidSide=lhs | first-in-clump=n/a
-// 4    | - (parent clump exists)        | center              | clumpSlant=nextPyramidSide=push (not first-in-clump because sibling clump is present)
-// 5    | - (parent clump exists)        | rhs                 | clumpSlant=push
-// 6    | - (parent clump exists)        | lhs                 | clumpSlant=unshift
-// 7    | - (parent clump exists)        | rhs                 | clumpSlant=push
-// 8    | - (parent clump exists)        | center              | clumpSlant=nextPyramidSide=unshift
+// 4    | - (parent clump exists)        | center (^)          | clumpSlant=nextPyramidSide=push (not first-in-clump because sibling clump is present)
+// 5    | - (parent clump exists)        | rhs (\)             | clumpSlant=push
+// 6    | - (parent clump exists)        | lhs (/)             | clumpSlant=unshift
+// 7    | - (parent clump exists)        | rhs (\)             | clumpSlant=push
+// 8    | - (parent clump exists)        | center (^)          | clumpSlant=nextPyramidSide=unshift
 class ClumpPyramid {
   constructor () {
     this.insertionSideToOrientation = {
