@@ -48,11 +48,11 @@ class Positioning {
 // ClumpPyramid heuristics:
 // Clump orientation | Children insertion when siblings are present
 // __________________|______________________________________________
-// centered          | nextPyramidSide => push || unshift (the ^ of /^\)
-// rhs               | descending => push (the \ of /^\)
 // lhs               | ascending => unshift (the / of /^\)
+// centered          | nextPyramidSide => unshift || push (the ^ of /^\)
+// rhs               | descending => push (the \ of /^\)
 // * Leaves are inserted longest to shortest (as per totalStemLength)
-// * Leaves' ancestors are represented by Clumps (arrays []) and are created if missing (in ground-up order, from Root to leaf's parent, i.e. R->C->C->C->C->L converts to [[[[[L]]]]])
+// * Leaves' ancestors are represented by Clumps (arrays [] of Leaves and other Clumps) and are created if missing (in ground-up order, from Root to leaf's parent, i.e. R->C->C->C->C->L converts to [[[[[L]]]]])
 // * Clumps within Clumps count as siblings to inserted leaves (i.e. quite common to see [L, [L], L])
 
 // Simplified example:
