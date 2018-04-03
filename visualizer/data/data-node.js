@@ -151,6 +151,7 @@ class AggregateNode extends DataNode {
 
       case 'GETADDRINFOREQWRAP':
       case 'GETNAMEINFOREQWRAP':
+      case 'QUERYWRAP':
         return 'dns'
 
       case 'PROMISE':
