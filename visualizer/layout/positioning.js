@@ -20,7 +20,7 @@ class Positioning {
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
   }
-  visualize () {
+  debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
     const arrangedLeaves = this.pickLeavesByLongest().sort(intoOrder)
 
@@ -153,6 +153,5 @@ class ClumpPyramid {
     this.order = flatMapDeep(this.clumpById[rootId])
   }
 }
-
 
 module.exports = Positioning

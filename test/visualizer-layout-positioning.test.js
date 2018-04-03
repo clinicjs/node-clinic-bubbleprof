@@ -228,7 +228,7 @@ test('Visualizer layout - positioning - pyramid - example in docs', function (t)
   t.end()
 })
 
-test('Visualizer layout - positioning - visualize', function (t) {
+test('Visualizer layout - positioning - debugInspect', function (t) {
   const topology = [
     ['1.9', 50],
     ['1.2.3.4.12', 150],
@@ -244,7 +244,7 @@ test('Visualizer layout - positioning - visualize', function (t) {
   const positioning = new Positioning(clusterSelection)
   positioning.formClumpPyramid()
 
-  t.deepEqual(positioning.visualize(), [
+  t.deepEqual(positioning.debugInspect(), [
     '1.9                  -- 51',
     '1.2.3.4.12           ------ 154',
     '1.2.3.5.11.13.14.15  ---------- 257',
