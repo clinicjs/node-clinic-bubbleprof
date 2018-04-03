@@ -5,6 +5,46 @@ function flatMapDeep (value) {
   return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
 }
 
+class Positioning {
+  constructor (nodes) {
+    this.nodes = nodes
+  }
+  pickLeavesByLongest () {
+    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength() - leafA.stem.getTotalStemLength()
+    const byLeafOnly = node => !node.children.length
+    return this.nodes.filter(byLeafOnly).sort(byLongest)
+  }
+  formClumpPyramid () {
+    const leavesByLongest = this.pickLeavesByLongest()
+    const clumpPyramid = new ClumpPyramid()
+    clumpPyramid.setLeaves(leavesByLongest)
+    this.order = clumpPyramid.order
+  }
+  visualize () {
+    const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
+    const arrangedLeaves = this.pickLeavesByLongest().sort(intoOrder)
+
+    const rows = arrangedLeaves.map(leaf => {
+      const magnitude = leaf.stem.getTotalStemLength()
+      const units = parseInt(magnitude / 25)
+      const lengthAsDashes = new Array(units).fill('-').join('')
+      const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')
+      return [nodeGenealogy, lengthAsDashes + ' ' + magnitude]
+    })
+
+    const toLongest = (a, b) => a > b ? a : b
+    const longestGenealogy = rows.map(row => row[0].length).reduce(toLongest, 0)
+    const normalize = row => {
+      while (row[0].length < longestGenealogy) {
+        row[0] += ' '
+      }
+    }
+    rows.forEach(normalize)
+
+    return rows.map(row => row.join('  ')).join('\n')
+  }
+}
+
 // ClumpPyramid heuristics:
 // Clump orientation | Children insertion when siblings are present
 // __________________|______________________________________________
@@ -114,44 +154,5 @@ class ClumpPyramid {
   }
 }
 
-class Positioning {
-  constructor (nodes) {
-    this.nodes = nodes
-  }
-  pickLeavesByLongest () {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength() - leafA.stem.getTotalStemLength()
-    const byLeafOnly = node => !node.children.length
-    return this.nodes.filter(byLeafOnly).sort(byLongest)
-  }
-  formClumpPyramid () {
-    const leavesByLongest = this.pickLeavesByLongest()
-    const clumpPyramid = new ClumpPyramid()
-    clumpPyramid.setLeaves(leavesByLongest)
-    this.order = clumpPyramid.order
-  }
-  visualize () {
-    const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const arrangedLeaves = this.pickLeavesByLongest().sort(intoOrder)
-
-    const rows = arrangedLeaves.map(leaf => {
-      const magnitude = leaf.stem.getTotalStemLength()
-      const units = parseInt(magnitude / 25)
-      const lengthAsDashes = new Array(units).fill('-').join('')
-      const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')
-      return [nodeGenealogy, lengthAsDashes + ' ' + magnitude]
-    })
-
-    const toLongest = (a, b) => a > b ? a : b
-    const longestGenealogy = rows.map(row => row[0].length).reduce(toLongest, 0)
-    const normalize = row => {
-      while (row[0].length < longestGenealogy) {
-        row[0] += ' '
-      }
-    }
-    rows.forEach(normalize)
-
-    return rows.map(row => row.join('  ')).join('\n')
-  }
-}
 
 module.exports = Positioning
