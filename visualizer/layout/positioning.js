@@ -109,7 +109,7 @@ class ClumpPyramid {
   nextPyramidSide () {
     return this.leavesOnSide.lhs < this.leavesOnSide.rhs ? 'unshift' : 'push'
   }
-  ensureAncestorClump (leaf, ancestorId, insertAtSide) {
+  setAncestorClump (leaf, ancestorId, insertAtSide) {
     if (this.clumpById[ancestorId]) {
       return
     }
@@ -137,7 +137,7 @@ class ClumpPyramid {
       let insertAtSide = this.nextPyramidSide()
 
       for (const ancestorId of leaf.stem.ancestors.ids) {
-        this.ensureAncestorClump(leaf, ancestorId, insertAtSide)
+        this.setAncestorClump(leaf, ancestorId, insertAtSide)
       }
 
       const parentClump = this.clumpById[leaf.parentId]
