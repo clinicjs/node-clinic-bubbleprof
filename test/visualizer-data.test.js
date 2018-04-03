@@ -2,9 +2,14 @@
 
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
+const DataSet = require('../visualizer/data/dataset.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
+const {
+  fakeNodes,
+  expectedTypeCategories
+} = require('./visualizer-util/prepare-fake-nodes.js')
 
 function validateClusterNode (clusterNode) {
   if (!clusterNode.name) return `(1) fails on clusterId ${clusterNode.clusterId}  `
@@ -16,12 +21,13 @@ function validateAggregateNode (aggregateNode) {
   if (!aggregateNode.mark || !aggregateNode.mark.get('party')) return `(3) fails on aggregateId ${aggregateNode.aggregateId}  `
   if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `(4) fails on aggregateId ${aggregateNode.aggregateId}  `
   if (!aggregateNode.isRoot && !aggregateNode.type) return `(5) fails on aggregateId ${aggregateNode.aggregateId}  `
+  if (!(aggregateNode.typeCategory && typeof aggregateNode.typeCategory === 'string')) return `(6) fails on aggregateId ${aggregateNode.aggregateId}  `
   return ''
 }
 
 function validateSourceNode (sourceNode) {
-  if (!sourceNode.id) return `(6) fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}  `
-  if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `(7) fails on asyncId ${sourceNode.asyncId}  `
+  if (!sourceNode.id) return `(7) fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}  `
+  if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `(8) fails on asyncId ${sourceNode.asyncId}  `
   return ''
 }
 
@@ -97,5 +103,35 @@ test('Visualizer data - access invalid node id', function (t) {
 
   t.equal(dataSet.getByNodeType('ClusterNode', 'string'), null)
 
+  t.end()
+})
+
+test('Visualizer data - less common, preset type categories', function (t) {
+  const dataSet = new DataSet(fakeNodes)
+  dataSet.processData()
+  let result = ''
+
+  for (const [aggregateId, expectedTypeCategory] of expectedTypeCategories) {
+    const aggregateNode = dataSet.aggregateNodes.get(aggregateId)
+    if (aggregateNode.typeCategory !== expectedTypeCategory) {
+      result += `AggregateNode ${aggregateId} is "${aggregateNode.typeCategory}", should be "${expectedTypeCategory}".  `
+    }
+  }
+
+  // Keep this up to date with https://nodejs.org/api/async_hooks.html#async_hooks_type - gotta categorise them all
+  const nodeCoreAsyncTypes = ['FSEVENTWRAP', 'FSREQWRAP', 'GETADDRINFOREQWRAP', 'GETNAMEINFOREQWRAP', 'HTTPPARSER',
+    'JSSTREAM', 'PIPECONNECTWRAP', 'PIPEWRAP', 'PROCESSWRAP', 'QUERYWRAP', 'SHUTDOWNWRAP',
+    'SIGNALWRAP', 'STATWATCHER', 'TCPCONNECTWRAP', 'TCPSERVER', 'TCPWRAP', 'TIMERWRAP', 'TTYWRAP',
+    'UDPSENDWRAP', 'UDPWRAP', 'WRITEWRAP', 'ZLIB', 'SSLCONNECTION', 'PBKDF2REQUEST',
+    'RANDOMBYTESREQUEST', 'TLSWRAP', 'Timeout', 'Immediate', 'TickObject']
+
+  const sampleAggregateNode = Array.from(dataSet.aggregateNodes.values())[1]
+  for (const type of nodeCoreAsyncTypes) {
+    sampleAggregateNode.type = type
+    if (sampleAggregateNode.typeCategory === 'user-defined') {
+      result += `Async_hook type ${type} is not matching to any category`
+    }
+  }
+  t.equal(result, '')
   t.end()
 })

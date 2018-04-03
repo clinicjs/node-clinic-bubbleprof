@@ -34,14 +34,14 @@ const dummyClusterNodes = {
 
 const dummyAggregateNodes = {
   root: {isRoot: true},
-  a: {parentAggregateId: 'root'},
-  b: {parentAggregateId: 'root'},
-  c: {parentAggregateId: 'a'},
-  d: {parentAggregateId: 'c'},
-  e: {parentAggregateId: 'b'},
-  f: {parentAggregateId: 'd'},
-  g: {parentAggregateId: 'f'},
-  h: {parentAggregateId: 'a'}
+  a: {parentAggregateId: 'root', type: 'ZLIB'},
+  b: {parentAggregateId: 'root', type: 'GETADDRINFOREQWRAP'},
+  c: {parentAggregateId: 'a', type: 'UDPSENDWRAP'},
+  d: {parentAggregateId: 'c', type: 'PROCESSWRAP'},
+  e: {parentAggregateId: 'b', type: 'FSEVENTWRAP'},
+  f: {parentAggregateId: 'd', type: 'someCustomType'},
+  g: {parentAggregateId: 'f', type: 'Another "custom-type"'},
+  h: {parentAggregateId: 'a', type: 'MORECUSTOMTYPES'}
 }
 
 /**
@@ -236,6 +236,18 @@ const expectedAggregateResults = new Map(Object.entries({
   }
 }))
 
+const expectedTypeCategories = new Map(Object.entries({
+  root: 'root',
+  a: 'zlib',
+  b: 'dns',
+  c: 'network',
+  d: 'process',
+  e: 'fs',
+  f: 'user-defined',
+  g: 'user-defined',
+  h: 'user-defined'
+}))
+
 const clusterNodes = new Map(Object.entries(dummyClusterNodes))
 const aggregateNodes = new Map(Object.entries(dummyAggregateNodes))
 
@@ -244,5 +256,6 @@ module.exports = {
   aggregateNodes,
   dummyCallbackEvents,
   expectedClusterResults,
-  expectedAggregateResults
+  expectedAggregateResults,
+  expectedTypeCategories
 }

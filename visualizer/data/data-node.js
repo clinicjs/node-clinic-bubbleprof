@@ -101,6 +101,8 @@ class AggregateNode extends DataNode {
     // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
     this.mark.stringified = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
 
+    // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
+    // 29 possible values defined in node core, plus other user-defined values can exist
     this.type = node.type
 
     this.frames = node.frames.map((frame) => {
@@ -113,6 +115,68 @@ class AggregateNode extends DataNode {
     this.sources = node.sources.map((source) => new SourceNode(source, this))
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
+  }
+  get typeCategory () {
+    // Combines node's async_hook types into a set of 12 more usable thematic categories
+    // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
+
+    switch (this.type) {
+      case 'PROCESSWRAP':
+      case 'TTYWRAP':
+      case 'SIGNALWRAP':
+        return 'process'
+
+      case 'FSEVENTWRAP':
+      case 'FSREQWRAP':
+      case 'STATWATCHER':
+        return 'fs'
+
+      case 'HTTPPARSER':
+      case 'PIPECONNECTWRAP':
+      case 'PIPEWRAP':
+      case 'TCPCONNECTWRAP':
+      case 'TCPSERVER':
+      case 'TCPWRAP':
+      case 'TCPSERVERWRAP':
+        return 'networking'
+
+      case 'JSSTREAM':
+      case 'WRITEWRAP':
+      case 'SHUTDOWNWRAP':
+        return 'streams'
+
+      case 'UDPSENDWRAP':
+      case 'UDPWRAP':
+        return 'network'
+
+      case 'GETADDRINFOREQWRAP':
+      case 'GETNAMEINFOREQWRAP':
+        return 'dns'
+
+      case 'PROMISE':
+        return 'promises'
+
+      case 'ZLIB':
+        return 'zlib'
+
+      case 'TIMERWRAP':
+      case 'Timeout':
+      case 'Immediate':
+      case 'TickObject':
+        return 'timers-and-ticks'
+
+      case 'PBKDF2REQUEST':
+      case 'RANDOMBYTESREQUEST':
+      case 'TLSWRAP':
+      case 'SSLCONNECTION':
+        return 'crypto'
+
+      case undefined:
+        return 'root'
+
+      default:
+        return 'user-defined'
+    }
   }
   get id () {
     return this.aggregateId
