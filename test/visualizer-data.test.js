@@ -7,21 +7,21 @@ const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
 
 function validateClusterNode (clusterNode) {
-  if (!clusterNode.name) return `1: fails on clusterId ${clusterNode.clusterId}`
-  if (clusterNode.clusterId <= clusterNode.parentClusterId) return `2: fails on clusterId ${clusterNode.clusterId}`
+  if (!clusterNode.name) return `(1) fails on clusterId ${clusterNode.clusterId}  `
+  if (clusterNode.clusterId <= clusterNode.parentClusterId) return `(2) fails on clusterId ${clusterNode.clusterId}  `
   return ''
 }
 
 function validateAggregateNode (aggregateNode) {
-  if (!aggregateNode.mark || !aggregateNode.mark.get(0)) return `3: fails on aggregateId ${aggregateNode.aggregateId}`
-  if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `4: fails on aggregateId ${aggregateNode.aggregateId}`
-  if (!aggregateNode.isRoot && !aggregateNode.type) return `5: fails on aggregateId ${aggregateNode.aggregateId}`
+  if (!aggregateNode.mark || !aggregateNode.mark.get('party')) return `(3) fails on aggregateId ${aggregateNode.aggregateId}  `
+  if (aggregateNode.aggregateId <= aggregateNode.parentAggregateId) return `(4) fails on aggregateId ${aggregateNode.aggregateId}  `
+  if (!aggregateNode.isRoot && !aggregateNode.type) return `(5) fails on aggregateId ${aggregateNode.aggregateId}  `
   return ''
 }
 
 function validateSourceNode (sourceNode) {
-  if (!sourceNode.id) return `6: fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}`
-  if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `7: fails on asyncId ${sourceNode.asyncId}`
+  if (!sourceNode.id) return `(6) fails with no sourceNode id, aggregateId ${sourceNode.aggregateNode.aggregateId}  `
+  if (sourceNode.asyncId <= sourceNode.parentAsyncId) return `(7) fails on asyncId ${sourceNode.asyncId}  `
   return ''
 }
 
