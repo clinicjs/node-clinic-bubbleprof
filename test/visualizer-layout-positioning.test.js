@@ -4,6 +4,7 @@ const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const generateLayout = require('../visualizer/layout/index.js')
 const Positioning = require('../visualizer/layout/positioning.js')
+const shuffle = require('shuffle-array')
 
 function mockClusterNode ({ id, parentId, children, stemLength }) {
   const clusterNode = {
@@ -62,17 +63,6 @@ function mockTopology (topology) {
     }
   }
   return mapToArray(clusterNodes)
-}
-
-// modified version of: https://stackoverflow.com/a/6274381
-function shuffle (a) {
-  let j, x, i
-  for (i = a.length - 1; i > 0; i--) {
-    j = Math.floor(Math.random() * (i + 1))
-    x = a[i]
-    a[i] = a[j]
-    a[j] = x
-  }
 }
 
 function topologyToOrderedLeaves (topology) {
