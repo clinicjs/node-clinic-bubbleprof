@@ -13,7 +13,7 @@ class DataNode {
     const node = this
     this.stats = {
       // For nodes whose sourceNodes contain no callbackEvents (.before and .after arrays are empty), these
-      // setters are never called so default 0 values are accessed. Such cases are rare but valid, e.g. root
+      // stats are not set, so default 0 values are accessed. Such cases are rare but valid, e.g. root
       // TODO: give examples of some of the async_hook types that often have no callbackEvents.
 
       sync: 0,
@@ -104,6 +104,7 @@ class AggregateNode extends DataNode {
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
     // 29 possible values defined in node core, plus other user-defined values can exist
     this.type = node.type
+    this.typeCategory = this.getTypeCategory(this.type)
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
@@ -116,7 +117,7 @@ class AggregateNode extends DataNode {
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
-  get typeCategory () {
+  getTypeCategory () {
     // Combines node's async_hook types into a set of 12 more usable thematic categories
     // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
 
