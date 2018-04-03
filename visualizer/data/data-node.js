@@ -83,16 +83,6 @@ class ClusterNode extends DataNode {
   }
 }
 
-class Mark {
-  constructor (mark) {
-    this.mark = mark
-  }
-
-  get (index) {
-    return this.mark[index]
-  }
-}
-
 class AggregateNode extends DataNode {
   constructor (node, clusterNode) {
     super(clusterNode.dataSet)
@@ -104,7 +94,13 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
-    this.mark = new Mark(node.mark)
+    const markKeys = ['party', 'module', 'name']
+    // node.mark is an array of length 3, defined in analysis/aggregate/aggregate-node.js
+    this.mark = new Map(node.mark.map((value, i) => [markKeys[i], value]))
+    // 'party' is 'user', 'module' or 'nodecore', 'module' and 'name' may be null
+    // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
+    this.mark.stringified = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
+
     this.type = node.type
 
     this.frames = node.frames.map((frame) => {
