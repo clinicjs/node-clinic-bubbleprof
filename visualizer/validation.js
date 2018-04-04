@@ -18,9 +18,7 @@ function validateKey (key, validOptions) {
 // Currently only used in /draw code
 /* istanbul ignore next */
 function isInstanceOf (obj, arr) {
-  let result = false
-  arr.forEach((constructorFunc) => { if (obj instanceof constructorFunc) result = true })
-  return result
+  return arr.some(constructorFunc => obj instanceof constructorFunc)
 }
 // Currently only used in /draw code
 /* istanbul ignore next */
