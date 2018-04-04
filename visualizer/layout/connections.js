@@ -22,9 +22,9 @@ class Connection {
     return this.getSourceRadius() +
       this.getVisibleLineLength() +
       this.getTargetRadius() +
-      this.scale.settings.labelMinimumSpace * 2 + // gap so any text labels are readable at both ends
-      this.scale.settings.lineWidth // distance from radius to edge of visible circle = half a line width
-      //                               half a line width at each end = one line width in total
+      // Leave a gap at both ends so any text labels are readable
+      // Only one lineWidth because it increases distance by half a line width at each end
+      this.scale.settings.labelMinimumSpace * 2 + this.scale.settings.lineWidth
   }
 }
 
