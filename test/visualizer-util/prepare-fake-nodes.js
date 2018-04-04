@@ -3,7 +3,9 @@ const {
   aggregateNodes,
   dummyCallbackEvents,
   expectedClusterResults,
-  expectedAggregateResults
+  expectedAggregateResults,
+  expectedTypeCategories,
+  expectedDecimalsTo5Places
 } = require('./fake-overlapping-nodes.js')
 
 class TestClusterNode {
@@ -18,9 +20,7 @@ class TestAggregateNode {
   constructor (aggregateId) {
     Object.assign(this, aggregateNodes.get(aggregateId))
     this.id = this.aggregateId = aggregateId
-    this.mark = this.mark || ['dummy', undefined, undefined]
     this.frames = this.frames || []
-    this.type = this.type || 'dummyType'
     this.sources = []
   }
 }
@@ -73,5 +73,7 @@ for (const expected of expectedAggregateResults.values()) {
 module.exports = {
   fakeNodes,
   expectedClusterResults,
-  expectedAggregateResults
+  expectedAggregateResults,
+  expectedTypeCategories,
+  expectedDecimalsTo5Places
 }
