@@ -22,8 +22,6 @@ class Stem {
     this.ownBetween = node.getBetweenTime()
     this.ownDiameter = radiusFromCircumference(node.getWithinTime()) * 2
 
-    this._totalStemLengthByScale = {}
-
     for (const ancestorId of this.ancestors.ids) {
       const ancestor = node.getSameType(ancestorId)
       this.ancestors.totalBetween += ancestor.stem.ownBetween
