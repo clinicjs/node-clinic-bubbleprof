@@ -1,10 +1,20 @@
-
-/* Define colors */
 html {
+  /* Define colors */
   --main-bg-color: rgb(27, 30, 39);
 
   --banner-text-color: rgb(255, 255, 255);
   --banner-bg-color: rgb(41, 45, 57);
+
+  --nearform-red: #ED1828;
+  --nearform-grey: #797A7C;
+
+  --pure-white: rgb(255, 255, 255);
+
+  --cyan-highlight: rgb(96, 147, 208);
+  --cyan: rgb(63, 125, 198);
+
+  /* Define simple SVG icons */
+  --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
 }
 
 /* Main layout */
@@ -25,16 +35,23 @@ html {
   font-family: sans-serif;
 }
 
-html #banner {
-  /* light text on dark background doesn't look so good in the browser compared
-     to graphical design tools. This is because graphical design tools uses
-     antialiasing, where browsers uses subpixel rendering. To make it look
-     like in the design tool, use antialiased font rendering. More details,
-     especially on why this is a bad idea:
+html * {
+  box-sizing: border-box;
+}
+
+html #banner, html #header, html #node-link, html #side-bar, html #footer .bar {
+  /* Light text on dark background in the browser looks blocky. To make it smoother
+     and clearer, we use antialiased font rendering in dark theme. More details,
+     especially on why this is a bad idea for dark text on light backgrounds:
        http://usabilitypost.com/2012/11/05/stop-fixing-font-smoothing/
   */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html.light-theme #header, html.light-theme #node-link, html.light-theme #side-bar {
+  -webkit-font-smoothing: unset;
+  -moz-osx-font-smoothing: unset;
 }
 
 /* Banner layout */
@@ -57,7 +74,95 @@ html #banner {
   font-size: 14pt;
   font-weight: lighter;
   color: var(--banner-text-color);
+
   display: block;
   margin-left: 35px;
   line-height: 65px;
+}
+
+#footer {
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+  z-index: 2;
+}
+
+#footer .bar {
+  border-top: 1px solid var(--cyan-highlight);
+  background: var(--cyan);
+  overflow: hidden;
+  cursor: pointer;
+  height: 65px;
+  width: 100%;
+}
+
+#footer .bar .text {
+  font-size: 14pt;
+  font-variant: all-small-caps;
+  font-weight: bold;
+  color: var(--pure-white);
+
+  margin-left: 37px;
+  line-height: 64px;
+  float: left;
+}
+
+#footer .bar .arrow {
+  float: left;
+  margin: 16px 10px;
+  height: 34px;
+  width: 34px;
+  background-image: var(--down-white-chevron-arrow);
+  background-size: cover;
+  transform: scaleY(-1);
+}
+
+#footer.collapsed .bar .arrow {
+  transform: scaleY(1);
+}
+
+/* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
+   Uses transforms only to keep working when processor is busy */
+.loading-indicator,
+.loading-indicator:before,
+.loading-indicator:after {
+  width: 124px;
+  height: 120px;
+  position: absolute;
+  left: 50%;
+  margin: 80px 0 0 -60px;
+  z-index: 3;
+}
+.loading-indicator:before {
+  content: "";
+  border-radius: 50%;
+  display: block;
+  border-left: 1px solid var(--nearform-grey);
+  border-right: 1px solid var(--nearform-grey);
+  border-top: 4px solid var(--nearform-red);
+  border-bottom: 4px solid var(--nearform-red);
+  transform: translateZ(0);
+  animation: loading 1.6s infinite linear;
+}
+.loading-indicator:after {
+  content: "Loading";
+  font-size: 14pt;
+  font-variant: all-small-caps;
+  font-weight: bold;
+  color: var(--nearform-red);
+  text-align: center;
+
+  display: block;
+  position: absolute;
+  top: 50px;
+}
+@keyframes loading {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
 }

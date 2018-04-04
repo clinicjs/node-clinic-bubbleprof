@@ -15,9 +15,27 @@ function validateKey (key, validOptions) {
     throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
   }
 }
+// Currently only used in /draw code
+/* istanbul ignore next */
+function isInstanceOf (obj, arr) {
+  return arr.some(constructorFunc => obj instanceof constructorFunc)
+}
+// Currently only used in /draw code
+/* istanbul ignore next */
+function uniqueMapKey (key, map) {
+  let counter = 0
+  function keyWithIncrement () {
+    counter++
+    const newKey = `${key}_${counter}`
+    return map.has(newKey) ? keyWithIncrement() : newKey
+  }
+  return map.has(key) ? keyWithIncrement(key + '_') : key
+}
 
 module.exports = {
   isNumber,
   areNumbers,
-  validateKey
+  validateKey,
+  isInstanceOf,
+  uniqueMapKey
 }
