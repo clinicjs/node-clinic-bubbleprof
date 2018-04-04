@@ -40,7 +40,7 @@ class Layout {
         }
       }
     }
-    this.scale.setScaleFactor(this.dataSet)
+    this.scale.setScaleFactor()
   }
 
   addConnection (targetNode, connectionArray) {
