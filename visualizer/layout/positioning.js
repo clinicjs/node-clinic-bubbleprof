@@ -1,5 +1,7 @@
 'use strict'
 
+const { pickLeavesByLongest } = require('./stems.js')
+
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
 function flatMapDeep (value) {
   return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
@@ -9,20 +11,15 @@ class Positioning {
   constructor (nodes) {
     this.nodes = nodes
   }
-  pickLeavesByLongest () {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength() - leafA.stem.getTotalStemLength()
-    const byLeafOnly = node => !node.children.length
-    return this.nodes.filter(byLeafOnly).sort(byLongest)
-  }
   formClumpPyramid () {
-    const leavesByLongest = this.pickLeavesByLongest()
+    const leavesByLongest = pickLeavesByLongest(this.nodes)
     const clumpPyramid = new ClumpPyramid()
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const arrangedLeaves = this.pickLeavesByLongest().sort(intoOrder)
+    const arrangedLeaves = pickLeavesByLongest(this.nodes).sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
       const magnitude = leaf.stem.getTotalStemLength()
