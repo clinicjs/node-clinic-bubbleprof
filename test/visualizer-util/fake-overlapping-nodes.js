@@ -34,14 +34,14 @@ const dummyClusterNodes = {
 
 const dummyAggregateNodes = {
   root: {isRoot: true},
-  a: {parentAggregateId: 'root'},
-  b: {parentAggregateId: 'root'},
-  c: {parentAggregateId: 'a'},
-  d: {parentAggregateId: 'c'},
-  e: {parentAggregateId: 'b'},
-  f: {parentAggregateId: 'd'},
-  g: {parentAggregateId: 'f'},
-  h: {parentAggregateId: 'a'}
+  a: {parentAggregateId: 'root', type: 'ZLIB', mark: ['module', null, null]},
+  b: {parentAggregateId: 'root', type: 'GETADDRINFOREQWRAP', mark: ['nodecore', null, null]},
+  c: {parentAggregateId: 'a', type: 'UDPSENDWRAP', mark: ['nodecore', null, null]},
+  d: {parentAggregateId: 'c', type: 'PROCESSWRAP', mark: ['user', null, null]},
+  e: {parentAggregateId: 'b', type: 'someCustomType', mark: ['module', null, null]},
+  f: {parentAggregateId: 'd', type: 'FSEVENTWRAP', mark: ['module', null, null]},
+  g: {parentAggregateId: 'f', type: 'PROCESSWRAP', mark: ['nodecore', null, null]},
+  h: {parentAggregateId: 'a', type: 'ANOTHERCUSTOMTYPE', mark: ['user', null, null]}
 }
 
 /**
@@ -236,6 +236,106 @@ const expectedAggregateResults = new Map(Object.entries({
   }
 }))
 
+const expectedTypeCategories = new Map(Object.entries({
+  root: 'root',
+  a: 'zlib',
+  b: 'dns',
+  c: 'network',
+  d: 'process',
+  e: 'user-defined',
+  f: 'fs',
+  g: 'process',
+  h: 'user-defined'
+}))
+
+const expectedDecimalsTo5Places = new Map(Object.entries({
+  A: {
+    type: {
+      between: new Map(),
+      within: new Map(Object.entries({
+        ZLIB: 0.70833,
+        GETADDRINFOREQWRAP: 0.06944,
+        UDPSENDWRAP: 0.22222
+      }))
+    },
+    typeCategory: {
+      between: new Map(),
+      within: new Map(Object.entries({
+        zlib: 0.70833,
+        dns: 0.06944,
+        network: 0.22222
+      }))
+    },
+    party: {
+      between: new Map(),
+      within: new Map(Object.entries({
+        module: 0.70833,
+        nodecore: 0.29167
+      }))
+    }
+  },
+  B: {
+    type: {
+      between: new Map(Object.entries({
+        PROCESSWRAP: 1
+      })),
+      within: new Map(Object.entries({
+        PROCESSWRAP: 0.48148,
+        FSEVENTWRAP: 0.51852
+      }))
+    },
+    typeCategory: {
+      between: new Map(Object.entries({
+        process: 1
+      })),
+      within: new Map(Object.entries({
+        process: 0.48148,
+        fs: 0.51852
+      }))
+    },
+    party: {
+      between: new Map(Object.entries({
+        user: 1
+      })),
+      within: new Map(Object.entries({
+        user: 0.14815,
+        module: 0.51852,
+        nodecore: 0.33333
+      }))
+    }
+  },
+  C: {
+    type: {
+      between: new Map(Object.entries({
+        someCustomType: 0.57895,
+        ANOTHERCUSTOMTYPE: 0.42105
+      })),
+      within: new Map(Object.entries({
+        someCustomType: 0.85714,
+        ANOTHERCUSTOMTYPE: 0.14286
+      }))
+    },
+    typeCategory: {
+      between: new Map(Object.entries({
+        'user-defined': 1
+      })),
+      within: new Map(Object.entries({
+        'user-defined': 1
+      }))
+    },
+    party: {
+      between: new Map(Object.entries({
+        module: 0.57895,
+        user: 0.42105
+      })),
+      within: new Map(Object.entries({
+        module: 0.85714,
+        user: 0.14286
+      }))
+    }
+  }
+}))
+
 const clusterNodes = new Map(Object.entries(dummyClusterNodes))
 const aggregateNodes = new Map(Object.entries(dummyAggregateNodes))
 
@@ -244,5 +344,7 @@ module.exports = {
   aggregateNodes,
   dummyCallbackEvents,
   expectedClusterResults,
-  expectedAggregateResults
+  expectedAggregateResults,
+  expectedTypeCategories,
+  expectedDecimalsTo5Places
 }
