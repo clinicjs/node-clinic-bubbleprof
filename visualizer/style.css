@@ -126,7 +126,7 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 .loading-indicator,
 .loading-indicator:before,
 .loading-indicator:after {
-  width: 120px;
+  width: 124px;
   height: 120px;
   position: absolute;
   left: 50%;
@@ -139,8 +139,8 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   display: block;
   border-left: 1px solid var(--nearform-grey);
   border-right: 1px solid var(--nearform-grey);
-  border-top: 3px solid var(--nearform-red);
-  border-bottom: 3px solid var(--nearform-red);
+  border-top: 4px solid var(--nearform-red);
+  border-bottom: 4px solid var(--nearform-red);
   transform: translateZ(0);
   animation: loading 1.6s infinite linear;
 }
