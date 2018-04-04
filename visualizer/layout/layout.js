@@ -1,22 +1,22 @@
 'use strict'
 
-const Scale = require('./scale.js')
 const Stem = require('./stems.js')
 const Connection = require('./connections.js')
+const Scale = require('./scale.js')
 
 class Layout {
-  constructor (dataSet, settings) {
+  constructor (nodes, settings) {
     const defaultSettings = {
       svgWidth: 1000,
       svgHeight: 1000,
       svgDistanceFromEdge: 30
     }
     this.settings = Object.assign(defaultSettings, settings)
-    this.dataSet = dataSet
+    this.nodes = nodes
 
     // Create instance now, place references in appropriate getters while generating stems & connections,
     // then run .setScaleFactor() to calculate scale factor after stems have been calculated
-    this.scale = new Scale(dataSet, this.settings)
+    this.scale = new Scale(nodes, this.settings)
 
     this.clusterConnections = []
     this.aggregateConnections = new Map() // Map of arrays, one array of agg connections per clusterId
@@ -24,23 +24,37 @@ class Layout {
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
   generate () {
-    for (const [clusterId, clusterNode] of this.dataSet.clusterNodes) {
-      clusterNode.stem = new Stem(clusterNode)
+    for (const node of this.nodes) {
+      this.includeNode(node)
+    }
+    this.scale.setScaleFactor()
+  }
 
-      if (clusterNode.parentClusterId) {
-        this.addConnection(clusterNode, this.clusterConnections)
-      }
-
-      this.aggregateConnections.set(clusterId, [])
-      for (const aggregateNode of clusterNode.nodes.values()) {
-        aggregateNode.stem = new Stem(aggregateNode)
-
-        if (aggregateNode.parentAggregateId) {
-          this.addConnection(aggregateNode, this.aggregateConnections.get(clusterId))
+  includeNode (node) {
+    const processByType = {
+      'ClusterNode': () => {
+        const clusterNode = node
+        if (clusterNode.parentId) {
+          this.addConnection(clusterNode, this.clusterConnections)
+        }
+        this.aggregateConnections.set(clusterNode.id, [])
+        for (const aggregateNode of clusterNode.nodes.values()) {
+          this.includeNode(aggregateNode)
+        }
+      },
+      'AggregateNode': () => {
+        const aggregateNode = node
+        if (aggregateNode.parentId) {
+          // Dynamic assignment is necessary when working with subsets
+          if (!this.aggregateConnections.has(aggregateNode.clusterNode.id)) {
+            this.aggregateConnections.set(aggregateNode.clusterNode.id, [])
+          }
+          this.addConnection(aggregateNode, this.aggregateConnections.get(aggregateNode.clusterNode.id))
         }
       }
     }
-    this.scale.setScaleFactor()
+    node.stem = new Stem(node)
+    processByType[node.constructor.name]()
   }
 
   addConnection (targetNode, connectionArray) {

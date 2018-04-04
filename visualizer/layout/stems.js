@@ -9,6 +9,11 @@ function getNodeAncestorIds (node) {
 
 class Stem {
   constructor (node) {
+    const parentNode = node.getParentNode()
+    // Dynamic Stem assignment is necessary when working with subsets
+    if (parentNode && !parentNode.stem) {
+      parentNode.stem = new Stem(parentNode)
+    }
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,

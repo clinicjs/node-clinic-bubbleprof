@@ -3,6 +3,7 @@
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const generateLayout = require('../visualizer/layout/index.js')
+const Layout = require('../visualizer/layout/layout.js')
 const Scale = require('../visualizer/layout/scale.js')
 const { isNumber } = require('../visualizer/validation.js')
 
@@ -164,16 +165,18 @@ test('Visualizer layout - scale - magnifies tiny longest', function (t) {
   t.end()
 })
 
-test('Visualizer layout - scale - scales based on aggregate nodes of given cluster node', function (t) {
+test('Visualizer layout - scale - scales based on selected subset of nodes', function (t) {
   const topology = [
     ['1.2', 1]
   ]
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet, { svgWidth, svgHeight })
-  layout.scale.setScaleFactor(2)
+  const aggregateNode = dataSet.getByNodeType('ClusterNode', 2).nodes.get(2)
+
+  const layout = new Layout([aggregateNode], { svgWidth, svgHeight })
+  layout.generate()
+
   t.equal(layout.scale.decisiveWeight.category, 'longest')
-  const expectedAggregateNodeLength = (1 + Math.PI)
-  const expectedScaleFactor = (svgHeight * 1.5) / expectedAggregateNodeLength
+  const expectedScaleFactor = (svgHeight * 1.5) / aggregateNode.stem.getTotalStemLength()
   t.ok(layout.scale.scaleFactor < expectedScaleFactor * 1.1 && layout.scale.scaleFactor > expectedScaleFactor * 0.9)
 
   t.end()

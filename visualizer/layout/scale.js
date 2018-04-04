@@ -4,21 +4,18 @@ const { radiusFromCircumference } = require('./line-coordinates.js')
 const { pickLeavesByLongest } = require('./stems.js')
 
 class Scale {
-  constructor (dataSet, settings = {}) {
+  constructor (nodes, settings = {}) {
     const defaultSettings = {
       lineWidth: 2.5,
       labelMinimumSpace: 14
     }
-    this.dataSet = dataSet
+    this.nodes = nodes
     this.settings = Object.assign(defaultSettings, settings)
   }
-  setScaleFactor (clusterId) {
+  setScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
-    const getAllClusterNodes = () => [...this.dataSet.clusterNodes.values()]
-    const getAggregateNodes = () => [...this.dataSet.getByNodeType('ClusterNode', clusterId).nodes.values()]
-    const nodesAtLevel = clusterId ? getAggregateNodes() : getAllClusterNodes()
-    const leavesByShortest = pickLeavesByLongest(nodesAtLevel).reverse()
+    const leavesByShortest = pickLeavesByLongest(this.nodes).reverse()
 
     const longest = leavesByShortest[leavesByShortest.length - 1].stem.getTotalStemLength()
     const shortest = leavesByShortest[0].stem.getTotalStemLength()
