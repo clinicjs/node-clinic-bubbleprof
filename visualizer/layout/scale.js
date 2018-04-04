@@ -1,5 +1,7 @@
 'use strict'
 
+const { radiusFromCircumference } = require('./line-coordinates.js')
+
 class Scale {
   constructor (dataSet, settings = {}) {
     const defaultSettings = {
@@ -23,15 +25,7 @@ class Scale {
 
   getCircleRadius (dataValue) {
     const equivalentLineLength = this.getLineLength(dataValue)
-    return Scale.radiusFromCircumference(equivalentLineLength)
-  }
-
-  static radiusFromCircumference (circumference) {
-    // Each pixel of colour must represent the same amount of time, else
-    // the dataviz is misleading. So, circles representing delays within a
-    // node are stroked, not filled, and data is linked to circumference,
-    // not area, so lines and circles are equivalent
-    return circumference / (2 * Math.PI)
+    return radiusFromCircumference(equivalentLineLength)
   }
 }
 

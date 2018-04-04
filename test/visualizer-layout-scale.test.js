@@ -28,10 +28,3 @@ test('Visualizer layout - scale - calculates scalable circle radius based on len
 
   t.end()
 })
-
-test('Visualizer layout - scale - calculates radius based on circumference', function (t) {
-  t.equal(Scale.radiusFromCircumference(3), 3 / (2 * Math.PI))
-  t.equal(Scale.radiusFromCircumference(5), 5 / (2 * Math.PI))
-
-  t.end()
-})

@@ -1,6 +1,6 @@
 'use strict'
 
-const { radiusFromCircumference } = require('./scale.js')
+const { radiusFromCircumference } = require('./line-coordinates.js')
 
 function getNodeAncestorIds (node) {
   const parent = node.getParentNode()
