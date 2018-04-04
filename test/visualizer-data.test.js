@@ -8,7 +8,8 @@ const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
 const {
   fakeNodes,
-  expectedTypeCategories
+  expectedTypeCategories,
+  expectedDecimalsTo5Places
 } = require('./visualizer-util/prepare-fake-nodes.js')
 
 function validateClusterNode (clusterNode) {
@@ -130,7 +131,39 @@ test('Visualizer data - less common, preset type categories', function (t) {
     sampleAggregateNode.type = type
     sampleAggregateNode.typeCategory = sampleAggregateNode.getTypeCategory()
     if (sampleAggregateNode.typeCategory === 'user-defined') {
-      result += `Async_hook type ${type} is not matching to any category`
+      result += `Async_hook type ${type} is not matching to any category.  `
+    }
+  }
+  t.equal(result, '')
+  t.end()
+})
+
+test('Visualizer data - decimals by type, category and party', function (t) {
+  function roundTo5Places (num) { return Number(num.toFixed(5)) }
+
+  const dataSet = new DataSet(fakeNodes)
+  dataSet.processData()
+  let result = ''
+
+  for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
+    const expectedByClassification = expectedDecimalsTo5Places.get(clusterId)
+    for (const [classification, expectedByPosition] of new Map(Object.entries(expectedByClassification))) {
+      for (const [position, expectedByLabel] of new Map(Object.entries(expectedByPosition))) {
+        let runningTotal = 0
+        for (const [label, expectedValue] of expectedByLabel) {
+          const actualValue = clusterNode.decimals[classification][position].get(label)
+          runningTotal += actualValue
+
+          const roundedValue = roundTo5Places(actualValue)
+          if (expectedValue !== roundedValue) {
+            result += `clusterNode ${clusterId}'s ${classification}.${position}->${label} decimal is ${roundedValue}, expected ${expectedValue}.  `
+          }
+        }
+        const roundedTotal = roundTo5Places(runningTotal)
+        if (expectedByLabel.size && roundedTotal !== 1) {
+          result += `Total of clusterNode ${clusterId}'s ${classification}.${position} decimals is ${roundedTotal}, should be 1.  `
+        }
+      }
     }
   }
   t.equal(result, '')

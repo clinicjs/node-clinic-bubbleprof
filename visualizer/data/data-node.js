@@ -25,14 +25,14 @@ class DataNode {
 
         within: 0,
         setWithin (num) { node.stats.async.within = node.validateStat(num, 'stats.async.within') }
-      }
-    }
+      },
 
-    this.rawTotals = {
-      sync: 0,
-      async: {
-        between: 0,
-        within: 0
+      rawTotals: {
+        sync: 0,
+        async: {
+          between: 0,
+          within: 0
+        }
       }
     }
   }
@@ -66,6 +66,13 @@ class ClusterNode extends DataNode {
 
     this.children = node.children
 
+    // These contain decimals referring to the portion of a clusterNode's delay attributable to some label
+    this.decimals = {
+      type: {between: new Map(), within: new Map()}, // Node async_hook types: 'HTTPPARSER', 'TickObject'...
+      typeCategory: {between: new Map(), within: new Map()}, // Defined in .getTypeCategory() below
+      party: {between: new Map(), within: new Map()} // From .mark - 'user', 'module' or 'nodecore'
+    }
+
     this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
 
     this.nodes = new Map(
@@ -74,6 +81,19 @@ class ClusterNode extends DataNode {
         new AggregateNode(aggregateNode, this)
       ])
     )
+  }
+  setDecimal (num, classification, position, label = 'root') {
+    const raw = this.stats.rawTotals
+    const rawTotal = position === 'within' ? raw.async.within + raw.sync : raw.async.between
+    const statType = `decimals.${classification}.${position}->${label}`
+    const decimal = (num === 0 && rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
+
+    const decimalsMap = this.decimals[classification][position]
+    if (decimalsMap.has(label)) {
+      decimalsMap.set(label, decimalsMap.get(label) + decimal)
+    } else {
+      decimalsMap.set(label, decimal)
+    }
   }
   get id () {
     return this.clusterId
@@ -94,17 +114,7 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
-    const markKeys = ['party', 'module', 'name']
-    // node.mark is an array of length 3, defined in analysis/aggregate/aggregate-node.js
-    this.mark = new Map(node.mark.map((value, i) => [markKeys[i], value]))
-    // 'party' is 'user', 'module' or 'nodecore', 'module' and 'name' may be null
-    // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
-    this.mark.stringified = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
-
-    // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
-    // 29 possible values defined in node core, plus other user-defined values can exist
-    this.type = node.type
-    this.typeCategory = this.getTypeCategory(this.type)
+    this.isBetweenClusters = node.parentAggregateId && !clusterNode.nodeIds.has(node.parentAggregateId)
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
@@ -113,12 +123,41 @@ class AggregateNode extends DataNode {
         data: frameItem
       }
     })
+
+    if (!node.mark) node.mark = ['root', null, null]
+    // node.mark is always an array of length 3, based on this schema:
+    const markKeys = ['party', 'module', 'name']
+    // 'party' (as in 'third-party') will be one of 'user', 'module' or 'nodecore'.
+    // 'module' and 'name' will be null unless frames met conditions in /analysis/aggregate
+    this.mark = new Map(node.mark.map((value, i) => [markKeys[i], value]))
+    // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
+    this.mark.string = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
+
+    // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
+    // 29 possible values defined in node core, plus other user-defined values can exist
+    this.type = node.type
+    this.typeCategory = this.getTypeCategory(this.type)
+
     this.sources = node.sources.map((source) => new SourceNode(source, this))
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
+  applyDecimalsToCluster () {
+    const apply = (time, betweenOrWithin) => {
+      this.clusterNode.setDecimal(time, 'type', betweenOrWithin, this.type)
+      this.clusterNode.setDecimal(time, 'typeCategory', betweenOrWithin, this.typeCategory)
+      this.clusterNode.setDecimal(time, 'party', betweenOrWithin, this.mark.get('party'))
+    }
+
+    if (this.isBetweenClusters) {
+      apply(this.stats.rawTotals.async.between, 'between')
+      apply(this.stats.rawTotals.sync, 'within')
+    } else {
+      apply(this.stats.rawTotals.async.between + this.stats.rawTotals.sync, 'within')
+    }
+  }
   getTypeCategory () {
-    // Combines node's async_hook types into a set of 12 more usable thematic categories
+    // Combines node's async_hook types into a set of 12 more user-friendly thematic categories
     // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
 
     switch (this.type) {

@@ -31,6 +31,7 @@ class DataSet {
   }
   processData () {
     this.calculateFlattenedStats()
+    this.calculateDecimals()
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
@@ -45,6 +46,9 @@ class DataSet {
   calculateFlattenedStats () {
     this.callbackEvents.processAll()
     this.callbackEvents = null
+  }
+  calculateDecimals () {
+    this.aggregateNodes.forEach(aggregateNode => aggregateNode.applyDecimalsToCluster())
   }
 }
 
