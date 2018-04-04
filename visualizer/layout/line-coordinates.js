@@ -114,6 +114,14 @@ class LineCoordinates {
     if (degrees > 180) degrees -= 360
     return degrees
   }
+
+  static radiusFromCircumference (circumference) {
+    // Each pixel of colour must represent the same amount of time, else
+    // the dataviz is misleading. So, circles representing delays within a
+    // node are stroked, not filled, and data is linked to circumference,
+    // not area, so lines and circles are equivalent
+    return circumference / (2 * Math.PI)
+  }
 }
 
 module.exports = LineCoordinates
