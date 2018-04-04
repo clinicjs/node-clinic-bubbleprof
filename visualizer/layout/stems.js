@@ -29,7 +29,6 @@ class Stem {
     }
   }
   getTotalStemLength () {
-    // All lines and circumferences are meant to represent same value / pixel ratio => so simply multiply all by same scale
     return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
   }
   static pickLeavesByLongest (nodes) {
