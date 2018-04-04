@@ -12,7 +12,7 @@ class Scale {
     this.nodes = nodes
     this.settings = Object.assign(defaultSettings, settings)
   }
-  updateScaleFactor () {
+  calculateScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
     const leavesByShortest = pickLeavesByLongest(this.nodes).reverse()

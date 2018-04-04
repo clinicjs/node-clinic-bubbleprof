@@ -16,7 +16,7 @@ class Layout {
     this.nodes = nodes
 
     // Create instance now, place references in appropriate getters while generating stems & connections,
-    // then run .updateScaleFactor() to calculate scale factor after stems have been calculated
+    // then run .calculateScaleFactor() to calculate scale factor after stems have been calculated
     this.scale = new Scale(nodes, this.settings)
     this.positioning = new Positioning(nodes)
 
@@ -29,7 +29,7 @@ class Layout {
     for (const node of this.nodes) {
       this.includeNode(node)
     }
-    this.scale.updateScaleFactor()
+    this.scale.calculateScaleFactor()
     this.positioning.formClumpPyramid()
   }
 
