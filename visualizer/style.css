@@ -114,6 +114,11 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   width: 34px;
   background-image: var(--down-white-chevron-arrow);
   background-size: cover;
+  transform: scaleY(-1);
+}
+
+#footer.collapsed .bar .arrow {
+  transform: scaleY(1);
 }
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8

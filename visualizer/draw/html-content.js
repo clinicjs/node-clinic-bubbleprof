@@ -85,6 +85,9 @@ class HtmlContent {
   draw () {
     this.d3Element.classed('hidden', this.isHidden)
 
+    if (this.collapseControl) this.collapseControl.draw()
+    if (this.loadingAnimation) this.loadingAnimation.draw()
+
     if (!this.isHidden) {
       for (const item of this.content.values()) {
         item.draw()
@@ -96,6 +99,8 @@ class HtmlContent {
 class CollapseControl extends HtmlContent {
   initializeElements () {
     super.initializeElements()
+
+    this.isCollapsed = true
 
     this.d3Element.classed('collapse-control', true)
 
