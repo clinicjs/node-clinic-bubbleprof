@@ -24,7 +24,9 @@ class HtmlContent {
     this.contentProperties = Object.assign(defaultProperties, contentProperties)
 
     this.isHidden = false
-    this.isCollapsed = this.collapseControl = null
+
+    this.collapseControl = null
+    this.loadingAnimation = null
 
     this.content = new Map()
     this.contentIds = []
@@ -40,13 +42,7 @@ class HtmlContent {
   }
 
   addCollapseControl (collapsedByDefault = false, contentProperties = {}) {
-    this.isCollapsed = collapsedByDefault
     this.collapseControl = new CollapseControl(this, contentProperties)
-    return this
-  }
-
-  toggleCollapse () {
-    this.isCollapsed = !this.isCollapsed
     return this
   }
 
@@ -87,10 +83,9 @@ class HtmlContent {
   }
 
   draw () {
-    this.d3Element.classed('collapsed', this.isCollapsed)
     this.d3Element.classed('hidden', this.isHidden)
 
-    if (!this.isHidden && !this.isCollapsed) {
+    if (!this.isHidden) {
       for (const item of this.content.values()) {
         item.draw()
       }
@@ -105,9 +100,17 @@ class CollapseControl extends HtmlContent {
     this.d3Element.classed('collapse-control', true)
 
     this.d3Element.on('click', () => {
-      this.parentContent.toggleCollapse()
-      this.parentContent.draw()
+      this.toggleCollapse()
+      this.draw()
     })
+  }
+  toggleCollapse () {
+    this.isCollapsed = !this.isCollapsed
+    return this
+  }
+  draw () {
+    super.draw()
+    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
   }
 }
 
