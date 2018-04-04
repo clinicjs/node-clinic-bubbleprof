@@ -29,6 +29,11 @@ class Stem {
     // All lines and circumferences are meant to represent same value / pixel ratio => so simply multiply all by same scale
     return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
   }
+  static pickLeavesByLongest (nodes) {
+    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength() - leafA.stem.getTotalStemLength()
+    const byLeafOnly = node => !node.children.length
+    return nodes.filter(byLeafOnly).sort(byLongest)
+  }
 }
 
 module.exports = Stem
