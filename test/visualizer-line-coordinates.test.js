@@ -127,3 +127,10 @@ test('Line Coordinates - .preventBackwardsAngle without parent', function (t) {
 
   t.end()
 })
+
+test('Line Coordinates - calculates radius based on circumference', function (t) {
+  t.equal(LineCoordinates.radiusFromCircumference(3), 3 / (2 * Math.PI))
+  t.equal(LineCoordinates.radiusFromCircumference(5), 5 / (2 * Math.PI))
+
+  t.end()
+})
