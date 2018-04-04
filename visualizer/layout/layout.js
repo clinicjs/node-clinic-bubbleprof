@@ -3,6 +3,7 @@
 const Stem = require('./stems.js')
 const Connection = require('./connections.js')
 const Scale = require('./scale.js')
+const Positioning = require('./positioning.js')
 
 class Layout {
   constructor (nodes, settings) {
@@ -17,6 +18,7 @@ class Layout {
     // Create instance now, place references in appropriate getters while generating stems & connections,
     // then run .setScaleFactor() to calculate scale factor after stems have been calculated
     this.scale = new Scale(nodes, this.settings)
+    this.positioning = new Positioning(nodes)
 
     this.clusterConnections = []
     this.aggregateConnections = new Map() // Map of arrays, one array of agg connections per clusterId
@@ -28,6 +30,7 @@ class Layout {
       this.includeNode(node)
     }
     this.scale.setScaleFactor()
+    this.positioning.formClumpPyramid()
   }
 
   includeNode (node) {

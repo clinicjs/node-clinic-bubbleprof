@@ -3,12 +3,7 @@
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const generateLayout = require('../visualizer/layout/index.js')
-const Positioning = require('../visualizer/layout/positioning.js')
 const shuffle = require('shuffle-array')
-
-function mapToArray (map) {
-  return [...map.values()]
-}
 
 const {
   mockTopology,
@@ -52,11 +47,9 @@ test('Visualizer layout - positioning - pyramid - simple', function (t) {
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  generateLayout(dataSet)
+  const layout = generateLayout(dataSet)
 
-  const clusterSelection = mapToArray(dataSet.clusterNodes)
-  const positioning = new Positioning(clusterSelection)
-  positioning.formClumpPyramid()
+  const positioning = layout.positioning
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
@@ -76,11 +69,9 @@ test('Visualizer layout - positioning - pyramid - gaps', function (t) {
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  generateLayout(dataSet)
+  const layout = generateLayout(dataSet)
 
-  const clusterSelection = mapToArray(dataSet.clusterNodes)
-  const positioning = new Positioning(clusterSelection)
-  positioning.formClumpPyramid()
+  const positioning = layout.positioning
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
@@ -106,11 +97,9 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  generateLayout(dataSet)
+  const layout = generateLayout(dataSet)
 
-  const clusterSelection = mapToArray(dataSet.clusterNodes)
-  const positioning = new Positioning(clusterSelection)
-  positioning.formClumpPyramid()
+  const positioning = layout.positioning
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
@@ -148,11 +137,9 @@ test('Visualizer layout - positioning - pyramid - example in docs', function (t)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  generateLayout(dataSet)
+  const layout = generateLayout(dataSet)
 
-  const clusterSelection = mapToArray(dataSet.clusterNodes)
-  const positioning = new Positioning(clusterSelection)
-  positioning.formClumpPyramid()
+  const positioning = layout.positioning
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
@@ -170,11 +157,9 @@ test('Visualizer layout - positioning - debugInspect', function (t) {
   ]
 
   const dataSet = loadData(mockTopology(topology))
-  generateLayout(dataSet)
+  const layout = generateLayout(dataSet)
 
-  const clusterSelection = mapToArray(dataSet.clusterNodes)
-  const positioning = new Positioning(clusterSelection)
-  positioning.formClumpPyramid()
+  const positioning = layout.positioning
 
   t.deepEqual(positioning.debugInspect(), [
     '1.9                  -- 51',
