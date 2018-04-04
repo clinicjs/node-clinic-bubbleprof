@@ -57,7 +57,7 @@ test('Visualizer layout - scale - demagnifies large shortest', function (t) {
   const layout = generateLayout(dataSet, { svgWidth, svgHeight })
   layout.scale.setScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'shortest')
-  t.ok(layout.scale.scaleFactor < 0.50 && layout.scale.scaleFactor > 0.4)
+  t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
 
   t.end()
 })
@@ -71,7 +71,7 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   layout.scale.setScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
   t.equal(layout.scale.finalSvgHeight, 1500)
-  t.ok(layout.scale.scaleFactor < 0.50 && layout.scale.scaleFactor > 0.4)
+  t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
 
   t.end()
 })
@@ -85,7 +85,7 @@ test('Visualizer layout - scale - demagnifies large diameter (width)', function 
   dataSet.getByNodeType('ClusterNode', 2).stem.ownDiameter = svgWidth
   layout.scale.setScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
-  t.ok(layout.scale.scaleFactor < 0.25 && layout.scale.scaleFactor > 0.20)
+  t.ok(layout.scale.scaleFactor < 0.25 && layout.scale.scaleFactor > 0.2)
 
   t.end()
 })
@@ -99,7 +99,7 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
   dataSet.getByNodeType('ClusterNode', 2).stem.ownDiameter = svgHeight / 2
   layout.scale.setScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
-  t.ok(layout.scale.scaleFactor < 0.3 && layout.scale.scaleFactor > 0.20)
+  t.ok(layout.scale.scaleFactor < 0.3 && layout.scale.scaleFactor > 0.2)
 
   t.end()
 })
