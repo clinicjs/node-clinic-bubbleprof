@@ -38,17 +38,17 @@ class HtmlContent {
 
     this.content.set(identifier, item)
     this.contentIds[prepend ? 'unshift' : 'push'](identifier)
-    return this
+    return item
   }
 
   addCollapseControl (collapsedByDefault = false, contentProperties = {}) {
     this.collapseControl = new CollapseControl(this, contentProperties)
-    return this
+    return this.collapseControl
   }
 
   addLoadingAnimation (contentProperties = {}) {
     this.loadingAnimation = new LoadingAnimation(this, contentProperties)
-    return this
+    return this.loadingAnimation
   }
 
   // Initial creation of elements independent of data and layout, before .setData() is called
