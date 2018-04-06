@@ -38,9 +38,16 @@ class Bubbles extends SvgContentGroup {
 
     if (this.nodeType === 'ClusterNode') { this.addTypeDonuts() }
   }
+
   getRadius (d) {
     return this.ui.layout.scale.getCircleRadius(d.getWithinTime())
   }
+
+  getTransformPosition (d, xOffset = 0, yOffset = 0) {
+    const position = this.ui.layout.positioning.nodeToPosition.get(d)
+    return `translate(${position.x + xOffset},${position.y + yOffset})`
+  }
+
   addCircles () {
     this.d3OuterCircles = this.d3Bubbles.append('circle')
       .classed('bubble-outer', true)
@@ -50,6 +57,7 @@ class Bubbles extends SvgContentGroup {
       .classed('bubble-inner', true)
       .style('stroke-width', this.ui.settings.strokeWidthInner)
   }
+
   addTypeDonuts () {
     // Too-small clusterNodes in dataArray won't have a donut, so rather than have an incomplete
     // selection or array, reference them from a map keyed by d index
@@ -62,7 +70,8 @@ class Bubbles extends SvgContentGroup {
 
       const donutWrapper = bubble.append('g')
         .classed('bubble-donut', true)
-      this.typeDonutsMap.set(i, donutWrapper)
+
+      this.typeDonutsMap.set(d, donutWrapper)
 
       const decimalsAsArray = Array.from(d.decimals.typeCategory.within.entries())
 
@@ -76,7 +85,7 @@ class Bubbles extends SvgContentGroup {
         .data(arcData)
         .enter()
         .append('path')
-        .attr('class', arcDatum => `type-${arcDatum.data[0]}`)
+        .attr('class', arcDatum => `type-${arcDatum.data[0].replace('/', '-')}`)
         .classed('donut-segment', true)
         .on('mouseover', arcDatum => { this.ui.highlightType(arcDatum.data[0]) })
         .on('mouseout', () => { this.ui.highlightType(null) })
@@ -99,8 +108,7 @@ class Bubbles extends SvgContentGroup {
     })
 
     if (this.typeDonutsMap) {
-      for (const [i, donutWrapper] of this.typeDonutsMap) {
-        const d = this.dataArray[i]
+      for (const [d, donutWrapper] of this.typeDonutsMap) {
         const donutRadius = this.getRadius(d) - this.ui.settings.strokePadding
 
         const arcMaker = d3.arc()
@@ -108,9 +116,11 @@ class Bubbles extends SvgContentGroup {
           .outerRadius(donutRadius)
 
         donutWrapper.selectAll('.donut-segment')
-          .attr('d', arcDatum => arcMaker(arcDatum))
+          .attr('d', arcDatum => { console.log(arcDatum, donutRadius, arcMaker(arcDatum)); return arcMaker(arcDatum)})
       }
     }
+
+    this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
   }
 }
 

@@ -21,7 +21,7 @@ function drawOuterUI () {
   const nodeLink = ui.sections.get('node-link')
   nodeLink.addLoadingAnimation()
 
-  const nodeLinkSVG = nodeLink.addContent(SvgContainer, {id: 'node-link-svg'}, {})
+  const nodeLinkSVG = nodeLink.addContent(SvgContainer, {id: 'node-link-svg', svgBounds: {}})
   nodeLinkSVG.addBubbles()
   nodeLinkSVG.addLinks()
 

@@ -128,54 +128,56 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   transform: scaleY(1);
 }
 
-svg .bubble .bubble-outer {
+/* SVG */
+
+svg .bubble-wrapper .bubble-outer {
   stroke-width: 3px;
   fill: var(--pure-black);
   cursor: pointer;
 }
 
-svg .bubble .bubble-inner {
+svg .bubble-wrapper .bubble-inner {
   fill: var(--main-bg-color);
   stroke: none;
 }
 
-svg .bubble.below-stroke-threshold .bubble-inner {
+svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   opacity: 0;
 }
 
 
-.party-user {
+.party-user .bubble-outer {
   border-color: var(--nearform-red);
-  stroke-color: var(--nearform-red);
+  stroke: var(--nearform-red);
 }
-.party-module {
+.party-module .bubble-outer {
   border-color: var(--cyan);
-  stroke-color: var(--cyan);
+  stroke: var(--cyan);
 }
-.party-nodecore {
+.party-nodecore .bubble-outer {
   border-color: var(--nearform-grey);
-  stroke-color: var(--nearform-grey);
+  stroke: var(--nearform-grey);
 }
 
 .type-files-streams {
   border-color: var(--type-colour-1);
-  stroke-color: var(--type-colour-1);
+  stroke: var(--type-colour-1);
 }
-.type-network {
+.type-networks {
   border-color: var(--type-colour-2);
-  stroke-color: var(--type-colour-2);
+  stroke: var(--type-colour-2);
 }
 .type-crypto {
   border-color: var(--type-colour-3);
-  stroke-color: var(--type-colour-3);
+  stroke: var(--type-colour-3);
 }
 .type-timing-promises {
   border-color: var(--type-colour-4);
-  stroke-color: var(--type-colour-4);
+  stroke: var(--type-colour-4);
 }
 .type-other {
   border-color: var(--type-colour-5);
-  stroke-color: var(--type-colour-5);
+  stroke: var(--type-colour-5);
 }
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8

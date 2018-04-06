@@ -2,16 +2,16 @@
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
-const { Bubbles, Links } = require('./svg-content.js')
+const Bubbles = require('./svg-bubbles.js')
 
 class SvgContainer extends HtmlContent {
-  constructor (parentContent, contentProperties = {}, svgBounds = null) {
+  constructor (parentContent, contentProperties = {}) {
     const defaultProperties = {
       htmlElementType: 'svg'
     }
     super(parentContent, Object.assign(defaultProperties, contentProperties))
 
-    if (svgBounds) {
+    if (contentProperties.svgBounds) {
       const defaultBounds = {
         minX: 0,
         minY: 0,
@@ -20,7 +20,7 @@ class SvgContainer extends HtmlContent {
         preserveAspectRatio: 'xMidYMid meet',
         minimumDistanceFromEdge: 20
       }
-      this.svgBounds = Object.assign(defaultBounds, svgBounds)
+      this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
 
     this.bubbles = null
@@ -32,11 +32,13 @@ class SvgContainer extends HtmlContent {
   }
 
   addLinks (contentProperties) {
-    this.links = new Links(this, contentProperties)
+    // TODO // this.links = new Links(this, contentProperties)
   }
 
   initializeElements () {
     super.initializeElements()
+
+    console.log('init', this.svgBounds)
 
     if (this.svgBounds) {
       const {
@@ -48,6 +50,7 @@ class SvgContainer extends HtmlContent {
       } = this.svgBounds
 
       this.d3Element
+        .attr('id', 'test ID')
         .attr('viewBox', `${minX} ${minY} ${width} ${height}`)
         .attr('preserveAspectRatio', preserveAspectRatio)
     }
