@@ -22,6 +22,8 @@ function drawOuterUI () {
   nodeLink.addLoadingAnimation()
 
   const nodeLinkSVG = nodeLink.addContent(SvgContainer, {id: 'node-link-svg'}, {})
+  nodeLinkSVG.addBubbles()
+  nodeLinkSVG.addLinks()
 
   nodeLink.addContent(HoverBox)
 

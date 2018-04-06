@@ -2,13 +2,14 @@
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
+const { Bubbles, Links } = require('./svg-content.js')
 
 class SvgContainer extends HtmlContent {
-  constructor (d3Container, contentProperties = {}, svgBounds = null) {
+  constructor (parentContent, contentProperties = {}, svgBounds = null) {
     const defaultProperties = {
       htmlElementType: 'svg'
     }
-    super(d3Container, Object.assign(defaultProperties, contentProperties))
+    super(parentContent, Object.assign(defaultProperties, contentProperties))
 
     if (svgBounds) {
       const defaultBounds = {
@@ -21,6 +22,17 @@ class SvgContainer extends HtmlContent {
       }
       this.svgBounds = Object.assign(defaultBounds, svgBounds)
     }
+
+    this.bubbles = null
+    this.links = null
+  }
+
+  addBubbles (contentProperties) {
+    this.bubbles = new Bubbles(this, contentProperties)
+  }
+
+  addLinks (contentProperties) {
+    this.links = new Links(this, contentProperties)
   }
 
   initializeElements () {
@@ -39,6 +51,10 @@ class SvgContainer extends HtmlContent {
         .attr('viewBox', `${minX} ${minY} ${width} ${height}`)
         .attr('preserveAspectRatio', preserveAspectRatio)
     }
+  }
+
+  draw () {
+    this.ui.emit('svgDraw')
   }
 }
 

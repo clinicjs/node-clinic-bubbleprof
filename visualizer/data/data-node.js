@@ -75,12 +75,15 @@ class ClusterNode extends DataNode {
 
     this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
 
-    this.nodes = new Map(
-      node.nodes.map((aggregateNode) => [
+    const aggregateNodes = node.nodes.map((aggregateNode) => [
         aggregateNode.aggregateId,
         new AggregateNode(aggregateNode, this)
       ])
-    )
+
+    this.nodes = new Map(aggregateNodes)
+
+    // All aggregateNodes within a clusterNode are by definition from the same party
+    this.mark = aggregateNodes[0][1].mark
   }
   setDecimal (num, classification, position, label = 'root') {
     const raw = this.stats.rawTotals

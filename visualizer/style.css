@@ -9,9 +9,16 @@ html {
   --nearform-grey: #797A7C;
 
   --pure-white: rgb(255, 255, 255);
+  --pure-black: rgb(0, 0, 0);
 
   --cyan-highlight: rgb(96, 147, 208);
   --cyan: rgb(63, 125, 198);
+
+  --type-colour-1: rgb(24, 237, 221);
+  --type-colour-2: rgb(250, 245, 13);
+  --type-colour-3: rgb(249, 110, 124);
+  --type-colour-4: rgb(135, 62, 149);
+  --type-colour-5: rgb(245, 245, 245);
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
@@ -119,6 +126,56 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 
 #footer.collapsed .bar .arrow {
   transform: scaleY(1);
+}
+
+svg .bubble .bubble-outer {
+  stroke-width: 3px;
+  fill: var(--pure-black);
+  cursor: pointer;
+}
+
+svg .bubble .bubble-inner {
+  fill: var(--main-bg-color);
+  stroke: none;
+}
+
+svg .bubble.below-stroke-threshold .bubble-inner {
+  opacity: 0;
+}
+
+
+.party-user {
+  border-color: var(--nearform-red);
+  stroke-color: var(--nearform-red);
+}
+.party-module {
+  border-color: var(--cyan);
+  stroke-color: var(--cyan);
+}
+.party-nodecore {
+  border-color: var(--nearform-grey);
+  stroke-color: var(--nearform-grey);
+}
+
+.type-files-streams {
+  border-color: var(--type-colour-1);
+  stroke-color: var(--type-colour-1);
+}
+.type-network {
+  border-color: var(--type-colour-2);
+  stroke-color: var(--type-colour-2);
+}
+.type-crypto {
+  border-color: var(--type-colour-3);
+  stroke-color: var(--type-colour-3);
+}
+.type-timing-promises {
+  border-color: var(--type-colour-4);
+  stroke-color: var(--type-colour-4);
+}
+.type-other {
+  border-color: var(--type-colour-5);
+  stroke-color: var(--type-colour-5);
 }
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
