@@ -1,6 +1,7 @@
 'use strict'
 
 const { pickLeavesByLongest } = require('./stems.js')
+const NodeAllocation = require('./node-allocation.js')
 
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
 function flatMapDeep (value) {
@@ -8,7 +9,8 @@ function flatMapDeep (value) {
 }
 
 class Positioning {
-  constructor (nodes) {
+  constructor (layout, nodes) {
+    this.layout = layout
     this.nodes = nodes
   }
   formClumpPyramid () {
@@ -16,6 +18,11 @@ class Positioning {
     const clumpPyramid = new ClumpPyramid()
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
+  }
+  placeNodes () {
+    this.nodeAllocation = new NodeAllocation(this.layout, this.nodes)
+    this.nodeAllocation.process()
+    this.nodeToPosition = this.nodeAllocation.nodeToPosition
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
