@@ -134,3 +134,19 @@ test('Line Coordinates - calculates radius based on circumference', function (t)
 
   t.end()
 })
+
+test('Line Coordinates - calculates xy position of point at length', function (t) {
+  let spec, line
+
+  spec = { x1: 0, y1: 0, x2: 3, y2: 4 } // 3-4-5 triangle
+  line = new LineCoordinates(spec)
+  t.equal(line.length, 5)
+  t.deepEqual(line.pointAtLength(2.5), { x: 1.5, y: 2 })
+
+  spec = { x1: 1, y1: 1, x2: 4, y2: 5 } // 3-4-5 triangle translated by (1, 1) => 4-5-6
+  line = new LineCoordinates(spec)
+  t.equal(line.length, 5)
+  t.deepEqual(line.pointAtLength(2.5), { x: 2.5, y: 3 })
+
+  t.end()
+})
