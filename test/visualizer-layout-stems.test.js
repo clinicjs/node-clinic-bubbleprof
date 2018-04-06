@@ -37,3 +37,14 @@ test('Visualizer layout - stems - calculates length based on ancestors', functio
 
   t.end()
 })
+
+test('Visualizer layout - stems - identifies leaves', function (t) {
+  const dataSet = loadData(slowioJson)
+  generateLayout(dataSet)
+
+  const stem = dataSet.clusterNodes.get(8).stem
+
+  t.deepEqual(stem.leaves.ids, [ 10, 16, 17, 18 ])
+
+  t.end()
+})
