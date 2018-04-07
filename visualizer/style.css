@@ -157,7 +157,7 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   border-color: var(--nearform-red);
   stroke: var(--nearform-red);
 }
-.party-module .bubble-outer {
+.party-external .bubble-outer {
   border-color: var(--cyan);
   stroke: var(--cyan);
 }

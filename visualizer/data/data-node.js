@@ -130,9 +130,8 @@ class AggregateNode extends DataNode {
     if (!node.mark) node.mark = ['root', null, null]
     // node.mark is always an array of length 3, based on this schema:
     const markKeys = ['party', 'module', 'name']
-    // 'party' (as in 'third-party') will be one of 'user', 'module' or 'nodecore'.
+    // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.
     // 'module' and 'name' will be null unless frames met conditions in /analysis/aggregate
-    // TODO: check status of .mark beyond 'party', maybe rename 'module' so it doesn't conflict
     this.mark = new Map(node.mark.map((value, i) => [markKeys[i], value]))
     // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
     this.mark.string = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
