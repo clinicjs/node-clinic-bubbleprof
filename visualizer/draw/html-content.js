@@ -103,6 +103,7 @@ class CollapseControl extends HtmlContent {
     this.isCollapsed = true
 
     this.d3Element.classed('collapse-control', true)
+    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
 
     this.d3Element.on('click', () => {
       this.toggleCollapse()
@@ -123,8 +124,12 @@ class LoadingAnimation extends HtmlContent {
   initializeElements () {
     super.initializeElements()
     this.d3Element.classed('loading-indicator', true)
+
+    this.ui.on('complete', () => {
+      this.isHidden = true
+      this.draw()
+    })
   }
-  // TODO: listen for 'loaded' event then hide
 }
 
 module.exports = HtmlContent

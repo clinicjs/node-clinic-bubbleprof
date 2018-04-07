@@ -61,6 +61,10 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   -moz-osx-font-smoothing: unset;
 }
 
+.hidden {
+  display: none;
+}
+
 /* Banner layout */
 
 #banner {
@@ -86,6 +90,8 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   margin-left: 35px;
   line-height: 65px;
 }
+
+/* Footer */
 
 #footer {
   position: fixed;
@@ -145,6 +151,7 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   opacity: 0;
 }
 
+/* Global classes linking styles to data properties */
 
 .party-user .bubble-outer {
   border-color: var(--nearform-red);
@@ -181,10 +188,13 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
 }
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
-   Uses transforms only to keep working when processor is busy */
+   * Must * animate by transforms only, to keep animating when processor is busy */
+
 .loading-indicator,
 .loading-indicator:before,
-.loading-indicator:after {
+.loading-indicator:after,
+body:not(.initialized):before,
+body:not(.initialized):after {
   width: 124px;
   height: 120px;
   position: absolute;
@@ -192,6 +202,13 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   margin: 80px 0 0 -60px;
   z-index: 3;
 }
+
+body:not(.initialized) {
+  position: relative;
+  z-index: 3;
+}
+
+body:not(.initialized):before,
 .loading-indicator:before {
   content: "";
   border-radius: 50%;
@@ -203,8 +220,9 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   transform: translateZ(0);
   animation: loading 1.6s infinite linear;
 }
+
+body:not(.initialized):after,
 .loading-indicator:after {
-  content: "Loading";
   font-size: 14pt;
   font-variant: all-small-caps;
   font-weight: bold;
@@ -213,8 +231,21 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
 
   display: block;
   position: absolute;
+}
+
+.loading-indicator:after {
+  content: "Loading";
   top: 50px;
 }
+
+body:not(.initialized):before {
+  top: 65px;
+}
+body:not(.initialized):after {
+  content: "Preparing file";
+  top: 115px;
+}
+
 @keyframes loading {
   0% {
     -webkit-transform: rotate(0deg);

@@ -1,6 +1,7 @@
 'use strict'
 
 const HtmlContent = require('./html-content.js')
+const d3 = require('./d3-subset.js')
 const EventEmitter = require('events')
 
 class BubbleprofUI extends EventEmitter {
@@ -28,6 +29,8 @@ class BubbleprofUI extends EventEmitter {
   // For all UI item instances, keep initial DOM element creation in initializeElements() method
   // so that browser paint etc can happen around the same time, minimising reflows
   initializeElements () {
+    d3.select('body').classed('initialized', true)
+
     // TODO: try replacing with .emit('initializeElements')
     for (const section of this.sections.values()) {
       section.initializeElements()
