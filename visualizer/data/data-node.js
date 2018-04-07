@@ -165,15 +165,19 @@ class AggregateNode extends DataNode {
     // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
 
     switch (this.type) {
-      case 'PROCESSWRAP':
-      case 'TTYWRAP':
-      case 'SIGNALWRAP':
-        return 'process'
 
       case 'FSEVENTWRAP':
       case 'FSREQWRAP':
       case 'STATWATCHER':
-        return 'fs'
+        this.subCategory = this.subCategory || 'fs'
+      case 'JSSTREAM':
+      case 'WRITEWRAP':
+      case 'SHUTDOWNWRAP':
+        this.subCategory = this.subCategory || 'streams'
+      case 'ZLIB':
+        this.subCategory = this.subCategory || 'zlib'
+
+        return 'files/streams'
 
       case 'HTTPPARSER':
       case 'PIPECONNECTWRAP':
@@ -182,45 +186,45 @@ class AggregateNode extends DataNode {
       case 'TCPSERVER':
       case 'TCPWRAP':
       case 'TCPSERVERWRAP':
-        return 'networking'
-
-      case 'JSSTREAM':
-      case 'WRITEWRAP':
-      case 'SHUTDOWNWRAP':
-        return 'streams'
-
+        this.subCategory = this.subCategory || 'networking'
       case 'UDPSENDWRAP':
       case 'UDPWRAP':
-        return 'network'
-
+        this.subCategory = this.subCategory || 'network'
       case 'GETADDRINFOREQWRAP':
       case 'GETNAMEINFOREQWRAP':
       case 'QUERYWRAP':
-        return 'dns'
+        this.subCategory = this.subCategory || 'dns'
 
-      case 'PROMISE':
-        return 'promises'
-
-      case 'ZLIB':
-        return 'zlib'
-
-      case 'TIMERWRAP':
-      case 'Timeout':
-      case 'Immediate':
-      case 'TickObject':
-        return 'timers-and-ticks'
+        return 'networks'
 
       case 'PBKDF2REQUEST':
       case 'RANDOMBYTESREQUEST':
       case 'TLSWRAP':
       case 'SSLCONNECTION':
+        this.subCategory = this.subCategory || 'crypto'
+
         return 'crypto'
 
-      case undefined:
-        return 'root'
+      case 'TIMERWRAP':
+      case 'Timeout':
+      case 'Immediate':
+      case 'TickObject':
+        this.subCategory = this.subCategory || 'timers-and-ticks'
+      case 'PROMISE':
+        this.subCategory = this.subCategory || 'promises'
 
+        return 'timing/promises'
+
+      case 'PROCESSWRAP':
+      case 'TTYWRAP':
+      case 'SIGNALWRAP':
+        this.subCategory = this.subCategory || 'process'
+      case undefined:
+        this.subCategory = this.subCategory || 'root'
       default:
-        return 'user-defined'
+        this.subCategory = this.subCategory || 'user-defined'
+
+        return 'other'
     }
   }
   get id () {
