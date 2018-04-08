@@ -16,7 +16,7 @@ class SvgContainer extends HtmlContent {
         minX: 0,
         minY: 0,
         width: 1000,
-        height: 1000,
+        height: 1000, // This may be overridden by layout.scale
         preserveAspectRatio: 'xMidYMid meet',
         minimumDistanceFromEdge: 20
       }
@@ -45,14 +45,17 @@ class SvgContainer extends HtmlContent {
         minX,
         minY,
         width,
-        height,
         preserveAspectRatio
       } = this.svgBounds
 
       this.d3Element
         .attr('id', 'test ID')
-        .attr('viewBox', `${minX} ${minY} ${width} ${height}`)
         .attr('preserveAspectRatio', preserveAspectRatio)
+
+      this.ui.on('setData', () => {
+        const height = this.ui.layout.scale.finalSvgHeight || this.svgBounds.height
+        this.d3Element.attr('viewBox', `${minX} ${minY} ${width} ${height}`)
+      })
     }
   }
 

@@ -28,6 +28,7 @@ class Bubbles extends SvgContentGroup {
       // so we sort the appending such that smallest bubbles stack above larger bubbles
       .sort((a, b) => this.getRadius(b) - this.getRadius(a))
 
+      .attr('id', d => `${d.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.mark.get('party')}`)
       .classed('bubble-wrapper', true)
       .classed('below-label-threshold', (d) => this.getRadius(d) < this.ui.settings.minimumLabelSpace)

@@ -11,7 +11,7 @@ class BubbleprofUI extends EventEmitter {
     const defaultSettings = {
       minimumLabelSpace: 14,
       strokePadding: 4,
-      strokeWidthOuter: 3,
+      strokeWidthOuter: 2,
       strokeWidthInner: 1.5
     }
     this.settings = Object.assign(defaultSettings, settings)
