@@ -31,18 +31,27 @@ class NodeAllocation {
     const { svgWidth, svgDistanceFromEdge } = layout.settings
     const { finalSvgHeight } = layout.scale
     const topOffset = finalSvgHeight * 0.2
+    const borders = {
+      top: topOffset,
+      bottom: finalSvgHeight - svgDistanceFromEdge,
+      left: svgDistanceFromEdge,
+      right: svgWidth - svgDistanceFromEdge
+    }
     const coordinates = [
-      { label: 'LHS', x1: svgDistanceFromEdge, y1: topOffset, x2: svgDistanceFromEdge, y2: finalSvgHeight },
-      { label: 'BOT', x1: svgDistanceFromEdge, y1: finalSvgHeight, x2: svgWidth - svgDistanceFromEdge, y2: finalSvgHeight },
-      { label: 'RHS', x1: svgWidth - svgDistanceFromEdge, y1: finalSvgHeight, x2: svgWidth - svgDistanceFromEdge, y2: topOffset }
+      { label: 'LHS', x1: borders.left, y1: borders.top, x2: borders.left, y2: borders.bottom },
+      { label: 'BOT', x1: borders.left, y1: borders.bottom, x2: borders.right, y2: borders.bottom },
+      { label: 'RHS', x1: borders.right, y1: borders.bottom, x2: borders.right, y2: borders.top }
     ]
     return coordinates
   }
   process (placementMode = NodeAllocation.placementMode.LENGTH_CONSTRAINED) {
     this.convertTotalStemLengthsToUnits()
     this.calculate1DLinearOffsets()
-    this.calculate2DLeafCoordinates(placementMode)
+    this.calculate2DLeafCoordinates()
     this.calculate2DMidpointCoordinates(placementMode)
+    if (placementMode === NodeAllocation.placementMode.LENGTH_CONSTRAINED) {
+      this.constrain2DLeafCoordinates()
+    }
   }
   // Hierarchical (by depth) comparison narrows clumps internally and expands space between clumps.
   // This has proved to be more visually appealing than result of flat comparison.
@@ -70,6 +79,9 @@ class NodeAllocation {
         // Form Clump for given node at given level
         const ancestorId = leaf.stem.ancestors.ids[depth]
         const ancestorAtDepth = leaf.getSameType(ancestorId)
+        if (!this.midPoints.get(ancestorId)) {
+          continue
+        }
         if (!hierarchyLevel.clumps.has(ancestorAtDepth)) {
           const previousHierarchyLevel = hierarchyLevels.get(depth - 1)
           const parentClump = previousHierarchyLevel ? previousHierarchyLevel.clumps.get(ancestorAtDepth.getParentNode()) : null
@@ -92,14 +104,12 @@ class NodeAllocation {
         hierarchyLevels.set(leafDepth, new HierarchyLevel(leafDepth))
       }
       const hierarchyLevel = hierarchyLevels.get(leafDepth)
-      if (!hierarchyLevel.clumps.has(leaf)) {
-        const previousHierarchyLevel = hierarchyLevels.get(leafDepth - 1)
-        const parentClump = previousHierarchyLevel.clumps.get(leaf.getParentNode())
-        const leafClump = new Clump(leaf, parentClump, leafTotalStemLength)
-        hierarchyLevel.clumps.set(leaf, leafClump)
-        if (parentClump) {
-          parentClump.childClumps.set(leaf, leafClump)
-        }
+      const previousHierarchyLevel = hierarchyLevels.get(leafDepth - 1)
+      const parentClump = previousHierarchyLevel.clumps.get(leaf.getParentNode())
+      const leafClump = new Clump(leaf, parentClump, leafTotalStemLength)
+      hierarchyLevel.clumps.set(leaf, leafClump)
+      if (parentClump) {
+        parentClump.childClumps.set(leaf, leafClump)
       }
     }
 
@@ -118,7 +128,9 @@ class NodeAllocation {
   calculate1DLinearOffsets () {
     let currentSegment = this.segments[0]
     let currentBlock = null
-    for (const leaf of this.leaves.values()) {
+    const intoOrder = (leafA, leafB) => this.layout.positioning.order.indexOf(leafA.id) - this.layout.positioning.order.indexOf(leafB.id)
+    const arrangedLeaves = [...this.leaves.values()].sort(intoOrder) // To be optimized (unnecessary iterations)
+    for (const leaf of arrangedLeaves) {
       const position = this.nodeToPosition.get(leaf)
       const allocatedSpace = position.units * this.total1DSpaceAvailable
       currentBlock = new SpaceBlock(leaf, currentBlock ? currentBlock.end : currentSegment.begin, allocatedSpace)
@@ -127,16 +139,25 @@ class NodeAllocation {
       currentSegment.blocks.push(currentBlock)
     }
   }
-  calculate2DLeafCoordinates (placementMode) {
+  calculate2DLeafCoordinates () {
     for (const segment of this.segments) {
       for (const block of segment.blocks) {
         const position = this.nodeToPosition.get(block.node)
         const relativeOffset = block.center - segment.begin
         const { x, y } = segment.translate1DPointTo2D(relativeOffset)
-        // console.log({relativeOffset, x, y, position, block, segment})
         position.x = x
         position.y = y
       }
+    }
+  }
+  constrain2DLeafCoordinates () {
+    for (const leaf of [...this.leaves.values()]) {
+      const position = this.nodeToPosition.get(leaf)
+      const parentPosition = this.nodeToPosition.get(leaf.getParentNode()) || this.getRootPosition()
+      const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: position.x, y2: position.y })
+      const { x, y } = line.pointAtLength(leaf.stem.ownBetween)
+      position.x = x
+      position.y = y
     }
   }
   calculate2DMidpointCoordinates (placementMode) {
@@ -145,23 +166,22 @@ class NodeAllocation {
       const position = this.nodeToPosition.get(midPoint)
       if (!parentNode) {
         // TODO: spread out x's to declutter multiple top-level nodes, preferably using this.layout.positioning.order
-        position.x = this.layout.settings.svgWidth / 2
-        position.y = this.layout.settings.svgDistanceFromEdge + (midPoint.stem.ownDiameter / 2)
+        const rootPosition = this.getRootPosition(midPoint.stem.ownDiameter)
+        position.x = rootPosition.x
+        position.y = rootPosition.y
         continue
       }
       const ownLeavesInSubset = midPoint.stem.leaves.ids.filter(leafId => this.leaves.has(leafId))
       const leafPositions = ownLeavesInSubset.map(leafId => this.nodeToPosition.get(this.leaves.get(leafId)))
-      // console.log({leafPositions})
       const leafCenter = leafPositions.reduce((combinedPosition, nodePosition) => {
         return { x: combinedPosition.x + nodePosition.x, y: combinedPosition.y + nodePosition.y }
       }, { x: 0, y: 0 })
       leafCenter.x /= leafPositions.length
       leafCenter.y /= leafPositions.length
 
-      const parentPosition = this.nodeToPosition.get(parentNode)
+      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition()
       const updateByPlacementMode = {
         [NodeAllocation.placementMode.LENGTH_CONSTRAINED]: () => {
-          // console.log({parentPosition, leafCenter})
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
           const { x, y } = line.pointAtLength(midPoint.stem.ownBetween)
           position.x = x
@@ -177,6 +197,12 @@ class NodeAllocation {
         }
       }
       updateByPlacementMode[placementMode]()
+    }
+  }
+  getRootPosition (nodeDiameter = 0) {
+    return {
+      x: this.layout.settings.svgWidth / 2,
+      y: this.layout.settings.svgDistanceFromEdge + (nodeDiameter / 2)
     }
   }
   static get placementMode () {
