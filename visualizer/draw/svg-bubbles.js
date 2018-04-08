@@ -40,10 +40,6 @@ class Bubbles extends SvgContentGroup {
     if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
 
-  getRadius (d) {
-    return this.ui.layout.scale.getCircleRadius(d.getWithinTime())
-  }
-
   getTransformPosition (d, xOffset = 0, yOffset = 0) {
     const position = this.ui.layout.positioning.nodeToPosition.get(d)
     return `translate(${position.x + xOffset},${position.y + yOffset})`
@@ -52,6 +48,7 @@ class Bubbles extends SvgContentGroup {
   addCircles () {
     this.d3OuterCircles = this.d3Bubbles.append('circle')
       .classed('bubble-outer', true)
+      .classed('by-variable', true)
       .style('stroke-width', this.ui.settings.strokeWidthOuter)
 
     this.d3InnerCircles = this.d3Bubbles.append('circle')
