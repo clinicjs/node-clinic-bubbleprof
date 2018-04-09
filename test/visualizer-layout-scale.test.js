@@ -95,8 +95,8 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
     ['1.2', 1]
   ]
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet, { svgWidth, svgHeight: svgHeight / 4, labelMinimumSpace: 0, lineWidth: 0 })
-  dataSet.getByNodeType('ClusterNode', 2).stem.ownDiameter = svgHeight / 2
+  const layout = generateLayout(dataSet, { svgWidth, svgHeight: (250 + 30 + 30) * (1 / 1.5), labelMinimumSpace: 0, lineWidth: 0 })
+  dataSet.getByNodeType('ClusterNode', 2).stem.ownDiameter = 500
   layout.scale.calculateScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.ok(layout.scale.scaleFactor < 0.3 && layout.scale.scaleFactor > 0.2)
@@ -176,8 +176,23 @@ test('Visualizer layout - scale - scales based on selected subset of nodes', fun
   layout.generate()
 
   t.equal(layout.scale.decisiveWeight.category, 'longest')
-  const expectedScaleFactor = (svgHeight * 1.5) / aggregateNode.stem.getTotalStemLength(layout.scale)
+  const totalStemLength = aggregateNode.stem.getTotalStemLength(layout.scale)
+  const expectedScaleFactor = ((svgHeight * 1.5) - totalStemLength.absolute) / totalStemLength.scalable
   t.ok(layout.scale.scaleFactor < expectedScaleFactor * 1.1 && layout.scale.scaleFactor > expectedScaleFactor * 0.9)
+
+  t.end()
+})
+
+test('Visualizer layout - scale - demagnifies when absolutes exceed available space', function (t) {
+  const topology = [
+    ['1.2.3.4.5.6.7.8.9.10.11', 1]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, { svgWidth: 100, svgHeight: 100, svgDistanceFromEdge: 5, labelMinimumSpace: 20, lineWidth: 30 })
+  layout.scale.calculateScaleFactor()
+  t.equal(layout.scale.decisiveWeight.category, 'longest')
+  t.equal(layout.scale.decisiveWeight.absoluteToContain, ((2 * 20) + 30) * 10)
+  t.ok(layout.scale.scaleFactor < 0.201 && layout.scale.scaleFactor > 0.199)
 
   t.end()
 })
