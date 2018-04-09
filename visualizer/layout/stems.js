@@ -32,11 +32,12 @@ class Stem {
       ancestor.stem.leaves.ids.push(node.id)
     }
   }
-  getTotalStemLength () {
-    return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
+  getTotalStemLength (scale) {
+    const scaledExtras = ((scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth) * this.ancestors.ids.length
+    return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter + scaledExtras
   }
-  static pickLeavesByLongest (nodes) {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength() - leafA.stem.getTotalStemLength()
+  static pickLeavesByLongest (nodes, scale) {
+    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength(scale) - leafA.stem.getTotalStemLength(scale)
     const byLeafOnly = node => !node.children.length
     return nodes.filter(byLeafOnly).sort(byLongest)
   }

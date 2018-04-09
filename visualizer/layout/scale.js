@@ -15,14 +15,14 @@ class Scale {
   calculateScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
-    const leavesByShortest = pickLeavesByLongest(this.nodes).reverse()
+    const leavesByShortest = pickLeavesByLongest(this.nodes, this).reverse()
 
-    const longest = leavesByShortest[leavesByShortest.length - 1].stem.getTotalStemLength()
-    const shortest = leavesByShortest[0].stem.getTotalStemLength()
+    const longest = leavesByShortest[leavesByShortest.length - 1].stem.getTotalStemLength(this)
+    const shortest = leavesByShortest[0].stem.getTotalStemLength(this)
     // TODO: Consider using in-between computed values for quantiles, like d3 does
-    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.getTotalStemLength()
-    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.getTotalStemLength()
-    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.getTotalStemLength()
+    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.getTotalStemLength(this)
+    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.getTotalStemLength(this)
+    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.getTotalStemLength(this)
 
     const availableWidth = (this.settings.svgWidth / 2) - (this.settings.svgDistanceFromEdge * 2)
     const stretchedHeight = this.settings.svgHeight * 1.5

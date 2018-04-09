@@ -19,10 +19,10 @@ test('Visualizer layout - stems - calculates between and diameter based on stats
 
 test('Visualizer layout - stems - calculates length based on ancestors', function (t) {
   const dataSet = loadData(slowioJson)
-  generateLayout(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const stem = dataSet.clusterNodes.get(16).stem
-  const totalStemLength = stem.getTotalStemLength()
+  const totalStemLength = stem.getTotalStemLength(layout.scale)
   t.deepEqual(stem.ancestors.ids, [ 1, 5, 7, 8, 10 ])
   t.equal(totalStemLength.toFixed(8), '21897.14445863')
 
@@ -34,6 +34,18 @@ test('Visualizer layout - stems - calculates length based on ancestors', functio
   const totalAncestorsLength = stem.ancestors.ids.map(toOwnLength).reduce(sum, 0)
   // Floating point precision acting up here, hence `.toFixed()` both sides
   t.equal((totalStemLength - totalAncestorsLength).toFixed(8), (stem.ownBetween + stem.ownDiameter).toFixed(8))
+
+  t.end()
+})
+
+test('Visualizer layout - stems - calculates length based on ancestors and scale', function (t) {
+  const dataSet = loadData(slowioJson)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 2, lineWidth: 3 })
+
+  const stem = dataSet.clusterNodes.get(16).stem
+  const totalStemLength = stem.getTotalStemLength(layout.scale)
+  t.deepEqual(stem.ancestors.ids, [ 1, 5, 7, 8, 10 ])
+  t.equal(totalStemLength.toFixed(8), (21897.14445863 + (2 * 2 * 5) + (3 * 5)).toFixed(8))
 
   t.end()
 })

@@ -76,7 +76,7 @@ class NodeAllocation {
     // Traverse the hierarchies and index Clumps at each level
     const hierarchyLevels = new Map()
     for (const leaf of this.leaves.values()) {
-      const leafTotalStemLength = leaf.stem.getTotalStemLength()
+      const leafTotalStemLength = leaf.stem.getTotalStemLength(this.layout.scale)
       // Include ancestor Clumps
       for (let depth in leaf.stem.ancestors.ids) {
         depth = parseInt(depth)

@@ -14,7 +14,7 @@ class Positioning {
     this.nodes = nodes
   }
   formClumpPyramid () {
-    const leavesByLongest = pickLeavesByLongest(this.nodes)
+    const leavesByLongest = pickLeavesByLongest(this.nodes, this.layout.scale)
     const clumpPyramid = new ClumpPyramid()
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
@@ -26,10 +26,10 @@ class Positioning {
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const arrangedLeaves = pickLeavesByLongest(this.nodes).sort(intoOrder)
+    const arrangedLeaves = pickLeavesByLongest(this.nodes, this.layout).sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
-      const magnitude = leaf.stem.getTotalStemLength()
+      const magnitude = leaf.stem.getTotalStemLength(this.layout.scale)
       const units = parseInt(magnitude / 25)
       const lengthAsDashes = new Array(units).fill('-').join('')
       const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')

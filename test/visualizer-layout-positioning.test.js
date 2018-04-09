@@ -20,18 +20,19 @@ test('Visualizer layout - positioning - mock topology', function (t) {
     ['1.9', 50]
   ]
   const dataSet = loadData(mockTopology(topology))
-  generateLayout(dataSet)
   t.ok(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
+  t.ok(layout)
 
-  t.equal(dataSet.clusterNodes.get(1).stem.getTotalStemLength(), 1)
-  t.equal(dataSet.clusterNodes.get(2).stem.getTotalStemLength(), 1 + 1)
-  t.equal(dataSet.clusterNodes.get(8).stem.getTotalStemLength(), 1 + 1 + 100)
-  t.equal(dataSet.clusterNodes.get(6).stem.getTotalStemLength(), 1 + 1 + 1)
-  t.equal(dataSet.clusterNodes.get(7).stem.getTotalStemLength(), 1 + 1 + 1 + 200)
-  t.equal(dataSet.clusterNodes.get(3).stem.getTotalStemLength(), 1 + 1 + 1)
-  t.equal(dataSet.clusterNodes.get(5).stem.getTotalStemLength(), 1 + 1 + 1 + 250)
-  t.equal(dataSet.clusterNodes.get(4).stem.getTotalStemLength(), 1 + 1 + 1 + 150)
-  t.equal(dataSet.clusterNodes.get(9).stem.getTotalStemLength(), 1 + 50)
+  t.equal(dataSet.clusterNodes.get(1).stem.getTotalStemLength(layout.scale), 1)
+  t.equal(dataSet.clusterNodes.get(2).stem.getTotalStemLength(layout.scale), 1 + 1)
+  t.equal(dataSet.clusterNodes.get(8).stem.getTotalStemLength(layout.scale), 1 + 1 + 100)
+  t.equal(dataSet.clusterNodes.get(6).stem.getTotalStemLength(layout.scale), 1 + 1 + 1)
+  t.equal(dataSet.clusterNodes.get(7).stem.getTotalStemLength(layout.scale), 1 + 1 + 1 + 200)
+  t.equal(dataSet.clusterNodes.get(3).stem.getTotalStemLength(layout.scale), 1 + 1 + 1)
+  t.equal(dataSet.clusterNodes.get(5).stem.getTotalStemLength(layout.scale), 1 + 1 + 1 + 250)
+  t.equal(dataSet.clusterNodes.get(4).stem.getTotalStemLength(layout.scale), 1 + 1 + 1 + 150)
+  t.equal(dataSet.clusterNodes.get(9).stem.getTotalStemLength(layout.scale), 1 + 50)
 
   t.end()
 })
@@ -48,7 +49,7 @@ test('Visualizer layout - positioning - pyramid - simple', function (t) {
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
 
@@ -70,7 +71,7 @@ test('Visualizer layout - positioning - pyramid - gaps', function (t) {
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
 
@@ -98,7 +99,7 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
 
@@ -138,7 +139,7 @@ test('Visualizer layout - positioning - pyramid - example in docs', function (t)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
 
@@ -158,7 +159,7 @@ test('Visualizer layout - positioning - debugInspect', function (t) {
   ]
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
 
