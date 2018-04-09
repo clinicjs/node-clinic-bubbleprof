@@ -14,6 +14,15 @@ class HoverBox extends HtmlContent {
   initializeElements () {
     super.initializeElements()
     this.d3Element.classed('hover-box', true)
+    this.d3Element.classed('hidden', true)
+
+    this.d3Element.on('mouseover', () => {
+      this.ui.emit('hover', node)
+    })
+
+    this.d3Element.on('mouseout', () => {
+      this.ui.emit('hover', null)
+    })
 
     this.ui.on('hover', node => {
       this.isHidden = !node
@@ -40,15 +49,13 @@ class HoverBox extends HtmlContent {
       const top = nodePosition.x * responsiveScaleFactor
       const left = nodePosition.y * responsiveScaleFactor
 
-      console.log(responsiveScaleFactor, nodePosition, top, left)
-
-      this.d3Element.style('top', nodePosition.x * responsiveScaleFactor + 'px')
-      this.d3Element.style('left', nodePosition.y * responsiveScaleFactor + 'px'  )
+      this.d3Element.style('top', nodePosition.y * responsiveScaleFactor + 'px')
+      this.d3Element.style('left', nodePosition.x * responsiveScaleFactor + 'px'  )
 
       this.d3Title.text(node.name)
       this.d3Subtitle.text(`${node.constructor.name} #${node.id})`)
-      this.betweenTime.text(`${this.ui.formatNumber(node.getBetweenTime())}\u2009ms aggregated delay within this bubble.`)
-      this.withinTime.text(`${this.ui.formatNumber(node.getWithinTime())}\u2009ms aggregated delay from the previous bubble.`)
+      this.betweenTime.html(`<strong>${this.ui.formatNumber(node.getBetweenTime())}\u2009ms</strong> aggregated delay within this bubble.`)
+      this.withinTime.html(`<strong>${this.ui.formatNumber(node.getWithinTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
     }
   }
 }

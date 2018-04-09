@@ -5,8 +5,10 @@ html {
   --banner-text-color: rgb(255, 255, 255);
   --banner-bg-color: rgb(41, 45, 57);
 
-  --nearform-red: #ED1828;
-  --nearform-grey: #797A7C;
+  --nearform-red: rgb(237,24,40);
+  --nearform-grey: rgb(121,122,124);
+
+  --grey-highlight: rgb(191,192,194);
 
   --pure-white: rgb(255, 255, 255);
   --pure-black: rgb(0, 0, 0);
@@ -286,6 +288,50 @@ body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
 
 .hover-box {
   position: absolute;
+  opacity: 0.86;
+  width: 320px;
+  background-color: var(--pure-black);
+  color: var(--nearform-grey);
+  padding-bottom: 14px;
+  margin-left: 6px;
+}
+
+.hover-box:before {
+  content: "";
+  display: block;
+  position: absolute;
+  margin-left: -8px;
+  border: 6px solid transparent;
+  border-right-color: var(--pure-black);
+  border-top-color: var(--pure-black);
+}
+
+.hover-box p {
+  margin: 0;
+  padding: 6px 14px;
+  font-size: var(--main-text-size)
+}
+
+.hover-box strong {
+  font-weight: normal;
+  color: var(--grey-highlight);
+}
+
+.hover-box h2 {
+  margin: 0;
+  padding: 14px;
+  font-size: 13pt;
+  color: var(--pure-white);
+  font-weight: normal;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--main-bg-color);
+}
+
+.hover-box h2 .subtitle {
+  font-size: 12pt;
+  color: var(--nearform-grey);
+  display: inline-block;
+  margin: 0 4px 0 0;
 }
 
 /* Global classes linking styles to data properties */
