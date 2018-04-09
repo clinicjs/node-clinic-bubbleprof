@@ -161,7 +161,8 @@ class NodeAllocation {
   constrain2DLeafCoordinates () {
     for (const leaf of [...this.leaves.values()]) {
       const position = this.nodeToPosition.get(leaf)
-      const parentPosition = this.nodeToPosition.get(leaf.getParentNode()) || this.getRootPosition()
+      const parentNode = leaf.getParentNode()
+      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.ownDiameter)
       const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: position.x, y2: position.y })
       const { x, y } = line.pointAtLength(leaf.stem.ownBetween)
       position.x = x
@@ -187,7 +188,7 @@ class NodeAllocation {
       leafCenter.x /= leafPositions.length
       leafCenter.y /= leafPositions.length
 
-      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition()
+      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.ownDiameter)
       const updateByPlacementMode = {
         [NodeAllocation.placementMode.LENGTH_CONSTRAINED]: () => {
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
@@ -207,7 +208,7 @@ class NodeAllocation {
       updateByPlacementMode[placementMode]()
     }
   }
-  getRootPosition (nodeDiameter = 0) {
+  getRootPosition (nodeDiameter) {
     return {
       x: this.layout.settings.svgWidth / 2,
       y: this.layout.settings.svgDistanceFromEdge + (nodeDiameter / 2)
