@@ -13,6 +13,17 @@ class Links extends SvgContentGroup {
     })
   }
 
+  isBelowFullLabelThreshold (connection) {
+    // If label doesn't have space to be x5 as wide as it is tall, use smaller label
+    return connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace * 5
+  }
+  isBelowLabelThreshold (connection) {
+    return connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace
+  }
+  isBelowVisibilityThreshold (connection) {
+    return connection.getVisibleLineLength() < 1
+  }
+
   initializeFromData (dataArray) {
     super.initializeFromData(dataArray)
 
@@ -26,8 +37,9 @@ class Links extends SvgContentGroup {
 
       .attr('class', connection => `party-${connection.targetNode.mark.get('party')}`)
       .classed('link-wrapper', true)
-      .classed('below-label-threshold', (connection) => connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace)
-      .classed('below-visibility-threshold', (connection) => connection.getVisibleLineLength() < 1)
+      .classed('below-threshold-1', (d) => this.isBelowFullLabelThreshold(d))
+      .classed('below-threshold-2', (d) => this.isBelowLabelThreshold(d))
+      .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
 
     this.addLines()
     this.addLabel()
@@ -179,9 +191,9 @@ class Links extends SvgContentGroup {
         })
       }
 
-      if (!d3LinkGroup.classed('below-label-threshold')) {
+      if (!d3LinkGroup.classed('below-threshold-2')) {
         const betweenTime = this.ui.formatNumber(connection.targetNode.getBetweenTime())
-        d3TimeLabel.text(betweenTime + (visibleLength < this.ui.settings.minimumLabelSpace * 4 ? '' : '\u2009ms'))
+        d3TimeLabel.text(betweenTime + (d3LinkGroup.classed('below-threshold-1') ? '' : '\u2009ms'))
 
         const toMidwayPoint = new LineCoordinates({
           x1: offsetBeforeLine.x2,

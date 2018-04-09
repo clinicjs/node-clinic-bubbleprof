@@ -2,6 +2,7 @@
 
 const d3 = require('./d3-subset.js')
 const SvgContentGroup = require('./svg-content.js')
+const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Bubbles extends SvgContentGroup {
   constructor (svgContainer, contentProperties) {
@@ -12,11 +13,14 @@ class Bubbles extends SvgContentGroup {
     })
   }
 
+  isBelowLabelThreshold (d) {
+    return this.getRadius(d) < this.ui.settings.minimumLabelSpace
+  }
   isBelowStrokeThreshold (d) {
     return this.getRadius(d) < this.ui.settings.strokePadding
   }
-  isBelowLabelThreshold (d) {
-    return this.getRadius(d) < this.ui.settings.minimumLabelSpace
+  isBelowVisibilityThreshold (d) {
+    return this.getRadius(d) < 1
   }
 
   initializeFromData (dataArray) {
@@ -38,9 +42,9 @@ class Bubbles extends SvgContentGroup {
       .attr('id', d => `${d.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.mark.get('party')}`)
       .classed('bubble-wrapper', true)
-      .classed('below-label-threshold', (d) => this.isBelowLabelThreshold(d))
-      .classed('below-stroke-threshold', (d) => this.isBelowStrokeThreshold(d))
-      .classed('below-visibility-threshold', (d) => this.getRadius(d) < 1)
+      .classed('below-threshold-1', (d) => this.isBelowLabelThreshold(d))
+      .classed('below-threshold-2', (d) => this.isBelowStrokeThreshold(d))
+      .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
       .on('mouseover', d => { this.ui.emit('hover', d) })
       .on('mouseout', () => { this.ui.emit('hover', null) })
 
@@ -52,7 +56,29 @@ class Bubbles extends SvgContentGroup {
 
   getTransformPosition (d, xOffset = 0, yOffset = 0) {
     const position = this.ui.layout.positioning.nodeToPosition.get(d)
-    return `translate(${position.x + xOffset},${position.y + yOffset})`
+    let { x, y } = position
+
+    if (this.isBelowVisibilityThreshold(d) && this.ui.layout.connectionsByTargetId.has(d.id)) {
+      // Move it back to the mid point of the gap
+      const connection = this.ui.layout.connectionsByTargetId.get(d.id)
+      const sourcePosition = this.ui.layout.positioning.nodeToPosition.get(connection.sourceNode)
+      const inboundLine = new LineCoordinates({
+        x1: sourcePosition.x,
+        y1: sourcePosition.y,
+        x2: position.x,
+        y2: position.y
+      })
+      const backwardsLine = new LineCoordinates({
+        x1: position.x,
+        y1: position.y,
+        length: this.ui.settings.minimumLabelSpace / 2,
+        degrees: LineCoordinates.enforceDegreesRange(inboundLine.degrees - 180)
+      })
+      x = backwardsLine.x2
+      y = backwardsLine.y2
+    }
+
+    return `translate(${x + xOffset},${y + yOffset})`
   }
 
   addCircles () {
