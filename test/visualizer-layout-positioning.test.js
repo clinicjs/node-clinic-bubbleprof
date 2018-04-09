@@ -189,7 +189,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
-  const subset = [...dataSet.clusterNodes.values()].filter(node => ![1, 2].includes(node.id))
+  const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
   const layout = new Layout(subset)
   layout.generate()
 

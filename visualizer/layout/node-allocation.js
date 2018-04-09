@@ -29,7 +29,8 @@ class NodeAllocation {
     for (const coordinate of coordinates) {
       const label = coordinate.label
       const line = new LineCoordinates(coordinate)
-      const begin = coordinate === coordinates[0] ? 0 : this.segments.slice(-1)[0].end
+      const tail = this.segments[this.segments.length - 1]
+      const begin = coordinate === coordinates[0] ? 0 : tail.end
       this.segments.push(new LinearSpaceSegment(label, begin, line))
       this.total1DSpaceAvailable += line.length
     }
