@@ -192,24 +192,23 @@ class NodeAllocation {
       leafCenter.y /= leafPositions.length
 
       const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.getScaled(this.layout.scale).ownDiameter)
-      const updateByPlacementMode = {
-        [NodeAllocation.placementMode.LENGTH_CONSTRAINED]: () => {
+      switch (placementMode) {
+        case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
           const parentRadius = parentNode.stem.getScaled(this.layout.scale).ownDiameter / 2
           const { x, y } = line.pointAtLength(parentRadius + midPoint.stem.getScaled(this.layout.scale).ownBetween)
           position.x = x
           position.y = y
-        },
-        [NodeAllocation.placementMode.SPIDER]: () => {
+          break
+        case NodeAllocation.placementMode.SPIDER:
           const combinedCenter = {
             x: leafCenter.x + parentPosition.x / 2,
             y: leafCenter.y + parentPosition.y / 2
           }
           position.x = combinedCenter.x
           position.y = combinedCenter.y
-        }
+          break
       }
-      updateByPlacementMode[placementMode]()
     }
   }
   getRootPosition (nodeDiameter) {
