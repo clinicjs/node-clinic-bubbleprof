@@ -207,26 +207,34 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 
 /* SVG */
 
-svg .bubble-wrapper .bubble-outer {
+#node-link svg text {
+  text-anchor: middle;
+}
+
+#node-link svg .bubble-wrapper .time-label {
+  alignment-baseline: middle;
+}
+
+#node-link svg .bubble-wrapper .bubble-outer {
   fill: var(--pure-black);
   cursor: pointer;
 }
 
-svg .bubble-wrapper .bubble-inner {
+#node-link svg .bubble-wrapper .bubble-inner {
   fill: var(--main-bg-color);
   stroke: none;
 }
 
-svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
+#node-link svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   opacity: 0;
 }
 
-svg .link-outer {
+#node-link svg .link-outer {
   fill: var(--pure-black);
   cursor: pointer;
 }
 
-svg .link-inner {
+#node-link svg .link-inner {
   /* TODO: visible only in spiderweb layout */
   stroke: var(--pure-black);
   opacity: 0.5;
@@ -262,6 +270,16 @@ body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
 .party-nodecore .by-variable {
   border-color: var(--nearform-grey);
   stroke: var(--nearform-grey);
+}
+
+.party-user .time-label {
+  fill: var(--nearform-red);
+}
+.party-external .time-label {
+  fill: var(--cyan);
+}
+.party-nodecore .time-label {
+  fill: var(--nearform-grey);
 }
 
 .type-files-streams,

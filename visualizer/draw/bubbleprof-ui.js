@@ -9,6 +9,7 @@ class BubbleprofUI extends EventEmitter {
     super()
 
     const defaultSettings = {
+      numberFormatter: d3.format(',.2f'),
       minimumLabelSpace: 14,
       strokePadding: 4,
       strokeWidthOuter: 2
@@ -25,6 +26,11 @@ class BubbleprofUI extends EventEmitter {
       }, this))
     }
   }
+
+  formatNumber (num) {
+    return num < 0.01 ? '<0.01' : this.settings.numberFormatter(num)
+  }
+
   // For all UI item instances, keep initial DOM element creation in initializeElements() method
   // so that browser paint etc can happen around the same time, minimising reflows
   initializeElements () {

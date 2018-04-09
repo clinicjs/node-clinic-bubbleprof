@@ -30,6 +30,7 @@ class Links extends SvgContentGroup {
       .classed('below-visibility-threshold', (connection) => connection.getVisibleLineLength() < 1)
 
     this.addLines()
+    this.addLabel()
 
     if (this.nodeType === 'ClusterNode') { this.addLineSegments() }
   }
@@ -44,6 +45,11 @@ class Links extends SvgContentGroup {
 
     this.d3InnerLines = this.d3Links.append('line')
       .classed('link-inner', true)
+  }
+
+  addLabel () {
+    this.d3TimeLabels = this.d3Links.append('text')
+      .classed('time-label', true)
   }
 
   addLineSegments () {
@@ -118,10 +124,13 @@ class Links extends SvgContentGroup {
   draw () {
     const outerLinesArray = this.d3OuterLines.nodes()
     const innerLinesArray = this.d3InnerLines.nodes()
+    const timeLabelsArray = this.d3TimeLabels.nodes()
 
     this.d3Links.each((connection, linkIndex, nodes) => {
       const d3OuterLine = d3.select(outerLinesArray[linkIndex])
       const d3InnerLine = d3.select(innerLinesArray[linkIndex])
+      const d3TimeLabel = d3.select(timeLabelsArray[linkIndex])
+      const d3LinkGroup = d3.select(nodes[linkIndex])
 
       const positions = this.ui.layout.positioning.nodeToPosition
       const sourcePositions = positions.get(connection.sourceNode)
@@ -168,6 +177,22 @@ class Links extends SvgContentGroup {
 
           Links.applyLineXYs(d3LineSegment, segmentCoordinates)
         })
+      }
+
+      if (!d3LinkGroup.classed('below-label-threshold')) {
+        const betweenTime = this.ui.formatNumber(connection.targetNode.getBetweenTime())
+        d3TimeLabel.text(betweenTime + (visibleLength < this.ui.settings.minimumLabelSpace * 4 ? '' : '\u2009ms'))
+
+        const toMidwayPoint = new LineCoordinates({
+          x1: offsetBeforeLine.x2,
+          y1: offsetBeforeLine.y2,
+          length: visibleLength / 2,
+          radians: offsetBeforeLine.radians
+        })
+        const degrees = connectCentresCoords.degrees
+        d3TimeLabel.attr('y', 0 - this.ui.settings.strokePadding - this.ui.settings.strokeWidthOuter)
+//        d3TimeLabel.attr('transform', `rotate(${ isAngleBackwards(degrees) ? degrees - 180 : degrees })`)
+        d3TimeLabel.attr('transform', `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${ degrees })`)
       }
     })
   }

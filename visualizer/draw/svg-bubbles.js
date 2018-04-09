@@ -36,6 +36,7 @@ class Bubbles extends SvgContentGroup {
       .classed('below-visibility-threshold', (d) => this.getRadius(d) < 1)
 
     this.addCircles()
+    this.addLabels()
 
     if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
@@ -55,6 +56,11 @@ class Bubbles extends SvgContentGroup {
 
     this.d3InnerCircles = this.d3Bubbles.append('circle')
       .classed('bubble-inner', true)
+  }
+
+  addLabels () {
+    this.d3TimeLabels = this.d3Bubbles.append('text')
+      .classed('time-label', true)
   }
 
   addTypeDonuts () {
@@ -117,6 +123,12 @@ class Bubbles extends SvgContentGroup {
       }
     }
     this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
+
+    this.d3TimeLabels.text(d => {
+      const withinTime = this.ui.formatNumber(d.getWithinTime())
+      const withMs = withinTime + (this.getRadius(d) < this.ui.settings.minimumLabelSpace ? '' : '\u2009ms')
+      return  withMs
+    })
   }
 }
 
