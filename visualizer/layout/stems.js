@@ -19,6 +19,9 @@ class Stem {
       totalDiameter: 0,
       ids: getNodeAncestorIds(node)
     }
+    this.leaves = {
+      ids: []
+    }
     this.ownBetween = node.getBetweenTime()
     this.ownDiameter = radiusFromCircumference(node.getWithinTime()) * 2
 
@@ -26,13 +29,26 @@ class Stem {
       const ancestor = node.getSameType(ancestorId)
       this.ancestors.totalBetween += ancestor.stem.ownBetween
       this.ancestors.totalDiameter += ancestor.stem.ownDiameter
+      ancestor.stem.leaves.ids.push(node.id)
     }
   }
-  getTotalStemLength () {
-    return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
+  getScaled (scale) {
+    return {
+      ownBetween: (scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth + scale.getLineLength(this.ownBetween),
+      ownDiameter: scale.getLineLength(this.ownDiameter)
+    }
   }
-  static pickLeavesByLongest (nodes) {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength() - leafA.stem.getTotalStemLength()
+  getTotalStemLength (scale) {
+    const absolute = ((scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth) * this.ancestors.ids.length
+    const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
+    return {
+      absolute,
+      scalable,
+      combined: absolute + scalable
+    }
+  }
+  static pickLeavesByLongest (nodes, scale) {
+    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength(scale).combined - leafA.stem.getTotalStemLength(scale).combined
     const byLeafOnly = node => !node.children.length
     return nodes.filter(byLeafOnly).sort(byLongest)
   }

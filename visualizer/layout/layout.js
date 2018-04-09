@@ -18,7 +18,7 @@ class Layout {
     // Create instance now, place references in appropriate getters while generating stems & connections,
     // then run .calculateScaleFactor() to calculate scale factor after stems have been calculated
     this.scale = new Scale(nodes, this.settings)
-    this.positioning = new Positioning(nodes)
+    this.positioning = new Positioning(this, nodes)
 
     this.clusterConnections = []
     this.aggregateConnections = new Map() // Map of arrays, one array of agg connections per clusterId
@@ -31,6 +31,7 @@ class Layout {
     }
     this.scale.calculateScaleFactor()
     this.positioning.formClumpPyramid()
+    this.positioning.placeNodes()
   }
 
   includeNode (node) {
