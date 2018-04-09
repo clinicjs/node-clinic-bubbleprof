@@ -12,6 +12,13 @@ class Bubbles extends SvgContentGroup {
     })
   }
 
+  isBelowStrokeThreshold (d) {
+    return this.getRadius(d) < this.ui.settings.strokePadding
+  }
+  isBelowLabelThreshold (d) {
+    return this.getRadius(d) < this.ui.settings.minimumLabelSpace
+  }
+
   initializeFromData (dataArray) {
     super.initializeFromData(dataArray)
 
@@ -31,9 +38,11 @@ class Bubbles extends SvgContentGroup {
       .attr('id', d => `${d.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.mark.get('party')}`)
       .classed('bubble-wrapper', true)
-      .classed('below-label-threshold', (d) => this.getRadius(d) < this.ui.settings.minimumLabelSpace)
-      .classed('below-stroke-threshold', (d) => this.getRadius(d) < this.ui.settings.strokePadding)
+      .classed('below-label-threshold', (d) => this.isBelowLabelThreshold(d))
+      .classed('below-stroke-threshold', (d) => this.isBelowStrokeThreshold(d))
       .classed('below-visibility-threshold', (d) => this.getRadius(d) < 1)
+      .on('mouseover', d => { this.ui.emit('hover', d) })
+      .on('mouseout', () => { this.ui.emit('hover', null) })
 
     this.addCircles()
     this.addLabels()
@@ -98,16 +107,9 @@ class Bubbles extends SvgContentGroup {
   draw () {
     this.d3OuterCircles.attr('r', d => this.getRadius(d))
 
-    this.d3InnerCircles.each((d, i, nodes) => {
-      const innerCircle = d3.select(nodes[i])
-
-      if (d3.select(innerCircle.node().parentNode).classed('below-stroke-threshold')) {
-        // This will be an invisible mouseover target
-        innerCircle.attr('r', () => this.ui.settings.strokePadding * 2)
-      } else {
-        // This will be visible, showing the inner part of the circle
-        innerCircle.attr('r', () => this.getRadius(d) - this.ui.settings.strokePadding)
-      }
+    this.d3InnerCircles.attr('r', d => {
+      // If below threshold, this will be an invisible mouseover target
+      return this.isBelowStrokeThreshold(d) ? this.ui.settings.minimumLabelSpace : this.getRadius(d) - this.ui.settings.strokePadding
     })
 
     if (this.typeDonutsMap) {

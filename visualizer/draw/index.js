@@ -78,7 +78,7 @@ function drawOuterUI () {
   nodeLinkSVG.addBubbles()
   nodeLinkSVG.addLinks()
 
-  nodeLink.addContent(HoverBox)
+  nodeLink.addContent(HoverBox, {svg: nodeLinkSVG})
 
   ui.initializeElements()
   return ui

@@ -205,7 +205,11 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   transform: scaleY(1);
 }
 
-/* SVG */
+/* Node-link diagram and container */
+
+#node-link {
+  position: relative;
+}
 
 #node-link svg text {
   text-anchor: middle;
@@ -252,6 +256,12 @@ body[data-highlight-party='user'] svg .party-user .by-variable,
 body[data-highlight-party='external'] svg .party-external .by-variable ,
 body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
   stroke-width: 3px !important;
+}
+
+/* Hover box */
+
+.hover-box {
+  position: absolute;
 }
 
 /* Global classes linking styles to data properties */
