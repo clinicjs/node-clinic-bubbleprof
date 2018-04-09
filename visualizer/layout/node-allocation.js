@@ -15,7 +15,7 @@ class NodeAllocation {
       const category = node.children.length ? 'midPoints' : 'leaves'
       this[category].set(node.id, node)
     }
-    for (const midPoint of [...this.midPoints.values()]) {
+    for (const midPoint of this.midPoints.values()) {
       if (!this.midPoints.get(midPoint.parentId)) {
         this.roots.set(midPoint.id, midPoint)
       }
@@ -159,7 +159,7 @@ class NodeAllocation {
     }
   }
   constrain2DLeafCoordinates () {
-    for (const leaf of [...this.leaves.values()]) {
+    for (const leaf of this.leaves.values()) {
       const position = this.nodeToPosition.get(leaf)
       const parentNode = leaf.getParentNode()
       const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.getScaled(this.layout.scale).ownDiameter)
@@ -170,7 +170,7 @@ class NodeAllocation {
     }
   }
   calculate2DMidpointCoordinates (placementMode) {
-    for (const midPoint of [...this.midPoints.values()]) {
+    for (const midPoint of this.midPoints.values()) {
       const parentNode = midPoint.getParentNode()
       const position = this.nodeToPosition.get(midPoint)
       if (!parentNode) {
