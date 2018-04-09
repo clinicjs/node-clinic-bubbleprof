@@ -3,18 +3,25 @@
 const LineCoordinates = require('./line-coordinates.js')
 
 class NodeAllocation {
-  constructor (layout, nodes, coordinates = NodeAllocation.threeSided(layout)) {
+  constructor (layout, nodes, coordinatesFn = NodeAllocation.threeSided) {
     this.layout = layout
-    this.initializeSegments(coordinates)
     this.nodeToPosition = new Map()
     this.leaves = new Map()
     this.midPoints = new Map()
+    this.roots = new Map()
     for (const node of nodes) {
       // Edge offset does not apply to midpoints - only leaves - hence init value is null
       this.nodeToPosition.set(node, { units: 0, offset: null, x: 0, y: 0 })
       const category = node.children.length ? 'midPoints' : 'leaves'
       this[category].set(node.id, node)
     }
+    for (const midPoint of [...this.midPoints.values()]) {
+      if (!this.midPoints.get(midPoint.parentId)) {
+        this.roots.set(midPoint.id, midPoint)
+      }
+    }
+    const coordinates = coordinatesFn(this.layout, this.roots)
+    this.initializeSegments(coordinates)
   }
   initializeSegments (coordinates) {
     this.segments = []
@@ -27,10 +34,11 @@ class NodeAllocation {
       this.total1DSpaceAvailable += line.length
     }
   }
-  static threeSided (layout) {
+  static threeSided (layout, roots) {
     const { svgWidth, svgDistanceFromEdge } = layout.settings
     const { finalSvgHeight } = layout.scale
-    const topOffset = finalSvgHeight * 0.2
+    const largestRootDiameter = [...roots.values()].reduce((largest, rootNode) => Math.max(largest, rootNode.stem.ownDiameter), 0)
+    const topOffset = svgDistanceFromEdge + Math.max(finalSvgHeight * 0.2, largestRootDiameter)
     const borders = {
       top: topOffset,
       bottom: finalSvgHeight - svgDistanceFromEdge,

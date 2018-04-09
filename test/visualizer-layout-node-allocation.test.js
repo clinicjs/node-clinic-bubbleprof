@@ -57,11 +57,11 @@ test('Visualizer layout - node allocation - three-sided space segments depend on
   const layout = generateLayout(dataSet)
   t.ok(layout)
 
-  const nodeAllocation = new NodeAllocation(layout, [...dataSet.clusterNodes.values()], NodeAllocation.threeSided(layout))
+  const nodeAllocation = new NodeAllocation(layout, [...dataSet.clusterNodes.values()], NodeAllocation.threeSided)
   nodeAllocation.process()
 
   t.equal(nodeAllocation.segments[0].begin, 0)
-  t.equal(nodeAllocation.segments[0].end, ((layout.scale.finalSvgHeight * 0.8) - layout.settings.svgDistanceFromEdge))
+  t.equal(nodeAllocation.segments[0].end, ((layout.scale.finalSvgHeight * 0.8) - (layout.settings.svgDistanceFromEdge * 2)))
   t.equal(nodeAllocation.segments[1].begin, nodeAllocation.segments[0].end)
   t.equal(nodeAllocation.segments[1].end - nodeAllocation.segments[1].begin, layout.settings.svgWidth - (layout.settings.svgDistanceFromEdge * 2))
   t.equal(nodeAllocation.segments[2].begin, nodeAllocation.segments[1].end)
