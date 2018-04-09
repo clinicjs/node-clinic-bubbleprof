@@ -211,6 +211,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 
 #node-link {
   position: relative;
+  padding-bottom: 65px;
 }
 
 #node-link svg text {
@@ -223,6 +224,10 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 
 #node-link svg .bubble-wrapper .name-label {
   alignment-baseline: after-edge;
+}
+
+#node-link svg .bubble-wrapper .name-label.flipped-label {
+  alignment-baseline: before-edge;
 }
 
 #node-link svg .text-label {

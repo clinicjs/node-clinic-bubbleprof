@@ -220,9 +220,14 @@ class Bubbles extends SvgContentGroup {
         degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
       })
 
-      let degrees = lineToLabel.degrees - 90
-      if (degrees > 90) degrees -= 180
-      if (degrees < -90) degrees += 180
+      let degrees = lineToLabel.degrees + 90
+      let flipDegreesLabel = false
+
+      if (degrees > 90 || degrees < -90) {
+        degrees -= 180
+        flipDegreesLabel = true
+      }
+      d3NameLabel.classed('flipped-label', flipDegreesLabel)
 
       const xOffset = lineToLabel.x2 - position.x
       const yOffset = lineToLabel.y2 - position.y
