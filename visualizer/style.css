@@ -109,12 +109,16 @@ main {
 
 #header {
   width: 100%;
-  margin: 8px 24px 4px;
-  padding-bottom: 4px;
+  margin: 4px 24px 4px;
+  padding: 4px 0;
   border-bottom: 1px solid var(--cyan);
   display: flex;
   flex-direction: row;
   font-size: var(--main-text-size);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--main-bg-color);
 }
 
 #header .panel {
