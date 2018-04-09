@@ -32,6 +32,12 @@ class Stem {
       ancestor.stem.leaves.ids.push(node.id)
     }
   }
+  getScaled (scale) {
+    return {
+      ownBetween: (scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth + scale.getLineLength(this.ownBetween),
+      ownDiameter: scale.getLineLength(this.ownDiameter)
+    }
+  }
   getTotalStemLength (scale) {
     const scaledExtras = ((scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth) * this.ancestors.ids.length
     return this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter + scaledExtras

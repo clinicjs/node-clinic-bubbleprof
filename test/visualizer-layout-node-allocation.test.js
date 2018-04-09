@@ -148,8 +148,10 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   nodeAllocation.process(NodeAllocation.placementMode.LENGTH_CONSTRAINED)
 
   const positionById = {}
+  const scaledStemById = {}
   for (const clusterNode of [...dataSet.clusterNodes.values()]) {
     positionById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode)
+    scaledStemById[clusterNode.id] = clusterNode.stem.getScaled(layout.scale)
   }
   const distanceById = {}
   for (const clusterNode of [...dataSet.clusterNodes.values()]) {
@@ -157,43 +159,48 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
       distanceById[clusterNode.id] = 0
       continue
     }
-    distanceById[clusterNode.id] = new LineCoordinates({ x1: positionById[clusterNode.parentId].x, y1: positionById[clusterNode.parentId].y, x2: positionById[clusterNode.id].x, y2: positionById[clusterNode.id].y }).length
+    distanceById[clusterNode.id] = new LineCoordinates({
+      x1: positionById[clusterNode.parentId].x,
+      y1: positionById[clusterNode.parentId].y,
+      x2:
+      positionById[clusterNode.id].x,
+      y2: positionById[clusterNode.id].y }).length
   }
 
   t.deepEqual(layout.positioning.order, [8, 7, 5, 2])
 
   t.equal(positionById[1].x, layout.settings.svgWidth / 2)
-  t.equal(positionById[1].y, layout.settings.svgDistanceFromEdge + (layout.scale.getLineLength(dataSet.clusterNodes.get(1).stem.ownDiameter) / 2))
+  t.equal(positionById[1].y, layout.settings.svgDistanceFromEdge + (scaledStemById[1].ownDiameter / 2))
 
   t.ok(positionById[3].y > positionById[1].y)
   t.ok(positionById[3].x < positionById[1].x)
-  t.ok(distanceById[3] < layout.scale.getLineLength(dataSet.clusterNodes.get(3).stem.ownBetween) * 1.01)
-  t.ok(distanceById[3] > layout.scale.getLineLength(dataSet.clusterNodes.get(3).stem.ownBetween) * 0.99)
+  t.ok(distanceById[3] < (scaledStemById[1].ownDiameter / 2) + scaledStemById[3].ownBetween * 1.01)
+  t.ok(distanceById[3] > (scaledStemById[1].ownDiameter / 2) + scaledStemById[3].ownBetween * 0.99)
 
   t.ok(positionById[6].y > positionById[3].y)
   t.ok(positionById[6].x < positionById[3].x)
-  t.ok(distanceById[6] < layout.scale.getLineLength(dataSet.clusterNodes.get(6).stem.ownBetween) * 1.01)
-  t.ok(distanceById[6] > layout.scale.getLineLength(dataSet.clusterNodes.get(6).stem.ownBetween) * 0.99)
+  t.ok(distanceById[6] < (scaledStemById[3].ownDiameter / 2) + scaledStemById[6].ownBetween * 1.01)
+  t.ok(distanceById[6] > (scaledStemById[3].ownDiameter / 2) + scaledStemById[6].ownBetween * 0.99)
 
   t.ok(positionById[8].y > positionById[6].y)
   t.ok(positionById[8].x < positionById[6].x)
-  t.ok(distanceById[8] < layout.scale.getLineLength(dataSet.clusterNodes.get(8).stem.ownBetween) * 1.01)
-  t.ok(distanceById[8] > layout.scale.getLineLength(dataSet.clusterNodes.get(8).stem.ownBetween) * 0.99)
+  t.ok(distanceById[8] < (scaledStemById[6].ownDiameter / 2) + scaledStemById[8].ownBetween * 1.01)
+  t.ok(distanceById[8] > (scaledStemById[6].ownDiameter / 2) + scaledStemById[8].ownBetween * 0.99)
 
   t.ok(positionById[4].y > positionById[3].y)
   t.ok(positionById[4].x > positionById[3].x)
-  t.ok(distanceById[4] < layout.scale.getLineLength(dataSet.clusterNodes.get(4).stem.ownBetween) * 1.01)
-  t.ok(distanceById[4] > layout.scale.getLineLength(dataSet.clusterNodes.get(4).stem.ownBetween) * 0.99)
+  t.ok(distanceById[4] < (scaledStemById[3].ownDiameter / 2) + scaledStemById[4].ownBetween * 1.01)
+  t.ok(distanceById[4] > (scaledStemById[3].ownDiameter / 2) + scaledStemById[4].ownBetween * 0.99)
 
   t.ok(positionById[5].y > positionById[4].y)
   t.ok(positionById[5].x > positionById[4].x)
-  t.ok(distanceById[5] < layout.scale.getLineLength(dataSet.clusterNodes.get(5).stem.ownBetween) * 1.01)
-  t.ok(distanceById[5] > layout.scale.getLineLength(dataSet.clusterNodes.get(5).stem.ownBetween) * 0.99)
+  t.ok(distanceById[5] < (scaledStemById[4].ownDiameter / 2) + scaledStemById[5].ownBetween * 1.01)
+  t.ok(distanceById[5] > (scaledStemById[4].ownDiameter / 2) + scaledStemById[5].ownBetween * 0.99)
 
   t.ok(positionById[2].y > positionById[1].y)
   t.ok(positionById[2].x > positionById[1].x)
-  t.ok(distanceById[2] < layout.scale.getLineLength(dataSet.clusterNodes.get(2).stem.ownBetween) * 1.01)
-  t.ok(distanceById[2] > layout.scale.getLineLength(dataSet.clusterNodes.get(2).stem.ownBetween) * 0.99)
+  t.ok(distanceById[2] < (scaledStemById[1].ownDiameter / 2) + scaledStemById[2].ownBetween * 1.01)
+  t.ok(distanceById[2] > (scaledStemById[1].ownDiameter / 2) + scaledStemById[2].ownBetween * 0.99)
   t.end()
 })
 
@@ -214,8 +221,10 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   nodeAllocation.process(NodeAllocation.placementMode.LENGTH_CONSTRAINED)
 
   const positionById = {}
+  const scaledStemById = {}
   for (const clusterNode of subset) {
     positionById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode)
+    scaledStemById[clusterNode.id] = clusterNode.stem.getScaled(layout.scale)
   }
 
   const distanceById = {}
@@ -224,7 +233,11 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
       distanceById[clusterNode.id] = 0
       continue
     }
-    distanceById[clusterNode.id] = new LineCoordinates({ x1: positionById[clusterNode.parentId].x, y1: positionById[clusterNode.parentId].y, x2: positionById[clusterNode.id].x, y2: positionById[clusterNode.id].y }).length
+    distanceById[clusterNode.id] = new LineCoordinates({
+      x1: positionById[clusterNode.parentId].x,
+      y1: positionById[clusterNode.parentId].y,
+      x2: positionById[clusterNode.id].x,
+      y2: positionById[clusterNode.id].y }).length
   }
 
   t.equal(positionById[6].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
@@ -232,13 +245,13 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
 
   t.ok(positionById[7].y > positionById[6].y)
   t.ok(positionById[7].x > positionById[6].x)
-  t.ok(distanceById[7] < layout.scale.getLineLength(dataSet.clusterNodes.get(7).stem.ownBetween) * 1.01)
-  t.ok(distanceById[7] > layout.scale.getLineLength(dataSet.clusterNodes.get(7).stem.ownBetween) * 0.99)
+  t.ok(distanceById[7] < scaledStemById[7].ownBetween * 1.01)
+  t.ok(distanceById[7] > scaledStemById[7].ownBetween * 0.99)
 
   t.ok(positionById[8].y > positionById[6].y)
   t.ok(positionById[8].x < positionById[6].x)
-  t.ok(distanceById[8] < layout.scale.getLineLength(dataSet.clusterNodes.get(8).stem.ownBetween) * 1.01)
-  t.ok(distanceById[8] > layout.scale.getLineLength(dataSet.clusterNodes.get(8).stem.ownBetween) * 0.99)
+  t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
+  t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
 
   t.end()
 })
