@@ -16,6 +16,8 @@ class BubbleprofUI extends EventEmitter {
     }
     this.settings = Object.assign(defaultSettings, settings)
 
+    this.mainContainer = {}
+
     // Main divisions of the page
     this.sections = new Map()
 
@@ -56,6 +58,9 @@ class BubbleprofUI extends EventEmitter {
   initializeElements () {
     const d3Body = d3.select('body')
     d3Body.classed('initialized', true)
+
+    this.mainContainer.d3Element = d3Body.append('main')
+    this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
 
     // TODO: try replacing with .emit('initializeElements')
     for (const section of this.sections.values()) {
