@@ -135,6 +135,7 @@ class ClumpPyramid {
     }
   }
   setLeaves (leavesByLongest) {
+    const roots = {}
     this.emptyPyramid()
     this.leadingLeaf = leavesByLongest[0]
     for (const leaf of leavesByLongest) {
@@ -142,6 +143,9 @@ class ClumpPyramid {
 
       for (const ancestorId of leaf.stem.ancestors.ids) {
         this.setAncestorClump(leaf, ancestorId, insertAtSide)
+        if (!leaf.getSameType(ancestorId).parentId) {
+          roots[ancestorId] = true
+        }
       }
 
       const parentClump = this.clumpById[leaf.parentId]
@@ -153,8 +157,7 @@ class ClumpPyramid {
       this.leavesOnSide[updateSide]++
     }
 
-    const rootId = 1
-    this.order = flatMapDeep(this.clumpById[rootId])
+    this.order = flatMapDeep(Object.keys(roots).map(rootId => flatMapDeep(this.clumpById[rootId])))
   }
 }
 

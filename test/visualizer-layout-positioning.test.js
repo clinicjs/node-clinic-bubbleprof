@@ -3,6 +3,7 @@
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const generateLayout = require('../visualizer/layout/index.js')
+const Layout = require('../visualizer/layout/layout.js')
 const shuffle = require('shuffle-array')
 
 const {
@@ -168,6 +169,34 @@ test('Visualizer layout - positioning - debugInspect', function (t) {
     '1.2.6.7.10           -------- 204',
     '1.8                  ---- 101'
   ].join('\n'))
+
+  t.end()
+})
+
+test('Visualizer layout - positioning - pyramid - can handle subsets', function (t) {
+  const topology = [
+    ['1.2.10.11.12.16', 200],
+    ['1.2.10.11.12.13', 350],
+    ['1.2.3.4.5.18', 100],
+    ['1.2.3.4.5.6', 450],
+    ['1.2.3.4.5.14', 300],
+    ['1.2.3.7.8.9', 400],
+    ['1.2.3.7.8.15', 250],
+    ['1.2.3.7.8.17', 150]
+  ]
+
+  shuffle(topology) // Pyramid result should be consistent independent of initial order
+
+  const dataSet = loadData(mockTopology(topology))
+  const subset = [...dataSet.clusterNodes.values()].filter(node => ![1, 2].includes(node.id))
+  const layout = new Layout(subset)
+  layout.generate()
+
+  const positioning = layout.positioning
+  positioning.formClumpPyramid()
+
+  const expectedOrder = [16, 13, 18, 6, 14, 9, 15, 17]
+  t.deepEqual(positioning.order, expectedOrder)
 
   t.end()
 })
