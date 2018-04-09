@@ -81,6 +81,12 @@ class LineCoordinates {
     return false
   }
 
+  pointAtLength (length) {
+    const vector = { x: this.x2 - this.x1, y: this.y2 - this.y1 }
+    const normalizedLength = length / this.length
+    return { x: this.x1 + (vector.x * normalizedLength), y: this.y1 + (vector.y * normalizedLength) }
+  }
+
   static lineEndpoints ({length, radians, x1, y1}) {
     return {
       x2: x1 + length * Math.cos(radians),

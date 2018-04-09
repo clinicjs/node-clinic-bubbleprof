@@ -1,6 +1,7 @@
 'use strict'
 
 const { pickLeavesByLongest } = require('./stems.js')
+const NodeAllocation = require('./node-allocation.js')
 
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
 function flatMapDeep (value) {
@@ -8,21 +9,27 @@ function flatMapDeep (value) {
 }
 
 class Positioning {
-  constructor (nodes) {
+  constructor (layout, nodes) {
+    this.layout = layout
     this.nodes = nodes
   }
   formClumpPyramid () {
-    const leavesByLongest = pickLeavesByLongest(this.nodes)
+    const leavesByLongest = pickLeavesByLongest(this.nodes, this.layout.scale)
     const clumpPyramid = new ClumpPyramid()
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
   }
+  placeNodes () {
+    this.nodeAllocation = new NodeAllocation(this.layout, this.nodes)
+    this.nodeAllocation.process()
+    this.nodeToPosition = this.nodeAllocation.nodeToPosition
+  }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const arrangedLeaves = pickLeavesByLongest(this.nodes).sort(intoOrder)
+    const arrangedLeaves = pickLeavesByLongest(this.nodes, this.layout).sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
-      const magnitude = leaf.stem.getTotalStemLength()
+      const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
       const units = parseInt(magnitude / 25)
       const lengthAsDashes = new Array(units).fill('-').join('')
       const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')
@@ -128,6 +135,7 @@ class ClumpPyramid {
     }
   }
   setLeaves (leavesByLongest) {
+    const roots = {}
     this.emptyPyramid()
     this.leadingLeaf = leavesByLongest[0]
     for (const leaf of leavesByLongest) {
@@ -135,6 +143,9 @@ class ClumpPyramid {
 
       for (const ancestorId of leaf.stem.ancestors.ids) {
         this.setAncestorClump(leaf, ancestorId, insertAtSide)
+        if (!leaf.getSameType(ancestorId).parentId) {
+          roots[ancestorId] = true
+        }
       }
 
       const parentClump = this.clumpById[leaf.parentId]
@@ -146,8 +157,7 @@ class ClumpPyramid {
       this.leavesOnSide[updateSide]++
     }
 
-    const rootId = 1
-    this.order = flatMapDeep(this.clumpById[rootId])
+    this.order = flatMapDeep(Object.keys(roots).map(rootId => flatMapDeep(this.clumpById[rootId])))
   }
 }
 
