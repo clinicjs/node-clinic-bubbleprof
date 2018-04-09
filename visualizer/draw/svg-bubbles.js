@@ -22,6 +22,13 @@ class Bubbles extends SvgContentGroup {
   isBelowVisibilityThreshold (d) {
     return this.getRadius(d) < 1
   }
+  hasLongInboundLine (length) {
+    return length > this.ui.settings.minimumLabelSpace * 5
+  }
+  hasShortInboundLine (length) {
+    return length < this.ui.settings.minimumLabelSpace
+  }
+
 
   initializeFromData (dataArray) {
     super.initializeFromData(dataArray)
@@ -54,20 +61,33 @@ class Bubbles extends SvgContentGroup {
     if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
 
-  getTransformPosition (d, xOffset = 0, yOffset = 0) {
-    const position = this.ui.layout.positioning.nodeToPosition.get(d)
-    let { x, y } = position
+  getNodePosition (d) {
+    return this.ui.layout.positioning.nodeToPosition.get(d)
+  }
 
-    if (this.isBelowVisibilityThreshold(d) && this.ui.layout.connectionsByTargetId.has(d.id)) {
-      // Move it back to the mid point of the gap
-      const connection = this.ui.layout.connectionsByTargetId.get(d.id)
-      const sourcePosition = this.ui.layout.positioning.nodeToPosition.get(connection.sourceNode)
-      const inboundLine = new LineCoordinates({
+  getInboundConnection (d) {
+    return this.ui.layout.connectionsByTargetId.get(d.id)
+  }
+
+  getInboundLine (d) {
+    const connection = this.getInboundConnection(d)
+    const position = this.getNodePosition(d)
+    const sourcePosition = this.getNodePosition(connection.sourceNode)
+    return new LineCoordinates({
         x1: sourcePosition.x,
         y1: sourcePosition.y,
         x2: position.x,
         y2: position.y
       })
+  }
+
+  getTransformPosition (d, xOffset = 0, yOffset = 0) {
+    const position = this.getNodePosition(d)
+    let { x, y } = position
+
+    if (this.isBelowVisibilityThreshold(d) && this.ui.layout.connectionsByTargetId.has(d.id)) {
+      // Move it back to the mid point of the gap
+      const inboundLine = this.getInboundLine(d)
       const backwardsLine = new LineCoordinates({
         x1: position.x,
         y1: position.y,
@@ -96,6 +116,11 @@ class Bubbles extends SvgContentGroup {
   addLabels () {
     this.d3TimeLabels = this.d3Bubbles.append('text')
       .classed('time-label', true)
+      .classed('text-label', true)
+
+    this.d3NameLabels = this.d3Bubbles.append('text')
+      .classed('name-label', true)
+      .classed('text-label', true)
   }
 
   addTypeDonuts () {
@@ -156,6 +181,53 @@ class Bubbles extends SvgContentGroup {
       const withinTime = this.ui.formatNumber(d.getWithinTime())
       const withMs = withinTime + (this.getRadius(d) < this.ui.settings.minimumLabelSpace ? '' : '\u2009ms')
       return withMs
+    })
+
+    this.d3NameLabels.each((d, i, nodes) => {
+      const d3NameLabel = d3.select(nodes[i])
+      let inboundDegrees = 90
+      let useLongerLabel = true
+      let useMicroLabel = false
+
+      if (d.parentId) {
+        const connection = this.getInboundConnection(d)
+        const length = connection.getVisibleLineLength()
+        const hasLongInboundLine = this.hasLongInboundLine(length)
+
+        useLongerLabel = !this.isBelowLabelThreshold(d) || hasLongInboundLine
+        useMicroLabel = !useLongerLabel && this.hasShortInboundLine(length)
+
+        d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
+        inboundDegrees = this.getInboundLine(d).degrees
+      }
+
+      if (d.name === 'miscellaneous' && !d.parentId) {
+        d3NameLabel.text('Starts here')
+      } else if (useLongerLabel) {
+        d3NameLabel.text(this.ui.truncateLabel(d.name, 4, 21))
+      } else if (useMicroLabel) {
+        d3NameLabel.text(this.ui.truncateLabel(d.name, 1, 6))
+        d3NameLabel.classed('smaller-label', true)
+      } else {
+        d3NameLabel.text(this.ui.truncateLabel(d.name, 1, 9))
+      }
+
+      const position = this.getNodePosition(d)
+      const lineToLabel = new LineCoordinates({
+        x1: position.x,
+        y1: position.y,
+        length: this.getRadius(d) + this.ui.settings.strokeWidthOuter,
+        degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
+      })
+
+      let degrees = lineToLabel.degrees - 90
+      if (degrees > 90) degrees -= 180
+      if (degrees < -90) degrees += 180
+
+      const xOffset = lineToLabel.x2 - position.x
+      const yOffset = lineToLabel.y2 - position.y
+
+      d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
     })
   }
 }

@@ -221,22 +221,30 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   alignment-baseline: middle;
 }
 
-#node-link svg .time-label {
+#node-link svg .bubble-wrapper .name-label {
+  alignment-baseline: after-edge;
+}
+
+#node-link svg .text-label {
   font-size: 12pt;
 }
 
-#node-link svg .below-threshold-1 .time-label {
-  font-size: 10pt;
+#node-link svg .below-threshold-1 .text-label {
+  font-size: 11pt;
   opacity: 0.9;
 }
 
-#node-link svg .below-threshold-2 .time-label {
-  font-size: 9pt;
+#node-link svg .below-threshold-1.bubble-wrapper .time-label {
+  display: none;
+}
+
+#node-link svg .below-threshold-2 .text-label {
+  font-size: 10pt;
   opacity: 0.8;
 }
 
-#node-link svg .below-threshold-3 .time-label {
-  font-size: 8pt;
+#node-link svg .below-threshold-3 .text-label {
+  font-size: 9pt;
   opacity: 0.7;
 }
 
@@ -355,14 +363,14 @@ body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
   stroke: var(--nearform-grey);
 }
 
-.party-user .time-label {
+.party-user .text-label {
   fill: var(--nearform-red);
 }
-.party-external .time-label {
+.party-external .text-label {
   fill: var(--cyan);
 }
-.party-root .time-label,
-.party-nodecore .time-label {
+.party-root .text-label,
+.party-nodecore .text-label {
   fill: var(--nearform-grey);
 }
 

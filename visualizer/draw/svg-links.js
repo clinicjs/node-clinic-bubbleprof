@@ -62,6 +62,7 @@ class Links extends SvgContentGroup {
   addLabel () {
     this.d3TimeLabels = this.d3Links.append('text')
       .classed('time-label', true)
+      .classed('text-label', true)
   }
 
   addLineSegments () {
