@@ -11,8 +11,7 @@ class BubbleprofUI extends EventEmitter {
     const defaultSettings = {
       minimumLabelSpace: 14,
       strokePadding: 4,
-      strokeWidthOuter: 2,
-      strokeWidthInner: 1.5
+      strokeWidthOuter: 2
     }
     this.settings = Object.assign(defaultSettings, settings)
 
@@ -29,12 +28,21 @@ class BubbleprofUI extends EventEmitter {
   // For all UI item instances, keep initial DOM element creation in initializeElements() method
   // so that browser paint etc can happen around the same time, minimising reflows
   initializeElements () {
-    d3.select('body').classed('initialized', true)
+    const d3Body = d3.select('body')
+    d3Body.classed('initialized', true)
 
     // TODO: try replacing with .emit('initializeElements')
     for (const section of this.sections.values()) {
       section.initializeElements()
     }
+
+    this.on('highlightType', (className) => {
+      d3Body.attr('data-highlight-type', className || null)
+    })
+
+    this.on('highlightParty', (className) => {
+      d3Body.attr('data-highlight-party', className || null)
+    })
   }
 
   setData (dataSet, layout) {
