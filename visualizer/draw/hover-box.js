@@ -16,14 +16,6 @@ class HoverBox extends HtmlContent {
     this.d3Element.classed('hover-box', true)
     this.d3Element.classed('hidden', true)
 
-    this.d3Element.on('mouseover', () => {
-      this.ui.emit('hover', node)
-    })
-
-    this.d3Element.on('mouseout', () => {
-      this.ui.emit('hover', null)
-    })
-
     this.ui.on('hover', node => {
       this.isHidden = !node
       this.draw(node)
@@ -41,16 +33,24 @@ class HoverBox extends HtmlContent {
     super.draw()
 
     if (node) {
+      this.d3Element.on('mouseover', () => {
+        this.ui.emit('hover', node)
+      })
+
+      this.d3Element.on('mouseout', () => {
+        this.ui.emit('hover', null)
+      })
+
       const svg = this.contentProperties.svg
       const svgWidth = svg.d3Element.node().getBoundingClientRect().width
       const responsiveScaleFactor = svgWidth / svg.svgBounds.width
 
       const nodePosition = this.ui.layout.positioning.nodeToPosition.get(node)
-      const top = nodePosition.x * responsiveScaleFactor
-      const left = nodePosition.y * responsiveScaleFactor
+      const top = nodePosition.y * responsiveScaleFactor
+      const left = nodePosition.x * responsiveScaleFactor
 
-      this.d3Element.style('top', nodePosition.y * responsiveScaleFactor + 'px')
-      this.d3Element.style('left', nodePosition.x * responsiveScaleFactor + 'px'  )
+      this.d3Element.style('top', top + 'px')
+      this.d3Element.style('left', left + 'px')
 
       this.d3Title.text(node.name)
       this.d3Subtitle.text(`${node.constructor.name} #${node.id})`)

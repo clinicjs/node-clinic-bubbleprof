@@ -206,8 +206,7 @@ class Links extends SvgContentGroup {
         if (degrees < -90) degrees += 180
 
         d3TimeLabel.attr('y', 0 - this.ui.settings.strokePadding - this.ui.settings.strokeWidthOuter)
-//        d3TimeLabel.attr('transform', `rotate(${ isAngleBackwards(degrees) ? degrees - 180 : degrees })`)
-        d3TimeLabel.attr('transform', `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${ degrees })`)
+        d3TimeLabel.attr('transform', `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${degrees})`)
       }
     })
   }

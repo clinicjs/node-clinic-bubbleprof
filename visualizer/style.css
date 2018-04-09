@@ -264,7 +264,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   cursor: pointer;
 }
 
-#node-link svg .link-inner {
+body.spiderweb-layout #node-link svg .link-inner {
   /* TODO: visible only in spiderweb layout */
   stroke: var(--pure-black);
   opacity: 0.5;
@@ -346,6 +346,9 @@ body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
   border-color: var(--cyan);
   stroke: var(--cyan);
 }
+
+.party-root .party-icon,
+.party-root .by-variable,
 .party-nodecore .party-icon,
 .party-nodecore .by-variable {
   border-color: var(--nearform-grey);
@@ -358,6 +361,7 @@ body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
 .party-external .time-label {
   fill: var(--cyan);
 }
+.party-root .time-label,
 .party-nodecore .time-label {
   fill: var(--nearform-grey);
 }

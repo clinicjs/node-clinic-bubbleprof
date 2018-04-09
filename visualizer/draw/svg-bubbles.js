@@ -155,7 +155,7 @@ class Bubbles extends SvgContentGroup {
     this.d3TimeLabels.text(d => {
       const withinTime = this.ui.formatNumber(d.getWithinTime())
       const withMs = withinTime + (this.getRadius(d) < this.ui.settings.minimumLabelSpace ? '' : '\u2009ms')
-      return  withMs
+      return withMs
     })
   }
 }
