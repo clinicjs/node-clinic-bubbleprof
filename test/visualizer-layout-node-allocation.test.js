@@ -164,7 +164,8 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
       y1: positionById[clusterNode.parentId].y,
       x2:
       positionById[clusterNode.id].x,
-      y2: positionById[clusterNode.id].y }).length
+      y2: positionById[clusterNode.id].y
+    }).length
   }
 
   t.deepEqual(layout.positioning.order, [8, 7, 5, 2])
@@ -237,7 +238,8 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
       x1: positionById[clusterNode.parentId].x,
       y1: positionById[clusterNode.parentId].y,
       x2: positionById[clusterNode.id].x,
-      y2: positionById[clusterNode.id].y }).length
+      y2: positionById[clusterNode.id].y
+    }).length
   }
 
   t.equal(positionById[6].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
