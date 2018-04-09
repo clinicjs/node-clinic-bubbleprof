@@ -242,27 +242,31 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   alignment-baseline: before-edge;
 }
 
-#node-link svg .text-label {
+#node-link svg .name-label {
   font-size: 12pt;
 }
 
-#node-link svg .below-threshold-1 .text-label {
+#node-link svg .below-threshold-1 .name-label {
   font-size: 11pt;
   opacity: 0.9;
 }
 
-#node-link svg .below-threshold-1.bubble-wrapper .time-label {
-  display: none;
-}
-
-#node-link svg .below-threshold-2 .text-label {
+#node-link svg .below-threshold-2 .name-label {
   font-size: 10pt;
   opacity: 0.8;
 }
 
-#node-link svg .below-threshold-3 .text-label {
+#node-link svg .below-threshold-3 .name-label {
   font-size: 9pt;
   opacity: 0.7;
+}
+
+#node-link svg .time-label {
+  font-size: 9pt;
+}
+
+#node-link svg .below-threshold-1.bubble-wrapper .time-label {
+  display: none;
 }
 
 #node-link svg .bubble-wrapper,
