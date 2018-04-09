@@ -6,7 +6,7 @@ const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Links extends SvgContentGroup {
   constructor (svgContainer, contentProperties) {
-    super (svgContainer, contentProperties)
+    super(svgContainer, contentProperties)
 
     this.ui.on('setData', () => {
       this.initializeFromData(this.ui.layout.connections)
@@ -119,7 +119,6 @@ class Links extends SvgContentGroup {
     const innerLinesArray = this.d3InnerLines.nodes()
 
     this.d3Links.each((connection, linkIndex, nodes) => {
-      const d3Link = d3.select(nodes[linkIndex])
       const d3OuterLine = d3.select(outerLinesArray[linkIndex])
       const d3InnerLine = d3.select(innerLinesArray[linkIndex])
 

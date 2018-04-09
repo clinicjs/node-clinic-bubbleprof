@@ -5,9 +5,9 @@ const { isNumber } = require('../validation.js')
 class LineCoordinates {
   constructor (args) {
     // Args must contain x1, y1, and either x2 & x2 or length & angle (radians or degrees)
-
     if (!args || !isNumber(args.x1) || !isNumber(args.y1)) {
-      throw new Error(`x1 and y1 of new LineCoordinates must be numeric: { x1: ${args.x1}, y1: ${args.y1} }`)
+      const argsMessage = args ? `{ x1: ${args.x1}, y1: ${args.y1} }` : 'no args object'
+      throw new Error(`x1 and y1 of new LineCoordinates must be numeric: ${argsMessage}`)
     }
 
     this.x1 = args.x1
