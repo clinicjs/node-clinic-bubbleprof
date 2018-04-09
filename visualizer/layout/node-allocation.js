@@ -167,7 +167,9 @@ class NodeAllocation {
       const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.getScaled(this.layout.scale).ownDiameter)
       const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: position.x, y2: position.y })
       const parentRadius = parentNode.stem.getScaled(this.layout.scale).ownDiameter / 2
-      const { x, y } = line.pointAtLength(parentRadius + leaf.stem.getScaled(this.layout.scale).ownBetween)
+      const thisRadius = leaf.stem.getScaled(this.layout.scale).ownDiameter / 2
+      const lineLength = leaf.stem.getScaled(this.layout.scale).ownBetween
+      const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
       position.x = x
       position.y = y
     }
@@ -196,7 +198,9 @@ class NodeAllocation {
         case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
           const parentRadius = parentNode.stem.getScaled(this.layout.scale).ownDiameter / 2
-          const { x, y } = line.pointAtLength(parentRadius + midPoint.stem.getScaled(this.layout.scale).ownBetween)
+          const thisRadius = midPoint.stem.getScaled(this.layout.scale).ownDiameter / 2
+          const lineLength = midPoint.stem.getScaled(this.layout.scale).ownBetween
+          const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
           position.x = x
           position.y = y
           break
