@@ -76,9 +76,9 @@ class ClusterNode extends DataNode {
     this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
 
     const aggregateNodes = node.nodes.map((aggregateNode) => [
-        aggregateNode.aggregateId,
-        new AggregateNode(aggregateNode, this)
-      ])
+      aggregateNode.aggregateId,
+      new AggregateNode(aggregateNode, this)
+    ])
 
     this.nodes = new Map(aggregateNodes)
 
@@ -162,17 +162,18 @@ class AggregateNode extends DataNode {
   getTypeCategory () {
     // Combines node's async_hook types into a set of 12 more user-friendly thematic categories
     // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
-
     switch (this.type) {
-
+      // "/* falls through */" comments are required by linter
       case 'FSEVENTWRAP':
       case 'FSREQWRAP':
       case 'STATWATCHER':
         this.subCategory = this.subCategory || 'fs'
+        /* falls through */
       case 'JSSTREAM':
       case 'WRITEWRAP':
       case 'SHUTDOWNWRAP':
         this.subCategory = this.subCategory || 'streams'
+        /* falls through */
       case 'ZLIB':
         this.subCategory = this.subCategory || 'zlib'
 
@@ -186,9 +187,11 @@ class AggregateNode extends DataNode {
       case 'TCPWRAP':
       case 'TCPSERVERWRAP':
         this.subCategory = this.subCategory || 'networking'
+        /* falls through */
       case 'UDPSENDWRAP':
       case 'UDPWRAP':
         this.subCategory = this.subCategory || 'network'
+        /* falls through */
       case 'GETADDRINFOREQWRAP':
       case 'GETNAMEINFOREQWRAP':
       case 'QUERYWRAP':
@@ -209,6 +212,7 @@ class AggregateNode extends DataNode {
       case 'Immediate':
       case 'TickObject':
         this.subCategory = this.subCategory || 'timers-and-ticks'
+        /* falls through */
       case 'PROMISE':
         this.subCategory = this.subCategory || 'promises'
 
@@ -218,8 +222,10 @@ class AggregateNode extends DataNode {
       case 'TTYWRAP':
       case 'SIGNALWRAP':
         this.subCategory = this.subCategory || 'process'
+        /* falls through */
       case undefined:
         this.subCategory = this.subCategory || 'root'
+        /* falls through */
       default:
         this.subCategory = this.subCategory || 'user-defined'
 

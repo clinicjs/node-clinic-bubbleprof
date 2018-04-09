@@ -1,7 +1,5 @@
 'use strict'
 
-const d3 = require('./d3-subset.js')
-
 class SvgContentGroup {
   constructor (svgContainer, contentProperties = {}) {
     this.svgContainer = svgContainer
@@ -42,24 +40,6 @@ class SvgContentGroup {
       .enter()
 
     if (id) this.d3Element.attr('id', id)
-  }
-}
-
-class Links extends SvgContentGroup {
-  constructor (svgContainer, contentProperties) {
-    super (svgContainer, contentProperties)
-
-    this.ui.on('setData', () => {
-    // TODO // this.initializeFromData(this.ui.layout.connections)
-    })
-  }
-
-  initializeFromData (dataArray) {
-    super.initializeFromData(dataArray)
-    // TODO
-  }
-
-  draw () {
   }
 }
 

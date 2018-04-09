@@ -5,7 +5,7 @@ const SvgContentGroup = require('./svg-content.js')
 
 class Bubbles extends SvgContentGroup {
   constructor (svgContainer, contentProperties) {
-    super (svgContainer, contentProperties)
+    super(svgContainer, contentProperties)
 
     this.ui.on('setData', () => {
       this.initializeFromData(this.ui.layout.nodes)
@@ -79,8 +79,7 @@ class Bubbles extends SvgContentGroup {
       // Creates array of data objects like:
       // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
       const arcData = d3.pie()
-        .value((arcDatum) => arcDatum[1])
-        (Array.from(d.decimals.typeCategory.within.entries()))
+        .value((arcDatum) => arcDatum[1])(decimalsAsArray)
 
       donutWrapper.selectAll('.donut-segment')
         .data(arcData)
@@ -90,7 +89,6 @@ class Bubbles extends SvgContentGroup {
         .classed('donut-segment', true)
         .on('mouseover', arcDatum => { this.ui.highlightType(arcDatum.data[0]) })
         .on('mouseout', () => { this.ui.highlightType(null) })
-
     })
   }
   draw () {
@@ -117,10 +115,9 @@ class Bubbles extends SvgContentGroup {
           .outerRadius(donutRadius)
 
         donutWrapper.selectAll('.donut-segment')
-          .attr('d', arcDatum => { console.log(arcDatum, donutRadius, arcMaker(arcDatum)); return arcMaker(arcDatum)})
+          .attr('d', arcDatum => arcMaker(arcDatum))
       }
     }
-
     this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
   }
 }

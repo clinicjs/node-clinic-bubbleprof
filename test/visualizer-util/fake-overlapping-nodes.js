@@ -236,7 +236,9 @@ const expectedAggregateResults = new Map(Object.entries({
   }
 }))
 
-const expectedTypeCategories = new Map(Object.entries({
+/*
+// TODO: write test using this when sub-categories are used in the UI
+const expectedTypeSubCategories = new Map(Object.entries({
   root: 'root',
   a: 'zlib',
   b: 'dns',
@@ -246,6 +248,19 @@ const expectedTypeCategories = new Map(Object.entries({
   f: 'fs',
   g: 'process',
   h: 'user-defined'
+}))
+*/
+
+const expectedTypeCategories = new Map(Object.entries({
+  root: 'other',
+  a: 'files/streams',
+  b: 'networks',
+  c: 'networks',
+  d: 'other',
+  e: 'other',
+  f: 'files/streams',
+  g: 'other',
+  h: 'other'
 }))
 
 const expectedDecimalsTo5Places = new Map(Object.entries({
@@ -258,6 +273,7 @@ const expectedDecimalsTo5Places = new Map(Object.entries({
         UDPSENDWRAP: 0.22222
       }))
     },
+    /* TODO: Re-implement when type category labels are stable
     typeCategory: {
       between: new Map(),
       within: new Map(Object.entries({
@@ -266,6 +282,7 @@ const expectedDecimalsTo5Places = new Map(Object.entries({
         network: 0.22222
       }))
     },
+    */
     party: {
       between: new Map(),
       within: new Map(Object.entries({
@@ -284,6 +301,7 @@ const expectedDecimalsTo5Places = new Map(Object.entries({
         FSEVENTWRAP: 0.51852
       }))
     },
+    /* TODO: Re-implement when type category labels are stable
     typeCategory: {
       between: new Map(Object.entries({
         process: 1
@@ -293,6 +311,7 @@ const expectedDecimalsTo5Places = new Map(Object.entries({
         fs: 0.51852
       }))
     },
+    */
     party: {
       between: new Map(Object.entries({
         user: 1
@@ -315,6 +334,7 @@ const expectedDecimalsTo5Places = new Map(Object.entries({
         ANOTHERCUSTOMTYPE: 0.14286
       }))
     },
+    /* TODO: Re-implement when type category labels are stable
     typeCategory: {
       between: new Map(Object.entries({
         'user-defined': 1
@@ -323,6 +343,7 @@ const expectedDecimalsTo5Places = new Map(Object.entries({
         'user-defined': 1
       }))
     },
+    */
     party: {
       between: new Map(Object.entries({
         module: 0.57895,

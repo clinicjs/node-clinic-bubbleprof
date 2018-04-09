@@ -38,8 +38,6 @@ class SvgContainer extends HtmlContent {
   initializeElements () {
     super.initializeElements()
 
-    console.log('init', this.svgBounds)
-
     if (this.svgBounds) {
       const {
         minX,
