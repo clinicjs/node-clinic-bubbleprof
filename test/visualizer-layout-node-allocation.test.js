@@ -23,7 +23,7 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
   const nodeAllocation = new NodeAllocation(layout, [...dataSet.clusterNodes.values()])
   nodeAllocation.process()
 
-  const unitsById = {}
+  const unitsById = []
   for (const clusterNode of dataSet.clusterNodes.values()) {
     unitsById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode).units
   }
@@ -147,13 +147,13 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   const nodeAllocation = new NodeAllocation(layout, [...dataSet.clusterNodes.values()])
   nodeAllocation.process(NodeAllocation.placementMode.LENGTH_CONSTRAINED)
 
-  const positionById = {}
-  const scaledStemById = {}
+  const positionById = []
+  const scaledStemById = []
   for (const clusterNode of [...dataSet.clusterNodes.values()]) {
     positionById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode)
     scaledStemById[clusterNode.id] = clusterNode.stem.getScaled(layout.scale)
   }
-  const distanceById = {}
+  const distanceById = []
   for (const clusterNode of [...dataSet.clusterNodes.values()]) {
     if (clusterNode.isRoot) {
       distanceById[clusterNode.id] = 0
@@ -220,14 +220,14 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const nodeAllocation = new NodeAllocation(layout, subset)
   nodeAllocation.process(NodeAllocation.placementMode.LENGTH_CONSTRAINED)
 
-  const positionById = {}
-  const scaledStemById = {}
+  const positionById = []
+  const scaledStemById = []
   for (const clusterNode of subset) {
     positionById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode)
     scaledStemById[clusterNode.id] = clusterNode.stem.getScaled(layout.scale)
   }
 
-  const distanceById = {}
+  const distanceById = []
   for (const clusterNode of subset) {
     if (clusterNode.id === 6) {
       distanceById[clusterNode.id] = 0
