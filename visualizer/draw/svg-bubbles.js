@@ -88,8 +88,8 @@ class Bubbles extends SvgContentGroup {
       // Move it back to the mid point of the gap
       const inboundLine = this.getInboundLine(d)
       const backwardsLine = new LineCoordinates({
-        x1: position.x,
-        y1: position.y,
+        x1: x,
+        y1: y,
         length: this.ui.settings.minimumLabelSpace / 2,
         degrees: LineCoordinates.enforceDegreesRange(inboundLine.degrees - 180)
       })
