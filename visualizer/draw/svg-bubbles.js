@@ -29,7 +29,6 @@ class Bubbles extends SvgContentGroup {
     return length < this.ui.settings.minimumLabelSpace
   }
 
-
   initializeFromData (dataArray) {
     super.initializeFromData(dataArray)
 
@@ -74,11 +73,11 @@ class Bubbles extends SvgContentGroup {
     const position = this.getNodePosition(d)
     const sourcePosition = this.getNodePosition(connection.sourceNode)
     return new LineCoordinates({
-        x1: sourcePosition.x,
-        y1: sourcePosition.y,
-        x2: position.x,
-        y2: position.y
-      })
+      x1: sourcePosition.x,
+      y1: sourcePosition.y,
+      x2: position.x,
+      y2: position.y
+    })
   }
 
   getTransformPosition (d, xOffset = 0, yOffset = 0) {

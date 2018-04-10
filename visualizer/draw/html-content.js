@@ -1,6 +1,5 @@
 'use strict'
 
-const d3 = require('./d3-subset.js')
 const { uniqueMapKey } = require('../validation.js')
 
 // Base class for HTML content, extended by specific types of UI item
@@ -94,7 +93,7 @@ class HtmlContent {
 
 class CollapseControl extends HtmlContent {
   constructor (parentContent, contentProperties, isCollapsed) {
-    super (parentContent, contentProperties)
+    super(parentContent, contentProperties)
     this.isCollapsed = isCollapsed
   }
   initializeElements () {
@@ -108,8 +107,6 @@ class CollapseControl extends HtmlContent {
       this.toggleCollapse()
       this.draw()
     })
-
-    console.log(this.contentProperties.htmlContent, this)
   }
   toggleCollapse () {
     console.log('Toggle')

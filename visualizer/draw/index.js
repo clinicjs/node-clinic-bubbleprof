@@ -72,7 +72,7 @@ function drawOuterUI () {
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
-  const mainKey = sideBar.addContent(undefined, {
+  sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
     htmlContent: `
       <p>Bubbleprof observes the async_hooks created in your application, measures their delays, and groups them to map out where the delays most occur in your application's async flow.</p>
@@ -87,10 +87,10 @@ function drawOuterUI () {
     `
   }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
-  const search = sideBar.addContent(undefined, { classNames: 'side-bar-item' })
+  sideBar.addContent(undefined, { classNames: 'side-bar-item' })
     .addCollapseControl(true, { htmlContent: 'Locate a function or file name <span class="arrow"></span>' })
 
-  const bars = sideBar.addContent(undefined, { classNames: 'side-bar-item' })
+  sideBar.addContent(undefined, { classNames: 'side-bar-item' })
     .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
 
   // Footer
