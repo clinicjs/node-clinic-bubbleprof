@@ -50,8 +50,8 @@ class Bubbles extends SvgContentGroup {
       .classed('bubble-outer', true)
       .classed('by-variable', true)
       .style('stroke-width', this.ui.settings.strokeWidthOuter)
-      .on('mouseover', d => { this.ui.emit('highlightParty', d.mark.get('party')) })
-      .on('mouseout', () => { this.ui.emit('highlightParty', null) })
+      .on('mouseover', d => this.ui.emit('highlightParty', d.mark.get('party')))
+      .on('mouseout', () => this.ui.emit('highlightParty', null))
 
     this.d3InnerCircles = this.d3Bubbles.append('circle')
       .classed('bubble-inner', true)
@@ -85,8 +85,8 @@ class Bubbles extends SvgContentGroup {
         .append('path')
         .attr('class', arcDatum => `type-${arcDatum.data[0]}`)
         .classed('donut-segment', true)
-        .on('mouseover', arcDatum => { this.ui.emit('highlightType', arcDatum.data[0]) })
-        .on('mouseout', () => { this.ui.emit('highlightType', null) })
+        .on('mouseover', arcDatum => this.ui.emit('highlightType', arcDatum.data[0]))
+        .on('mouseout', () => this.ui.emit('highlightType', null))
     })
   }
   draw () {
