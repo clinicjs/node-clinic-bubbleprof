@@ -21,6 +21,7 @@ class Layout {
     this.positioning = new Positioning(this, nodes)
 
     this.connections = []
+    this.connectionsByTargetId = new Map()
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
@@ -30,7 +31,9 @@ class Layout {
 
       if (node.parentId) {
         const sourceNode = node.getParentNode()
-        this.connections.push(new Connection(sourceNode, node, this.scale))
+        const connection = new Connection(sourceNode, node, this.scale)
+        this.connectionsByTargetId.set(node.id, connection)
+        this.connections.push(connection)
       }
     }
     this.scale.calculateScaleFactor()

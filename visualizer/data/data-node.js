@@ -86,7 +86,7 @@ class ClusterNode extends DataNode {
     // All aggregateNodes within a clusterNode are by definition from the same party
     this.mark = aggregateNodes[0][1].mark
   }
-  setDecimal (num, classification, position, label = 'root') {
+  setDecimal (num, classification, position, label = 'nodecore') {
     const raw = this.stats.rawTotals
     const rawTotal = position === 'within' ? raw.async.within + raw.sync : raw.async.between
     const statType = `decimals.${classification}.${position}->${label}`
@@ -128,7 +128,7 @@ class AggregateNode extends DataNode {
       }
     })
 
-    if (!node.mark) node.mark = ['root', null, null]
+    if (!node.mark) node.mark = ['nodecore', null, null]
     // node.mark is always an array of length 3, based on this schema:
     const markKeys = ['party', 'module', 'name']
     // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.

@@ -16,8 +16,8 @@ class SvgContainer extends HtmlContent {
       const defaultBounds = {
         minX: 0,
         minY: 0,
-        width: 1000,
-        height: 1000, // This may be overridden by layout.scale
+        width: null, // Set from layout.settings
+        height: null, // Set in layout.scale
         preserveAspectRatio: 'xMidYMid meet',
         minimumDistanceFromEdge: 20
       }
@@ -43,7 +43,6 @@ class SvgContainer extends HtmlContent {
       const {
         minX,
         minY,
-        width,
         preserveAspectRatio
       } = this.svgBounds
 
@@ -52,8 +51,10 @@ class SvgContainer extends HtmlContent {
         .attr('preserveAspectRatio', preserveAspectRatio)
 
       this.ui.on('setData', () => {
-        const height = this.ui.layout.scale.finalSvgHeight || this.svgBounds.height
-        this.d3Element.attr('viewBox', `${minX} ${minY} ${width} ${height}`)
+        this.svgBounds.height = this.ui.layout.scale.finalSvgHeight || this.ui.layout.settings.svgHeight
+        this.svgBounds.width = this.ui.layout.settings.svgWidth
+
+        this.d3Element.attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
       })
     }
   }

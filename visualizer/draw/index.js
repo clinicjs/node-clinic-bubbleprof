@@ -8,7 +8,7 @@ const SvgContainer = require('./svg-container.js')
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
 
-  const sections = ['header', 'side-bar', 'node-link', 'footer']
+  const sections = ['header', 'node-link', 'side-bar', 'footer']
   const ui = new BubbleprofUI(sections)
 
   // Header
@@ -60,16 +60,6 @@ function drawOuterUI () {
     label: 'Other'
   })
 
-  // Footer
-  const footerCollapseHTML = '<div class="text">How to use this</div><div class="arrow"></div>'
-  ui.sections.get('footer').addCollapseControl(true, {
-    htmlContent: footerCollapseHTML,
-    classNames: 'bar'
-  })
-
-  // Sidebar
-  ui.sections.get('side-bar').addCollapseControl()
-
   // Main panel - nodelink diagram
   const nodeLink = ui.sections.get('node-link')
   nodeLink.addLoadingAnimation()
@@ -78,8 +68,39 @@ function drawOuterUI () {
   nodeLinkSVG.addBubbles()
   nodeLinkSVG.addLinks()
 
-  nodeLink.addContent(HoverBox)
+  nodeLink.addContent(HoverBox, {svg: nodeLinkSVG})
 
+  // Sidebar
+  const sideBar = ui.sections.get('side-bar')
+  sideBar.addContent(undefined, {
+    classNames: 'main-key side-bar-item',
+    htmlContent: `
+      <p>Bubbleprof observes the async_hooks created in your application, measures their delays, and groups them to map out where the delays most occur in your application's async flow.</p>
+      <span class="key-item-bubble key-image"></span>
+      <p>Each bubble shows where the flow moved between your own code (red), a module (blue) or node core (grey).</p>
+      <span class="key-item-arrow key-image"></span>
+      <p>Arrows pointing from a bubble show delays while moving out into the next module or party</p>
+      <span class="key-item-inner key-image"></span>
+      <p>Inner coloured lines indicate the types of async_hooks responsible for this delay. Click to explore.</p>
+      <span class="key-item-number key-image"></span>
+      <p>The lengths of the lines between and around the bubbles indicate the aggregated delay in miliseconds (ms).</p>
+    `
+  }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
+
+  sideBar.addContent(undefined, { classNames: 'side-bar-item' })
+    .addCollapseControl(true, { htmlContent: 'Locate a function or file name <span class="arrow"></span>' })
+
+  sideBar.addContent(undefined, { classNames: 'side-bar-item' })
+    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
+
+  // Footer
+  const footerCollapseHTML = '<div class="text">How to use this</div><div class="arrow"></div>'
+  ui.sections.get('footer').addCollapseControl(true, {
+    htmlContent: footerCollapseHTML,
+    classNames: 'bar'
+  })
+
+  // Complete
   ui.initializeElements()
   return ui
 }

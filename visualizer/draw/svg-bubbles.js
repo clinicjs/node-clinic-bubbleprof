@@ -2,6 +2,7 @@
 
 const d3 = require('./d3-subset.js')
 const SvgContentGroup = require('./svg-content.js')
+const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Bubbles extends SvgContentGroup {
   constructor (svgContainer, contentProperties) {
@@ -10,6 +11,22 @@ class Bubbles extends SvgContentGroup {
     this.ui.on('setData', () => {
       this.initializeFromData(this.ui.layout.nodes)
     })
+  }
+
+  isBelowLabelThreshold (d) {
+    return this.getRadius(d) < this.ui.settings.minimumLabelSpace
+  }
+  isBelowStrokeThreshold (d) {
+    return this.getRadius(d) < this.ui.settings.strokePadding
+  }
+  isBelowVisibilityThreshold (d) {
+    return this.getRadius(d) < 1
+  }
+  hasLongInboundLine (length) {
+    return length > this.ui.settings.minimumLabelSpace * 5
+  }
+  hasShortInboundLine (length) {
+    return length < this.ui.settings.minimumLabelSpace
   }
 
   initializeFromData (dataArray) {
@@ -31,18 +48,56 @@ class Bubbles extends SvgContentGroup {
       .attr('id', d => `${d.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.mark.get('party')}`)
       .classed('bubble-wrapper', true)
-      .classed('below-label-threshold', (d) => this.getRadius(d) < this.ui.settings.minimumLabelSpace)
-      .classed('below-stroke-threshold', (d) => this.getRadius(d) < this.ui.settings.strokePadding)
-      .classed('below-visibility-threshold', (d) => this.getRadius(d) < 1)
+      .classed('below-threshold-1', (d) => this.isBelowLabelThreshold(d))
+      .classed('below-threshold-2', (d) => this.isBelowStrokeThreshold(d))
+      .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
+      .on('mouseover', d => this.ui.emit('hover', d))
+      .on('mouseout', () => this.ui.emit('hover', null))
 
     this.addCircles()
+    this.addLabels()
 
     if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
 
+  getNodePosition (d) {
+    return this.ui.layout.positioning.nodeToPosition.get(d)
+  }
+
+  getInboundConnection (d) {
+    return this.ui.layout.connectionsByTargetId.get(d.id)
+  }
+
+  getInboundLine (d) {
+    const connection = this.getInboundConnection(d)
+    const position = this.getNodePosition(d)
+    const sourcePosition = this.getNodePosition(connection.sourceNode)
+    return new LineCoordinates({
+      x1: sourcePosition.x,
+      y1: sourcePosition.y,
+      x2: position.x,
+      y2: position.y
+    })
+  }
+
   getTransformPosition (d, xOffset = 0, yOffset = 0) {
-    const position = this.ui.layout.positioning.nodeToPosition.get(d)
-    return `translate(${position.x + xOffset},${position.y + yOffset})`
+    const position = this.getNodePosition(d)
+    let { x, y } = position
+
+    if (this.isBelowVisibilityThreshold(d) && this.ui.layout.connectionsByTargetId.has(d.id)) {
+      // Move it back to the mid point of the gap
+      const inboundLine = this.getInboundLine(d)
+      const backwardsLine = new LineCoordinates({
+        x1: x,
+        y1: y,
+        length: this.ui.settings.minimumLabelSpace / 2,
+        degrees: LineCoordinates.enforceDegreesRange(inboundLine.degrees - 180)
+      })
+      x = backwardsLine.x2
+      y = backwardsLine.y2
+    }
+
+    return `translate(${x + xOffset},${y + yOffset})`
   }
 
   addCircles () {
@@ -55,6 +110,16 @@ class Bubbles extends SvgContentGroup {
 
     this.d3InnerCircles = this.d3Bubbles.append('circle')
       .classed('bubble-inner', true)
+  }
+
+  addLabels () {
+    this.d3TimeLabels = this.d3Bubbles.append('text')
+      .classed('time-label', true)
+      .classed('text-label', true)
+
+    this.d3NameLabels = this.d3Bubbles.append('text')
+      .classed('name-label', true)
+      .classed('text-label', true)
   }
 
   addTypeDonuts () {
@@ -92,16 +157,9 @@ class Bubbles extends SvgContentGroup {
   draw () {
     this.d3OuterCircles.attr('r', d => this.getRadius(d))
 
-    this.d3InnerCircles.each((d, i, nodes) => {
-      const innerCircle = d3.select(nodes[i])
-
-      if (d3.select(innerCircle.node().parentNode).classed('below-stroke-threshold')) {
-        // This will be an invisible mouseover target
-        innerCircle.attr('r', () => this.ui.settings.strokePadding * 2)
-      } else {
-        // This will be visible, showing the inner part of the circle
-        innerCircle.attr('r', () => this.getRadius(d) - this.ui.settings.strokePadding)
-      }
+    this.d3InnerCircles.attr('r', d => {
+      // If below threshold, this will be an invisible mouseover target
+      return this.isBelowStrokeThreshold(d) ? this.ui.settings.minimumLabelSpace : this.getRadius(d) - this.ui.settings.strokePadding
     })
 
     if (this.typeDonutsMap) {
@@ -117,6 +175,64 @@ class Bubbles extends SvgContentGroup {
       }
     }
     this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
+
+    this.d3TimeLabels.text(d => {
+      const withinTime = this.ui.formatNumber(d.getWithinTime())
+      const withMs = withinTime + (this.getRadius(d) < this.ui.settings.minimumLabelSpace ? '' : '\u2009ms')
+      return withMs
+    })
+
+    this.d3NameLabels.each((d, i, nodes) => {
+      const d3NameLabel = d3.select(nodes[i])
+      let inboundDegrees = 90
+      let useLongerLabel = true
+      let useMicroLabel = false
+
+      if (d.parentId) {
+        const connection = this.getInboundConnection(d)
+        const length = connection.getVisibleLineLength()
+        const hasLongInboundLine = this.hasLongInboundLine(length)
+
+        useLongerLabel = !this.isBelowLabelThreshold(d) || hasLongInboundLine
+        useMicroLabel = !useLongerLabel && this.hasShortInboundLine(length)
+
+        d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
+        inboundDegrees = this.getInboundLine(d).degrees
+      }
+
+      if (d.name === 'miscellaneous' && !d.parentId) {
+        d3NameLabel.text('Starts here')
+      } else if (useLongerLabel) {
+        d3NameLabel.text(this.ui.truncateLabel(d.name, 4, 21))
+      } else if (useMicroLabel) {
+        d3NameLabel.text(this.ui.truncateLabel(d.name, 1, 6))
+        d3NameLabel.classed('smaller-label', true)
+      } else {
+        d3NameLabel.text(this.ui.truncateLabel(d.name, 1, 9))
+      }
+
+      const position = this.getNodePosition(d)
+      const lineToLabel = new LineCoordinates({
+        x1: position.x,
+        y1: position.y,
+        length: this.getRadius(d) + this.ui.settings.strokeWidthOuter,
+        degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
+      })
+
+      let degrees = lineToLabel.degrees + 90
+      let flipDegreesLabel = false
+
+      if (degrees > 90 || degrees < -90) {
+        degrees -= 180
+        flipDegreesLabel = true
+      }
+      d3NameLabel.classed('flipped-label', flipDegreesLabel)
+
+      const xOffset = lineToLabel.x2 - position.x
+      const yOffset = lineToLabel.y2 - position.y
+
+      d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
+    })
   }
 }
 
