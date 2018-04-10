@@ -9,9 +9,16 @@ html {
   --nearform-grey: #797A7C;
 
   --pure-white: rgb(255, 255, 255);
+  --pure-black: rgb(0, 0, 0);
 
   --cyan-highlight: rgb(96, 147, 208);
   --cyan: rgb(63, 125, 198);
+
+  --type-colour-1: rgb(24, 237, 221);
+  --type-colour-2: rgb(250, 245, 13);
+  --type-colour-3: rgb(249, 110, 124);
+  --type-colour-4: rgb(135, 62, 149);
+  --type-colour-5: rgb(245, 245, 245);
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
@@ -54,6 +61,10 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   -moz-osx-font-smoothing: unset;
 }
 
+.hidden {
+  display: none;
+}
+
 /* Banner layout */
 
 #banner {
@@ -79,6 +90,8 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   margin-left: 35px;
   line-height: 65px;
 }
+
+/* Footer */
 
 #footer {
   position: fixed;
@@ -121,11 +134,67 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   transform: scaleY(1);
 }
 
+/* SVG */
+
+svg .bubble-wrapper .bubble-outer {
+  stroke-width: 3px;
+  fill: var(--pure-black);
+  cursor: pointer;
+}
+
+svg .bubble-wrapper .bubble-inner {
+  fill: var(--main-bg-color);
+  stroke: none;
+}
+
+svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
+  opacity: 0;
+}
+
+/* Global classes linking styles to data properties */
+
+.party-user .bubble-outer {
+  border-color: var(--nearform-red);
+  stroke: var(--nearform-red);
+}
+.party-external .bubble-outer {
+  border-color: var(--cyan);
+  stroke: var(--cyan);
+}
+.party-nodecore .bubble-outer {
+  border-color: var(--nearform-grey);
+  stroke: var(--nearform-grey);
+}
+
+.type-files-streams {
+  border-color: var(--type-colour-1);
+  stroke: var(--type-colour-1);
+}
+.type-networks {
+  border-color: var(--type-colour-2);
+  stroke: var(--type-colour-2);
+}
+.type-crypto {
+  border-color: var(--type-colour-3);
+  stroke: var(--type-colour-3);
+}
+.type-timing-promises {
+  border-color: var(--type-colour-4);
+  stroke: var(--type-colour-4);
+}
+.type-other {
+  border-color: var(--type-colour-5);
+  stroke: var(--type-colour-5);
+}
+
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
-   Uses transforms only to keep working when processor is busy */
+   * Must * animate by transforms only, to keep animating when processor is busy */
+
 .loading-indicator,
 .loading-indicator:before,
-.loading-indicator:after {
+.loading-indicator:after,
+body:not(.initialized):before,
+body:not(.initialized):after {
   width: 124px;
   height: 120px;
   position: absolute;
@@ -133,6 +202,13 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   margin: 80px 0 0 -60px;
   z-index: 3;
 }
+
+body:not(.initialized) {
+  position: relative;
+  z-index: 3;
+}
+
+body:not(.initialized):before,
 .loading-indicator:before {
   content: "";
   border-radius: 50%;
@@ -144,8 +220,9 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   transform: translateZ(0);
   animation: loading 1.6s infinite linear;
 }
+
+body:not(.initialized):after,
 .loading-indicator:after {
-  content: "Loading";
   font-size: 14pt;
   font-variant: all-small-caps;
   font-weight: bold;
@@ -154,8 +231,21 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 
   display: block;
   position: absolute;
+}
+
+.loading-indicator:after {
+  content: "Loading";
   top: 50px;
 }
+
+body:not(.initialized):before {
+  top: 65px;
+}
+body:not(.initialized):after {
+  content: "Preparing file";
+  top: 115px;
+}
+
 @keyframes loading {
   0% {
     -webkit-transform: rotate(0deg);

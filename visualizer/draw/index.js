@@ -18,10 +18,14 @@ function drawOuterUI () {
   })
   ui.sections.get('side-bar').addCollapseControl()
 
-  ui.sections.get('node-link')
-    .addLoadingAnimation()
-    .addContent(SvgContainer, {id: 'node-link-svg'}, {})
-    .addContent(HoverBox)
+  const nodeLink = ui.sections.get('node-link')
+  nodeLink.addLoadingAnimation()
+
+  const nodeLinkSVG = nodeLink.addContent(SvgContainer, {id: 'node-link-svg', svgBounds: {}})
+  nodeLinkSVG.addBubbles()
+  nodeLinkSVG.addLinks()
+
+  nodeLink.addContent(HoverBox)
 
   ui.initializeElements()
   return ui

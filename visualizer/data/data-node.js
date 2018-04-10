@@ -69,18 +69,22 @@ class ClusterNode extends DataNode {
     // These contain decimals referring to the portion of a clusterNode's delay attributable to some label
     this.decimals = {
       type: {between: new Map(), within: new Map()}, // Node async_hook types: 'HTTPPARSER', 'TickObject'...
-      typeCategory: {between: new Map(), within: new Map()}, // Defined in .getTypeCategory() below
+      // TODO: subTypeCategories stats
+      typeCategory: {between: new Map(), within: new Map()}, // Defined in .getAsyncTypeCategories() below
       party: {between: new Map(), within: new Map()} // From .mark - 'user', 'module' or 'nodecore'
     }
 
     this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
 
-    this.nodes = new Map(
-      node.nodes.map((aggregateNode) => [
-        aggregateNode.aggregateId,
-        new AggregateNode(aggregateNode, this)
-      ])
-    )
+    const aggregateNodes = node.nodes.map((aggregateNode) => [
+      aggregateNode.aggregateId,
+      new AggregateNode(aggregateNode, this)
+    ])
+
+    this.nodes = new Map(aggregateNodes)
+
+    // All aggregateNodes within a clusterNode are by definition from the same party
+    this.mark = aggregateNodes[0][1].mark
   }
   setDecimal (num, classification, position, label = 'root') {
     const raw = this.stats.rawTotals
@@ -127,9 +131,8 @@ class AggregateNode extends DataNode {
     if (!node.mark) node.mark = ['root', null, null]
     // node.mark is always an array of length 3, based on this schema:
     const markKeys = ['party', 'module', 'name']
-    // 'party' (as in 'third-party') will be one of 'user', 'module' or 'nodecore'.
+    // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.
     // 'module' and 'name' will be null unless frames met conditions in /analysis/aggregate
-    // TODO: check status of .mark beyond 'party', maybe rename 'module' so it doesn't conflict
     this.mark = new Map(node.mark.map((value, i) => [markKeys[i], value]))
     // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
     this.mark.string = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
@@ -137,7 +140,9 @@ class AggregateNode extends DataNode {
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
     // 29 possible values defined in node core, plus other user-defined values can exist
     this.type = node.type
-    this.typeCategory = this.getTypeCategory(this.type)
+    const [typeCategory, typeSubCategory] = AggregateNode.getAsyncTypeCategories(this.type)
+    this.typeCategory = typeCategory
+    this.typeSubCategory = typeSubCategory
 
     this.sources = node.sources.map((source) => new SourceNode(source, this))
 
@@ -157,20 +162,26 @@ class AggregateNode extends DataNode {
       apply(this.stats.rawTotals.async.between + this.stats.rawTotals.sync, 'within')
     }
   }
-  getTypeCategory () {
-    // Combines node's async_hook types into a set of 12 more user-friendly thematic categories
-    // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
-
-    switch (this.type) {
-      case 'PROCESSWRAP':
-      case 'TTYWRAP':
-      case 'SIGNALWRAP':
-        return 'process'
-
+  get id () {
+    return this.aggregateId
+  }
+  get parentId () {
+    return this.parentAggregateId
+  }
+  static getAsyncTypeCategories (typeName) {
+  // Combines node's async_hook types into sets of more user-friendly thematic categories
+  // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
+    switch (typeName) {
       case 'FSEVENTWRAP':
       case 'FSREQWRAP':
       case 'STATWATCHER':
-        return 'fs'
+        return ['files-streams', 'fs']
+      case 'JSSTREAM':
+      case 'WRITEWRAP':
+      case 'SHUTDOWNWRAP':
+        return ['files-streams', 'streams']
+      case 'ZLIB':
+        return ['files-streams', 'zlib']
 
       case 'HTTPPARSER':
       case 'PIPECONNECTWRAP':
@@ -179,52 +190,38 @@ class AggregateNode extends DataNode {
       case 'TCPSERVER':
       case 'TCPWRAP':
       case 'TCPSERVERWRAP':
-        return 'networking'
-
-      case 'JSSTREAM':
-      case 'WRITEWRAP':
-      case 'SHUTDOWNWRAP':
-        return 'streams'
-
+        return ['networks', 'networking']
       case 'UDPSENDWRAP':
       case 'UDPWRAP':
-        return 'network'
-
+        return ['networks', 'network']
       case 'GETADDRINFOREQWRAP':
       case 'GETNAMEINFOREQWRAP':
       case 'QUERYWRAP':
-        return 'dns'
-
-      case 'PROMISE':
-        return 'promises'
-
-      case 'ZLIB':
-        return 'zlib'
-
-      case 'TIMERWRAP':
-      case 'Timeout':
-      case 'Immediate':
-      case 'TickObject':
-        return 'timers-and-ticks'
+        return ['networks', 'dns']
 
       case 'PBKDF2REQUEST':
       case 'RANDOMBYTESREQUEST':
       case 'TLSWRAP':
       case 'SSLCONNECTION':
-        return 'crypto'
+        return ['crypto', 'crypto']
 
+      case 'TIMERWRAP':
+      case 'Timeout':
+      case 'Immediate':
+      case 'TickObject':
+        return ['timing-promises', 'timers-and-ticks']
+      case 'PROMISE':
+        return ['timing-promises', 'promises']
+
+      case 'PROCESSWRAP':
+      case 'TTYWRAP':
+      case 'SIGNALWRAP':
+        return ['other', 'process']
       case undefined:
-        return 'root'
-
+        return ['other', 'root']
       default:
-        return 'user-defined'
+        return ['other', 'user-defined']
     }
-  }
-  get id () {
-    return this.aggregateId
-  }
-  get parentId () {
-    return this.parentAggregateId
   }
 }
 
