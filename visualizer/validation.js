@@ -17,11 +17,6 @@ function validateKey (key, validOptions) {
 }
 // Currently only used in /draw code
 /* istanbul ignore next */
-function isInstanceOf (obj, arr) {
-  return arr.some(constructorFunc => obj instanceof constructorFunc)
-}
-// Currently only used in /draw code
-/* istanbul ignore next */
 function uniqueMapKey (key, map) {
   let counter = 0
   function keyWithIncrement () {
@@ -36,6 +31,5 @@ module.exports = {
   isNumber,
   areNumbers,
   validateKey,
-  isInstanceOf,
   uniqueMapKey
 }

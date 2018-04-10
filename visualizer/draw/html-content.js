@@ -1,19 +1,13 @@
 'use strict'
 
-const d3 = require('./d3-subset.js')
-const { isInstanceOf, uniqueMapKey } = require('../validation.js')
+const { uniqueMapKey } = require('../validation.js')
 
 // Base class for HTML content, extended by specific types of UI item
 // Only initializeElement() and draw() modify the DOM
 class HtmlContent {
-  constructor (parentContent = d3.select('body'), contentProperties = {}, ui = parentContent.ui) {
-    if (!isInstanceOf(parentContent, [HtmlContent, d3.selection])) {
-      const problem = parentContent === Object(parentContent) ? `constructor is ${parentContent.constructor.name}` : `is ${typeof parentContent} ${parentContent}`
-      throw new Error(`Invalid parentContent: ${problem}`)
-    }
-
-    this.parentContent = parentContent
+  constructor (parentContent, contentProperties = {}, ui = parentContent.ui) {
     this.ui = ui
+    this.parentContent = parentContent || this.ui.mainContainer
 
     const defaultProperties = {
       id: null,
@@ -43,7 +37,7 @@ class HtmlContent {
   }
 
   addCollapseControl (collapsedByDefault = false, contentProperties = {}) {
-    this.collapseControl = new CollapseControl(this, contentProperties)
+    this.collapseControl = new CollapseControl(this, contentProperties, collapsedByDefault)
     return this.collapseControl
   }
 
@@ -61,7 +55,7 @@ class HtmlContent {
       classNames
     } = this.contentProperties
 
-    const d3ParentElement = this.parentContent.d3ContentWrapper || this.parentContent
+    const d3ParentElement = this.parentContent.d3ContentWrapper
 
     this.d3Element = d3ParentElement.append(htmlElementType)
     this.d3ContentWrapper = this.d3Element
@@ -76,7 +70,7 @@ class HtmlContent {
 
     if (id) this.d3Element.attr('id', id)
     if (classNames) this.d3Element.classed(classNames, true)
-    if (htmlContent) this.d3Element.html(this.d3Element.html() + htmlContent)
+    if (htmlContent) this.d3ContentWrapper.html(htmlContent)
 
     for (const id of this.contentIds) {
       this.content.get(id).initializeElements()
@@ -98,10 +92,12 @@ class HtmlContent {
 }
 
 class CollapseControl extends HtmlContent {
+  constructor (parentContent, contentProperties, isCollapsed) {
+    super(parentContent, contentProperties)
+    this.isCollapsed = isCollapsed
+  }
   initializeElements () {
     super.initializeElements()
-
-    this.isCollapsed = true
 
     this.d3Element.classed('collapse-control', true)
     this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
@@ -113,7 +109,6 @@ class CollapseControl extends HtmlContent {
   }
   toggleCollapse () {
     this.isCollapsed = !this.isCollapsed
-    return this
   }
   draw () {
     super.draw()

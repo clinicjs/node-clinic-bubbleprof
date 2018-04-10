@@ -9,11 +9,14 @@ class BubbleprofUI extends EventEmitter {
     super()
 
     const defaultSettings = {
+      numberFormatter: d3.format(',.2f'),
       minimumLabelSpace: 14,
       strokePadding: 4,
       strokeWidthOuter: 2
     }
     this.settings = Object.assign(defaultSettings, settings)
+
+    this.mainContainer = {}
 
     // Main divisions of the page
     this.sections = new Map()
@@ -25,11 +28,39 @@ class BubbleprofUI extends EventEmitter {
       }, this))
     }
   }
+
+  formatNumber (num) {
+    return num < 0.01 ? '<0.01' : this.settings.numberFormatter(num)
+  }
+
+  truncateLabel (labelString, maxWords, maxChars) {
+    const labelWords = labelString.split(' ')
+    let truncatedLabel = labelString
+    let addEllipsis = false
+
+    if (labelWords.length > maxWords) {
+      truncatedLabel = labelWords.slice(0, maxWords).join(' ')
+      addEllipsis = true
+    }
+
+    if (truncatedLabel.length > maxChars) {
+      truncatedLabel = truncatedLabel.slice(0, maxChars - 2)
+      addEllipsis = true
+    }
+
+    if (addEllipsis) truncatedLabel += '…'
+
+    return truncatedLabel
+  }
+
   // For all UI item instances, keep initial DOM element creation in initializeElements() method
   // so that browser paint etc can happen around the same time, minimising reflows
   initializeElements () {
     const d3Body = d3.select('body')
     d3Body.classed('initialized', true)
+
+    this.mainContainer.d3Element = d3Body.append('main')
+    this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
 
     // TODO: try replacing with .emit('initializeElements')
     for (const section of this.sections.values()) {

@@ -13,6 +13,17 @@ class Links extends SvgContentGroup {
     })
   }
 
+  isBelowFullLabelThreshold (connection) {
+    // If label doesn't have space to be x5 as wide as it is tall, use smaller label
+    return connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace * 5
+  }
+  isBelowLabelThreshold (connection) {
+    return connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace
+  }
+  isBelowVisibilityThreshold (connection) {
+    return connection.getVisibleLineLength() < 1
+  }
+
   initializeFromData (dataArray) {
     super.initializeFromData(dataArray)
 
@@ -26,10 +37,12 @@ class Links extends SvgContentGroup {
 
       .attr('class', connection => `party-${connection.targetNode.mark.get('party')}`)
       .classed('link-wrapper', true)
-      .classed('below-label-threshold', (connection) => connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace)
-      .classed('below-visibility-threshold', (connection) => connection.getVisibleLineLength() < 1)
+      .classed('below-threshold-1', (d) => this.isBelowFullLabelThreshold(d))
+      .classed('below-threshold-2', (d) => this.isBelowLabelThreshold(d))
+      .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
 
     this.addLines()
+    this.addLabel()
 
     if (this.nodeType === 'ClusterNode') { this.addLineSegments() }
   }
@@ -44,6 +57,12 @@ class Links extends SvgContentGroup {
 
     this.d3InnerLines = this.d3Links.append('line')
       .classed('link-inner', true)
+  }
+
+  addLabel () {
+    this.d3TimeLabels = this.d3Links.append('text')
+      .classed('time-label', true)
+      .classed('text-label', true)
   }
 
   addLineSegments () {
@@ -118,10 +137,13 @@ class Links extends SvgContentGroup {
   draw () {
     const outerLinesArray = this.d3OuterLines.nodes()
     const innerLinesArray = this.d3InnerLines.nodes()
+    const timeLabelsArray = this.d3TimeLabels.nodes()
 
     this.d3Links.each((connection, linkIndex, nodes) => {
       const d3OuterLine = d3.select(outerLinesArray[linkIndex])
       const d3InnerLine = d3.select(innerLinesArray[linkIndex])
+      const d3TimeLabel = d3.select(timeLabelsArray[linkIndex])
+      const d3LinkGroup = d3.select(nodes[linkIndex])
 
       const positions = this.ui.layout.positioning.nodeToPosition
       const sourcePositions = positions.get(connection.sourceNode)
@@ -168,6 +190,24 @@ class Links extends SvgContentGroup {
 
           Links.applyLineXYs(d3LineSegment, segmentCoordinates)
         })
+      }
+
+      if (!d3LinkGroup.classed('below-threshold-2')) {
+        const betweenTime = this.ui.formatNumber(connection.targetNode.getBetweenTime())
+        d3TimeLabel.text(betweenTime + (d3LinkGroup.classed('below-threshold-1') ? '' : '\u2009ms'))
+
+        const toMidwayPoint = new LineCoordinates({
+          x1: offsetBeforeLine.x2,
+          y1: offsetBeforeLine.y2,
+          length: visibleLength / 2,
+          radians: offsetBeforeLine.radians
+        })
+        let degrees = connectCentresCoords.degrees
+        if (degrees > 90) degrees -= 180
+        if (degrees < -90) degrees += 180
+
+        d3TimeLabel.attr('y', 0 - this.ui.settings.strokePadding - this.ui.settings.strokeWidthOuter)
+        d3TimeLabel.attr('transform', `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${degrees})`)
       }
     })
   }
