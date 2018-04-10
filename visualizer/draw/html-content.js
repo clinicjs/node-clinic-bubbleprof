@@ -103,13 +103,11 @@ class CollapseControl extends HtmlContent {
     this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
 
     this.d3Element.on('click', () => {
-      console.log('On click')
       this.toggleCollapse()
       this.draw()
     })
   }
   toggleCollapse () {
-    console.log('Toggle')
     this.isCollapsed = !this.isCollapsed
   }
   draw () {
