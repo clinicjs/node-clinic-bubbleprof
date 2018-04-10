@@ -23,4 +23,4 @@ setTimeout(() => {
   ui.setData(dataSet, layout)
   /* istanbul ignore next */
   ui.emit('complete')
-}, 400)
+})

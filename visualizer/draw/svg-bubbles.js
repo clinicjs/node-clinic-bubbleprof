@@ -37,7 +37,7 @@ class Bubbles extends SvgContentGroup {
 
     this.addCircles()
 
-    if (this.nodeType === 'ClusterNode') { this.addTypeDonuts() }
+    if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
 
   getRadius (d) {
