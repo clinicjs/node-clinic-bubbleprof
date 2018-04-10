@@ -51,8 +51,8 @@ class Bubbles extends SvgContentGroup {
       .classed('below-threshold-1', (d) => this.isBelowLabelThreshold(d))
       .classed('below-threshold-2', (d) => this.isBelowStrokeThreshold(d))
       .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
-      .on('mouseover', d => { this.ui.emit('hover', d) })
-      .on('mouseout', () => { this.ui.emit('hover', null) })
+      .on('mouseover', d => this.ui.emit('hover', d))
+      .on('mouseout', () => this.ui.emit('hover', null))
 
     this.addCircles()
     this.addLabels()
