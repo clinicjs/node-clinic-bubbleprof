@@ -17,6 +17,10 @@ class SvgContentGroup {
     })
   }
 
+  getRadius (node) {
+    return this.ui.layout.scale.getCircleRadius(node.getWithinTime())
+  }
+
   // Unlike the HtmlContent it's most efficient to setData and initializeElements at same time
   initializeFromData (dataArray) {
     this.dataArray = dataArray

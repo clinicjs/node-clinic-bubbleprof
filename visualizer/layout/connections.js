@@ -2,6 +2,7 @@
 
 class Connection {
   constructor (sourceNode, targetNode, scale) {
+    // TODO: rename sourceNode everywhere to avoid confusion with DataNode->SourceNode class
     this.sourceId = sourceNode.id
     this.sourceNode = sourceNode
 

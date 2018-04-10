@@ -17,23 +17,32 @@ test('Line Coordinates - throw on invalid arguments', function (t) {
     { x1: 0, y1: 0, length: 1, radians: 0 },
     { x1: 0, y1: 0, length: 1, degrees: 1 }
   ]
-  const errorByArg = {
-    x1: 'x1 and y1 of new LineCoordinates must be numeric',
-    y1: 'x1 and y1 of new LineCoordinates must be numeric',
-    x2: 'length or (x2, y2) of new LineCoordinates must be numeric',
-    y2: 'length or (x2, y2) of new LineCoordinates must be numeric',
-    length: 'length or (x2, y2) of new LineCoordinates must be numeric',
-    radians: 'radians or degrees of new LineCoordinates must be numeric',
-    degrees: 'radians or degrees of new LineCoordinates must be numeric'
+  function getErrorByArg (argType, arg) {
+    switch (arg) {
+      case 'x1':
+        return 'x1 and y1 of new LineCoordinates must be numeric'
+      case 'y1':
+        return 'x1 and y1 of new LineCoordinates must be numeric'
+      case 'x2':
+        return `Length or (x2, y2) of new LineCoordinates must be numeric: { length: undefined, x2: ${argType}, y2: 1 }`
+      case 'y2':
+        return `Length or (x2, y2) of new LineCoordinates must be numeric: { length: undefined, x2: 1, y2: ${argType} }`
+      case 'length':
+        return `Length or (x2, y2) of new LineCoordinates must be numeric: { length: ${argType}, x2: undefined, y2: undefined }`
+      case 'radians':
+        return `Radians or degrees of new LineCoordinates must be numeric: { radians: ${argType}, degrees: undefined }`
+      case 'degrees':
+        return `Radians or degrees of new LineCoordinates must be numeric: { radians: undefined, degrees: ${argType} }`
+    }
   }
   for (const argSet of validArgSets) {
     for (const arg of Object.keys(argSet)) {
       const spec = Object.assign({}, argSet)
       t.doesNotThrow(() => new LineCoordinates(spec))
       spec[arg] = 'string'
-      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg]))
+      t.throws(() => new LineCoordinates(spec), new Error(getErrorByArg('string', arg)))
       delete spec[arg]
-      t.throws(() => new LineCoordinates(spec), new Error(errorByArg[arg]))
+      t.throws(() => new LineCoordinates(spec), new Error(getErrorByArg('undefined', arg)))
     }
   }
 

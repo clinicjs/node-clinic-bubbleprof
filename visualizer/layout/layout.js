@@ -20,50 +20,22 @@ class Layout {
     this.scale = new Scale(nodes, this.settings)
     this.positioning = new Positioning(this, nodes)
 
-    this.clusterConnections = []
-    this.aggregateConnections = new Map() // Map of arrays, one array of agg connections per clusterId
+    this.connections = []
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
   generate () {
     for (const node of this.nodes) {
-      this.includeNode(node)
+      node.stem = new Stem(node)
+
+      if (node.parentId) {
+        const sourceNode = node.getParentNode()
+        this.connections.push(new Connection(sourceNode, node, this.scale))
+      }
     }
     this.scale.calculateScaleFactor()
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
-  }
-
-  includeNode (node) {
-    const processByType = {
-      'ClusterNode': () => {
-        const clusterNode = node
-        if (clusterNode.parentId) {
-          this.addConnection(clusterNode, this.clusterConnections)
-        }
-        this.aggregateConnections.set(clusterNode.id, [])
-        for (const aggregateNode of clusterNode.nodes.values()) {
-          this.includeNode(aggregateNode)
-        }
-      },
-      'AggregateNode': () => {
-        const aggregateNode = node
-        if (aggregateNode.parentId) {
-          // Dynamic assignment is necessary when working with subsets
-          if (!this.aggregateConnections.has(aggregateNode.clusterNode.id)) {
-            this.aggregateConnections.set(aggregateNode.clusterNode.id, [])
-          }
-          this.addConnection(aggregateNode, this.aggregateConnections.get(aggregateNode.clusterNode.id))
-        }
-      }
-    }
-    node.stem = new Stem(node)
-    processByType[node.constructor.name]()
-  }
-
-  addConnection (targetNode, connectionArray) {
-    const sourceNode = targetNode.getParentNode()
-    connectionArray.push(new Connection(sourceNode, targetNode, this.scale))
   }
 }
 
