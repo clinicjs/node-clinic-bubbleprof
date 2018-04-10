@@ -3,6 +3,7 @@
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
 const Bubbles = require('./svg-bubbles.js')
+const Links = require('./svg-links.js')
 
 class SvgContainer extends HtmlContent {
   constructor (parentContent, contentProperties = {}) {
@@ -32,7 +33,7 @@ class SvgContainer extends HtmlContent {
   }
 
   addLinks (contentProperties) {
-    // TODO // this.links = new Links(this, contentProperties)
+    this.links = new Links(this, contentProperties)
   }
 
   initializeElements () {

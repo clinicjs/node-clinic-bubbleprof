@@ -137,7 +137,6 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 /* SVG */
 
 svg .bubble-wrapper .bubble-outer {
-  stroke-width: 3px;
   fill: var(--pure-black);
   cursor: pointer;
 }
@@ -151,38 +150,54 @@ svg .bubble-wrapper.below-stroke-threshold .bubble-inner {
   opacity: 0;
 }
 
+svg .link-outer {
+  fill: var(--pure-black);
+  cursor: pointer;
+}
+
+svg .link-inner {
+  /* TODO: visible only in spiderweb layout */
+  stroke: var(--pure-black);
+  opacity: 0.5;
+}
+
 /* Global classes linking styles to data properties */
 
-.party-user .bubble-outer {
+.party-user .by-variable {
   border-color: var(--nearform-red);
   stroke: var(--nearform-red);
 }
-.party-external .bubble-outer {
+.party-external .by-variable {
   border-color: var(--cyan);
   stroke: var(--cyan);
 }
-.party-nodecore .bubble-outer {
+.party-nodecore .by-variable {
   border-color: var(--nearform-grey);
   stroke: var(--nearform-grey);
 }
 
-.type-files-streams {
+.type-files-streams,
+.type-files-streams .by-variable {
   border-color: var(--type-colour-1);
   stroke: var(--type-colour-1);
 }
-.type-networks {
+.type-networks,
+.type-networks .by-variable {
   border-color: var(--type-colour-2);
   stroke: var(--type-colour-2);
 }
-.type-crypto {
+.type-crypto,
+.type-crypto .by-variable {
   border-color: var(--type-colour-3);
   stroke: var(--type-colour-3);
 }
-.type-timing-promises {
+.type-timing-promises,
+.type-timing-promises .by-variable {
   border-color: var(--type-colour-4);
   stroke: var(--type-colour-4);
 }
-.type-other {
+.type-other,
+.type-other .by-variable {
   border-color: var(--type-colour-5);
   stroke: var(--type-colour-5);
 }
