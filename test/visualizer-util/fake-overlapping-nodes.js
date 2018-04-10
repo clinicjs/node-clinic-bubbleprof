@@ -236,8 +236,6 @@ const expectedAggregateResults = new Map(Object.entries({
   }
 }))
 
-/*
-// TODO: write test using this when sub-categories are used in the UI
 const expectedTypeSubCategories = new Map(Object.entries({
   root: 'root',
   a: 'zlib',
@@ -249,16 +247,15 @@ const expectedTypeSubCategories = new Map(Object.entries({
   g: 'process',
   h: 'user-defined'
 }))
-*/
 
 const expectedTypeCategories = new Map(Object.entries({
   root: 'other',
-  a: 'files/streams',
+  a: 'files-streams',
   b: 'networks',
   c: 'networks',
   d: 'other',
   e: 'other',
-  f: 'files/streams',
+  f: 'files-streams',
   g: 'other',
   h: 'other'
 }))
@@ -367,5 +364,6 @@ module.exports = {
   expectedClusterResults,
   expectedAggregateResults,
   expectedTypeCategories,
+  expectedTypeSubCategories,
   expectedDecimalsTo5Places
 }

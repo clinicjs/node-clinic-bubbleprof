@@ -5,6 +5,7 @@ const {
   expectedClusterResults,
   expectedAggregateResults,
   expectedTypeCategories,
+  expectedTypeSubCategories,
   expectedDecimalsTo5Places
 } = require('./fake-overlapping-nodes.js')
 
@@ -75,5 +76,6 @@ module.exports = {
   expectedClusterResults,
   expectedAggregateResults,
   expectedTypeCategories,
+  expectedTypeSubCategories,
   expectedDecimalsTo5Places
 }

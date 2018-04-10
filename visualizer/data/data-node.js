@@ -140,7 +140,7 @@ class AggregateNode extends DataNode {
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
     // 29 possible values defined in node core, plus other user-defined values can exist
     this.type = node.type
-    const [typeCategory, typeSubCategory] = getAsyncTypeCategories(this.type)
+    const [typeCategory, typeSubCategory] = AggregateNode.getAsyncTypeCategories(this.type)
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
@@ -167,6 +167,61 @@ class AggregateNode extends DataNode {
   }
   get parentId () {
     return this.parentAggregateId
+  }
+  static getAsyncTypeCategories (typeName) {
+  // Combines node's async_hook types into sets of more user-friendly thematic categories
+  // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
+    switch (typeName) {
+      case 'FSEVENTWRAP':
+      case 'FSREQWRAP':
+      case 'STATWATCHER':
+        return ['files-streams', 'fs']
+      case 'JSSTREAM':
+      case 'WRITEWRAP':
+      case 'SHUTDOWNWRAP':
+        return ['files-streams', 'streams']
+      case 'ZLIB':
+        return ['files-streams', 'zlib']
+
+      case 'HTTPPARSER':
+      case 'PIPECONNECTWRAP':
+      case 'PIPEWRAP':
+      case 'TCPCONNECTWRAP':
+      case 'TCPSERVER':
+      case 'TCPWRAP':
+      case 'TCPSERVERWRAP':
+        return ['networks', 'networking']
+      case 'UDPSENDWRAP':
+      case 'UDPWRAP':
+        return ['networks', 'network']
+      case 'GETADDRINFOREQWRAP':
+      case 'GETNAMEINFOREQWRAP':
+      case 'QUERYWRAP':
+        return ['networks', 'dns']
+
+      case 'PBKDF2REQUEST':
+      case 'RANDOMBYTESREQUEST':
+      case 'TLSWRAP':
+      case 'SSLCONNECTION':
+        return ['crypto', 'crypto']
+
+      case 'TIMERWRAP':
+      case 'Timeout':
+      case 'Immediate':
+      case 'TickObject':
+        return ['timing-promises', 'timers-and-ticks']
+      case 'PROMISE':
+        return ['timing-promises', 'promises']
+
+      case 'PROCESSWRAP':
+      case 'TTYWRAP':
+      case 'SIGNALWRAP':
+        return ['other', 'process']
+      case undefined:
+        return ['other', 'root']
+      default:
+        return ['other', 'user-defined']
+    }
   }
 }
 
@@ -195,62 +250,6 @@ class SourceNode extends DataNode {
   }
   get id () {
     return this.asyncId
-  }
-}
-
-function getAsyncTypeCategories (typeName) {
-  // Combines node's async_hook types into sets of more user-friendly thematic categories
-  // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
-  switch (typeName) {
-    case 'FSEVENTWRAP':
-    case 'FSREQWRAP':
-    case 'STATWATCHER':
-      return ['files-streams', 'fs']
-    case 'JSSTREAM':
-    case 'WRITEWRAP':
-    case 'SHUTDOWNWRAP':
-      return ['files-streams', 'streams']
-    case 'ZLIB':
-      return ['files-streams', 'zlib']
-
-    case 'HTTPPARSER':
-    case 'PIPECONNECTWRAP':
-    case 'PIPEWRAP':
-    case 'TCPCONNECTWRAP':
-    case 'TCPSERVER':
-    case 'TCPWRAP':
-    case 'TCPSERVERWRAP':
-      return ['networks', 'networking']
-    case 'UDPSENDWRAP':
-    case 'UDPWRAP':
-      return ['networks', 'network']
-    case 'GETADDRINFOREQWRAP':
-    case 'GETNAMEINFOREQWRAP':
-    case 'QUERYWRAP':
-      return ['networks', 'dns']
-
-    case 'PBKDF2REQUEST':
-    case 'RANDOMBYTESREQUEST':
-    case 'TLSWRAP':
-    case 'SSLCONNECTION':
-      return ['crypto', 'crypto']
-
-    case 'TIMERWRAP':
-    case 'Timeout':
-    case 'Immediate':
-    case 'TickObject':
-      return ['timing-promises', 'timers-and-ticks']
-    case 'PROMISE':
-      return ['timing-promises', 'promises']
-
-    case 'PROCESSWRAP':
-    case 'TTYWRAP':
-    case 'SIGNALWRAP':
-      return ['other', 'process']
-    case undefined:
-      return ['other', 'root']
-    default:
-      return ['other', 'user-defined']
   }
 }
 
