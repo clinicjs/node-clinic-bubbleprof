@@ -22,6 +22,8 @@ html {
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
+
+  --main-text-size: 10pt;
 }
 
 /* Main layout */
@@ -89,6 +91,75 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   display: block;
   margin-left: 35px;
   line-height: 65px;
+}
+
+/* Header */
+
+#header {
+  margin: 8px 24px 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--cyan);
+  display: flex;
+  flex-direction: row;
+  font-size: var(--main-text-size);
+}
+
+#header .panel {
+  margin: 0 18px 0 6px;
+}
+
+#header .panel > label {
+  color: var(--cyan);
+}
+
+#header .interactive-key {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 2px;
+  border-bottom: 1px solid transparent;
+}
+
+#header .interactive-key label {
+  color: var(--pure-white);
+}
+
+.type-icon,
+.party-icon {
+  display: inline-block;
+  width: 9px;
+}
+
+.type-icon {
+  margin: 4px;
+  height: 1px;
+  border-top: 1px solid transparent;
+}
+
+.party-icon {
+  height: 8px;
+  margin: 1px 4px;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  background: var(--pure-black);
+}
+
+body[data-highlight-party='user'] #header .interactive-key.party-user,
+body[data-highlight-party='external'] #header .interactive-key.party-external,
+body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore,
+body[data-highlight-type='files-streams'] #header .interactive-key.type-files-streams,
+body[data-highlight-type='networks'] #header .interactive-key.type-networks,
+body[data-highlight-type='crypto'] #header .interactive-key.type-crypto,
+body[data-highlight-type='timing-promises'] #header .interactive-key.type-timing-promises,
+body[data-highlight-type='other'] #header .interactive-key.type-other {
+  border-bottom-color: var(--cyan);
+}
+
+body[data-highlight-type='files-streams'] #header .interactive-key.type-files-streams .type-icon,
+body[data-highlight-type='networks'] #header .interactive-key.type-networks .type-icon,
+body[data-highlight-type='crypto'] #header .interactive-key.type-crypto .type-icon,
+body[data-highlight-type='timing-promises'] #header .interactive-key.type-timing-promises .type-icon,
+body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon {
+  border-top-width: 2.5px;
 }
 
 /* Footer */
@@ -161,16 +232,33 @@ svg .link-inner {
   opacity: 0.5;
 }
 
+body[data-highlight-type='files-streams'] svg .type-files-streams,
+body[data-highlight-type='networks'] svg .type-networks,
+body[data-highlight-type='crypto'] svg .type-crypto,
+body[data-highlight-type='timing-promises'] svg .type-timing-promises,
+body[data-highlight-type='other'] svg .type-other {
+  stroke-width: 2.5px;
+}
+
+body[data-highlight-party='user'] svg .party-user .by-variable,
+body[data-highlight-party='external'] svg .party-external .by-variable ,
+body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
+  stroke-width: 3px !important;
+}
+
 /* Global classes linking styles to data properties */
 
+.party-user .party-icon,
 .party-user .by-variable {
   border-color: var(--nearform-red);
   stroke: var(--nearform-red);
 }
+.party-external .party-icon,
 .party-external .by-variable {
   border-color: var(--cyan);
   stroke: var(--cyan);
 }
+.party-nodecore .party-icon,
 .party-nodecore .by-variable {
   border-color: var(--nearform-grey);
   stroke: var(--nearform-grey);
@@ -178,29 +266,40 @@ svg .link-inner {
 
 .type-files-streams,
 .type-files-streams .by-variable {
-  border-color: var(--type-colour-1);
   stroke: var(--type-colour-1);
+}
+.type-files-streams .type-icon {
+  border-color: var(--type-colour-1);
 }
 .type-networks,
 .type-networks .by-variable {
-  border-color: var(--type-colour-2);
   stroke: var(--type-colour-2);
+}
+.type-networks .type-icon {
+  border-color: var(--type-colour-2);
 }
 .type-crypto,
 .type-crypto .by-variable {
-  border-color: var(--type-colour-3);
   stroke: var(--type-colour-3);
+}
+.type-crypto .type-icon {
+  border-color: var(--type-colour-3);
 }
 .type-timing-promises,
 .type-timing-promises .by-variable {
-  border-color: var(--type-colour-4);
   stroke: var(--type-colour-4);
+}
+.type-timing-promises .type-icon {
+  border-color: var(--type-colour-4);
 }
 .type-other,
 .type-other .by-variable {
-  border-color: var(--type-colour-5);
   stroke: var(--type-colour-5);
 }
+.type-other .type-icon {
+  border-color: var(--type-colour-5);
+}
+
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
    * Must * animate by transforms only, to keep animating when processor is busy */

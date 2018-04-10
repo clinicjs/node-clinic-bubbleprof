@@ -17,6 +17,7 @@ class HtmlContent {
 
     const defaultProperties = {
       id: null,
+      name: null,
       htmlElementType: 'div',
       htmlContent: '',
       classNames: ''
@@ -32,7 +33,7 @@ class HtmlContent {
     this.contentIds = []
   }
 
-  addContent (ContentClass, contentProperties = {}, prepend = false) {
+  addContent (ContentClass = HtmlContent, contentProperties = {}, prepend = false) {
     const item = new ContentClass(this, contentProperties)
     const identifier = uniqueMapKey(contentProperties.id || ContentClass.constructor.name, this.content)
 

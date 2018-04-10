@@ -50,10 +50,11 @@ class Bubbles extends SvgContentGroup {
       .classed('bubble-outer', true)
       .classed('by-variable', true)
       .style('stroke-width', this.ui.settings.strokeWidthOuter)
+      .on('mouseover', d => this.ui.emit('highlightParty', d.mark.get('party')))
+      .on('mouseout', () => this.ui.emit('highlightParty', null))
 
     this.d3InnerCircles = this.d3Bubbles.append('circle')
       .classed('bubble-inner', true)
-      .style('stroke-width', this.ui.settings.strokeWidthInner)
   }
 
   addTypeDonuts () {
@@ -82,10 +83,10 @@ class Bubbles extends SvgContentGroup {
         .data(arcData)
         .enter()
         .append('path')
-        .attr('class', arcDatum => `type-${arcDatum.data[0].replace('/', '-')}`)
+        .attr('class', arcDatum => `type-${arcDatum.data[0]}`)
         .classed('donut-segment', true)
-        .on('mouseover', arcDatum => { this.ui.highlightType(arcDatum.data[0]) })
-        .on('mouseout', () => { this.ui.highlightType(null) })
+        .on('mouseover', arcDatum => this.ui.emit('highlightType', arcDatum.data[0]))
+        .on('mouseout', () => this.ui.emit('highlightType', null))
     })
   }
   draw () {
