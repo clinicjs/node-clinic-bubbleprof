@@ -135,7 +135,6 @@ test('Visualizer data - less common, preset type categories', function (t) {
     'UDPSENDWRAP', 'UDPWRAP', 'WRITEWRAP', 'ZLIB', 'SSLCONNECTION', 'PBKDF2REQUEST',
     'RANDOMBYTESREQUEST', 'TLSWRAP', 'Timeout', 'Immediate', 'TickObject']
 
-  const sampleAggregateNode = Array.from(dataSet.aggregateNodes.values())[1]
   for (const type of nodeCoreAsyncTypes) {
     const subCategory = AggregateNode.getAsyncTypeCategories(type)[1]
     if (subCategory === 'user-defined') {
