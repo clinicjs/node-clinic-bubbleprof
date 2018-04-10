@@ -54,8 +54,8 @@ class HoverBox extends HtmlContent {
 
       this.d3Title.text(node.name)
       this.d3Subtitle.text(`${node.constructor.name} #${node.id})`)
-      this.betweenTime.html(`<strong>${this.ui.formatNumber(node.getBetweenTime())}\u2009ms</strong> aggregated delay within this bubble.`)
-      this.withinTime.html(`<strong>${this.ui.formatNumber(node.getWithinTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
+      this.betweenTime.html(`<strong>${this.ui.formatNumber(node.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
+      this.withinTime.html(`<strong>${this.ui.formatNumber(node.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
     }
   }
 }
