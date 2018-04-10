@@ -2,25 +2,37 @@
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
+const Bubbles = require('./svg-bubbles.js')
 
 class SvgContainer extends HtmlContent {
-  constructor (d3Container, contentProperties = {}, svgBounds = null) {
+  constructor (parentContent, contentProperties = {}) {
     const defaultProperties = {
       htmlElementType: 'svg'
     }
-    super(d3Container, Object.assign(defaultProperties, contentProperties))
+    super(parentContent, Object.assign(defaultProperties, contentProperties))
 
-    if (svgBounds) {
+    if (contentProperties.svgBounds) {
       const defaultBounds = {
         minX: 0,
         minY: 0,
         width: 1000,
-        height: 1000,
+        height: 1000, // This may be overridden by layout.scale
         preserveAspectRatio: 'xMidYMid meet',
         minimumDistanceFromEdge: 20
       }
-      this.svgBounds = Object.assign(defaultBounds, svgBounds)
+      this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
+
+    this.bubbles = null
+    this.links = null
+  }
+
+  addBubbles (contentProperties) {
+    this.bubbles = new Bubbles(this, contentProperties)
+  }
+
+  addLinks (contentProperties) {
+    // TODO // this.links = new Links(this, contentProperties)
   }
 
   initializeElements () {
@@ -31,14 +43,22 @@ class SvgContainer extends HtmlContent {
         minX,
         minY,
         width,
-        height,
         preserveAspectRatio
       } = this.svgBounds
 
       this.d3Element
-        .attr('viewBox', `${minX} ${minY} ${width} ${height}`)
+        .attr('id', 'test ID')
         .attr('preserveAspectRatio', preserveAspectRatio)
+
+      this.ui.on('setData', () => {
+        const height = this.ui.layout.scale.finalSvgHeight || this.svgBounds.height
+        this.d3Element.attr('viewBox', `${minX} ${minY} ${width} ${height}`)
+      })
     }
+  }
+
+  draw () {
+    this.ui.emit('svgDraw')
   }
 }
 

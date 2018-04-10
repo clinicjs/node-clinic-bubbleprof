@@ -38,17 +38,17 @@ class HtmlContent {
 
     this.content.set(identifier, item)
     this.contentIds[prepend ? 'unshift' : 'push'](identifier)
-    return this
+    return item
   }
 
   addCollapseControl (collapsedByDefault = false, contentProperties = {}) {
     this.collapseControl = new CollapseControl(this, contentProperties)
-    return this
+    return this.collapseControl
   }
 
   addLoadingAnimation (contentProperties = {}) {
     this.loadingAnimation = new LoadingAnimation(this, contentProperties)
-    return this
+    return this.loadingAnimation
   }
 
   // Initial creation of elements independent of data and layout, before .setData() is called
@@ -103,6 +103,7 @@ class CollapseControl extends HtmlContent {
     this.isCollapsed = true
 
     this.d3Element.classed('collapse-control', true)
+    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
 
     this.d3Element.on('click', () => {
       this.toggleCollapse()
@@ -123,8 +124,12 @@ class LoadingAnimation extends HtmlContent {
   initializeElements () {
     super.initializeElements()
     this.d3Element.classed('loading-indicator', true)
+
+    this.ui.on('complete', () => {
+      this.isHidden = true
+      this.draw()
+    })
   }
-  // TODO: listen for 'loaded' event then hide
 }
 
 module.exports = HtmlContent

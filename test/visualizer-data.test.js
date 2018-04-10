@@ -6,9 +6,11 @@ const DataSet = require('../visualizer/data/dataset.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 const fakeJson = require('./visualizer-util/fakedata.json')
+const { AggregateNode } = require('../visualizer/data/data-node.js')
 const {
   fakeNodes,
   expectedTypeCategories,
+  expectedTypeSubCategories,
   expectedDecimalsTo5Places
 } = require('./visualizer-util/prepare-fake-nodes.js')
 
@@ -115,7 +117,14 @@ test('Visualizer data - less common, preset type categories', function (t) {
   for (const [aggregateId, expectedTypeCategory] of expectedTypeCategories) {
     const aggregateNode = dataSet.aggregateNodes.get(aggregateId)
     if (aggregateNode.typeCategory !== expectedTypeCategory) {
-      result += `AggregateNode ${aggregateId} is "${aggregateNode.typeCategory}", should be "${expectedTypeCategory}".  `
+      result += `AggregateNode ${aggregateId} has typeCategory "${aggregateNode.typeCategory}", expected "${expectedTypeCategory}".  `
+    }
+  }
+
+  for (const [aggregateId, expectedTypeSubCategory] of expectedTypeSubCategories) {
+    const aggregateNode = dataSet.aggregateNodes.get(aggregateId)
+    if (aggregateNode.typeSubCategory !== expectedTypeSubCategory) {
+      result += `AggregateNode ${aggregateId} has typeSubCategory "${aggregateNode.typeSubCategory}", expected "${expectedTypeSubCategory}".  `
     }
   }
 
@@ -126,12 +135,10 @@ test('Visualizer data - less common, preset type categories', function (t) {
     'UDPSENDWRAP', 'UDPWRAP', 'WRITEWRAP', 'ZLIB', 'SSLCONNECTION', 'PBKDF2REQUEST',
     'RANDOMBYTESREQUEST', 'TLSWRAP', 'Timeout', 'Immediate', 'TickObject']
 
-  const sampleAggregateNode = Array.from(dataSet.aggregateNodes.values())[1]
   for (const type of nodeCoreAsyncTypes) {
-    sampleAggregateNode.type = type
-    sampleAggregateNode.typeCategory = sampleAggregateNode.getTypeCategory()
-    if (sampleAggregateNode.typeCategory === 'user-defined') {
-      result += `Async_hook type ${type} is not matching to any category.  `
+    const subCategory = AggregateNode.getAsyncTypeCategories(type)[1]
+    if (subCategory === 'user-defined') {
+      result += `Node core async_hook type ${type} is not matching to any category.  `
     }
   }
   t.equal(result, '')
