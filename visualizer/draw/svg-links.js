@@ -39,10 +39,11 @@ class Links extends SvgContentGroup {
       .classed('link-outer', true)
       .classed('by-variable', true)
       .style('stroke-width', this.ui.settings.strokeWidthOuter)
+      .on('mouseover', connection => this.ui.emit('highlightParty', connection.targetNode.mark.get('party')))
+      .on('mouseout', () => this.ui.emit('highlightParty', null))
 
     this.d3InnerLines = this.d3Links.append('line')
       .classed('link-inner', true)
-      .style('stroke-width', this.ui.settings.strokeWidthInner)
   }
 
   addLineSegments () {
@@ -61,10 +62,10 @@ class Links extends SvgContentGroup {
         .data(decimalsAsArray)
         .enter()
         .append('line')
-        .attr('class', decimal => `type-${decimal[0].replace('/', '-')}`)
+        .attr('class', decimal => `type-${decimal[0]}`)
         .classed('link-segment', true)
-        .on('mouseover', () => { this.ui.highlightType(targetNode.typeCategory) })
-        .on('mouseout', () => { this.ui.highlightType(null) })
+        .on('mouseover', decimal => this.ui.emit('highlightType', decimal[0]))
+        .on('mouseout', () => this.ui.emit('highlightType', null))
 
       this.segmentedLinesMap.set(connection, link.selectAll('line.link-segment'))
     })
