@@ -4,6 +4,7 @@ const Stem = require('./stems.js')
 const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
+const { ClusterNode } = require('../data/data-node.js')
 
 class Layout {
   constructor (nodes, settings, collapseNodes = false) {
@@ -15,7 +16,10 @@ class Layout {
       labelMinimumSpace: 14
     }
     this.settings = Object.assign(defaultSettings, settings)
+
+    // TODO: phase out this.nodes, use layoutNodes exclusively
     this.nodes = nodes
+    this.nodesMap = new Map(nodes.map(node => [node.id, node]))
 
     // TODO: re-evaluate this, does it still make sense to initialise these now?
     this.scale = new Scale(this)
@@ -24,16 +28,65 @@ class Layout {
     this.connections = []
     this.connectionsByTargetId = new Map()
 
+    this.layoutNodes = new Map()
     this.stems = new Map()
   }
 
-  prepareLayoutNodes (nodes = this.nodes) {
-    this.layoutNodes = new Map()
-    nodes.forEach(node => {
-      const parent = node.parentId ? this.layoutNodes.get(node.parentId) : null
-      this.layoutNodes.set(node.id, new LayoutNode(node, parent))
-      if (parent) parent.children.push(node.id)
-    })
+  prepareLayoutNodes () {
+    const createLayoutNode = (nodeId, parentLayoutNode) => {
+      const node = this.nodesMap.get(nodeId)
+      // if nodeId is a member of a clump, node.id is the id of the clump itself
+      if (this.layoutNodes.has(node.id)) return
+
+      const layoutNode = new LayoutNode(node, parentLayoutNode)
+      this.layoutNodes.set(node.id, layoutNode)
+
+      if (parentLayoutNode) parentLayoutNode.children.push(node.id)
+      for (const childNodeId of node.children) {
+        createLayoutNode(childNodeId, layoutNode)
+      }
+    }
+    createLayoutNode(this.nodes[0].id)
+  }
+
+  // For layouts inside a clusterNode, rather than layouts of all cluterNodes
+  prepareSublayoutNodes (connection) {
+    // This sublayout is of nodes within targetNode. Some have parents within sourceNode
+    const { sourceNode, targetNode } = connection
+
+    const linkToSource = new ArtificialNode({
+      id: sourceNode.id,
+      isRoot: true,
+      children: []
+    }, sourceNode)
+
+    this.nodesMap.set(linkToSource.id, linkToSource)
+    this.nodes.unshift(linkToSource)
+
+    // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
+    for (const node of this.nodes) {
+      // if (!nodeType) nodeType = node.constructor.name
+
+      if (node.isBetweenClusters) {
+        linkToSource.children.push(node.id)
+      }
+      for (const childId of node.children) {
+        // If this child is in another cluster, add a dummy leaf node -> clickable link to that cluster
+        if (!this.nodes.some(node => node.id === childId)) {
+          const childNode = node.getSameType(childId)
+
+          // If we're inside a cluster of clusters, childNode might be on the top level of clusters
+          const linkOnwards = new ArtificialNode({
+            id: childId,
+            parentId: node.id
+          }, childNode)
+
+          this.nodesMap.set(linkOnwards.id, linkOnwards)
+          this.nodes.push(linkOnwards)
+        }
+      }
+    }
+    this.prepareLayoutNodes()
   }
 
   processBetweenData () {
@@ -119,6 +172,29 @@ class LayoutNode {
     this.inboundConnection = null
     this.parent = parent || null
     this.children = []
+  }
+}
+
+class ArtificialNode extends ClusterNode {
+  constructor (rawNode, nodeToCopy) {
+    const nodeProperties = Object.assign({}, nodeToCopy, rawNode, {
+      clusterId: rawNode.id || nodeToCopy.id,
+      parentClusterId: rawNode.parentId || nodeToCopy.parentId,
+      nodes: []
+    })
+    super(nodeProperties, nodeToCopy.dataSet)
+
+    const defaultProperties = {
+      replacesIds: [this.id],
+      nodeType: 'AggregateNode'
+    }
+    const node = Object.assign(defaultProperties, rawNode)
+
+    this.replacesIds = this.replacesIds
+    this.nodeType = node.nodeType
+  }
+  getSameType (nodeId) {
+    return this.dataSet.getByNodeType(this.nodeType, nodeId)
   }
 }
 

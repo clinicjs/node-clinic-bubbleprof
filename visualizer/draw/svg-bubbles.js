@@ -53,6 +53,14 @@ class Bubbles extends SvgContentGroup {
       .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
       .on('mouseover', d => this.ui.emit('hover', d))
       .on('mouseout', () => this.ui.emit('hover', null))
+      .on('click', (d, e) => {
+        if (this.nodeType === 'AggregateNode') {
+          d3.event.stopPropagation()
+          this.ui.outputFrames(d)
+        } else {
+          this.ui.createSubLayout(d)
+        }
+      })
 
     this.addCircles()
     this.addLabels()
@@ -87,8 +95,9 @@ class Bubbles extends SvgContentGroup {
   getTransformPosition (d, xOffset = 0, yOffset = 0) {
     const position = this.getNodePosition(d)
     let { x, y } = position
+    const connection = this.getInboundConnection(d)
 
-    if (this.isBelowVisibilityThreshold(d) && this.ui.layout.connectionsByTargetId.has(d.id)) {
+    if (this.isBelowVisibilityThreshold(d) && connection && this.ui.layout.layoutNodes.has(connection.sourceNode.id)) {
       // Move it back to the mid point of the gap
       const inboundLine = this.getInboundLine(d)
       const backwardsLine = new LineCoordinates({

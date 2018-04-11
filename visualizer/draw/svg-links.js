@@ -40,6 +40,14 @@ class Links extends SvgContentGroup {
       .classed('below-threshold-1', (d) => this.isBelowFullLabelThreshold(d))
       .classed('below-threshold-2', (d) => this.isBelowLabelThreshold(d))
       .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
+      .on('click', connection => {
+        if (this.nodeType === 'AggregateNode') {
+          d3.event.stopPropagation()
+          this.ui.outputFrames(connection.targetNode)
+        } else {
+          this.ui.createSubLayout(connection.targetLayoutNode)
+        }
+      })
 
     this.addLines()
     this.addLabel()
@@ -170,7 +178,7 @@ class Links extends SvgContentGroup {
       const visibleLength = connection.getVisibleLineLength()
       d3OuterLine.attr('d', this.getOuterLinePath(offsetBeforeLine, visibleLength))
 
-      if (this.segmentedLinesMap.has(connection)) {
+      if (this.segmentedLinesMap && this.segmentedLinesMap.has(connection)) {
         const d3SegmentsGroup = this.segmentedLinesMap.get(connection)
 
         let segmentCoordinates = offsetBeforeLine

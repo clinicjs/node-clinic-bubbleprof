@@ -3,9 +3,11 @@
 const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
 const EventEmitter = require('events')
+const Layout = require('../layout/layout.js')
+const SvgContainer = require('./svg-container.js')
 
 class BubbleprofUI extends EventEmitter {
-  constructor (sections = [], settings) {
+  constructor (sections = [], settings, appendTo = undefined) {
     super()
 
     const defaultSettings = {
@@ -22,15 +24,44 @@ class BubbleprofUI extends EventEmitter {
     this.sections = new Map()
 
     for (const sectionName of sections) {
-      this.sections.set(sectionName, new HtmlContent(undefined, {
+      this.sections.set(sectionName, new HtmlContent(appendTo, {
         htmlElementType: 'section',
         id: sectionName
       }, this))
     }
   }
 
+  createSubLayout (layoutNode) {
+    const node = layoutNode.node
+    if (node.nodes && node.nodes.size) {
+      const newLayout = new Layout([...node.nodes.values()], this.layout.settings)
+      newLayout.prepareSublayoutNodes(layoutNode.inboundConnection)
+      newLayout.generate()
+
+      const nodeLinkSection = this.sections.get('node-link')
+      const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection)
+
+      const sublayout = newUI.sections.get('sublayout')
+      sublayout.addCollapseControl()
+      const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
+      sublayout.initializeElements()
+      sublayout.d3Element.on('click', () => {
+        sublayout.d3Element.remove()
+      })
+      sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
+      sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
+      newUI.setData(this.dataSet, newLayout)
+    }
+  }
+
   formatNumber (num) {
     return num < 0.01 ? '<0.01' : this.settings.numberFormatter(num)
+  }
+
+  outputFrames (aggregateNode) {
+    for (const frame of aggregateNode.frames) {
+      console.log(frame.formatted)
+    }
   }
 
   truncateLabel (labelString, maxWords, maxChars) {
