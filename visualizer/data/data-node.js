@@ -2,7 +2,7 @@
 
 const Frame = require('./frame.js')
 const { CallbackEvent } = require('./callback-event.js')
-const { isNumber } = require('../validation.js')
+const { validateNumber } = require('../validation.js')
 
 class DataNode {
   constructor (dataSet) {
@@ -48,9 +48,9 @@ class DataNode {
     return this.dataSet.getByNodeType(this.constructor.name, nodeId)
   }
 
-  validateStat (num, statType) {
-    if (!isNumber(num)) throw new Error(`Tried to set ${typeof num} "${num}" to ${this.constructor.name} ${this.id} ${statType}, should be number`)
-    return num
+  validateStat (num, statType = '', aboveZero = false) {
+    const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
+    return validateNumber(num, targetDescription, aboveZero)
   }
 }
 
