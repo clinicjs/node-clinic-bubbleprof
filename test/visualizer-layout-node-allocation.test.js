@@ -260,7 +260,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   t.end()
 })
 
-test('Visualizer layout - node allocation - validation in flawed subset', function (t) {
+test('Visualizer layout - node allocation - validation on leafCenter division', function (t) {
   const topology = [
     ['1.2', 100 - 1],
     ['1.3.4.5', 500 - 3],
