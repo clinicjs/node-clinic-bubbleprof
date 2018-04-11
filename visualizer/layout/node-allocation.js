@@ -3,20 +3,24 @@
 const LineCoordinates = require('./line-coordinates.js')
 
 class NodeAllocation {
-  constructor (layout, nodes, coordinatesFn = NodeAllocation.threeSided) {
+  constructor (layout, layoutNodes, coordinatesFn = NodeAllocation.threeSided) {
     this.layout = layout
+    this.layoutNodes = layoutNodes
     this.nodeToPosition = new Map()
     this.leaves = new Map()
     this.midPoints = new Map()
     this.roots = new Map()
-    for (const node of nodes) {
+    for (const layoutNode of layoutNodes.values()) {
+      const node = layoutNode.node
       // Edge offset does not apply to midpoints - only leaves - hence init value is null
-      this.nodeToPosition.set(node, { units: 0, offset: null, x: 0, y: 0 })
+      const position = { units: 0, offset: null, x: 0, y: 0 }
+      this.nodeToPosition.set(node, position)
+      layoutNode.position = position
       const category = node.children.length ? 'midPoints' : 'leaves'
-      this[category].set(node.id, node)
+      this[category].set(node.id, layoutNode)
     }
     for (const midPoint of this.midPoints.values()) {
-      if (!this.midPoints.get(midPoint.parentId)) {
+      if (!this.midPoints.get(midPoint.node.parentId)) {
         this.roots.set(midPoint.id, midPoint)
       }
     }
@@ -38,7 +42,7 @@ class NodeAllocation {
   static threeSided (layout, roots) {
     const { svgWidth, svgDistanceFromEdge } = layout.settings
     const { finalSvgHeight } = layout.scale
-    const toLargestDiameter = (largest, rootNode) => Math.max(largest, rootNode.stem.getScaled(layout.scale).ownDiameter)
+    const toLargestDiameter = (largest, rootLayoutNode) => Math.max(largest, rootLayoutNode.stem.getScaled(layout.scale).ownDiameter)
     const largestRootDiameter = [...roots.values()].reduce(toLargestDiameter, 0)
     const topOffset = svgDistanceFromEdge + Math.max(finalSvgHeight * 0.2, largestRootDiameter)
     const borders = {
@@ -77,17 +81,20 @@ class NodeAllocation {
   convertTotalStemLengthsToUnits () {
     // Traverse the hierarchies and index Clumps at each level
     const hierarchyLevels = new Map()
-    for (const leaf of this.leaves.values()) {
-      const leafTotalStemLength = leaf.stem.getTotalStemLength(this.layout.scale).combined
+    for (const leafLayoutNode of this.leaves.values()) {
+      const leaf = leafLayoutNode.node
+      const stem = leafLayoutNode.stem
+
+      const leafTotalStemLength = stem.getTotalStemLength(this.layout.scale).combined
       // Include ancestor Clumps
-      for (let depth in leaf.stem.ancestors.ids) {
+      for (let depth in stem.ancestors.ids) {
         depth = parseInt(depth)
         if (!hierarchyLevels.has(depth)) {
           hierarchyLevels.set(depth, new HierarchyLevel(depth))
         }
         const hierarchyLevel = hierarchyLevels.get(depth)
         // Form Clump for given node at given level
-        const ancestorId = leaf.stem.ancestors.ids[depth]
+        const ancestorId = stem.ancestors.ids[depth]
         const ancestorAtDepth = leaf.getSameType(ancestorId)
         if (!this.midPoints.get(ancestorId)) {
           continue
@@ -109,7 +116,7 @@ class NodeAllocation {
         }
       }
       // Include leaf Clump
-      const leafDepth = leaf.stem.ancestors.ids.length
+      const leafDepth = stem.ancestors.ids.length
       if (!hierarchyLevels.has(leafDepth)) {
         hierarchyLevels.set(leafDepth, new HierarchyLevel(leafDepth))
       }
@@ -138,9 +145,10 @@ class NodeAllocation {
   calculate1DLinearOffsets () {
     let currentSegment = this.segments[0]
     let currentBlock = null
-    const intoOrder = (leafA, leafB) => this.layout.positioning.order.indexOf(leafA.id) - this.layout.positioning.order.indexOf(leafB.id)
+    const intoOrder = (leafA, leafB) => this.layout.positioning.order.indexOf(leafA.node.id) - this.layout.positioning.order.indexOf(leafB.node.id)
     const arrangedLeaves = [...this.leaves.values()].sort(intoOrder) // To be optimized (unnecessary iterations)
-    for (const leaf of arrangedLeaves) {
+    for (const leafLayoutNode of arrangedLeaves) {
+      const leaf = leafLayoutNode.node
       const position = this.nodeToPosition.get(leaf)
       const allocatedSpace = position.units * this.total1DSpaceAvailable
       currentBlock = new SpaceBlock(leaf, currentBlock ? currentBlock.end : currentSegment.begin, allocatedSpace)
@@ -161,45 +169,54 @@ class NodeAllocation {
     }
   }
   constrain2DLeafCoordinates () {
-    for (const leaf of this.leaves.values()) {
+    for (const layoutNode of this.leaves.values()) {
+      const leaf = layoutNode.node
+      const stem = layoutNode.stem
+      const parentStem = layoutNode.parent.stem
+
       const position = this.nodeToPosition.get(leaf)
       const parentNode = leaf.getParentNode()
-      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.getScaled(this.layout.scale).ownDiameter)
+      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentStem.getScaled(this.layout.scale).ownDiameter)
       const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: position.x, y2: position.y })
-      const parentRadius = parentNode.stem.getScaled(this.layout.scale).ownDiameter / 2
-      const thisRadius = leaf.stem.getScaled(this.layout.scale).ownDiameter / 2
-      const lineLength = leaf.stem.getScaled(this.layout.scale).ownBetween
+      const parentRadius = parentStem.getScaled(this.layout.scale).ownDiameter / 2
+      const thisRadius = stem.getScaled(this.layout.scale).ownDiameter / 2
+      const lineLength = stem.getScaled(this.layout.scale).ownBetween
       const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
       position.x = x
       position.y = y
     }
   }
   calculate2DMidpointCoordinates (placementMode) {
-    for (const midPoint of this.midPoints.values()) {
+    for (const layoutNode of this.midPoints.values()) {
+      const midPoint = layoutNode.node
+      const stem = layoutNode.stem
+
       const parentNode = midPoint.getParentNode()
       const position = this.nodeToPosition.get(midPoint)
       if (!parentNode) {
         // TODO: spread out x's to declutter multiple top-level nodes, preferably using this.layout.positioning.order
-        const rootPosition = this.getRootPosition(midPoint.stem.getScaled(this.layout.scale).ownDiameter)
+        const rootPosition = this.getRootPosition(stem.getScaled(this.layout.scale).ownDiameter)
         position.x = rootPosition.x
         position.y = rootPosition.y
         continue
       }
-      const ownLeavesInSubset = midPoint.stem.leaves.ids.filter(leafId => this.leaves.has(leafId))
-      const leafPositions = ownLeavesInSubset.map(leafId => this.nodeToPosition.get(this.leaves.get(leafId)))
+      const parentStem = layoutNode.parent.stem
+      const ownLeavesInSubset = stem.leaves.ids.filter(leafId => this.leaves.has(leafId))
+      const leafPositions = ownLeavesInSubset.map(leafId => this.nodeToPosition.get(this.leaves.get(leafId).node))
       const leafCenter = leafPositions.reduce((combinedPosition, nodePosition) => {
         return { x: combinedPosition.x + nodePosition.x, y: combinedPosition.y + nodePosition.y }
       }, { x: 0, y: 0 })
+
       leafCenter.x /= leafPositions.length
       leafCenter.y /= leafPositions.length
 
-      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentNode.stem.getScaled(this.layout.scale).ownDiameter)
+      const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentStem.getScaled(this.layout.scale).ownDiameter)
       switch (placementMode) {
         case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
-          const parentRadius = parentNode.stem.getScaled(this.layout.scale).ownDiameter / 2
-          const thisRadius = midPoint.stem.getScaled(this.layout.scale).ownDiameter / 2
-          const lineLength = midPoint.stem.getScaled(this.layout.scale).ownBetween
+          const parentRadius = parentStem.getScaled(this.layout.scale).ownDiameter / 2
+          const thisRadius = stem.getScaled(this.layout.scale).ownDiameter / 2
+          const lineLength = stem.getScaled(this.layout.scale).ownBetween
           const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
           position.x = x
           position.y = y

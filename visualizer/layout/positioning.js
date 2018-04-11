@@ -9,24 +9,25 @@ function flatMapDeep (value) {
 }
 
 class Positioning {
-  constructor (layout, nodes) {
+  constructor (layout) {
     this.layout = layout
-    this.nodes = nodes
+    this.layoutNodes = null // defined later
   }
   formClumpPyramid () {
-    const leavesByLongest = pickLeavesByLongest(this.nodes, this.layout.scale)
+    this.layoutNodes = this.layout.layoutNodes
+    const leavesByLongest = pickLeavesByLongest(this.layoutNodes, this.layout.scale)
     const clumpPyramid = new ClumpPyramid()
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
   }
   placeNodes () {
-    this.nodeAllocation = new NodeAllocation(this.layout, this.nodes)
+    this.nodeAllocation = new NodeAllocation(this.layout, this.layoutNodes)
     this.nodeAllocation.process()
     this.nodeToPosition = this.nodeAllocation.nodeToPosition
   }
   debugInspect () {
-    const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const arrangedLeaves = pickLeavesByLongest(this.nodes, this.layout).sort(intoOrder)
+    const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.node.id) - this.order.indexOf(leafB.node.id)
+    const arrangedLeaves = pickLeavesByLongest(this.layoutNodes, this.layout).sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
       const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
@@ -123,7 +124,7 @@ class ClumpPyramid {
 
     // Assign orientation in relation to centered leaf
     // Note - first (i.e. longest) leaf will always be centered, thus its ancestor clumps have center orientation
-    const clumpOrientation = leaf === this.leadingLeaf ? 'center' : this.insertionSideToOrientation[insertAtSide]
+    const clumpOrientation = leaf === this.leadingLeaf.node ? 'center' : this.insertionSideToOrientation[insertAtSide]
     this.clumpById[ancestorId].orientation = clumpOrientation
 
     // Insert newly-created ancestor clump into its direct-parent clump
@@ -138,10 +139,12 @@ class ClumpPyramid {
     const roots = {}
     this.emptyPyramid()
     this.leadingLeaf = leavesByLongest[0]
-    for (const leaf of leavesByLongest) {
+    for (const layoutNodeLeaf of leavesByLongest) {
       let insertAtSide = this.nextPyramidSide()
+      const leaf = layoutNodeLeaf.node
+      const stem = layoutNodeLeaf.stem
 
-      for (const ancestorId of leaf.stem.ancestors.ids) {
+      for (const ancestorId of stem.ancestors.ids) {
         this.setAncestorClump(leaf, ancestorId, insertAtSide)
         if (!leaf.getSameType(ancestorId).parentId) {
           roots[ancestorId] = true
@@ -153,7 +156,7 @@ class ClumpPyramid {
         insertAtSide = this.orientationToInsertionSide[parentClump.orientation]
       }
       parentClump[insertAtSide](leaf.id)
-      const updateSide = leaf === this.leadingLeaf ? 'center' : this.insertionSideToOrientation[insertAtSide]
+      const updateSide = leaf === this.leadingLeaf.node ? 'center' : this.insertionSideToOrientation[insertAtSide]
       this.leavesOnSide[updateSide]++
     }
 
