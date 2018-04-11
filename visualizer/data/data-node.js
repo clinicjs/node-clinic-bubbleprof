@@ -55,8 +55,18 @@ class DataNode {
 }
 
 class ClusterNode extends DataNode {
-  constructor (node, dataSet) {
+  constructor (rawNode, dataSet) {
     super(dataSet)
+
+    const defaultProperties = {
+      clusterId: 0,
+      parentClusterId: null,
+      children: [],
+      name: 'miscellaneous',
+      mark: null,
+      isRoot: false
+    }
+    const node = Object.assign(defaultProperties, rawNode)
 
     this.isRoot = (node.clusterId === 1)
 
@@ -84,9 +94,9 @@ class ClusterNode extends DataNode {
     this.nodes = new Map(aggregateNodes)
 
     // All aggregateNodes within a clusterNode are by definition from the same party
-    this.mark = aggregateNodes[0][1].mark
+    this.mark = node.mark || aggregateNodes[0][1].mark
   }
-  setDecimal (num, classification, position, label = 'nodecore') {
+  setDecimal (num, classification, position, label) {
     const raw = this.stats.rawTotals
     const rawTotal = position === 'within' ? raw.async.within + raw.sync : raw.async.between
     const statType = `decimals.${classification}.${position}->${label}`
@@ -108,8 +118,19 @@ class ClusterNode extends DataNode {
 }
 
 class AggregateNode extends DataNode {
-  constructor (node, clusterNode) {
+  constructor (rawNode, clusterNode) {
     super(clusterNode.dataSet)
+
+    const defaultProperties = {
+      aggregateId: 0,
+      parentAggregateId: null,
+      children: [],
+      frames: [],
+      type: 'none',
+      mark: ['nodecore', null, null],
+      isRoot: false
+    }
+    const node = Object.assign(defaultProperties, rawNode)
 
     this.isRoot = (node.isRoot || node.aggregateId === 1)
 
@@ -128,7 +149,6 @@ class AggregateNode extends DataNode {
       }
     })
 
-    if (!node.mark) node.mark = ['nodecore', null, null]
     // node.mark is always an array of length 3, based on this schema:
     const markKeys = ['party', 'module', 'name']
     // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.
@@ -217,7 +237,7 @@ class AggregateNode extends DataNode {
       case 'TTYWRAP':
       case 'SIGNALWRAP':
         return ['other', 'process']
-      case undefined:
+      case 'none':
         return ['other', 'root']
       default:
         return ['other', 'user-defined']
@@ -226,18 +246,29 @@ class AggregateNode extends DataNode {
 }
 
 class SourceNode extends DataNode {
-  constructor (source, aggregateNode) {
+  constructor (rawSource, aggregateNode) {
     super(aggregateNode.dataSet)
+
+    const defaultProperties = {
+      asyncId: 0,
+      parentAsyncId: null,
+      children: [],
+      init: null,
+      before: [],
+      after: [],
+      destroy: null
+    }
+    const source = Object.assign(defaultProperties, rawSource)
 
     this.asyncId = source.asyncId
     this.parentAsyncId = source.parentAsyncId
     this.triggerAsyncId = source.parentAsyncId
     this.executionAsyncId = source.parentAsyncId
 
-    this.init = source.init
-    this.before = source.before
-    this.after = source.after
-    this.destroy = source.destroy
+    this.init = source.init // numeric timestamp
+    this.before = source.before // array of numeric timestamps
+    this.after = source.after // array of numeric timestamps
+    this.destroy = source.destroy // numeric timestamp
 
     this.aggregateNode = aggregateNode
 
