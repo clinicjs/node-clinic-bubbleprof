@@ -64,7 +64,8 @@ class ClusterNode extends DataNode {
       children: [],
       name: 'miscellaneous',
       mark: null,
-      isRoot: false
+      isRoot: false,
+      nodes: []
     }
     const node = Object.assign(defaultProperties, rawNode)
 
@@ -128,7 +129,8 @@ class AggregateNode extends DataNode {
       frames: [],
       type: 'none',
       mark: ['nodecore', null, null],
-      isRoot: false
+      isRoot: false,
+      sources: []
     }
     const node = Object.assign(defaultProperties, rawNode)
 
