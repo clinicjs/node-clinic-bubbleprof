@@ -94,7 +94,11 @@ test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', func
 test('Visualizer CallbackEvents - Invalid data item', function (t) {
   t.throws(() => {
     dataSet.clusterNodes.values().next().value.stats.setSync('14%')
-  }, new Error('Tried to set string "14%" to ClusterNode A stats.sync, should be number'))
+  }, new Error('For ClusterNode A stats.sync: Got string 14%, must be a number'))
+
+  t.throws(() => {
+    dataSet.clusterNodes.values().next().value.stats.setSync(1 / 0)
+  }, new Error('For ClusterNode A stats.sync: Got Infinity, must be finite'))
 
   t.end()
 })
