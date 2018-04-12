@@ -11,10 +11,6 @@ class Stem {
     this.layout = layout
     const node = layoutNode.node
 
-    // Dynamic Stem assignment is necessary when working with subsets
-    if (layoutNode.parent && !layoutNode.parent.stem) {
-      layoutNode.parent.stem = new Stem(this.layout, layoutNode.parent)
-    }
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
