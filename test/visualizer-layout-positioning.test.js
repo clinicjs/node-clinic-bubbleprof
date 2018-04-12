@@ -24,15 +24,15 @@ test('Visualizer layout - positioning - mock topology', function (t) {
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
 
-  t.equal(dataSet.clusterNodes.get(1).stem.getTotalStemLength(layout.scale).scalable, 1)
-  t.equal(dataSet.clusterNodes.get(2).stem.getTotalStemLength(layout.scale).scalable, 1 + 1)
-  t.equal(dataSet.clusterNodes.get(8).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 100)
-  t.equal(dataSet.clusterNodes.get(6).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1)
-  t.equal(dataSet.clusterNodes.get(7).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 200)
-  t.equal(dataSet.clusterNodes.get(3).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1)
-  t.equal(dataSet.clusterNodes.get(5).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 250)
-  t.equal(dataSet.clusterNodes.get(4).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 150)
-  t.equal(dataSet.clusterNodes.get(9).stem.getTotalStemLength(layout.scale).scalable, 1 + 50)
+  t.equal(layout.layoutNodes.get(1).stem.getTotalStemLength(layout.scale).scalable, 1)
+  t.equal(layout.layoutNodes.get(2).stem.getTotalStemLength(layout.scale).scalable, 1 + 1)
+  t.equal(layout.layoutNodes.get(8).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 100)
+  t.equal(layout.layoutNodes.get(6).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1)
+  t.equal(layout.layoutNodes.get(7).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 200)
+  t.equal(layout.layoutNodes.get(3).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1)
+  t.equal(layout.layoutNodes.get(5).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 250)
+  t.equal(layout.layoutNodes.get(4).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 150)
+  t.equal(layout.layoutNodes.get(9).stem.getTotalStemLength(layout.scale).scalable, 1 + 50)
 
   t.end()
 })
@@ -191,6 +191,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   const dataSet = loadData(mockTopology(topology))
   const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
   const layout = new Layout(subset)
+  layout.prepareLayoutNodes()
   layout.generate()
 
   const positioning = layout.positioning

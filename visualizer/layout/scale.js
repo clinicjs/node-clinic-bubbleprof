@@ -4,18 +4,15 @@ const { radiusFromCircumference } = require('./line-coordinates.js')
 const { pickLeavesByLongest } = require('./stems.js')
 
 class Scale {
-  constructor (nodes, settings = {}) {
-    const defaultSettings = {
-      lineWidth: 2.5,
-      labelMinimumSpace: 14
-    }
-    this.nodes = nodes
-    this.settings = Object.assign(defaultSettings, settings)
+  constructor (layout) {
+    this.layout = layout
+    this.layoutNodes = null // set later
   }
   calculateScaleFactor () {
+    this.layoutNodes = this.layout.layoutNodes
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
-    const leavesByShortest = pickLeavesByLongest(this.nodes, this).reverse()
+    const leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
 
     const longest = leavesByShortest[leavesByShortest.length - 1].stem.getTotalStemLength(this)
     const shortest = leavesByShortest[0].stem.getTotalStemLength(this)
@@ -24,9 +21,15 @@ class Scale {
     const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.getTotalStemLength(this)
     const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.getTotalStemLength(this)
 
-    const availableWidth = (this.settings.svgWidth / 2) - (this.settings.svgDistanceFromEdge * 2)
-    const stretchedHeight = this.settings.svgHeight * 1.5
-    const availableHeight = (stretchedHeight) - (this.settings.svgDistanceFromEdge * 2)
+    const {
+      svgWidth,
+      svgDistanceFromEdge,
+      svgHeight
+    } = this.layout.settings
+
+    const availableWidth = (svgWidth / 2) - (svgDistanceFromEdge * 2)
+    const stretchedHeight = svgHeight * 1.5
+    const availableHeight = (stretchedHeight) - (svgDistanceFromEdge * 2)
 
     // Note - assumptions below depend on ClumpPyramid Positioning
     const scalesBySignificance = [
@@ -52,7 +55,7 @@ class Scale {
     this.decisiveWeight = this.scalesBySmallest[0]
     this.scaleFactor = this.decisiveWeight.weight
 
-    this.finalSvgHeight = this.decisiveWeight.available > this.settings.svgHeight ? stretchedHeight : this.settings.svgHeight
+    this.finalSvgHeight = this.decisiveWeight.available > svgHeight ? stretchedHeight : svgHeight
   }
 
   getLineLength (dataValue) {

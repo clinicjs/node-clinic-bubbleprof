@@ -2,22 +2,19 @@
 
 const { radiusFromCircumference } = require('./line-coordinates.js')
 
-function getNodeAncestorIds (node) {
-  const parent = node.getParentNode()
-  return parent ? [...parent.stem.ancestors.ids, parent.id] : []
+function getNodeAncestorIds (parent) {
+  return parent ? [...parent.stem.ancestors.ids, parent.node.id] : []
 }
 
 class Stem {
-  constructor (node) {
-    const parentNode = node.getParentNode()
-    // Dynamic Stem assignment is necessary when working with subsets
-    if (parentNode && !parentNode.stem) {
-      parentNode.stem = new Stem(parentNode)
-    }
+  constructor (layout, layoutNode) {
+    this.layout = layout
+    const node = layoutNode.node
+
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
-      ids: getNodeAncestorIds(node)
+      ids: getNodeAncestorIds(layoutNode.parent)
     }
     this.leaves = {
       ids: []
@@ -26,20 +23,20 @@ class Stem {
     this.ownDiameter = radiusFromCircumference(node.getWithinTime()) * 2
 
     for (const ancestorId of this.ancestors.ids) {
-      const ancestor = node.getSameType(ancestorId)
-      this.ancestors.totalBetween += ancestor.stem.ownBetween
-      this.ancestors.totalDiameter += ancestor.stem.ownDiameter
-      ancestor.stem.leaves.ids.push(node.id)
+      const ancestorStem = layout.layoutNodes.get(ancestorId).stem
+      this.ancestors.totalBetween += ancestorStem.ownBetween
+      this.ancestors.totalDiameter += ancestorStem.ownDiameter
+      ancestorStem.leaves.ids.push(node.id)
     }
   }
   getScaled (scale) {
     return {
-      ownBetween: (scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth + scale.getLineLength(this.ownBetween),
+      ownBetween: (this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth + scale.getLineLength(this.ownBetween),
       ownDiameter: scale.getLineLength(this.ownDiameter)
     }
   }
-  getTotalStemLength (scale) {
-    const absolute = ((scale.settings.labelMinimumSpace * 2) + scale.settings.lineWidth) * this.ancestors.ids.length
+  getTotalStemLength () {
+    const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
     const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
     return {
       absolute,
@@ -47,10 +44,10 @@ class Stem {
       combined: absolute + scalable
     }
   }
-  static pickLeavesByLongest (nodes, scale) {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength(scale).combined - leafA.stem.getTotalStemLength(scale).combined
-    const byLeafOnly = node => !node.children.length
-    return nodes.filter(byLeafOnly).sort(byLongest)
+  static pickLeavesByLongest (layoutNodes) {
+    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().combined - leafA.stem.getTotalStemLength().combined
+    const byLeafOnly = layoutNode => !layoutNode.node.children.length
+    return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }
 }
 
