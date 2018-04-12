@@ -59,12 +59,16 @@ class Layout {
       subsetNodeById[node.id] = node
     }
     const topNodes = nodes.filter(node => !subsetNodeById[node.parentId])
+    const collapsedNodes = []
+    for (const node of topNodes) {
+      clumpNodes(node)
+    }
+    return collapsedNodes
 
     function isBelowThreshold (node) {
       return (node.getWithinTime() + node.getBetweenTime()) * scale.scaleFactor < 10
     }
 
-    const collapsedNodes = []
     function clumpNodes (node, clump = null) {
       if (isBelowThreshold(node)) {
         if (!clump) {
@@ -99,11 +103,6 @@ class Layout {
 
       return clump
     }
-
-    for (const node of topNodes) {
-      clumpNodes(node)
-    }
-    return collapsedNodes
   }
 }
 
