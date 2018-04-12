@@ -6,6 +6,8 @@ const Layout = require('../visualizer/layout/layout.js')
 const NodeAllocation = require('../visualizer/layout/node-allocation.js')
 const LineCoordinates = require('../visualizer/layout/line-coordinates.js')
 
+const Layout = require('../visualizer/layout/layout.js')
+
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
 test('Visualizer layout - node allocation - all assigned leaf units are proportional to parent and add up to 1', function (t) {
@@ -268,6 +270,31 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   t.ok(positionById[8].x > positionById[6].x)
   t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
   t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
+
+  t.end()
+})
+
+test('Visualizer layout - node allocation - validation on leafCenter division', function (t) {
+  const topology = [
+    ['1.2', 100 - 1],
+    ['1.3.4.5', 500 - 3],
+    ['1.3.6.7', 900 - 3],
+    ['1.3.6.8', 500 - 3]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  t.ok(dataSet)
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
+  t.ok(layout)
+
+  // Subset containing leaves and midPoints with no leaves
+  const subset = [1, 2, 3, 4, 6].map(nodeId => dataSet.clusterNodes.get(nodeId))
+  t.ok(subset)
+
+  const subLayout = new Layout(subset)
+
+  t.throws(() => {
+    subLayout.generate()
+  }, new Error('For ClusterNode 3 leafCenter division: Got 0, must be > 0'))
 
   t.end()
 })

@@ -15,6 +15,27 @@ function validateKey (key, validOptions) {
     throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
   }
 }
+function validateNumber (num, targetDescription = '', conditions = {}) {
+  const defaultConditions = {
+    isFinite: true,
+    aboveZero: false
+  }
+  conditions = Object.assign(defaultConditions, conditions)
+  if (targetDescription) targetDescription += ': '
+
+  if (!isNumber(num)) {
+    throw new Error(`${targetDescription}Got ${typeof num} ${num}, must be a number`)
+  }
+  if (conditions.aboveZero && num <= 0) {
+    throw new Error(`${targetDescription}Got ${num}, must be > 0`)
+  }
+  if (conditions.isFinite && !isFinite(num)) {
+    throw new Error(`${targetDescription}Got ${num}, must be finite`)
+  }
+
+  return num
+}
+
 // Currently only used in /draw code
 /* istanbul ignore next */
 function uniqueMapKey (key, map) {
@@ -31,5 +52,6 @@ module.exports = {
   isNumber,
   areNumbers,
   validateKey,
+  validateNumber,
   uniqueMapKey
 }

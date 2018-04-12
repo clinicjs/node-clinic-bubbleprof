@@ -1,6 +1,7 @@
 'use strict'
 
 const LineCoordinates = require('./line-coordinates.js')
+const { validateNumber } = require('../validation.js')
 
 class NodeAllocation {
   constructor (layout, layoutNodes, coordinatesFn = NodeAllocation.threeSided) {
@@ -46,10 +47,10 @@ class NodeAllocation {
     const largestRootDiameter = [...roots.values()].reduce(toLargestDiameter, 0)
     const topOffset = svgDistanceFromEdge + Math.max(finalSvgHeight * 0.2, largestRootDiameter)
     const borders = {
-      top: topOffset,
-      bottom: finalSvgHeight - svgDistanceFromEdge,
-      left: svgDistanceFromEdge,
-      right: svgWidth - svgDistanceFromEdge
+      top: validateNumber(topOffset),
+      bottom: validateNumber(finalSvgHeight - svgDistanceFromEdge),
+      left: validateNumber(svgDistanceFromEdge),
+      right: validateNumber(svgWidth - svgDistanceFromEdge)
     }
     const coordinates = [
       { label: 'LHS', x1: borders.left, y1: borders.top, x2: borders.left, y2: borders.bottom },
@@ -138,8 +139,10 @@ class NodeAllocation {
       for (const clumpAtDepth of hierarchyLevel.clumps.values()) {
         const parentUnits = clumpAtDepth.parentClump ? clumpAtDepth.parentClump.units : 1
         const proportionFactor = clumpAtDepth.parentClump ? clumpAtDepth.parentClump.getTotalChildrenLongestLeafLength() : hierarchyLevel.longestLeafLengthSum
-        clumpAtDepth.units = parentUnits * (clumpAtDepth.longestLeafLength / proportionFactor)
-        this.nodeToPosition.get(clumpAtDepth.node).units = clumpAtDepth.units
+        const clumpUnits = parentUnits * (clumpAtDepth.longestLeafLength / proportionFactor)
+
+        clumpAtDepth.units = clumpAtDepth.node.validateStat(clumpUnits)
+        this.nodeToPosition.get(clumpAtDepth.node).units = clumpUnits
       }
     }
   }
@@ -164,8 +167,9 @@ class NodeAllocation {
         const position = this.nodeToPosition.get(block.node)
         const relativeOffset = block.center - segment.begin
         const { x, y } = segment.translate1DPointTo2D(relativeOffset)
-        position.x = x
-        position.y = y
+
+        position.x = block.node.validateStat(x, 'x position')
+        position.y = block.node.validateStat(y, 'y position')
       }
     }
   }
@@ -184,8 +188,9 @@ class NodeAllocation {
       const thisRadius = stem.getScaled(this.layout.scale).ownDiameter / 2
       const lineLength = stem.getScaled(this.layout.scale).ownBetween
       const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
-      position.x = x
-      position.y = y
+
+      position.x = leaf.validateStat(x)
+      position.y = leaf.validateStat(y)
     }
   }
   calculate2DMidpointCoordinates (placementMode) {
@@ -197,17 +202,21 @@ class NodeAllocation {
       if (!this.layoutNodes.get(midPoint.parentId)) {
         // TODO: spread out x's to declutter multiple top-level nodes, preferably using this.layout.positioning.order
         const rootPosition = this.getRootPosition(stem.getScaled(this.layout.scale).ownDiameter)
-        position.x = rootPosition.x
-        position.y = rootPosition.y
+        position.x = midPoint.validateStat(rootPosition.x)
+        position.y = midPoint.validateStat(rootPosition.y)
         continue
       }
       const parentStem = layoutNode.parent.stem
       const ownLeavesInSubset = stem.leaves.ids.filter(leafId => this.leaves.has(leafId))
       const leafPositions = ownLeavesInSubset.map(leafId => this.nodeToPosition.get(this.leaves.get(leafId).node))
       const leafCenter = leafPositions.reduce((combinedPosition, nodePosition) => {
-        return { x: combinedPosition.x + nodePosition.x, y: combinedPosition.y + nodePosition.y }
+        return {
+          x: midPoint.validateStat(combinedPosition.x + nodePosition.x),
+          y: midPoint.validateStat(combinedPosition.y + nodePosition.y)
+        }
       }, { x: 0, y: 0 })
 
+      midPoint.validateStat(leafPositions.length, `leafCenter division`, { aboveZero: true })
       leafCenter.x /= leafPositions.length
       leafCenter.y /= leafPositions.length
 
@@ -216,20 +225,22 @@ class NodeAllocation {
       switch (placementMode) {
         case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
-          const parentRadius = parentStem.getScaled(this.layout.scale).ownDiameter / 2
-          const thisRadius = stem.getScaled(this.layout.scale).ownDiameter / 2
-          const lineLength = stem.getScaled(this.layout.scale).ownBetween
+
+          const parentRadius = parentNode.validateStat(parentStem.getScaled(this.layout.scale).ownDiameter / 2)
+          const thisRadius = midPoint.validateStat(stem.getScaled(this.layout.scale).ownDiameter / 2)
+          const lineLength = midPoint.validateStat(stem.getScaled(this.layout.scale).ownBetween)
+
           const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
-          position.x = x
-          position.y = y
+          position.x = midPoint.validateStat(x)
+          position.y = midPoint.validateStat(y)
           break
         case NodeAllocation.placementMode.SPIDER:
           const combinedCenter = {
             x: leafCenter.x + parentPosition.x / 2,
             y: leafCenter.y + parentPosition.y / 2
           }
-          position.x = combinedCenter.x
-          position.y = combinedCenter.y
+          position.x = midPoint.validateStat(combinedCenter.x)
+          position.y = midPoint.validateStat(combinedCenter.y)
           break
       }
     }
