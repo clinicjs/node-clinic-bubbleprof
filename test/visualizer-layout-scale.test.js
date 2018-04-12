@@ -4,21 +4,12 @@ const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const generateLayout = require('../visualizer/layout/index.js')
 const Layout = require('../visualizer/layout/layout.js')
-const Scale = require('../visualizer/layout/scale.js')
 const { isNumber } = require('../visualizer/validation.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
 const svgWidth = 1000
 const svgHeight = 1000
-
-test('Visualizer layout - scale - uses default settings', function (t) {
-  const scale = new Scale()
-  t.ok(isNumber(scale.settings.lineWidth))
-  t.ok(isNumber(scale.settings.labelMinimumSpace))
-
-  t.end()
-})
 
 test('Visualizer layout - scale - calculates scalable line length', function (t) {
   const topology = [
@@ -82,7 +73,7 @@ test('Visualizer layout - scale - demagnifies large diameter (width)', function 
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, { svgWidth, svgHeight, labelMinimumSpace: 0, lineWidth: 0 })
-  dataSet.getByNodeType('ClusterNode', 2).stem.ownDiameter = svgWidth
+  layout.layoutNodes.get(2).stem.ownDiameter = svgWidth
   layout.scale.calculateScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.ok(layout.scale.scaleFactor < 0.25 && layout.scale.scaleFactor > 0.2)
@@ -96,7 +87,7 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, { svgWidth, svgHeight: (250 + 30 + 30) * (1 / 1.5), labelMinimumSpace: 0, lineWidth: 0 })
-  dataSet.getByNodeType('ClusterNode', 2).stem.ownDiameter = 500
+  layout.layoutNodes.get(2).stem.ownDiameter = 500
   layout.scale.calculateScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.ok(layout.scale.scaleFactor < 0.3 && layout.scale.scaleFactor > 0.2)
@@ -170,13 +161,14 @@ test('Visualizer layout - scale - scales based on selected subset of nodes', fun
     ['1.2', 1]
   ]
   const dataSet = loadData(mockTopology(topology))
-  const aggregateNode = dataSet.getByNodeType('ClusterNode', 2).nodes.get(2)
+  const aggregateNode = dataSet.aggregateNodes.get(2)
 
   const layout = new Layout([aggregateNode], { svgWidth, svgHeight, labelMinimumSpace: 0, lineWidth: 0 })
+  layout.prepareLayoutNodes()
   layout.generate()
 
   t.equal(layout.scale.decisiveWeight.category, 'longest')
-  const totalStemLength = aggregateNode.stem.getTotalStemLength(layout.scale)
+  const totalStemLength = layout.layoutNodes.get(aggregateNode.id).stem.getTotalStemLength(layout.scale)
   const expectedScaleFactor = ((svgHeight * 1.5) - totalStemLength.absolute) / totalStemLength.scalable
   t.ok(layout.scale.scaleFactor < expectedScaleFactor * 1.1 && layout.scale.scaleFactor > expectedScaleFactor * 0.9)
 
