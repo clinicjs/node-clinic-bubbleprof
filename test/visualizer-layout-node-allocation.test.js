@@ -5,8 +5,7 @@ const loadData = require('../visualizer/data/index.js')
 const Layout = require('../visualizer/layout/layout.js')
 const NodeAllocation = require('../visualizer/layout/node-allocation.js')
 const LineCoordinates = require('../visualizer/layout/line-coordinates.js')
-
-const Layout = require('../visualizer/layout/layout.js')
+const generateLayout = require('../visualizer/layout/index.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
@@ -291,6 +290,7 @@ test('Visualizer layout - node allocation - validation on leafCenter division', 
   t.ok(subset)
 
   const subLayout = new Layout(subset)
+  subLayout.prepareLayoutNodes()
 
   t.throws(() => {
     subLayout.generate()
