@@ -46,11 +46,17 @@ function mockTopology (topology) {
         continue
       }
       const parentId = ids[i - 1] || 0
+      const parentCluster = clusterNodes.get(parentId)
+      if (parentCluster) {
+        if (!parentCluster.children.includes(id)) {
+          parentCluster.children.push(id)
+        }
+      }
       const fillerValue = parentId === 0 ? Math.PI : 1 // Root's value is within, not between
       const clusterNode = mockClusterNode({
         id,
         parentId,
-        children: ids.slice(i + 1, ids.length),
+        children: [],
         stemLength: id === lastId ? totalStemLength : fillerValue
       })
       clusterNodes.set(id, clusterNode)

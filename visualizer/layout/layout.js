@@ -6,7 +6,7 @@ const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 
 class Layout {
-  constructor (nodes, settings) {
+  constructor (nodes, settings, collapseNodes = false) {
     const defaultSettings = {
       svgWidth: 1000,
       svgHeight: 1000,
@@ -52,6 +52,57 @@ class Layout {
     this.scale.calculateScaleFactor()
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
+  }
+  static collapseNodes (nodes, scale) {
+    const subsetNodeById = {}
+    for (const node of nodes) {
+      subsetNodeById[node.id] = node
+    }
+    const topNodes = nodes.filter(node => !subsetNodeById[node.parentId])
+    const collapsedNodes = []
+    for (const node of topNodes) {
+      clumpNodes(node)
+    }
+    return collapsedNodes
+
+    function isBelowThreshold (node) {
+      return (node.getWithinTime() + node.getBetweenTime()) * scale.scaleFactor < 10
+    }
+
+    function clumpNodes (node, clump = null) {
+      if (isBelowThreshold(node)) {
+        if (!clump) {
+          clump = {
+            isCollapsed: true,
+            children: []
+          }
+        }
+        // Node considered tiny, include it in a clump
+        clump.children.push(node)
+      } else {
+        // Node considered long, include it as standalone
+        collapsedNodes.push(node)
+        clump = null
+      }
+      const indexBeforeBranching = collapsedNodes.length
+      const childClumps = node.children.map(childId => {
+        const child = subsetNodeById[childId]
+        return child ? clumpNodes(child, clump) : null
+      }).filter(hasFormedClump => !!hasFormedClump)
+      // Combine sibling clumps
+      for (let i = 1; i < childClumps.length; ++i) {
+        if (childClumps[i] !== childClumps[0]) {
+          childClumps[0].children = childClumps[0].children.concat(childClumps[i].children)
+        }
+        childClumps.splice(i, 1)
+      }
+      // Include combined clump
+      if (childClumps[0] && collapsedNodes[indexBeforeBranching] !== childClumps[0]) {
+        collapsedNodes.splice(indexBeforeBranching, 0, childClumps[0])
+      }
+
+      return clump
+    }
   }
 }
 
