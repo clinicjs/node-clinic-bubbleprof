@@ -161,12 +161,12 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
 
   const positionById = []
   const scaledStemById = []
-  for (const layoutNode of [...layout.layoutNodes.values()]) {
+  for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.node.id] = nodeAllocation.nodeToPosition.get(layoutNode.node)
     scaledStemById[layoutNode.node.id] = layoutNode.stem.getScaled(layout.scale)
   }
   const distanceById = []
-  for (const clusterNode of [...dataSet.clusterNodes.values()]) {
+  for (const clusterNode of dataSet.clusterNodes.values()) {
     if (clusterNode.isRoot) {
       distanceById[clusterNode.id] = 0
       continue
