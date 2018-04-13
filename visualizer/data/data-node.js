@@ -36,7 +36,6 @@ class DataNode {
       }
     }
   }
-
   getWithinTime () { return this.stats.sync + this.stats.async.within }
   getBetweenTime () { return this.stats.async.between }
 
@@ -51,6 +50,17 @@ class DataNode {
   validateStat (num, statType = '', aboveZero = false) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
     return validateNumber(num, targetDescription, aboveZero)
+  }
+
+  static markFromArray (markArray) {
+    // node.mark is always an array of length 3, based on this schema:
+    const markKeys = ['party', 'module', 'name']
+    // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.
+    // 'module' and 'name' will be null unless frames met conditions in /analysis/aggregate
+    const mark = new Map(markArray.map((value, i) => [markKeys[i], value]))
+    // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
+    mark.string = markArray.reduce((string, value) => string + (value ? '.' + value : ''))
+    return mark
   }
 }
 
@@ -86,16 +96,26 @@ class ClusterNode extends DataNode {
     }
 
     this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
+    this.nodes = new Map()
 
-    const aggregateNodes = node.nodes.map((aggregateNode) => [
-      aggregateNode.aggregateId,
-      new AggregateNode(aggregateNode, this)
-    ])
+    let firstNode = null
 
-    this.nodes = new Map(aggregateNodes)
+    for (const subNode of node.nodes) {
+      this.nodeIds.add(subNode.aggregateId)
+      if (subNode.dataSet) {
+        // this is a node instance already
+        this.nodes.set(subNode.id, subNode)
+        if (!firstNode) firstNode = subNode
+      } else {
+        // these are the properties from which an aggregate node should be created
+        const aggregateNode = new AggregateNode(subNode, this)
+        this.nodes.set(subNode.aggregateId, aggregateNode)
+        if (!firstNode) firstNode = aggregateNode
+      }
+    }
 
     // All aggregateNodes within a clusterNode are by definition from the same party
-    this.mark = node.mark || aggregateNodes[0][1].mark
+    this.mark = node.mark ? DataNode.markFromArray(node.mark) : firstNode.mark
   }
   setDecimal (num, classification, position, label) {
     const raw = this.stats.rawTotals
@@ -151,13 +171,8 @@ class AggregateNode extends DataNode {
       }
     })
 
-    // node.mark is always an array of length 3, based on this schema:
-    const markKeys = ['party', 'module', 'name']
-    // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.
-    // 'module' and 'name' will be null unless frames met conditions in /analysis/aggregate
-    this.mark = new Map(node.mark.map((value, i) => [markKeys[i], value]))
-    // for example, 'nodecore.net.onconnection', or 'module.somemodule', or 'user'
-    this.mark.string = node.mark.reduce((string, value) => string + (value ? '.' + value : ''))
+    this.name = this.frames.length ? this.frames[0].formatted.slice(7) : 'empty frames'
+    this.mark = DataNode.markFromArray(node.mark)
 
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
     // 29 possible values defined in node core, plus other user-defined values can exist
@@ -289,5 +304,6 @@ class SourceNode extends DataNode {
 module.exports = {
   ClusterNode,
   AggregateNode,
-  SourceNode
+  SourceNode,
+  DataNode
 }
