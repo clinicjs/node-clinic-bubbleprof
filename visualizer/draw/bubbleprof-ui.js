@@ -7,7 +7,7 @@ const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
 
 class BubbleprofUI extends EventEmitter {
-  constructor (sections = [], settings, appendTo) {
+  constructor (sections = [], settings, appendTo, parentUI = null) {
     super()
 
     const defaultSettings = {
@@ -19,6 +19,12 @@ class BubbleprofUI extends EventEmitter {
     this.settings = Object.assign(defaultSettings, settings)
 
     this.mainContainer = {}
+
+    function getOriginalUI (parentUI) {
+      return parentUI.parentUI ? this.setParentUI(parentUI.parentUI) : parentUI
+    }
+
+    this.originalUI = parentUI ? getOriginalUI(parentUI) : this
 
     // Main divisions of the page
     this.sections = new Map()
@@ -39,7 +45,7 @@ class BubbleprofUI extends EventEmitter {
       newLayout.generate()
 
       const nodeLinkSection = this.sections.get('node-link')
-      const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection)
+      const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection, this)
 
       const sublayout = newUI.sections.get('sublayout')
       sublayout.addCollapseControl()
@@ -59,9 +65,7 @@ class BubbleprofUI extends EventEmitter {
   }
 
   outputFrames (aggregateNode) {
-    for (const frame of aggregateNode.frames) {
-      console.log(frame.formatted)
-    }
+    this.originalUI.emit('outputFrames', aggregateNode)
   }
 
   truncateLabel (labelString, maxWords, maxChars) {

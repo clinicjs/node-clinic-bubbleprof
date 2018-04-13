@@ -12,6 +12,7 @@ class Frame {
     this.isConstructor = frame.isConstructor
     this.isNative = frame.isNative
     this.isToplevel = frame.isToplevel
+    this.party = this.getFrameParty(this.fileName)
   }
 
   format () {
@@ -40,6 +41,26 @@ class Frame {
     }
 
     return formatted
+  }
+
+  // TODO: move this logic to analysis, add property there, then trim file paths
+  getFrameParty (fileName) {
+    if (!fileName) return ['empty', 'no file']
+
+    // If first character is / or it's a letter followed by :/
+    if (fileName.charAt(0) === '/' || fileName.match(/^[a-zA-Z]:\\/)) {
+      // ...then this is a Unix or Windows style local file path
+
+      if (fileName.match(/(?:\\|\/)node_modules(?:\\|\/)/)) {
+        const directories = fileName.split(/\\|\//)
+        const moduleName = directories[directories.lastIndexOf('node_modules') + 1]
+        return ['external', `module ${moduleName}`]
+      } else {
+        return ['user', 'your application']
+      }
+    } else {
+      return ['nodecore', 'node core']
+    }
   }
 }
 
