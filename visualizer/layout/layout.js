@@ -30,7 +30,7 @@ class Layout {
   prepareLayoutNodes (nodes = this.nodes) {
     this.layoutNodes = new Map()
     nodes.forEach(node => {
-      const parent = node.parentId ? this.layoutNodes.get(node.getParentNode().id) : null
+      const parent = node.parentId ? this.layoutNodes.get(node.parentId) : null
       this.layoutNodes.set(node.id, new LayoutNode(node, parent))
       if (parent) parent.children.push(node.id)
     })
@@ -42,7 +42,7 @@ class Layout {
       const node = layoutNode.node
 
       if (node.parentId) {
-        const sourceNode = node.getParentNode()
+        const sourceNode = node.getParentNode() || this.layoutNodes.get(node.parentId).node
         const connection = new Connection(sourceNode, node, this.scale)
         this.connectionsByTargetId.set(node.id, connection)
         this.connections.push(connection)
