@@ -31,7 +31,7 @@ class Positioning {
 
     const rows = arrangedLeaves.map(leaf => {
       const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
-      const units = parseInt(magnitude / 25)
+      const units = parseInt((magnitude * this.layout.scale.scaleFactor) / 25)
       const lengthAsDashes = new Array(units).fill('-').join('')
       const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.node.id].join('.')
       return [nodeGenealogy, lengthAsDashes + ' ' + magnitude]
