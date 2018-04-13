@@ -17,7 +17,7 @@ class NodeAllocation {
       const position = { units: 0, offset: null, x: 0, y: 0 }
       this.nodeToPosition.set(node, position)
       layoutNode.position = position
-      const category = node.children.length ? 'midPoints' : 'leaves'
+      const category = layoutNode.stem.leaves.ids.length ? 'midPoints' : 'leaves'
       this[category].set(node.id, layoutNode)
     }
     for (const midPoint of this.midPoints.values()) {
@@ -209,6 +209,7 @@ class NodeAllocation {
       const parentStem = layoutNode.parent.stem
       const ownLeavesInSubset = stem.leaves.ids.filter(leafId => this.leaves.has(leafId))
       const leafPositions = ownLeavesInSubset.map(leafId => this.nodeToPosition.get(this.leaves.get(leafId).node))
+      midPoint.validateStat(leafPositions.length, `leafCenter division`, { aboveZero: true })
       const leafCenter = leafPositions.reduce((combinedPosition, nodePosition) => {
         return {
           x: midPoint.validateStat(combinedPosition.x + nodePosition.x),
@@ -216,7 +217,6 @@ class NodeAllocation {
         }
       }, { x: 0, y: 0 })
 
-      midPoint.validateStat(leafPositions.length, `leafCenter division`, { aboveZero: true })
       leafCenter.x /= leafPositions.length
       leafCenter.y /= leafPositions.length
 

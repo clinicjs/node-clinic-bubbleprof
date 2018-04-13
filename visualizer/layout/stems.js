@@ -3,7 +3,7 @@
 const { radiusFromCircumference } = require('./line-coordinates.js')
 
 function getNodeAncestorIds (parent) {
-  return parent ? [...parent.stem.ancestors.ids, parent.node.id] : []
+  return parent ? [...parent.stem.ancestors.ids, parent.id] : []
 }
 
 class Stem {
@@ -48,7 +48,7 @@ class Stem {
   }
   static pickLeavesByLongest (layoutNodes) {
     const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().combined - leafA.stem.getTotalStemLength().combined
-    const byLeafOnly = layoutNode => !layoutNode.node.children.length
+    const byLeafOnly = layoutNode => !layoutNode.children.length
     return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }
 }
