@@ -97,13 +97,14 @@ class NodeAllocation {
         const hierarchyLevel = hierarchyLevels.get(depth)
         // Form Clump for given node at given level
         const ancestorId = ancestors[depth]
-        const ancestorAtDepth = leaf.getSameType(ancestorId)
         if (!this.midPoints.get(ancestorId)) {
           continue
         }
+        const ancestorAtDepthLayoutNode = this.layoutNodes.get(ancestorId)
+        const ancestorAtDepth = ancestorAtDepthLayoutNode && ancestorAtDepthLayoutNode.node
         if (!hierarchyLevel.clumps.has(ancestorAtDepth)) {
           const previousHierarchyLevel = hierarchyLevels.get(depth - 1)
-          const parentClump = previousHierarchyLevel ? previousHierarchyLevel.clumps.get(ancestorAtDepth.getParentNode()) : null
+          const parentClump = previousHierarchyLevel ? previousHierarchyLevel.clumps.get(ancestorAtDepthLayoutNode.parent && ancestorAtDepthLayoutNode.parent.node) : null
           const ancestorClump = new Clump(ancestorAtDepth, parentClump, leafTotalStemLength)
           hierarchyLevel.clumps.set(ancestorAtDepth, ancestorClump)
           if (parentClump) {
@@ -124,7 +125,7 @@ class NodeAllocation {
       }
       const hierarchyLevel = hierarchyLevels.get(leafDepth)
       const previousHierarchyLevel = hierarchyLevels.get(leafDepth - 1)
-      const parentClump = previousHierarchyLevel.clumps.get(leaf.getParentNode())
+      const parentClump = previousHierarchyLevel.clumps.get(leafLayoutNode.parent && leafLayoutNode.parent.node)
       const leafClump = new Clump(leaf, parentClump, leafTotalStemLength)
       hierarchyLevel.clumps.set(leaf, leafClump)
       if (parentClump) {
@@ -181,7 +182,7 @@ class NodeAllocation {
       const parentStem = layoutNode.parent && layoutNode.parent.stem
       const parentDiameter = parentStem ? parentStem.getScaled(this.layout.scale).ownDiameter : 0
       const position = this.nodeToPosition.get(leaf)
-      const parentNode = leaf.getParentNode()
+      const parentNode = layoutNode.parent && layoutNode.parent.node
       const parentPosition = this.nodeToPosition.get(parentNode) || this.getRootPosition(parentDiameter)
       const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: position.x, y2: position.y })
       const parentRadius = parentDiameter / 2
@@ -220,7 +221,7 @@ class NodeAllocation {
       leafCenter.x /= leafPositions.length
       leafCenter.y /= leafPositions.length
 
-      const parentNode = midPoint.getParentNode()
+      const parentNode = layoutNode.parent && layoutNode.parent.node
       const parentPosition = this.nodeToPosition.get(parentNode)
       switch (placementMode) {
         case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
