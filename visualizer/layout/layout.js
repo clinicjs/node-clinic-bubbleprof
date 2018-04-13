@@ -32,6 +32,7 @@ class Layout {
     nodes.forEach(node => {
       const parent = node.parentId ? this.layoutNodes.get(node.getParentNode().id) : null
       this.layoutNodes.set(node.id, new LayoutNode(node, parent))
+      if (parent) parent.children.push(node.id)
     })
   }
 
@@ -108,11 +109,13 @@ class Layout {
 
 class LayoutNode {
   constructor (node, parent) {
+    this.id = node.id
     this.node = node
     this.stem = null
     this.position = null
     this.inboundConnection = null
     this.parent = parent || null
+    this.children = []
   }
 }
 
