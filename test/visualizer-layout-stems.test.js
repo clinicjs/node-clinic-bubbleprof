@@ -5,6 +5,8 @@ const loadData = require('../visualizer/data/index.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const generateLayout = require('../visualizer/layout/index.js')
 
+const { mockTopology } = require('./visualizer-util/fake-topology.js')
+
 test('Visualizer layout - stems - calculates between and diameter based on stats', function (t) {
   const dataSet = loadData(slowioJson)
   const layout = generateLayout(dataSet)
@@ -41,12 +43,26 @@ test('Visualizer layout - stems - calculates length based on ancestors and scale
 })
 
 test('Visualizer layout - stems - identifies leaves', function (t) {
-  const dataSet = loadData(slowioJson)
-  const layout = generateLayout(dataSet)
+  const topology = [
+    ['1.9', 1],
+    ['1.2.3.4', 1],
+    ['1.2.3.5', 1],
+    ['1.2.6.7', 1],
+    ['1.2.8', 1]
+  ]
 
-  const stem = layout.layoutNodes.get(8).stem
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
-  t.deepEqual(stem.leaves.ids, [ 10, 16, 17, 18 ])
+  t.deepEqual(layout.layoutNodes.get(1).stem.leaves.ids, [9, 4, 5, 7, 8])
+  t.deepEqual(layout.layoutNodes.get(9).stem.leaves.ids, [])
+  t.deepEqual(layout.layoutNodes.get(2).stem.leaves.ids, [4, 5, 7, 8])
+  t.deepEqual(layout.layoutNodes.get(3).stem.leaves.ids, [4, 5])
+  t.deepEqual(layout.layoutNodes.get(6).stem.leaves.ids, [7])
+  t.deepEqual(layout.layoutNodes.get(4).stem.leaves.ids, [])
+  t.deepEqual(layout.layoutNodes.get(5).stem.leaves.ids, [])
+  t.deepEqual(layout.layoutNodes.get(7).stem.leaves.ids, [])
+  t.deepEqual(layout.layoutNodes.get(8).stem.leaves.ids, [])
 
   t.end()
 })
