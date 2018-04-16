@@ -26,7 +26,9 @@ class Stem {
       const ancestorStem = layout.layoutNodes.get(ancestorId).stem
       this.ancestors.totalBetween += ancestorStem.ownBetween
       this.ancestors.totalDiameter += ancestorStem.ownDiameter
-      ancestorStem.leaves.ids.push(node.id)
+      if (!node.children.length) {
+        ancestorStem.leaves.ids.push(node.id)
+      }
     }
   }
   getScaled (scale) {
