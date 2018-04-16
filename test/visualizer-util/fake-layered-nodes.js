@@ -82,14 +82,21 @@ for (const dummyEvent of dummyCallbackEvents) {
 }
 
 for (const [clusterId, clusterNode] of clusterNodes) {
-  for (var i = 0; i < clusterNode.nodes.length; i++) {
+  for (let i = 0; i < clusterNode.nodes.length; i++) {
     const aggregateId = clusterNode.nodes[i]
     clusterNode.nodes[i] = aggregateNodes.get(aggregateId)
+    clusterNode.id = clusterNode.clusterId = clusterId
   }
 }
 
+for (const [aggregateId, aggregateNode] of aggregateNodes) {
+  aggregateNode.id = aggregateNode.aggregateId = aggregateId
+}
+
 const clusterNodesArray = [...clusterNodes.values()]
+const aggregateNodesArray = [...aggregateNodes.values()]
 
 module.exports = {
-  clusterNodesArray
+  clusterNodesArray,
+  aggregateNodesArray
 }
