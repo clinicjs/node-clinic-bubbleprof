@@ -5,7 +5,6 @@ const loadData = require('../visualizer/data/index.js')
 const Layout = require('../visualizer/layout/layout.js')
 const NodeAllocation = require('../visualizer/layout/node-allocation.js')
 const LineCoordinates = require('../visualizer/layout/line-coordinates.js')
-const generateLayout = require('../visualizer/layout/index.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
@@ -23,11 +22,9 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
   layout.prepareLayoutNodes()
   layout.generate()
 
-  const nodeAllocation = layout.positioning.nodeAllocation
-
   const unitsById = []
-  for (const clusterNode of dataSet.clusterNodes.values()) {
-    unitsById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode).units
+  for (const layoutNode of layout.layoutNodes.values()) {
+    unitsById[layoutNode.id] = layoutNode.position.units
   }
 
   t.equal(unitsById[1], 1)
@@ -96,7 +93,7 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
     for (const block of segment.blocks) {
       t.ok(block.center > segment.begin)
       t.ok(block.center < segment.end)
-      t.equal(nodeAllocation.nodeToPosition.get(block.node).offset, block.center)
+      t.equal(block.layoutNode.position.offset, block.center)
       blocks.push(block)
     }
   }
@@ -106,7 +103,7 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
     t.equal(blocks[i - 1].end, blocks[i].begin)
   }
 
-  t.deepEqual(blocks.map(block => block.node.id), layout.positioning.order)
+  t.deepEqual(blocks.map(block => block.layoutNode.id), layout.positioning.order)
 
   t.end()
 })
@@ -131,7 +128,7 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
 
   for (const segment of nodeAllocation.segments) {
     for (const block of segment.blocks) {
-      const { x, y } = nodeAllocation.nodeToPosition.get(block.node)
+      const { x, y } = block.layoutNode.position
       t.ok(x > 0)
       t.ok(y > 0)
       t.deepEqual(segment.line.pointAtLength(block.center - segment.begin), { x, y })
@@ -162,21 +159,22 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   const positionById = []
   const scaledStemById = []
   for (const layoutNode of layout.layoutNodes.values()) {
-    positionById[layoutNode.node.id] = nodeAllocation.nodeToPosition.get(layoutNode.node)
-    scaledStemById[layoutNode.node.id] = layoutNode.stem.getScaled(layout.scale)
+    positionById[layoutNode.id] = layoutNode.position
+    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
   }
   const distanceById = []
-  for (const clusterNode of dataSet.clusterNodes.values()) {
-    if (clusterNode.isRoot) {
-      distanceById[clusterNode.id] = 0
+  for (const layoutNode of layout.layoutNodes.values()) {
+    if (layoutNode.id === 1) {
+      // Root node will always have 0 distance
+      distanceById[layoutNode.id] = 0
       continue
     }
-    distanceById[clusterNode.id] = new LineCoordinates({
-      x1: positionById[clusterNode.parentId].x,
-      y1: positionById[clusterNode.parentId].y,
+    distanceById[layoutNode.id] = new LineCoordinates({
+      x1: positionById[layoutNode.parent.id].x,
+      y1: positionById[layoutNode.parent.id].y,
       x2:
-      positionById[clusterNode.id].x,
-      y2: positionById[clusterNode.id].y
+      positionById[layoutNode.id].x,
+      y2: positionById[layoutNode.id].y
     }).length
   }
 
@@ -238,22 +236,23 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
 
   const positionById = []
   const scaledStemById = []
-  for (const clusterNode of subset) {
-    positionById[clusterNode.id] = nodeAllocation.nodeToPosition.get(clusterNode)
-    scaledStemById[clusterNode.id] = layout.layoutNodes.get(clusterNode.id).stem.getScaled(layout.scale)
+  for (const layoutNode of layout.layoutNodes.values()) {
+    positionById[layoutNode.id] = layoutNode.position
+    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
   }
 
   const distanceById = []
-  for (const clusterNode of subset) {
-    if (clusterNode.id === 6) {
-      distanceById[clusterNode.id] = 0
+  for (const layoutNode of layout.layoutNodes.values()) {
+    if (layoutNode.id === 6) {
+      // As top-level node in this subset, node 6 has same placement as root and 0 distance
+      distanceById[layoutNode.id] = 0
       continue
     }
-    distanceById[clusterNode.id] = new LineCoordinates({
-      x1: positionById[clusterNode.parentId].x,
-      y1: positionById[clusterNode.parentId].y,
-      x2: positionById[clusterNode.id].x,
-      y2: positionById[clusterNode.id].y
+    distanceById[layoutNode.id] = new LineCoordinates({
+      x1: positionById[layoutNode.parent.id].x,
+      y1: positionById[layoutNode.parent.id].y,
+      x2: positionById[layoutNode.id].x,
+      y2: positionById[layoutNode.id].y
     }).length
   }
 
@@ -269,32 +268,6 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   t.ok(positionById[8].x > positionById[6].x)
   t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
   t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
-
-  t.end()
-})
-
-test('Visualizer layout - node allocation - validation on leafCenter division', function (t) {
-  const topology = [
-    ['1.2', 100 - 1],
-    ['1.3.4.5', 500 - 3],
-    ['1.3.6.7', 900 - 3],
-    ['1.3.6.8', 500 - 3]
-  ]
-  const dataSet = loadData(mockTopology(topology))
-  t.ok(dataSet)
-  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
-  t.ok(layout)
-
-  // Subset containing leaves and midPoints with no leaves
-  const subset = [1, 2, 3, 4, 6].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  t.ok(subset)
-
-  const subLayout = new Layout(subset)
-  subLayout.prepareLayoutNodes()
-
-  t.throws(() => {
-    subLayout.generate()
-  }, new Error('For ClusterNode 3 leafCenter division: Got 0, must be > 0'))
 
   t.end()
 })

@@ -9,7 +9,7 @@ class Bubbles extends SvgContentGroup {
     super(svgContainer, contentProperties)
 
     this.ui.on('setData', () => {
-      this.initializeFromData(this.ui.layout.nodes)
+      this.initializeFromData([...this.ui.layout.layoutNodes.values()])
     })
   }
 
@@ -45,8 +45,8 @@ class Bubbles extends SvgContentGroup {
       // so we sort the appending such that smallest bubbles stack above larger bubbles
       .sort((a, b) => this.getRadius(b) - this.getRadius(a))
 
-      .attr('id', d => `${d.constructor.name}-${d.id}`)
-      .attr('class', d => `party-${d.mark.get('party')}`)
+      .attr('id', d => `${d.node.constructor.name}-${d.id}`)
+      .attr('class', d => `party-${d.node.mark.get('party')}`)
       .classed('bubble-wrapper', true)
       .classed('below-threshold-1', (d) => this.isBelowLabelThreshold(d))
       .classed('below-threshold-2', (d) => this.isBelowStrokeThreshold(d))
@@ -60,18 +60,22 @@ class Bubbles extends SvgContentGroup {
     if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
 
-  getNodePosition (d) {
-    return this.ui.layout.positioning.nodeToPosition.get(d)
+  getNodePosition (layoutNode) {
+    return layoutNode.position
   }
 
-  getInboundConnection (d) {
-    return this.ui.layout.connectionsByTargetId.get(d.id)
+  getRadius (layoutNode) {
+    return this.ui.layout.scale.getCircleRadius(layoutNode.node.getWithinTime())
+  }
+
+  getInboundConnection (layoutNode) {
+    return layoutNode.inboundConnection
   }
 
   getInboundLine (d) {
     const connection = this.getInboundConnection(d)
     const position = this.getNodePosition(d)
-    const sourcePosition = this.getNodePosition(connection.sourceNode)
+    const sourcePosition = this.getNodePosition(connection.sourceLayoutNode)
     return new LineCoordinates({
       x1: sourcePosition.x,
       y1: sourcePosition.y,
@@ -105,7 +109,7 @@ class Bubbles extends SvgContentGroup {
       .classed('bubble-outer', true)
       .classed('by-variable', true)
       .style('stroke-width', this.ui.settings.strokeWidthOuter)
-      .on('mouseover', d => this.ui.emit('highlightParty', d.mark.get('party')))
+      .on('mouseover', d => this.ui.emit('highlightParty', d.node.mark.get('party')))
       .on('mouseout', () => this.ui.emit('highlightParty', null))
 
     this.d3InnerCircles = this.d3Bubbles.append('circle')
@@ -137,7 +141,7 @@ class Bubbles extends SvgContentGroup {
 
       this.typeDonutsMap.set(d, donutWrapper)
 
-      const decimalsAsArray = Array.from(d.decimals.typeCategory.within.entries())
+      const decimalsAsArray = Array.from(d.node.decimals.typeCategory.within.entries())
 
       // Creates array of data objects like:
       // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
@@ -177,7 +181,7 @@ class Bubbles extends SvgContentGroup {
     this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
 
     this.d3TimeLabels.text(d => {
-      const withinTime = this.ui.formatNumber(d.getWithinTime())
+      const withinTime = this.ui.formatNumber(d.node.getWithinTime())
       const withMs = withinTime + (this.getRadius(d) < this.ui.settings.minimumLabelSpace ? '' : '\u2009ms')
       return withMs
     })
@@ -188,7 +192,7 @@ class Bubbles extends SvgContentGroup {
       let useLongerLabel = true
       let useMicroLabel = false
 
-      if (d.parentId) {
+      if (d.parent) {
         const connection = this.getInboundConnection(d)
         const length = connection.getVisibleLineLength()
         const hasLongInboundLine = this.hasLongInboundLine(length)
@@ -200,15 +204,15 @@ class Bubbles extends SvgContentGroup {
         inboundDegrees = this.getInboundLine(d).degrees
       }
 
-      if (d.name === 'miscellaneous' && !d.parentId) {
+      if (d.name === 'miscellaneous' && !d.parent) {
         d3NameLabel.text('Starts here')
       } else if (useLongerLabel) {
-        d3NameLabel.text(this.ui.truncateLabel(d.name, 4, 21))
+        d3NameLabel.text(this.ui.truncateLabel(d.node.name, 4, 21))
       } else if (useMicroLabel) {
-        d3NameLabel.text(this.ui.truncateLabel(d.name, 1, 6))
+        d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 6))
         d3NameLabel.classed('smaller-label', true)
       } else {
-        d3NameLabel.text(this.ui.truncateLabel(d.name, 1, 9))
+        d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 9))
       }
 
       const position = this.getNodePosition(d)

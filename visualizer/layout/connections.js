@@ -1,17 +1,20 @@
 'use strict'
 
 class Connection {
-  constructor (sourceNode, targetNode, scale) {
+  constructor (sourceLayoutNode, targetLayoutNode, scale) {
     // TODO: rename sourceNode everywhere to avoid confusion with DataNode->SourceNode class
-    this.sourceId = sourceNode.id
-    this.sourceNode = sourceNode
+    this.sourceId = sourceLayoutNode.id
+    this.sourceLayoutNode = sourceLayoutNode
+    this.sourceNode = sourceLayoutNode.node
 
-    this.targetId = targetNode.id
-    this.targetNode = targetNode
+    this.targetId = targetLayoutNode.id
+    this.targetLayoutNode = targetLayoutNode
+    this.targetNode = targetLayoutNode.node
 
     this.scale = scale
 
-    targetNode.connectionFromParent = this
+    // TODO: remove this completely once all branches are merged and released
+    // this.targetNode.connectionFromParent = this
   }
 
   // Avoid duplication of values so stats can be swtiched/recalculated with settings

@@ -45,7 +45,7 @@ class Scale {
       new ScaleWeight('q75 3-4-5 triangle', leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)], availableWidth, q75.scalable * 0.6, q75.absolute)
     ]
     const smallestSide = availableWidth < availableHeight ? availableWidth : availableHeight
-    const largestDiameterNode = leavesByShortest.sort((a, b) => b.stem.ownDiameter - a.stem.ownDiameter)[0]
+    const largestDiameterNode = [...this.layoutNodes.values()].sort((a, b) => b.stem.ownDiameter - a.stem.ownDiameter)[0]
     // For diagram clarity, largest circle should be no more (and ideally no less) than quater of the viewport
     const diameterClamp = new ScaleWeight('diameter clamp', largestDiameterNode, smallestSide / 2, largestDiameterNode.stem.ownDiameter, 0)
 
