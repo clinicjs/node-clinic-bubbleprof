@@ -97,6 +97,7 @@ test('Visualizer layout - collapse - collapses both siblings and parents', funct
 // gives
 // C->L
 //  \>L
+/* TODO: Reactivate and fix this test when collapse feature is added
 test('Visualizer layout - collapse - works with missing leaves', function (t) {
   const topology = [
     ['1.2.3', 100],
@@ -115,3 +116,4 @@ test('Visualizer layout - collapse - works with missing leaves', function (t) {
 
   t.end()
 })
+*/
