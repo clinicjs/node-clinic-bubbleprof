@@ -203,7 +203,6 @@ test('Visualizer - layer - layout connections are healthy on processBetweenData'
   t.equal(layout.connections[0].targetNode, dataSet.clusterNodes.get('B'))
   t.equal(layout.connections[0].targetNode.constructor.name, 'ClusterNode')
 
-
   t.equal(layout.connections[1].sourceId, 'B')
   t.equal(layout.connections[1].sourceNode, dataSet.clusterNodes.get('B'))
   t.equal(layout.connections[1].sourceNode.constructor.name, 'ClusterNode')
@@ -232,7 +231,6 @@ test('Visualizer - layer - layout connections are healthy on processBetweenData'
   t.equal(layout.connections[4].targetNode, dataSet.clusterNodes.get('C'))
   t.equal(layout.connections[4].targetNode.constructor.name, 'ClusterNode')
 
-
   t.end()
 })
 
@@ -260,9 +258,9 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
   ])
   */
 
-  // TODO: validate that this change makes sense given the change in logic
   t.equal(layout.scale.decisiveWeight.category, 'shortest')
-//  t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
+  // TODO: validate that this change makes sense given the change in logic
+  // t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.equal(layout.scale.decisiveWeight.node.constructor.name, 'LayoutNode')
   // TODO: validate that this change makes sense given the change in logic
   // t.equal(layout.scale.decisiveWeight.node.id, 'A')

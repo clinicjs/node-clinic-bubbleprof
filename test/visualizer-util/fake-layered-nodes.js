@@ -4,7 +4,7 @@ const {
   clusterNodes,
   aggregateNodes,
   dummyCallbackEvents
-  } = require('./fake-overlapping-nodes.js')
+} = require('./fake-overlapping-nodes.js')
 
 const newAggregateNodes = {
   i: {parentAggregateId: 'g'},

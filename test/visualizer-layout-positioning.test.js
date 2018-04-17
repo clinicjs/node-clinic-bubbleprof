@@ -207,8 +207,8 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   const positioning = layout.positioning
   positioning.formClumpPyramid()
 
-  const expectedOrder = [16, 13, 18, 6, 14, 9, 15, 17]
   // TODO: Figure out why this changed
+  // const expectedOrder = [16, 13, 18, 6, 14, 9, 15, 17]
   // t.deepEqual(positioning.order, expectedOrder)
 
   t.end()

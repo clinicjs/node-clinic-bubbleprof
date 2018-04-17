@@ -169,9 +169,8 @@ test('Visualizer layout - scale - scales based on selected subset of nodes', fun
 
   // TODO: re-evaluate and re-activate the logic of these tests against new scale logic
   // t.equal(layout.scale.decisiveWeight.category, 'longest')
-  const totalStemLength = layout.layoutNodes.get(aggregateNode.id).stem.getTotalStemLength(layout.scale)
-  const expectedScaleFactor = ((svgHeight * 1.5) - totalStemLength.absolute) / totalStemLength.scalable
-  // TODO: re-evaluate and re-activate the logic of these tests against new scale logic
+  // const totalStemLength = layout.layoutNodes.get(aggregateNode.id).stem.getTotalStemLength(layout.scale)
+  // const expectedScaleFactor = ((svgHeight * 1.5) - totalStemLength.absolute) / totalStemLength.scalable
   // t.ok(layout.scale.scaleFactor < expectedScaleFactor * 1.1 && layout.scale.scaleFactor > expectedScaleFactor * 0.9)
 
   t.end()
