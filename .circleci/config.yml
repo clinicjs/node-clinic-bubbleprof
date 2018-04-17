@@ -70,7 +70,8 @@ workflows:
       - test:
           requires:
             - build
-      - coverage:
-          requires:
-            - lint
-            - test
+      # being run manually until we hit a stable ui
+      #- coverage:
+      #    requires:
+      #      - lint
+      #      - test
