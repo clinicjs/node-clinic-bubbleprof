@@ -39,7 +39,6 @@ class Layout {
   processBetweenData () {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
-      const node = layoutNode.node
 
       if (layoutNode.parent) {
         const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
