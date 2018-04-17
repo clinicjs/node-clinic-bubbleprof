@@ -16,9 +16,9 @@ class HoverBox extends HtmlContent {
     this.d3Element.classed('hover-box', true)
     this.d3Element.classed('hidden', true)
 
-    this.ui.on('hover', node => {
-      this.isHidden = !node
-      this.draw(node)
+    this.ui.on('hover', layoutNode => {
+      this.isHidden = !layoutNode
+      this.draw(layoutNode)
     })
 
     this.d3Title = this.d3Element.append('h2')
@@ -29,12 +29,12 @@ class HoverBox extends HtmlContent {
     this.withinTime = this.d3Element.append('p')
   }
 
-  draw (node) {
+  draw (layoutNode) {
     super.draw()
 
-    if (node) {
+    if (layoutNode) {
       this.d3Element.on('mouseover', () => {
-        this.ui.emit('hover', node)
+        this.ui.emit('hover', layoutNode)
       })
 
       this.d3Element.on('mouseout', () => {
@@ -45,13 +45,14 @@ class HoverBox extends HtmlContent {
       const svgWidth = svg.d3Element.node().getBoundingClientRect().width
       const responsiveScaleFactor = svgWidth / svg.svgBounds.width
 
-      const nodePosition = this.ui.layout.positioning.nodeToPosition.get(node)
+      const nodePosition = layoutNode.position
       const top = nodePosition.y * responsiveScaleFactor
       const left = nodePosition.x * responsiveScaleFactor
 
       this.d3Element.style('top', top + 'px')
       this.d3Element.style('left', left + 'px')
 
+      const node = layoutNode.node
       this.d3Title.text(node.name)
       this.d3Subtitle.text(`${node.constructor.name} #${node.id})`)
       this.betweenTime.html(`<strong>${this.ui.formatNumber(node.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
