@@ -9,12 +9,12 @@ class Frames extends HtmlContent {
     this.frames = null
   }
 
-  groupFrames () {
+  groupFrames (frames) {
     let previousFrame
     let previousGroup
     const groupedFrames = []
 
-    for (const frame of this.frames) {
+    for (const frame of frames) {
       if (!previousFrame || previousFrame.data.party[1] !== frame.data.party[1]) {
         const group = [frame]
         group.isGroup = true
@@ -42,7 +42,7 @@ class Frames extends HtmlContent {
     this.ui.on('outputFrames', (aggregateNode) => {
       this.frames = aggregateNode.frames || null
       this.node = aggregateNode
-      if (this.frames) this.groupFrames()
+      this.groupFrames(this.frames || [])
       this.draw()
     })
   }
@@ -63,7 +63,22 @@ class Frames extends HtmlContent {
   }
 
   drawFrames (frames, d3AppendTo) {
-    for (let frame of frames) {
+    if (!frames.length) {
+      const d3Group = this.d3ContentWrapper.append('div')
+        .classed('frame-group', true)
+        .on('click', () => {
+          d3Group.classed('collapsed', !d3Group.classed('collapsed'))
+        })
+
+      d3Group.append('div')
+        .classed('sub-collapse-control', true)
+        .html('<span class="arrow"></span> Empty frames')
+
+      d3Group.append('div')
+        .classed('frame-item', true)
+        .text('No frames are available for this async_hook. It could be from a native module, or something not integrated with the async_hooks API.')
+    }
+    for (const frame of frames) {
       if (frame.isGroup) {
         const d3Group = this.d3ContentWrapper.append('div')
           .classed('frame-group', true)

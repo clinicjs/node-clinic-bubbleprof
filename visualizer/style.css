@@ -250,6 +250,10 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   padding: 4px 0;
 }
 
+#frames-panel div.frame-item {
+  padding: 8px 20px;
+}
+
 #frames-panel .frame-group .frame-item {
   border-left: solid 1px var(--cyan);
 }
