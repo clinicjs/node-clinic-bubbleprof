@@ -1,7 +1,7 @@
 'use strict'
 
 const { AllCallbackEvents } = require('./callback-event.js')
-const { validateKey, isNumber } = require('../validation.js')
+const { validateKey } = require('../validation.js')
 const { ClusterNode } = require('./data-node.js')
 
 class DataSet {
@@ -40,7 +40,6 @@ class DataSet {
       ClusterNode: 'clusterNodes'
     }
     validateKey(nodeType, Object.keys(typeKeyMapping))
-    if (!isNumber(nodeId)) return null
     return this[typeKeyMapping[nodeType]].get(nodeId)
   }
   calculateFlattenedStats () {

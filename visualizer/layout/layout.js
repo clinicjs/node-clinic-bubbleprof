@@ -36,8 +36,7 @@ class Layout {
     })
   }
 
-  // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate () {
+  processBetweenData () {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
       const node = layoutNode.node
@@ -50,6 +49,11 @@ class Layout {
         layoutNode.inboundConnection = connection
       }
     }
+  }
+
+  // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
+  generate () {
+    this.processBetweenData()
     this.scale.calculateScaleFactor()
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()

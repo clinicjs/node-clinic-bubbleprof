@@ -104,7 +104,7 @@ test('Visualizer data - invalid settings', function (t) {
 test('Visualizer data - access invalid node id', function (t) {
   const dataSet = loadData(slowioJson)
 
-  t.equal(dataSet.getByNodeType('ClusterNode', 'string'), null)
+  t.equal(dataSet.getByNodeType('ClusterNode', 'foo'), undefined)
 
   t.end()
 })

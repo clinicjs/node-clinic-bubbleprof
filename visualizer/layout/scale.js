@@ -27,7 +27,7 @@ class Scale {
       svgHeight
     } = this.layout.settings
 
-    const availableWidth = (svgWidth / 2) - (svgDistanceFromEdge * 2)
+    const availableWidth = (svgWidth / 2) - svgDistanceFromEdge
     const stretchedHeight = svgHeight * 1.5
     const availableHeight = (stretchedHeight) - (svgDistanceFromEdge * 2)
 
