@@ -23,7 +23,6 @@ class Positioning {
   placeNodes () {
     this.nodeAllocation = new NodeAllocation(this.layout, this.layoutNodes)
     this.nodeAllocation.process()
-    this.nodeToPosition = this.nodeAllocation.nodeToPosition
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.node.id) - this.order.indexOf(leafB.node.id)

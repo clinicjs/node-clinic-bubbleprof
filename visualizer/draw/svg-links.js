@@ -145,15 +145,14 @@ class Links extends SvgContentGroup {
       const d3TimeLabel = d3.select(timeLabelsArray[linkIndex])
       const d3LinkGroup = d3.select(nodes[linkIndex])
 
-      const positions = this.ui.layout.positioning.nodeToPosition
-      const sourcePositions = positions.get(connection.sourceNode)
-      const targetPositions = positions.get(connection.targetNode)
+      const sourcePosition = connection.sourceLayoutNode.position
+      const targetPosition = connection.targetLayoutNode.position
 
       const connectCentresCoords = new LineCoordinates({
-        x1: sourcePositions.x,
-        y1: sourcePositions.y,
-        x2: targetPositions.x,
-        y2: targetPositions.y
+        x1: sourcePosition.x,
+        y1: sourcePosition.y,
+        x2: targetPosition.x,
+        y2: targetPosition.y
       })
       Links.applyLineXYs(d3InnerLine, connectCentresCoords)
 

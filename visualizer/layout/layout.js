@@ -41,10 +41,9 @@ class Layout {
       layoutNode.stem = new Stem(this, layoutNode)
       const node = layoutNode.node
 
-      if (node.parentId) {
-        const sourceNode = node.getParentNode() || this.layoutNodes.get(node.parentId).node
-        const connection = new Connection(sourceNode, node, this.scale)
-        this.connectionsByTargetId.set(node.id, connection)
+      if (layoutNode.parent) {
+        const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
+        this.connectionsByTargetId.set(layoutNode.id, connection)
         this.connections.push(connection)
         layoutNode.inboundConnection = connection
       }
@@ -59,6 +58,7 @@ class Layout {
     this.positioning.placeNodes()
   }
   static collapseNodes (nodes, scale) {
+    // TODO: rework this
     const subsetNodeById = {}
     for (const node of nodes) {
       subsetNodeById[node.id] = node
