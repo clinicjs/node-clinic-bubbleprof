@@ -23,7 +23,6 @@ class Positioning {
   placeNodes () {
     this.nodeAllocation = new NodeAllocation(this.layout, this.layoutNodes)
     this.nodeAllocation.process()
-    this.nodeToPosition = this.nodeAllocation.nodeToPosition
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.node.id) - this.order.indexOf(leafB.node.id)
@@ -132,9 +131,9 @@ class ClumpPyramid {
     // Insert newly-created ancestor clump into its direct-parent clump
     // Note - root will have no parent
     const ancestor = this.layoutNodes.get(ancestorId)
-    const ancestorParent = ancestor && this.layoutNodes.get(ancestor.node.parentId)
+    const ancestorParent = ancestor ? ancestor.parent : null
     if (ancestorParent) {
-      this.clumpById[ancestorParent.node.id][insertAtSide](this.clumpById[ancestorId])
+      this.clumpById[ancestorParent.id][insertAtSide](this.clumpById[ancestorId])
     }
   }
   setLeaves (leavesByLongest) {
@@ -157,7 +156,11 @@ class ClumpPyramid {
         }
       }
 
-      const parentClump = this.clumpById[leaf.parentId]
+      const parentClump = this.clumpById[layoutNodeLeaf.parent ? layoutNodeLeaf.parent.id : 0]
+
+      // TODO: find out why at aggregateNode level sometimes there's a node on its own like this
+      if (!parentClump) continue
+
       if (parentClump.orientation !== 'center') {
         insertAtSide = this.orientationToInsertionSide[parentClump.orientation]
       }

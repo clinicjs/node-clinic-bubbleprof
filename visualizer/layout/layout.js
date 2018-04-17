@@ -30,7 +30,7 @@ class Layout {
   prepareLayoutNodes (nodes = this.nodes) {
     this.layoutNodes = new Map()
     nodes.forEach(node => {
-      const parent = node.parentId ? this.layoutNodes.get(node.getParentNode().id) : null
+      const parent = node.parentId ? this.layoutNodes.get(node.parentId) : null
       this.layoutNodes.set(node.id, new LayoutNode(node, parent))
       if (parent) parent.children.push(node.id)
     })
@@ -39,12 +39,10 @@ class Layout {
   processBetweenData () {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
-      const node = layoutNode.node
 
-      if (node.parentId) {
-        const sourceNode = node.getParentNode()
-        const connection = new Connection(sourceNode, node, this.scale)
-        this.connectionsByTargetId.set(node.id, connection)
+      if (layoutNode.parent) {
+        const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
+        this.connectionsByTargetId.set(layoutNode.id, connection)
         this.connections.push(connection)
         layoutNode.inboundConnection = connection
       }
@@ -59,6 +57,7 @@ class Layout {
     this.positioning.placeNodes()
   }
   static collapseNodes (nodes, scale) {
+    // TODO: rework this
     const subsetNodeById = {}
     for (const node of nodes) {
       subsetNodeById[node.id] = node
