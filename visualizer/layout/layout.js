@@ -52,13 +52,11 @@ class Layout {
   // For layouts inside a clusterNode, rather than layouts of all cluterNodes
   prepareSublayoutNodes (connection) {
     // This sublayout is of nodes within targetNode. Some have parents within sourceNode
-    const { sourceNode, targetNode } = connection
-
     const linkToSource = new ArtificialNode({
-      id: sourceNode.id,
+      id: connection ? connection.sourceNode.id : 0,
       isRoot: true,
       children: []
-    }, sourceNode)
+    }, connection ? connection.sourceNode : this.nodes[0])
 
     this.nodesMap.set(linkToSource.id, linkToSource)
     this.nodes.unshift(linkToSource)
