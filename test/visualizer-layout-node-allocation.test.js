@@ -165,6 +165,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   const distanceById = []
   for (const layoutNode of layout.layoutNodes.values()) {
     if (layoutNode.id === 1) {
+      // Root node will always have 0 distance
       distanceById[layoutNode.id] = 0
       continue
     }
@@ -243,6 +244,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const distanceById = []
   for (const layoutNode of layout.layoutNodes.values()) {
     if (layoutNode.id === 6) {
+      // As top-level node in this subset, node 6 has same placement as root and 0 distance
       distanceById[layoutNode.id] = 0
       continue
     }
