@@ -86,6 +86,11 @@ for (const [clusterId, clusterNode] of clusterNodes) {
     const aggregateId = clusterNode.nodes[i]
     clusterNode.nodes[i] = aggregateNodes.get(aggregateId)
     clusterNode.id = clusterNode.clusterId = clusterId
+    if (clusterNode.parentClusterId) {
+      const parentNode = clusterNodes.get(clusterNode.parentClusterId)
+      if (!parentNode.children) parentNode.children = []
+      if (!parentNode.children.includes(clusterId)) parentNode.children.push(clusterId)
+    }
   }
 }
 

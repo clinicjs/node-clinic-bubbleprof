@@ -203,33 +203,35 @@ test('Visualizer - layer - layout connections are healthy on processBetweenData'
   t.equal(layout.connections[0].targetNode, dataSet.clusterNodes.get('B'))
   t.equal(layout.connections[0].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[1].sourceId, 'A')
-  t.equal(layout.connections[1].sourceNode, dataSet.clusterNodes.get('A'))
+
+  t.equal(layout.connections[1].sourceId, 'B')
+  t.equal(layout.connections[1].sourceNode, dataSet.clusterNodes.get('B'))
   t.equal(layout.connections[1].sourceNode.constructor.name, 'ClusterNode')
-  t.equal(layout.connections[1].targetId, 'C')
-  t.equal(layout.connections[1].targetNode, dataSet.clusterNodes.get('C'))
+  t.equal(layout.connections[1].targetId, 'D')
+  t.equal(layout.connections[1].targetNode, dataSet.clusterNodes.get('D'))
   t.equal(layout.connections[1].targetNode.constructor.name, 'ClusterNode')
 
   t.equal(layout.connections[2].sourceId, 'B')
   t.equal(layout.connections[2].sourceNode, dataSet.clusterNodes.get('B'))
   t.equal(layout.connections[2].sourceNode.constructor.name, 'ClusterNode')
-  t.equal(layout.connections[2].targetId, 'D')
-  t.equal(layout.connections[2].targetNode, dataSet.clusterNodes.get('D'))
+  t.equal(layout.connections[2].targetId, 'E')
+  t.equal(layout.connections[2].targetNode, dataSet.clusterNodes.get('E'))
   t.equal(layout.connections[2].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[3].sourceId, 'B')
-  t.equal(layout.connections[3].sourceNode, dataSet.clusterNodes.get('B'))
+  t.equal(layout.connections[3].sourceId, 'E')
+  t.equal(layout.connections[3].sourceNode, dataSet.clusterNodes.get('E'))
   t.equal(layout.connections[3].sourceNode.constructor.name, 'ClusterNode')
-  t.equal(layout.connections[3].targetId, 'E')
-  t.equal(layout.connections[3].targetNode, dataSet.clusterNodes.get('E'))
+  t.equal(layout.connections[3].targetId, 'F')
+  t.equal(layout.connections[3].targetNode, dataSet.clusterNodes.get('F'))
   t.equal(layout.connections[3].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[4].sourceId, 'E')
-  t.equal(layout.connections[4].sourceNode, dataSet.clusterNodes.get('E'))
+  t.equal(layout.connections[4].sourceId, 'A')
+  t.equal(layout.connections[4].sourceNode, dataSet.clusterNodes.get('A'))
   t.equal(layout.connections[4].sourceNode.constructor.name, 'ClusterNode')
-  t.equal(layout.connections[4].targetId, 'F')
-  t.equal(layout.connections[4].targetNode, dataSet.clusterNodes.get('F'))
+  t.equal(layout.connections[4].targetId, 'C')
+  t.equal(layout.connections[4].targetNode, dataSet.clusterNodes.get('C'))
   t.equal(layout.connections[4].targetNode.constructor.name, 'ClusterNode')
+
 
   t.end()
 })
@@ -326,14 +328,14 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
   t.equal(layout.connections[0].getSourceRadius().toFixed(2), (((24.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // A
   t.equal(layout.connections[0].getTargetRadius().toFixed(2), (((10.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // B
   t.equal(layout.connections[0].getVisibleLineLength().toFixed(2), (6 * expectedScaleFactor).toFixed(2))
-  t.equal(layout.connections[1].getTargetRadius().toFixed(2), (((2.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // C
-  t.equal(layout.connections[1].getVisibleLineLength().toFixed(2), (8.5 * expectedScaleFactor).toFixed(2))
-  t.equal(layout.connections[2].getTargetRadius().toFixed(2), (((0.7 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // D
+  t.equal(layout.connections[1].getTargetRadius().toFixed(2), (((0.7 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // D
+  t.equal(layout.connections[1].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[2].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // E
   t.equal(layout.connections[2].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
-  t.equal(layout.connections[3].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // E
+  t.equal(layout.connections[3].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // F
   t.equal(layout.connections[3].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
-  t.equal(layout.connections[4].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // F
-  t.equal(layout.connections[4].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[4].getVisibleLineLength().toFixed(2), (8.5 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[4].getTargetRadius().toFixed(2), (((2.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // C
 
   t.end()
 })
