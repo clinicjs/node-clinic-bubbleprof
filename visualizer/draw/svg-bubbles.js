@@ -56,7 +56,7 @@ class Bubbles extends SvgContentGroup {
       .on('click', (d, e) => {
         if (this.nodeType === 'AggregateNode') {
           d3.event.stopPropagation()
-          this.ui.outputFrames(d)
+          this.ui.outputFrames(d.node)
         } else {
           this.ui.createSubLayout(d)
         }
