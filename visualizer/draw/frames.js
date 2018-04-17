@@ -43,7 +43,13 @@ class Frames extends HtmlContent {
       this.frames = aggregateNode.frames || null
       this.node = aggregateNode
       this.groupFrames(this.frames || [])
-      this.draw()
+      if (aggregateNode) {
+        const footer = this.ui.sections.get('footer')
+        footer.collapseControl.isCollapsed = false
+        footer.draw()
+      } else {
+        this.draw()
+      }
     })
   }
 
