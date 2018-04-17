@@ -243,8 +243,9 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
 
+  const expectedScaleFactor = 30.1336
   t.deepEqual(layout.scale.scalesBySmallest.map(weight => [weight.category, weight.weight.toFixed(4)]), [
-    ['diameter clamp', '30.1336'],
+    ['diameter clamp', expectedScaleFactor + ''],
     ['q25 4-3-5 triangle', '32.1378'],
     ['q50 1-1-sqrt(2) triangle', '33.3507'],
     ['q75 3-4-5 triangle', '39.0334'],
@@ -259,7 +260,7 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
   t.equal(layout.scale.decisiveWeight.absoluteToContain, 0)
   t.equal(layout.scale.decisiveWeight.scalableToContain, (24.5 / Math.PI))
   t.equal(layout.scale.decisiveWeight.weight.toFixed(2), (235 / 7.8).toFixed(2))
-  t.equal(layout.scale.scaleFactor.toFixed(4), '30.1336')
+  t.equal(layout.scale.scaleFactor.toFixed(4), expectedScaleFactor + '')
 
   t.end()
 })
@@ -274,24 +275,25 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
   layout.scale.calculateScaleFactor()
 
   const lineExtras = (2.5 + 14 + 14)
+  const expectedScaleFactor = 30.1336
 
   t.equal(layout.layoutNodes.get('A').stem.getScaled(layout.scale).ownBetween, lineExtras)
-  t.equal(layout.layoutNodes.get('A').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((24.5 / Math.PI) * 30.1336).toFixed(2))
+  t.equal(layout.layoutNodes.get('A').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((24.5 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('B').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (6 * 30.1336)).toFixed(2))
-  t.equal(layout.layoutNodes.get('B').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((10.5 / Math.PI) * 30.1336).toFixed(2))
+  t.equal(layout.layoutNodes.get('B').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (6 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('B').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((10.5 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('C').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (8.5 * 30.1336)).toFixed(2))
-  t.equal(layout.layoutNodes.get('C').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((2.5 / Math.PI) * 30.1336).toFixed(2))
+  t.equal(layout.layoutNodes.get('C').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (8.5 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('C').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((2.5 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('D').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * 30.1336)).toFixed(2))
-  t.equal(layout.layoutNodes.get('D').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.7 / Math.PI) * 30.1336).toFixed(2))
+  t.equal(layout.layoutNodes.get('D').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('D').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.7 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('E').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * 30.1336)).toFixed(2))
-  t.equal(layout.layoutNodes.get('E').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.1 / Math.PI) * 30.1336).toFixed(2))
+  t.equal(layout.layoutNodes.get('E').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('E').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.1 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('F').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * 30.1336)).toFixed(2))
-  t.equal(layout.layoutNodes.get('F').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.1 / Math.PI) * 30.1336).toFixed(2))
+  t.equal(layout.layoutNodes.get('F').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('F').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.1 / Math.PI) * expectedScaleFactor).toFixed(2))
 
   t.end()
 })
@@ -305,17 +307,19 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
 
-  t.equal(layout.connections[0].getSourceRadius().toFixed(2), (((24.5 / Math.PI) / 2) * 30.1336).toFixed(2)) // A
-  t.equal(layout.connections[0].getTargetRadius().toFixed(2), (((10.5 / Math.PI) / 2) * 30.1336).toFixed(2)) // B
-  t.equal(layout.connections[0].getVisibleLineLength().toFixed(2), (6 * 30.1336).toFixed(2))
-  t.equal(layout.connections[1].getTargetRadius().toFixed(2), (((2.5 / Math.PI) / 2) * 30.1336).toFixed(2)) // C
-  t.equal(layout.connections[1].getVisibleLineLength().toFixed(2), (8.5 * 30.1336).toFixed(2))
-  t.equal(layout.connections[2].getTargetRadius().toFixed(2), (((0.7 / Math.PI) / 2) * 30.1336).toFixed(2)) // D
-  t.equal(layout.connections[2].getVisibleLineLength().toFixed(2), (0.1 * 30.1336).toFixed(2))
-  t.equal(layout.connections[3].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * 30.1336).toFixed(2)) // E
-  t.equal(layout.connections[3].getVisibleLineLength().toFixed(2), (0.1 * 30.1336).toFixed(2))
-  t.equal(layout.connections[4].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * 30.1336).toFixed(2)) // F
-  t.equal(layout.connections[4].getVisibleLineLength().toFixed(2), (0.1 * 30.1336).toFixed(2))
+  const expectedScaleFactor = 30.1336
+
+  t.equal(layout.connections[0].getSourceRadius().toFixed(2), (((24.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // A
+  t.equal(layout.connections[0].getTargetRadius().toFixed(2), (((10.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // B
+  t.equal(layout.connections[0].getVisibleLineLength().toFixed(2), (6 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[1].getTargetRadius().toFixed(2), (((2.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // C
+  t.equal(layout.connections[1].getVisibleLineLength().toFixed(2), (8.5 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[2].getTargetRadius().toFixed(2), (((0.7 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // D
+  t.equal(layout.connections[2].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[3].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // E
+  t.equal(layout.connections[3].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
+  t.equal(layout.connections[4].getTargetRadius().toFixed(2), (((0.1 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // F
+  t.equal(layout.connections[4].getVisibleLineLength().toFixed(2), (0.1 * expectedScaleFactor).toFixed(2))
 
   t.end()
 })
