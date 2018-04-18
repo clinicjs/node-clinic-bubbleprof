@@ -457,32 +457,32 @@ body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
 
 .party-user .party-icon,
 .party-user .by-variable {
-  border-color: var(--nearform-red);
-  stroke: var(--nearform-red);
+  border-color: var(--party-colour-1);
+  stroke: var(--party-colour-1);
 }
 .party-external .party-icon,
 .party-external .by-variable {
-  border-color: var(--cyan);
-  stroke: var(--cyan);
+  border-color: var(--party-colour-2);
+  stroke: var(--party-colour-2);
 }
 
 .party-root .party-icon,
 .party-root .by-variable,
 .party-nodecore .party-icon,
 .party-nodecore .by-variable {
-  border-color: var(--nearform-grey);
-  stroke: var(--nearform-grey);
+  border-color: var(--party-colour-3);
+  stroke: var(--party-colour-3);
 }
 
 .party-user .text-label {
-  fill: var(--nearform-red);
+  fill: var(--party-colour-1);
 }
 .party-external .text-label {
-  fill: var(--cyan);
+  fill: var(--party-colour-2);
 }
 .party-root .text-label,
 .party-nodecore .text-label {
-  fill: var(--nearform-grey);
+  fill: var(--party-colour-3);
 }
 
 .type-files-streams,
