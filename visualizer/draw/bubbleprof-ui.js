@@ -21,9 +21,9 @@ class BubbleprofUI extends EventEmitter {
     this.mainContainer = {}
 
     function getOriginalUI (parentUI) {
-      return parentUI.parentUI ? this.setParentUI(parentUI.parentUI) : parentUI
+      return parentUI.parentUI ? getOriginalUI(parentUI.parentUI) : parentUI
     }
-
+    this.parentUI = parentUI
     this.originalUI = parentUI ? getOriginalUI(parentUI) : this
 
     // Main divisions of the page
