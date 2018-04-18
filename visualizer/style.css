@@ -16,11 +16,15 @@ html {
   --cyan-highlight: rgb(96, 147, 208);
   --cyan: rgb(63, 125, 198);
 
-  --type-colour-1: rgb(24, 237, 221);
-  --type-colour-2: rgb(250, 245, 13);
-  --type-colour-3: rgb(249, 110, 124);
-  --type-colour-4: rgb(135, 62, 149);
-  --type-colour-5: rgb(245, 245, 245);
+  --party-colour-1: rgb(166, 228, 255);
+  --party-colour-2: var(--cyan);
+  --party-colour-3: var(--nearform-grey);
+
+  --type-colour-1: rgb(173, 102, 71); /* Rusty orange */
+  --type-colour-2: rgb(0, 209, 168); /* Pale green */
+  --type-colour-3: rgb(211, 166, 255); /* Pale lilac */
+  --type-colour-4: rgb(102, 69, 181); /* Deep purple */
+  --type-colour-5: rgb(252, 255, 123); /* Pale yellow */
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
