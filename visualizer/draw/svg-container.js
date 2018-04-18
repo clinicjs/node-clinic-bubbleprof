@@ -47,7 +47,7 @@ class SvgContainer extends HtmlContent {
       } = this.svgBounds
 
       this.d3Element
-        .attr('id', 'test ID')
+        .attr('id', this.contentProperties.id)
         .attr('preserveAspectRatio', preserveAspectRatio)
 
       this.ui.on('setData', () => {

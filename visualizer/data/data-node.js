@@ -53,6 +53,7 @@ class DataNode {
   }
 
   static markFromArray (markArray) {
+    if (markArray instanceof Map) return markArray
     // node.mark is always an array of length 3, based on this schema:
     const markKeys = ['party', 'module', 'name']
     // 'party' (as in 'third-party') will be one of 'user', 'external' or 'nodecore'.
@@ -79,7 +80,7 @@ class ClusterNode extends DataNode {
     }
     const node = Object.assign(defaultProperties, rawNode)
 
-    this.isRoot = (node.clusterId === 1)
+    this.isRoot = (node.isRoot || node.clusterId === 1)
 
     this.clusterId = node.clusterId
     this.parentClusterId = node.parentClusterId
@@ -170,8 +171,8 @@ class AggregateNode extends DataNode {
         data: frameItem
       }
     })
-
     this.name = this.frames.length ? this.frames[0].formatted.slice(7) : 'empty frames'
+
     this.mark = DataNode.markFromArray(node.mark)
 
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type

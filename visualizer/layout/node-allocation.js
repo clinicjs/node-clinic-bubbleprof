@@ -138,8 +138,9 @@ class NodeAllocation {
       for (const clumpAtDepth of hierarchyLevel.clumps.values()) {
         const parentUnits = clumpAtDepth.parentClump ? clumpAtDepth.parentClump.units : 1
         const proportionFactor = clumpAtDepth.parentClump ? clumpAtDepth.parentClump.getTotalChildrenLongestLeafLength() : hierarchyLevel.longestLeafLengthSum
-        const clumpUnits = parentUnits * (clumpAtDepth.longestLeafLength / proportionFactor)
 
+        // In some cases e.g. root node, these can be 0; if so, set as 1. TODO: investigate this further
+        const clumpUnits = ((parentUnits * clumpAtDepth.longestLeafLength) || 1) / (proportionFactor || 1)
         clumpAtDepth.units = clumpAtDepth.layoutNode.node.validateStat(clumpUnits)
         clumpAtDepth.layoutNode.position.units = clumpUnits
       }

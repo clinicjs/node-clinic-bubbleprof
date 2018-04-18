@@ -1,6 +1,7 @@
 'use strict'
 
 const { radiusFromCircumference } = require('./line-coordinates.js')
+const { validateNumber } = require('../validation.js')
 
 function getNodeAncestorIds (parent) {
   return parent ? [...parent.stem.ancestors.ids, parent.id] : []
@@ -32,19 +33,27 @@ class Stem {
     }
   }
   getScaled (scale) {
+    const ownBetween = (this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth + scale.getLineLength(this.ownBetween)
+    const ownDiameter = scale.getLineLength(this.ownDiameter)
     return {
-      ownBetween: (this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth + scale.getLineLength(this.ownBetween),
-      ownDiameter: scale.getLineLength(this.ownDiameter)
+      ownBetween: validateNumber(ownBetween, this.getValidationMessage()),
+      ownDiameter: validateNumber(ownDiameter, this.getValidationMessage())
     }
   }
   getTotalStemLength () {
     const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
     const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
     return {
-      absolute,
-      scalable,
+      absolute: validateNumber(absolute, this.getValidationMessage()),
+      scalable: validateNumber(scalable, this.getValidationMessage()),
       combined: absolute + scalable
     }
+  }
+  getValidationMessage () {
+    return `for stem with:
+    ancestor ids [${this.ancestors.ids.join(', ')}], length ${this.ancestors.ids.length});
+    leaves [${this.leaves.ids.join(', ')}], length ${this.leaves.ids.length};
+    `
   }
   static pickLeavesByLongest (layoutNodes) {
     const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().combined - leafA.stem.getTotalStemLength().combined
