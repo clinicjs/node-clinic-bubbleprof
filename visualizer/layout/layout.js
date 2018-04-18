@@ -12,7 +12,8 @@ class Layout {
       svgWidth: 1000,
       svgHeight: 1000,
       svgDistanceFromEdge: 30,
-      lineWidth: 2.5,
+      // lineWidth and labelMinimumSpace will usually be passed in from UI settings
+      lineWidth: 2,
       labelMinimumSpace: 14
     }
     this.settings = Object.assign(defaultSettings, settings)
