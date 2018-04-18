@@ -51,9 +51,9 @@ class Stem {
   }
   getValidationMessage () {
     return `for stem with:
-      ancestor ids [${this.ancestors.ids.join(', ')}], length ${this.ancestors.ids.length});
-      leaves [${this.leaves.ids.join(', ')}], length ${this.leaves.ids.length};
-      `
+    ancestor ids [${this.ancestors.ids.join(', ')}], length ${this.ancestors.ids.length});
+    leaves [${this.leaves.ids.join(', ')}], length ${this.leaves.ids.length};
+    `
   }
   static pickLeavesByLongest (layoutNodes) {
     const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().combined - leafA.stem.getTotalStemLength().combined

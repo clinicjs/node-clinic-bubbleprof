@@ -7,7 +7,7 @@ const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
 
 class BubbleprofUI extends EventEmitter {
-  constructor (sections = [], settings, appendTo = undefined) {
+  constructor (sections = [], settings, appendTo) {
     super()
 
     const defaultSettings = {

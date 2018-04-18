@@ -173,7 +173,6 @@ class AggregateNode extends DataNode {
     })
     this.name = this.frames.length ? this.frames[0].formatted.slice(7) : 'empty frames'
 
-    this.name = this.frames.length ? this.frames[0].formatted.slice(7) : 'empty frames'
     this.mark = DataNode.markFromArray(node.mark)
 
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
