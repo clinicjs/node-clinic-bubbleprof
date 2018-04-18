@@ -200,8 +200,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
 
   const dataSet = loadData(mockTopology(topology))
   const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
-  const layout = new Layout(subset)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: subset })
   layout.generate()
 
   const positioning = layout.positioning

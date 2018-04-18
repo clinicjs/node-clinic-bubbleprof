@@ -5,9 +5,7 @@ const loadData = require('../visualizer/data/index.js')
 const generateLayout = require('../visualizer/layout/index.js')
 const Layout = require('../visualizer/layout/layout.js')
 
-const {
-  mockTopology
-} = require('./visualizer-util/fake-topology.js')
+const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
 // T=Tiny, L=Long, C=Collapsed
 
@@ -20,7 +18,8 @@ test('Visualizer layout - collapse - collapses children and parents linearly', f
   t.ok(dataSet)
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  const collapsed = Layout.collapseNodes(layout.nodes, { scaleFactor: 1 })
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  const collapsed = Layout.collapseNodes(dataNodes, { scaleFactor: 1 })
   const actual = collapsed.map(ch => ch.id || ch.children.map(ch => ch.id))
   t.deepEqual(actual, [[1, 2, 3], 4])
 
@@ -42,7 +41,8 @@ test('Visualizer layout - collapse - collapses branches at stem', function (t) {
   dataSet.clusterNodes.get(1).stats.async.between = 100 // make root long
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  const collapsed = Layout.collapseNodes(layout.nodes, { scaleFactor: 1 })
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  const collapsed = Layout.collapseNodes(dataNodes, { scaleFactor: 1 })
   const actual = collapsed.map(ch => ch.id || ch.children.map(ch => ch.id))
   t.deepEqual(actual, [1, [2, 4], 3, 5])
 
@@ -63,7 +63,8 @@ test('Visualizer layout - collapse - collapses both siblings and parents', funct
   t.ok(dataSet)
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  const collapsed = Layout.collapseNodes(layout.nodes, { scaleFactor: 1 })
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  const collapsed = Layout.collapseNodes(dataNodes, { scaleFactor: 1 })
   const actual = collapsed.map(ch => ch.id || ch.children.map(ch => ch.id))
   t.deepEqual(actual, [[1, 2, 4], 3, 5])
 
@@ -85,7 +86,8 @@ test('Visualizer layout - collapse - collapses both siblings and parents', funct
   dataSet.clusterNodes.get(4).stats.async.between = 100 // make node 4 long
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  const collapsed = Layout.collapseNodes(layout.nodes, { scaleFactor: 1 })
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  const collapsed = Layout.collapseNodes(dataNodes, { scaleFactor: 1 })
   const actual = collapsed.map(ch => ch.id || ch.children.map(ch => ch.id))
   t.deepEqual(actual, [[1, 2], 3, 4, 5])
 
@@ -107,10 +109,10 @@ test('Visualizer layout - collapse - works with missing leaves', function (t) {
   t.ok(dataSet)
   dataSet.clusterNodes.get(4).stats.async.between = 100 // make node 4 long
   const subset = [1, 2, 3, 4].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  const layout = new Layout(subset, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
   layout.prepareLayoutNodes()
-  const collapsed = Layout.collapseNodes(layout.nodes, { scaleFactor: 1 })
+  const collapsed = Layout.collapseNodes(subset, { scaleFactor: 1 })
   const actual = collapsed.map(ch => ch.id || ch.children.map(ch => ch.id))
   t.deepEqual(actual, [[1, 2], 3, 4])
 

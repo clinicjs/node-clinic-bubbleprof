@@ -7,7 +7,7 @@ const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
 
 class Layout {
-  constructor (nodes, settings, collapseNodes = false) {
+  constructor ({ dataNodes, connection }, settings, collapseNodes = false) {
     const defaultSettings = {
       svgWidth: 1000,
       svgHeight: 1000,
@@ -18,10 +18,6 @@ class Layout {
     }
     this.settings = Object.assign(defaultSettings, settings)
 
-    // TODO: phase out this.nodes, use layoutNodes exclusively
-    this.nodes = nodes
-    this.nodesMap = new Map(nodes.map(node => [node.id, node]))
-
     // TODO: re-evaluate this, does it still make sense to initialise these now?
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
@@ -30,28 +26,33 @@ class Layout {
     this.connectionsByTargetId = new Map()
 
     this.layoutNodes = new Map()
-    this.stems = new Map()
+
+    if (connection) {
+      this.prepareSublayoutNodes(dataNodes, connection)
+    } else {
+      this.prepareLayoutNodes(dataNodes)
+    }
   }
 
-  prepareLayoutNodes () {
+  prepareLayoutNodes (dataNodes) {
+    const dataNodeById = new Map(dataNodes.map(node => [node.id, node]))
     const createLayoutNode = (nodeId, parentLayoutNode) => {
-      const node = this.nodesMap.get(nodeId)
-      // if nodeId is a member of a clump, node.id is the id of the clump itself
-      if (this.layoutNodes.has(node.id)) return
+      const dataNode = dataNodeById.get(nodeId)
+      if (this.layoutNodes.has(dataNode.id)) return
 
-      const layoutNode = new LayoutNode(node, parentLayoutNode)
-      this.layoutNodes.set(node.id, layoutNode)
+      const layoutNode = new LayoutNode(dataNode, parentLayoutNode)
+      this.layoutNodes.set(dataNode.id, layoutNode)
 
-      if (parentLayoutNode) parentLayoutNode.children.push(node.id)
-      for (const childNodeId of node.children) {
+      if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
+      for (const childNodeId of dataNode.children) {
         createLayoutNode(childNodeId, layoutNode)
       }
     }
-    createLayoutNode(this.nodes[0].id)
+    createLayoutNode(dataNodes[0].id)
   }
 
   // For layouts inside a clusterNode, rather than layouts of all cluterNodes
-  prepareSublayoutNodes (connection) {
+  prepareSublayoutNodes (dataNodes, connection) {
     // This sublayout is of nodes within targetNode. Some have parents within sourceNode
     const linkToSource = !connection ? null : new ArtificialNode({
       id: connection.sourceNode.id,
@@ -60,35 +61,33 @@ class Layout {
     }, connection.sourceNode)
 
     if (linkToSource) {
-      this.nodesMap.set(linkToSource.id, linkToSource)
-      this.nodes.unshift(linkToSource)
+      dataNodes.unshift(linkToSource)
     }
 
     // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
-    for (const node of this.nodes) {
+    for (const dataNode of dataNodes) {
       // if (!nodeType) nodeType = node.constructor.name
 
-      if (linkToSource && node.isBetweenClusters) {
-        linkToSource.children.push(node.id)
+      if (linkToSource && dataNode.isBetweenClusters) {
+        linkToSource.children.push(dataNode.id)
       }
-      for (const childId of node.children) {
+      for (const childId of dataNode.children) {
         // If this child is in another cluster, add a dummy leaf node -> clickable link to that cluster
-        if (!this.nodes.some(node => node.id === childId)) {
-          const childNode = node.getSameType(childId)
+        if (!dataNodes.some(dataNode => dataNode.id === childId)) {
+          const childNode = dataNode.getSameType(childId)
 
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const linkOnwards = new ArtificialNode({
             id: childId,
             children: [],
-            parentId: node.id
-          }, childNode.clusterNode)
+            parentId: dataNode.id
+          }, childNode)
 
-          this.nodesMap.set(linkOnwards.id, linkOnwards)
-          this.nodes.push(linkOnwards)
+          dataNodes.push(linkOnwards)
         }
       }
     }
-    this.prepareLayoutNodes()
+    this.prepareLayoutNodes(dataNodes)
   }
 
   processBetweenData () {

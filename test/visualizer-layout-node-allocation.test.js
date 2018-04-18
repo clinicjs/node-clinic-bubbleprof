@@ -17,9 +17,8 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   const unitsById = []
@@ -53,9 +52,8 @@ test('Visualizer layout - node allocation - three-sided space segments depend on
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
@@ -81,9 +79,8 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   const nodeAllocation = layout.positioning.nodeAllocation
@@ -117,9 +114,8 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
@@ -147,9 +143,8 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
@@ -225,9 +220,8 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
   const subset = [6, 7, 8].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  const layout = new Layout(subset, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)

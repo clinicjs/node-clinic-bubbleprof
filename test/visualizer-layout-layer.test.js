@@ -47,10 +47,9 @@ test('Visualizer - layer - layout is healthy on init', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
 
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
   t.deepEqual(layout.settings, layoutSettings)
 
-  layout.prepareLayoutNodes()
   t.equal(layout.layoutNodes.get('A').parent, null)
   t.deepEqual(layout.layoutNodes.get('A').children, ['B', 'C'])
   t.equal(layout.layoutNodes.get('B').parent.id, layout.layoutNodes.get('A').id)
@@ -70,8 +69,7 @@ test('Visualizer - layer - layout is healthy on init', function (t) {
 test('Visualizer - layer - layout stems are healthy on processBetweenData', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   const lineExtras = (2.5 + 14 + 14)
   const expected = {
@@ -193,8 +191,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
 test('Visualizer - layer - layout connections are healthy on processBetweenData', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
 
@@ -239,8 +236,7 @@ test('Visualizer - layer - layout connections are healthy on processBetweenData'
 test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
@@ -280,8 +276,7 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
 test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
@@ -315,8 +310,7 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
 test('Visualizer - layer - layout connections are healthy on calculateScaleFactor', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
@@ -343,8 +337,7 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
 test('Visualizer - layer - layout positioning is healthy on formClumpPyramid', function (t) {
   const dataSet = new DataSet(clusterNodesArray)
   dataSet.processData()
-  const layout = new Layout([...dataSet.clusterNodes.values()], layoutSettings)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
