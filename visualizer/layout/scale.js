@@ -2,6 +2,7 @@
 
 const { radiusFromCircumference } = require('./line-coordinates.js')
 const { pickLeavesByLongest } = require('./stems.js')
+const { validateNumber } = require('../validation.js')
 
 class Scale {
   constructor (layout) {
@@ -53,7 +54,7 @@ class Scale {
     this.scalesBySmallest = accountedScales.sort((a, b) => a.weight - b.weight)
 
     this.decisiveWeight = this.scalesBySmallest[0]
-    this.scaleFactor = this.decisiveWeight.weight
+    this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
     this.finalSvgHeight = this.decisiveWeight.available > svgHeight ? stretchedHeight : svgHeight
   }
@@ -79,6 +80,9 @@ class ScaleWeight {
     if (this.weight < 0 && absoluteToContain > 0) {
       this.weight = available / absoluteToContain
     }
+    // If there's only one node and it has zero size, weight will be Infinity
+    // Default to 1 because there's nothing to scale
+    if (!Number.isFinite(this.weight)) this.weight = 1
   }
 }
 

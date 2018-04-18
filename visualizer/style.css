@@ -297,6 +297,27 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   cursor: pointer;
 }
 
+#sublayout-svg {
+  position: absolute;
+  background: var(--main-bg-color);
+  top: 0;
+}
+
+#sublayout:after {
+  display: block;
+  top: 8px;
+  right: 8px;
+  height: 32px;
+  background: var(--pure-black);
+  color: var(--cyan);
+  content: "⨉";
+  z-index: 20;
+  position: absolute;
+  padding: 2px 11px 6px;
+  font-size: 28px;
+  cursor: pointer;
+}
+
 /* Sidebar */
 
 #side-bar {
