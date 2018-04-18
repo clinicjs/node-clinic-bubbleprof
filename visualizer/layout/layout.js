@@ -7,7 +7,7 @@ const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
 
 class Layout {
-  constructor ({ dataNodes, connection }, settings, collapseNodes = false) {
+  constructor ({ dataNodes, connection }, settings) {
     const defaultSettings = {
       svgWidth: 1000,
       svgHeight: 1000,
@@ -18,14 +18,11 @@ class Layout {
     }
     this.settings = Object.assign(defaultSettings, settings)
 
-    // TODO: re-evaluate this, does it still make sense to initialise these now?
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
 
     this.connections = []
     this.connectionsByTargetId = new Map()
-
-    this.layoutNodes = new Map()
 
     if (connection) {
       this.prepareSublayoutNodes(dataNodes, connection)
@@ -34,11 +31,14 @@ class Layout {
     }
   }
 
+  // Note: This currently does not support missing midpoints (implicit children)
   prepareLayoutNodes (dataNodes) {
+    this.layoutNodes = new Map()
+
     const dataNodeById = new Map(dataNodes.map(node => [node.id, node]))
     const createLayoutNode = (nodeId, parentLayoutNode) => {
       const dataNode = dataNodeById.get(nodeId)
-      if (this.layoutNodes.has(dataNode.id)) return
+      if (!dataNode || this.layoutNodes.has(dataNode.id)) return
 
       const layoutNode = new LayoutNode(dataNode, parentLayoutNode)
       this.layoutNodes.set(dataNode.id, layoutNode)
@@ -48,7 +48,10 @@ class Layout {
         createLayoutNode(childNodeId, layoutNode)
       }
     }
-    createLayoutNode(dataNodes[0].id)
+    const topDataNodes = dataNodes.filter(dataNode => !dataNode.parent)
+    for (const dataNode of topDataNodes) {
+      createLayoutNode(dataNode.id)
+    }
   }
 
   // For layouts inside a clusterNode, rather than layouts of all cluterNodes
@@ -104,62 +107,108 @@ class Layout {
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate () {
+  generate ({ collapseNodes } = {}) {
     this.processBetweenData()
     this.scale.calculateScaleFactor()
+    if (collapseNodes) {
+      this.collapseNodes()
+      this.processBetweenData()
+      this.scale.calculateScaleFactor()
+    }
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
   }
-  static collapseNodes (nodes, scale) {
-    // TODO: rework this
-    const subsetNodeById = {}
-    for (const node of nodes) {
-      subsetNodeById[node.id] = node
-    }
-    const topNodes = nodes.filter(node => !subsetNodeById[node.parentId])
-    const collapsedNodes = []
-    for (const node of topNodes) {
-      clumpNodes(node)
-    }
-    return collapsedNodes
 
-    function isBelowThreshold (node) {
-      return (node.getWithinTime() + node.getBetweenTime()) * scale.scaleFactor < 10
+  collapseNodes () {
+    const { layoutNodes, scale } = this
+    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
+    // TODO: stop relying on coincidental Map.keys() order
+    const hierarchyOrder = []
+    for (const layoutNode of topLayoutNodes) {
+      squash(layoutNode)
     }
+    const newLayoutNodes = new Map()
+    for (const id of hierarchyOrder) {
+      newLayoutNodes.set(id, layoutNodes.get(id))
+    }
+    this.layoutNodes = newLayoutNodes
 
-    function clumpNodes (node, clump = null) {
-      if (isBelowThreshold(node)) {
-        if (!clump) {
-          clump = {
-            isCollapsed: true,
-            children: []
+    function squash (layoutNode, parent) {
+      // Skip ArtificialNodes
+      if (layoutNode instanceof ArtificialNode) return layoutNode
+
+      // Squash children first
+      const childrenAboveThreshold = []
+      const collapsedChildren = []
+      for (const childId of layoutNode.children) {
+        const child = layoutNodes.get(childId)
+        const squashed = squash(child, layoutNode)
+        if (squashed) {
+          collapsedChildren.push(squashed)
+        } else {
+          hierarchyOrder.unshift(childId)
+          childrenAboveThreshold.push(child)
+        }
+      }
+
+      const selfBelowThreshold = isBelowThreshold(layoutNode.node)
+      const nodesBelowThreshold = selfBelowThreshold ? [layoutNode].concat(collapsedChildren) : collapsedChildren
+      const flatLayoutNodes = flatMapDeep(nodesBelowThreshold.map(layoutNode => layoutNode.collapsedNodes || layoutNode))
+      const grandChildren = flatMapDeep(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.children))
+      const collapsedLayoutNode = new CollapsedLayoutNode(flatLayoutNodes, parent, childrenAboveThreshold.map(child => child.id).concat(grandChildren))
+      const collapsedSize = collapsedLayoutNode && collapsedLayoutNode.collapsedNodes.length
+
+      const isParentCollapsible = parent && isBelowThreshold(parent.node)
+      if (!selfBelowThreshold) {
+        if (collapsedSize >= 1) {
+          // Merged children
+          if (!layoutNodes.has(collapsedLayoutNode.id)) {
+            indexCollapsedLayoutNode(collapsedLayoutNode)
+            hierarchyOrder.unshift(collapsedLayoutNode.id)
           }
+          layoutNode.children = [collapsedLayoutNode, ...childrenAboveThreshold].map(child => child.id)
         }
-        // Node considered tiny, include it in a clump
-        clump.children.push(node)
-      } else {
-        // Node considered long, include it as standalone
-        collapsedNodes.push(node)
-        clump = null
-      }
-      const indexBeforeBranching = collapsedNodes.length
-      const childClumps = node.children.map(childId => {
-        const child = subsetNodeById[childId]
-        return child ? clumpNodes(child, clump) : null
-      }).filter(hasFormedClump => !!hasFormedClump)
-      // Combine sibling clumps
-      for (let i = 1; i < childClumps.length; ++i) {
-        if (childClumps[i] !== childClumps[0]) {
-          childClumps[0].children = childClumps[0].children.concat(childClumps[i].children)
+        if (!parent) {
+          hierarchyOrder.unshift(layoutNode.id)
         }
-        childClumps.splice(i, 1)
+      } else if (selfBelowThreshold && !isParentCollapsible && collapsedSize >= 2) {
+        // Merged self and children
+        indexCollapsedLayoutNode(collapsedLayoutNode)
+        hierarchyOrder.unshift(collapsedLayoutNode.id)
+      } else if (selfBelowThreshold && !parent) {
+        // Short top-level node
+        hierarchyOrder.unshift(layoutNode.id)
       }
-      // Include combined clump
-      if (childClumps[0] && collapsedNodes[indexBeforeBranching] !== childClumps[0]) {
-        collapsedNodes.splice(indexBeforeBranching, 0, childClumps[0])
-      }
+      return selfBelowThreshold ? collapsedLayoutNode : null
+    }
 
-      return clump
+    function indexCollapsedLayoutNode (collapsedLayoutNode) {
+      if (!collapsedLayoutNode.parent || !isBelowThreshold(collapsedLayoutNode.parent.node)) {
+        layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
+      }
+      for (const childId of collapsedLayoutNode.children) {
+        layoutNodes.get(childId).parent = collapsedLayoutNode
+        // Reindex child to position it after this clump
+        // TODO: optimize this
+        // const child = layoutNodes.get(childId)
+        // layoutNodes.delete(childId)
+        // layoutNodes.set(childId, child)
+      }
+      for (const layoutNode of collapsedLayoutNode.collapsedNodes) {
+        layoutNode.parent = null
+        layoutNode.children = []
+        // layoutNodes.delete(layoutNode.id)
+        // layoutNodes.delete('clump:' + layoutNode.id)
+      }
+    }
+
+    function isBelowThreshold (dataNode) {
+      return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.scaleFactor < 10
+    }
+
+    // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
+    function flatMapDeep (value) {
+      return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
     }
   }
 }
@@ -171,8 +220,29 @@ class LayoutNode {
     this.stem = null
     this.position = null
     this.inboundConnection = null
-    this.parent = parent || null
+    this.parent = parent
     this.children = []
+  }
+  getBetweenTime () {
+    return this.node.getBetweenTime()
+  }
+  getWithinTime () {
+    return this.node.getWithinTime()
+  }
+}
+
+class CollapsedLayoutNode {
+  constructor (layoutNodes, parent, children) {
+    this.id = 'clump:' + layoutNodes.map(layoutNode => layoutNode.id).join(',')
+    this.collapsedNodes = layoutNodes
+    this.parent = parent
+    this.children = children || []
+  }
+  getBetweenTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
+  }
+  getWithinTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
   }
 }
 

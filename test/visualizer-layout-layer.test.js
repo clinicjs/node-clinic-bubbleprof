@@ -50,7 +50,7 @@ test('Visualizer - layer - layout is healthy on init', function (t) {
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
   t.deepEqual(layout.settings, layoutSettings)
 
-  t.equal(layout.layoutNodes.get('A').parent, null)
+  t.equal(layout.layoutNodes.get('A').parent, undefined)
   t.deepEqual(layout.layoutNodes.get('A').children, ['B', 'C'])
   t.equal(layout.layoutNodes.get('B').parent.id, layout.layoutNodes.get('A').id)
   t.equal(layout.layoutNodes.get('C').parent.id, layout.layoutNodes.get('A').id)
