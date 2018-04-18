@@ -33,6 +33,14 @@ class Frames extends HtmlContent {
 
     this.d3Element.classed('frames-container', true)
 
+    this.d3Element.append('span')
+      .classed('close', true)
+      .on('click', () => {
+        const footer = this.ui.sections.get('footer')
+        footer.collapseControl.isCollapsed = true
+        footer.draw()
+      })
+
     this.d3NoFrames = this.d3ContentWrapper.append('p')
       .text(`
         Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
