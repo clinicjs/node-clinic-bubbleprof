@@ -69,7 +69,7 @@ class BubbleprofUI extends EventEmitter {
     if (dataNode.linkTo) {
       const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
       this.parentUI.createSubLayout(targetLayoutNode)
-    } else if (dataNode.nodeType === 'AggregateNode') {
+    } else if (dataNode.constructor.name === 'AggregateNode') {
       this.outputFrames(dataNode)
     } else {
       this.createSubLayout(layoutNode)
