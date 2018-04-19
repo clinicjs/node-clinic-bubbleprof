@@ -4,6 +4,7 @@ const BubbleprofUI = require('./bubbleprof-ui.js')
 const HoverBox = require('./hover-box.js')
 const InteractiveKey = require('./interactive-key.js')
 const SvgContainer = require('./svg-container.js')
+const staticKeyHtml = require('./static-key.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -74,17 +75,7 @@ function drawOuterUI () {
   const sideBar = ui.sections.get('side-bar')
   sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
-    htmlContent: `
-      <p>Bubbleprof observes the async_hooks created in your application, measures their delays, and groups them to map out where the delays most occur in your application's async flow.</p>
-      <span class="key-item-bubble key-image"></span>
-      <p>Each bubble shows where the flow moved between your own code (red), a module (blue) or node core (grey).</p>
-      <span class="key-item-arrow key-image"></span>
-      <p>Arrows pointing from a bubble show delays while moving out into the next module or party</p>
-      <span class="key-item-inner key-image"></span>
-      <p>Inner coloured lines indicate the types of async_hooks responsible for this delay. Click to explore.</p>
-      <span class="key-item-number key-image"></span>
-      <p>The lengths of the lines between and around the bubbles indicate the aggregated delay in miliseconds (ms).</p>
-    `
+    htmlContent: staticKeyHtml
   }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
