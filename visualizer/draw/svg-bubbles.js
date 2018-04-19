@@ -54,12 +54,8 @@ class Bubbles extends SvgContentGroup {
       .on('mouseover', d => this.ui.emit('hover', d))
       .on('mouseout', () => this.ui.emit('hover', null))
       .on('click', (d, e) => {
-        if (this.nodeType === 'AggregateNode') {
-          d3.event.stopPropagation()
-          this.ui.outputFrames(d.node)
-        } else {
-          this.ui.createSubLayout(d)
-        }
+        d3.event.stopPropagation()
+        this.ui.selectNode(d)
       })
 
     this.addCircles()

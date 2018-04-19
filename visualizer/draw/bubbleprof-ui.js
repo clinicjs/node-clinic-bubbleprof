@@ -64,6 +64,18 @@ class BubbleprofUI extends EventEmitter {
     return num < 0.01 ? '<0.01' : this.settings.numberFormatter(num)
   }
 
+  selectNode (layoutNode) {
+    const dataNode = layoutNode.node
+    if (dataNode.linkTo) {
+      const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
+      this.parentUI.createSubLayout(targetLayoutNode)
+    } else if (dataNode.nodeType === 'AggregateNode') {
+      this.outputFrames(dataNode)
+    } else {
+      this.createSubLayout(layoutNode)
+    }
+  }
+
   outputFrames (aggregateNode) {
     this.originalUI.emit('outputFrames', aggregateNode)
   }
