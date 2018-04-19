@@ -40,7 +40,11 @@ class BubbleprofUI extends EventEmitter {
   createSubLayout (layoutNode) {
     const node = layoutNode.node
     if (node.nodes && node.nodes.size) {
-      const newLayout = new Layout({ dataNodes: [...node.nodes.values()] }, this.layout.settings)
+      const connection = layoutNode.inboundConnection
+      const newLayout = new Layout({
+        dataNodes: [...node.nodes.values()],
+        connection: connection || { targetNode: node }
+      }, this.layout.settings)
       newLayout.generate()
 
       const nodeLinkSection = this.sections.get('node-link')

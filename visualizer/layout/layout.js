@@ -58,7 +58,8 @@ class Layout {
   // For layouts inside a clusterNode, rather than layouts of all cluterNodes
   prepareSublayoutNodes (dataNodes, connection) {
     // This sublayout is of nodes within targetNode. Some have parents within sourceNode
-    const linkToSource = !connection ? null : new ArtificialNode({
+
+    const linkToSource = !connection.sourceNode ? null : new ArtificialNode({
       id: connection.sourceNode.id,
       isRoot: true,
       children: []
@@ -85,7 +86,8 @@ class Layout {
             id: childId,
             children: [],
             parentId: dataNode.id
-          }, childNode)
+          // Use the name, mark etc of the clusterNode the target node is inside
+          }, childNode.clusterNode)
 
           dataNodes.push(linkOnwards)
         }
