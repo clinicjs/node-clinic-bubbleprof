@@ -47,7 +47,7 @@ class Frame {
   getFrameParty (fileName) {
     if (!fileName) return ['empty', 'no file']
 
-    // If first character is / or it's a letter followed by :/
+    // If first character is / or it's a letter followed by :\
     if (fileName.charAt(0) === '/' || fileName.match(/^[a-zA-Z]:\\/)) {
       // ...then this is a Unix or Windows style local file path
 
@@ -55,12 +55,10 @@ class Frame {
         const directories = fileName.split(/\\|\//)
         const moduleName = directories[directories.lastIndexOf('node_modules') + 1]
         return ['external', `module ${moduleName}`]
-      } else {
-        return ['user', 'your application']
       }
-    } else {
-      return ['nodecore', 'node core']
+      return ['user', 'your application']
     }
+    return ['nodecore', 'node core']
   }
 }
 
