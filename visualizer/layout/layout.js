@@ -5,6 +5,7 @@ const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
+const { validateNumber } = require('../validation.js')
 
 class Layout {
   constructor ({ dataNodes, connection }, settings) {
@@ -233,6 +234,9 @@ class LayoutNode {
   getWithinTime () {
     return this.node.getWithinTime()
   }
+  validateStat (...args) {
+    return this.node.validateStat(...args)
+  }
 }
 
 class CollapsedLayoutNode {
@@ -247,6 +251,10 @@ class CollapsedLayoutNode {
   }
   getWithinTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
+  }
+  validateStat (num, statType = '', aboveZero = false) {
+    const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
+    return validateNumber(num, targetDescription, aboveZero)
   }
 }
 
