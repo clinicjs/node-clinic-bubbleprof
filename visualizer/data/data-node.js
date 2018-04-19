@@ -171,7 +171,7 @@ class AggregateNode extends DataNode {
         data: frameItem
       }
     })
-    this.name = this.frames.length ? this.frames[0].formatted.slice(7) : 'empty frames'
+    this.name = this.frames.length ? this.frames[0].formatted.slice(7) : (this.isRoot ? 'root' : 'empty frames')
 
     this.mark = DataNode.markFromArray(node.mark)
 
