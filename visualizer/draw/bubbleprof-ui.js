@@ -11,7 +11,7 @@ class BubbleprofUI extends EventEmitter {
     super()
 
     const defaultSettings = {
-      numberFormatter: d3.format(',.2f'),
+      numberFormatter: d3.format(',.1f'),
       minimumLabelSpace: 14,
       strokePadding: 4,
       strokeWidthOuter: 2
@@ -55,7 +55,7 @@ class BubbleprofUI extends EventEmitter {
   }
 
   formatNumber (num) {
-    return num < 0.01 ? '<0.01' : this.settings.numberFormatter(num)
+    return num < 0.1 ? '<0.1' : this.settings.numberFormatter(num)
   }
 
   outputFrames (aggregateNode) {
