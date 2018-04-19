@@ -48,6 +48,7 @@ class Frames extends HtmlContent {
       .classed('no-frames-message', true)
 
     this.ui.on('outputFrames', (aggregateNode) => {
+      console.log(aggregateNode)
       this.frames = aggregateNode.frames || null
       this.node = aggregateNode
       this.groupFrames(this.frames || [])
