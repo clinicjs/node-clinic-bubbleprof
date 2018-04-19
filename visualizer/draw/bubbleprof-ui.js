@@ -69,6 +69,8 @@ class BubbleprofUI extends EventEmitter {
     if (dataNode.linkTo) {
       const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
       this.parentUI.createSubLayout(targetLayoutNode)
+      // TODO: replace with something better designed e.g. a back button for within sublayouts
+      this.sections.get('sublayout').d3Element.remove()
     } else if (dataNode.constructor.name === 'AggregateNode') {
       this.outputFrames(dataNode)
     } else {
