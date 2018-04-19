@@ -1,6 +1,7 @@
 html {
   /* Define colors */
   --main-bg-color: rgb(27, 30, 39);
+  --overlay-bg-color: rgba(55, 61, 79, 0.99);
 
   --banner-text-color: rgb(255, 255, 255);
   --banner-bg-color: rgb(41, 45, 57);
@@ -24,6 +25,8 @@ html {
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
+
+  --close-x: "×";
 
   --main-text-size: 10pt;
 }
@@ -50,7 +53,7 @@ html * {
   box-sizing: border-box;
 }
 
-html #banner, html #header, html #node-link, html #side-bar, html #footer .bar {
+html #banner, html #header, html #node-link, html #side-bar, html #footer {
   /* Light text on dark background in the browser looks blocky. To make it smoother
      and clearer, we use antialiased font rendering in dark theme. More details,
      especially on why this is a bad idea for dark text on light backgrounds:
@@ -186,6 +189,8 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   width: 100%;
   bottom: 0;
   z-index: 2;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 #footer .bar {
@@ -195,6 +200,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   cursor: pointer;
   height: 65px;
   width: 100%;
+  cursor: pointer;
 }
 
 #footer .bar .text {
@@ -220,6 +226,69 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 
 #footer.collapsed .bar .arrow {
   transform: scaleY(1);
+}
+
+#frames-panel {
+  background: var(--overlay-bg-color);
+  padding: 18px 28px;
+  color: var(--pure-white);
+  font-size: var(--main-text-size);
+  max-height: 300px;
+  overflow: auto;
+}
+
+#frames-panel .sub-collapse-control {
+  cursor: pointer;
+  color: var(--cyan);
+  font-weight: bold;
+}
+
+#frames-panel .collapsed .frame-item {
+  display: none;
+}
+
+#frames-panel .frame-item {
+  margin: 0 0 0 4px;
+  padding: 4px 0;
+}
+
+#frames-panel pre.frame-item {
+  white-space: pre-wrap;
+  padding-left: 3px;
+}
+
+#frames-panel div.frame-item {
+  padding: 8px 20px;
+}
+
+#frames-panel .frame-group .frame-item {
+  border-left: solid 1px var(--cyan);
+}
+
+#frames-panel .collapsed .sub-collapse-control .arrow {
+  transform: rotate(90deg);
+}
+
+#frames-panel .sub-collapse-control .arrow {
+  display: inline-block;
+  margin: 0 8px -3px -3px;
+}
+
+#frames-panel .close {
+  width: 24px;
+  height: 24px;
+  color: var(--cyan-highlight);
+  position: absolute;
+  right: 28px;
+  top: 18px;
+  display: block;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+#frames-panel .close:after {
+  content: var(--close-x);
+  display: block;
 }
 
 /* Node-link diagram and container */
@@ -310,7 +379,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   height: 32px;
   background: var(--pure-black);
   color: var(--cyan);
-  content: "⨉";
+  content: var(--close-x);
   z-index: 20;
   position: absolute;
   padding: 2px 11px 6px;
@@ -337,15 +406,19 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   padding: 8px 16px 8px 8px;
 }
 
-#side-bar .side-bar-item .collapse-control .arrow {
+#side-bar .side-bar-item .collapse-control .arrow,
+#frames-panel .sub-collapse-control .arrow {
   height: 14px;
   width: 16px;
-  position: absolute;
-  top: 8px;
-  right: 0px;
   background-image: var(--down-white-chevron-arrow);
   background-size: cover;
   transform: scaleY(-1);
+}
+
+#side-bar .side-bar-item .collapse-control .arrow {
+  position: absolute;
+  top: 8px;
+  right: 0px;
 }
 
 #side-bar .side-bar-item.collapsed .collapse-control .arrow {

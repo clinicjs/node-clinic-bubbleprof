@@ -76,8 +76,9 @@ class Layout {
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const linkOnwards = new ArtificialNode({
             id: childId,
+            children: [],
             parentId: node.id
-          }, childNode)
+          }, childNode.clusterNode)
 
           this.nodesMap.set(linkOnwards.id, linkOnwards)
           this.nodes.push(linkOnwards)
@@ -187,6 +188,8 @@ class ArtificialNode extends ClusterNode {
       nodeType: 'AggregateNode'
     }
     const node = Object.assign(defaultProperties, rawNode)
+
+    this.linkTo = nodeToCopy
 
     this.replacesIds = this.replacesIds
     this.nodeType = node.nodeType
