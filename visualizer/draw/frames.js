@@ -50,6 +50,9 @@ class Frames extends HtmlContent {
     this.ui.on('outputFrames', (aggregateNode) => {
       this.frames = aggregateNode.frames || null
       this.node = aggregateNode
+
+      this.isRoot = aggregateNode.isRoot
+
       this.groupFrames(this.frames || [])
       if (aggregateNode) {
         const footer = this.ui.sections.get('footer')
@@ -88,9 +91,14 @@ class Frames extends HtmlContent {
         .classed('sub-collapse-control', true)
         .html('<span class="arrow"></span> Empty frames')
 
-      d3Group.append('div')
+      const d3EmptyFrameItem = d3Group.append('div')
         .classed('frame-item', true)
-        .text('No frames are available for this async_hook. It could be from a native module, or something not integrated with the async_hooks API.')
+
+      if (this.isRoot) {
+        d3EmptyFrameItem.text('This is the root node, representing the starting point of your application. No stack frames are available.')
+      } else {
+        d3EmptyFrameItem.text('No frames are available for this async_hook. It could be from a native module, or something not integrated with the async_hooks API.')
+      }
     }
     for (const frame of frames) {
       if (frame.isGroup) {
