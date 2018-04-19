@@ -212,3 +212,29 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
 
   t.end()
 })
+
+test('Visualizer layout - positioning - pyramid - can handle collapsets', function (t) {
+  const topology = [
+    ['1.9', 50],
+    ['1.2.3.4', 150],
+    ['1.2.3.5', 250],
+    ['1.2.6.7', 200],
+    ['1.2.8', 100]
+  ]
+  const expectedTopology = Object.assign([], topology)
+  shuffle(topology) // Pyramid result should be consistent independent of initial order
+
+  const dataSet = loadData(mockTopology(topology))
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
+  layout.processHierarchy({ collapseNodes: true })
+  // Arbitrary Map order being issue here
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 6].every(c => key.includes(c)))
+  t.ok(clumpId)
+  const positioning = layout.positioning
+  positioning.formClumpPyramid()
+
+  const expectedOrder = topologyToOrderedLeaves(expectedTopology)
+  t.deepEqual(positioning.order, expectedOrder)
+
+  t.end()
+})

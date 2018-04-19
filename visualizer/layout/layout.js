@@ -106,8 +106,7 @@ class Layout {
     }
   }
 
-  // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate ({ collapseNodes } = {}) {
+  processHierarchy ({ collapseNodes } = {}) {
     this.processBetweenData()
     this.scale.calculateScaleFactor()
     if (collapseNodes) {
@@ -115,6 +114,11 @@ class Layout {
       this.processBetweenData()
       this.scale.calculateScaleFactor()
     }
+  }
+
+  // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
+  generate (settings) {
+    this.processHierarchy(settings)
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
   }
