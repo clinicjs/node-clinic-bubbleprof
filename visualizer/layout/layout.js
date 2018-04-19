@@ -76,6 +76,7 @@ class Layout {
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const linkOnwards = new ArtificialNode({
             id: childId,
+            children: [],
             parentId: node.id
           }, childNode)
 
