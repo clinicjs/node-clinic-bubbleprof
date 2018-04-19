@@ -20,7 +20,7 @@ const svgLink = `
 const svgText = `
   <svg class="key-item-image bubbleprof">
     <g class="party-user bubble-wrapper" transform="translate(24,24)">
-      <text class="time-label text-label">123.4&thinsp;ms</text>
+      <text class="time-label text-label">1,234&thinsp;ms</text>
     </g>
   </svg>
 `
