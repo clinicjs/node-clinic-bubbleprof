@@ -5,6 +5,7 @@ const HoverBox = require('./hover-box.js')
 const InteractiveKey = require('./interactive-key.js')
 const SvgContainer = require('./svg-container.js')
 const staticKeyHtml = require('./static-key.js')
+const Frames = require('./frames.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -73,6 +74,7 @@ function drawOuterUI () {
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
+
   sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
     htmlContent: staticKeyHtml
@@ -85,11 +87,13 @@ function drawOuterUI () {
     .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
 
   // Footer
-  const footerCollapseHTML = '<div class="text">How to use this</div><div class="arrow"></div>'
-  ui.sections.get('footer').addCollapseControl(true, {
+  const footerCollapseHTML = '<div class="text">Stack frames to investigate</div><div class="arrow"></div>'
+  const footer = ui.sections.get('footer')
+  footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
     classNames: 'bar'
   })
+  footer.addContent(Frames, { id: 'frames-panel', classNames: 'side-bar-item' })
 
   // Complete
   ui.initializeElements()
