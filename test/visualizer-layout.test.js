@@ -218,7 +218,7 @@ test('Visualizer layout - collapse - collapses subset with missing leaves', func
 // T->L
 //  \>L->C
 //     \>L->C
-test('Visualizer layout - collapse - xyz', function (t) {
+test('Visualizer layout - collapse - complex example', function (t) {
   const topology = [
     ['1.2', 50],
     ['1.3.4', 1],
