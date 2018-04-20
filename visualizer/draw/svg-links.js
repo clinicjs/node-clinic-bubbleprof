@@ -41,12 +41,8 @@ class Links extends SvgContentGroup {
       .classed('below-threshold-2', (d) => this.isBelowLabelThreshold(d))
       .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
       .on('click', connection => {
-        if (this.nodeType === 'AggregateNode') {
-          d3.event.stopPropagation()
-          this.ui.outputFrames(connection.targetNode)
-        } else {
-          this.ui.createSubLayout(connection.targetLayoutNode)
-        }
+        d3.event.stopPropagation()
+        this.ui.selectNode(connection.targetLayoutNode)
       })
 
     this.addLines()

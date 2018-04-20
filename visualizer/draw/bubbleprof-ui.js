@@ -7,11 +7,11 @@ const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
 
 class BubbleprofUI extends EventEmitter {
-  constructor (sections = [], settings, appendTo) {
+  constructor (sections = [], settings, appendTo, parentUI = null) {
     super()
 
     const defaultSettings = {
-      numberFormatter: d3.format(',.2f'),
+      numberFormatter: d3.format(',.0f'),
       strokePadding: 4,
       lineWidth: 2,
       labelMinimumSpace: 14
@@ -19,6 +19,12 @@ class BubbleprofUI extends EventEmitter {
     this.settings = Object.assign(defaultSettings, settings)
 
     this.mainContainer = {}
+
+    function getOriginalUI (parentUI) {
+      return parentUI.parentUI ? getOriginalUI(parentUI.parentUI) : parentUI
+    }
+    this.parentUI = parentUI
+    this.originalUI = parentUI ? getOriginalUI(parentUI) : this
 
     // Main divisions of the page
     this.sections = new Map()
@@ -39,7 +45,7 @@ class BubbleprofUI extends EventEmitter {
       newLayout.generate()
 
       const nodeLinkSection = this.sections.get('node-link')
-      const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection)
+      const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection, this)
 
       const sublayout = newUI.sections.get('sublayout')
       sublayout.addCollapseControl()
@@ -55,13 +61,25 @@ class BubbleprofUI extends EventEmitter {
   }
 
   formatNumber (num) {
-    return num < 0.01 ? '<0.01' : this.settings.numberFormatter(num)
+    return num < 1 ? '<1' : this.settings.numberFormatter(num)
+  }
+
+  selectNode (layoutNode) {
+    const dataNode = layoutNode.node
+    if (dataNode.linkTo) {
+      const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
+      this.parentUI.createSubLayout(targetLayoutNode)
+      // TODO: replace with something better designed e.g. a back button for within sublayouts
+      this.sections.get('sublayout').d3Element.remove()
+    } else if (dataNode.constructor.name === 'AggregateNode') {
+      this.outputFrames(dataNode)
+    } else {
+      this.createSubLayout(layoutNode)
+    }
   }
 
   outputFrames (aggregateNode) {
-    for (const frame of aggregateNode.frames) {
-      console.log(frame.formatted)
-    }
+    this.originalUI.emit('outputFrames', aggregateNode)
   }
 
   truncateLabel (labelString, maxWords, maxChars) {
