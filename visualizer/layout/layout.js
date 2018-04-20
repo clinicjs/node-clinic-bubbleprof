@@ -250,6 +250,18 @@ class CollapsedLayoutNode {
     this.collapsedNodes = layoutNodes
     this.parent = parent
     this.children = children || []
+
+    for (const layoutNode of layoutNodes) {
+      const node = layoutNode.node
+      if (!this.node) {
+        this.node = new ArtificialNode({
+          nodeType: node.constructor.name
+        }, node)
+      } else {
+        this.node.aggregateStats(node)
+        this.applyDecimals(node)
+      }
+    }
   }
   getBetweenTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
@@ -260,6 +272,13 @@ class CollapsedLayoutNode {
   validateStat (num, statType = '', aboveZero = false) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
     return validateNumber(num, targetDescription, aboveZero)
+  }
+  applyDecimals (otherNode) {
+    this.node.aggregateDecimals(otherNode, 'type', 'between')
+    this.node.aggregateDecimals(otherNode, 'type', 'within')
+    this.node.aggregateDecimals(otherNode, 'typeCategory', 'between')
+    this.node.aggregateDecimals(otherNode, 'typeCategory', 'within')
+    // TODO: aggregate party, draw appropriate pie
   }
 }
 
@@ -285,6 +304,30 @@ class ArtificialNode extends ClusterNode {
   }
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
+  }
+  aggregateStats (dataNode) {
+    this.stats.setSync(this.stats.sync + dataNode.stats.sync)
+    this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
+    this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
+
+    this.stats.rawTotals.sync += dataNode.stats.rawTotals.sync
+    this.stats.rawTotals.async.between += dataNode.stats.rawTotals.async.between
+    this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
+  }
+  aggregateDecimals (dataNode, classification, position) {
+    if (dataNode.constructor.name === 'AggregateNode') {
+      /* TODO: fix this
+      const label = otherNode[classification]
+      const newDecimal = otherNode.decimals[classification][position].get(label)
+      this.setDecimal(newDecimal, classification, position, label)
+      */
+    } else {
+      const byLabel = dataNode.decimals[classification][position]
+      for (const label of byLabel.keys()) {
+        const newDecimal = dataNode.decimals[classification][position].get(label)
+        this.setDecimal(newDecimal, classification, position, label)
+      }
+    }
   }
 }
 
