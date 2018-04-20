@@ -96,11 +96,11 @@ class Layout {
     this.prepareLayoutNodes(dataNodes)
   }
 
-  processBetweenData () {
+  processBetweenData (generateConnections = false) {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
 
-      if (layoutNode.parent) {
+      if (generateConnections && layoutNode.parent) {
         const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
         this.connectionsByTargetId.set(layoutNode.id, connection)
         this.connections.push(connection)
@@ -114,7 +114,7 @@ class Layout {
     this.scale.calculateScaleFactor()
     if (collapseNodes) {
       this.collapseNodes()
-      this.processBetweenData()
+      this.processBetweenData(true)
       this.scale.calculateScaleFactor()
     }
   }
