@@ -3,13 +3,10 @@
 const Layout = require('./layout.js')
 
 function generateLayout (dataSet, settings) {
-  const layout = new Layout([...dataSet.clusterNodes.values()], settings)
-
-  // This will be interrupted when generating sublayouts
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
 
   // This can be interrupted in tests etc
-  layout.generate()
+  layout.generate(settings)
   return layout
 }
 

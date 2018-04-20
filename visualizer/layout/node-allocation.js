@@ -11,15 +11,14 @@ class NodeAllocation {
     this.midPoints = new Map()
     this.roots = new Map()
     for (const layoutNode of layoutNodes.values()) {
-      const node = layoutNode.node
       // Edge offset does not apply to midpoints - only leaves - hence init value is null
       const position = { units: 0, offset: null, x: 0, y: 0 }
       layoutNode.position = position
       const category = layoutNode.stem.leaves.ids.length ? 'midPoints' : 'leaves'
-      this[category].set(node.id, layoutNode)
+      this[category].set(layoutNode.id, layoutNode)
     }
     for (const midPoint of this.midPoints.values()) {
-      if (!this.midPoints.get(midPoint.node.parentId)) {
+      if (!midPoint.parent) {
         this.roots.set(midPoint.id, midPoint)
       }
     }
@@ -81,7 +80,7 @@ class NodeAllocation {
     // Traverse the hierarchies and index Clumps at each level
     const hierarchyLevels = new Map()
     for (const leafLayoutNode of this.leaves.values()) {
-      const leaf = leafLayoutNode.node
+      const leaf = leafLayoutNode
       const stem = leafLayoutNode.stem
 
       const leafTotalStemLength = stem.getTotalStemLength(this.layout.scale).combined
@@ -99,10 +98,10 @@ class NodeAllocation {
           continue
         }
         const ancestorAtDepthLayoutNode = this.layoutNodes.get(ancestorId)
-        const ancestorAtDepth = ancestorAtDepthLayoutNode && ancestorAtDepthLayoutNode.node
+        const ancestorAtDepth = ancestorAtDepthLayoutNode && ancestorAtDepthLayoutNode
         if (!hierarchyLevel.clumps.has(ancestorAtDepth)) {
           const previousHierarchyLevel = hierarchyLevels.get(depth - 1)
-          const parentClump = previousHierarchyLevel ? previousHierarchyLevel.clumps.get(ancestorAtDepthLayoutNode.parent && ancestorAtDepthLayoutNode.parent.node) : null
+          const parentClump = previousHierarchyLevel ? previousHierarchyLevel.clumps.get(ancestorAtDepthLayoutNode.parent && ancestorAtDepthLayoutNode.parent) : null
           const ancestorClump = new Clump(ancestorAtDepthLayoutNode, parentClump, leafTotalStemLength)
           hierarchyLevel.clumps.set(ancestorAtDepth, ancestorClump)
           if (parentClump) {
@@ -123,7 +122,7 @@ class NodeAllocation {
       }
       const hierarchyLevel = hierarchyLevels.get(leafDepth)
       const previousHierarchyLevel = hierarchyLevels.get(leafDepth - 1)
-      const parentClump = previousHierarchyLevel.clumps.get(leafLayoutNode.parent && leafLayoutNode.parent.node)
+      const parentClump = previousHierarchyLevel.clumps.get(leafLayoutNode.parent && leafLayoutNode.parent)
       const leafClump = new Clump(leafLayoutNode, parentClump, leafTotalStemLength)
       hierarchyLevel.clumps.set(leaf, leafClump)
       if (parentClump) {
@@ -141,7 +140,7 @@ class NodeAllocation {
 
         // In some cases e.g. root node, these can be 0; if so, set as 1. TODO: investigate this further
         const clumpUnits = ((parentUnits * clumpAtDepth.longestLeafLength) || 1) / (proportionFactor || 1)
-        clumpAtDepth.units = clumpAtDepth.layoutNode.node.validateStat(clumpUnits)
+        clumpAtDepth.units = clumpAtDepth.layoutNode.validateStat(clumpUnits)
         clumpAtDepth.layoutNode.position.units = clumpUnits
       }
     }
@@ -149,7 +148,7 @@ class NodeAllocation {
   calculate1DLinearOffsets () {
     let currentSegment = this.segments[0]
     let currentBlock = null
-    const intoOrder = (leafA, leafB) => this.layout.positioning.order.indexOf(leafA.node.id) - this.layout.positioning.order.indexOf(leafB.node.id)
+    const intoOrder = (leafA, leafB) => this.layout.positioning.order.indexOf(leafA.id) - this.layout.positioning.order.indexOf(leafB.id)
     const arrangedLeaves = [...this.leaves.values()].sort(intoOrder) // To be optimized (unnecessary iterations)
     for (const leafLayoutNode of arrangedLeaves) {
       const position = leafLayoutNode.position
@@ -167,14 +166,14 @@ class NodeAllocation {
         const relativeOffset = block.center - segment.begin
         const { x, y } = segment.translate1DPointTo2D(relativeOffset)
 
-        position.x = block.layoutNode.node.validateStat(x, 'x position')
-        position.y = block.layoutNode.node.validateStat(y, 'y position')
+        position.x = block.layoutNode.validateStat(x, 'x position')
+        position.y = block.layoutNode.validateStat(y, 'y position')
       }
     }
   }
   constrain2DLeafCoordinates () {
     for (const layoutNode of this.leaves.values()) {
-      const leaf = layoutNode.node
+      const leaf = layoutNode
       const stem = layoutNode.stem
 
       const parentStem = layoutNode.parent && layoutNode.parent.stem
@@ -193,7 +192,7 @@ class NodeAllocation {
   }
   calculate2DMidpointCoordinates (placementMode) {
     for (const layoutNode of this.midPoints.values()) {
-      const midPoint = layoutNode.node
+      const midPoint = layoutNode // TODO: make naming consistent
       const stem = layoutNode.stem
       const position = layoutNode.position
 
@@ -205,7 +204,7 @@ class NodeAllocation {
         continue
       }
       const parentStem = layoutNode.parent.stem
-      const parentNode = layoutNode.parent.node
+      const parentNode = layoutNode.parent
       const parentPosition = layoutNode.parent.position
 
       const ownLeavesInSubset = stem.leaves.ids.filter(leafId => this.leaves.has(leafId))

@@ -10,8 +10,6 @@ function getNodeAncestorIds (parent) {
 class Stem {
   constructor (layout, layoutNode) {
     this.layout = layout
-    const node = layoutNode.node
-
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
@@ -20,15 +18,15 @@ class Stem {
     this.leaves = {
       ids: []
     }
-    this.ownBetween = node.getBetweenTime()
-    this.ownDiameter = radiusFromCircumference(node.getWithinTime()) * 2
+    this.ownBetween = layoutNode.getBetweenTime()
+    this.ownDiameter = radiusFromCircumference(layoutNode.getWithinTime()) * 2
 
     for (const ancestorId of this.ancestors.ids) {
       const ancestorStem = layout.layoutNodes.get(ancestorId).stem
       this.ancestors.totalBetween += ancestorStem.ownBetween
       this.ancestors.totalDiameter += ancestorStem.ownDiameter
       if (!layoutNode.children.length) {
-        ancestorStem.leaves.ids.push(node.id)
+        ancestorStem.leaves.ids.push(layoutNode.id)
       }
     }
   }

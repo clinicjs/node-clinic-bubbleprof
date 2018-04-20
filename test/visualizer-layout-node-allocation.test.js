@@ -17,12 +17,11 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
-  const unitsById = []
+  const unitsById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     unitsById[layoutNode.id] = layoutNode.position.units
   }
@@ -53,9 +52,8 @@ test('Visualizer layout - node allocation - three-sided space segments depend on
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
@@ -81,9 +79,8 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   const nodeAllocation = layout.positioning.nodeAllocation
@@ -117,9 +114,8 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
@@ -147,22 +143,21 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout([...dataSet.clusterNodes.values()], { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
   const nodeAllocation = layout.positioning.nodeAllocation
   nodeAllocation.process(NodeAllocation.placementMode.LENGTH_CONSTRAINED)
 
-  const positionById = []
-  const scaledStemById = []
+  const positionById = {}
+  const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
     scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
   }
-  const distanceById = []
+  const distanceById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     if (layoutNode.id === 1) {
       // Root node will always have 0 distance
@@ -225,23 +220,22 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
   const subset = [6, 7, 8].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  const layout = new Layout(subset, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
   t.ok(layout)
-  layout.prepareLayoutNodes()
   layout.generate()
 
   layout.positioning.nodeAllocation = new NodeAllocation(layout, layout.layoutNodes, NodeAllocation.threeSided)
   const nodeAllocation = layout.positioning.nodeAllocation
   nodeAllocation.process(NodeAllocation.placementMode.LENGTH_CONSTRAINED)
 
-  const positionById = []
-  const scaledStemById = []
+  const positionById = {}
+  const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
     scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
   }
 
-  const distanceById = []
+  const distanceById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     if (layoutNode.id === 6) {
       // As top-level node in this subset, node 6 has same placement as root and 0 distance
@@ -266,6 +260,121 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
 
   t.ok(positionById[8].y > positionById[6].y)
   t.ok(positionById[8].x > positionById[6].x)
+  t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
+  t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
+
+  t.end()
+})
+
+test('Visualizer layout - node allocation - can handle collapsets', function (t) {
+  const topology = [
+    ['1.2', 100 - 1],
+    ['1.3.4.5', 500 - 3],
+    ['1.3.6.7', 900 - 3],
+    ['1.3.6.8', 500 - 3]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  t.ok(dataSet)
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  t.ok(layout)
+  layout.processHierarchy({ collapseNodes: true })
+  // Arbitrary Map order being issue here
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 3, 4, 6].every(c => ('' + key).includes(c)))
+  t.ok(clumpId)
+  layout.positioning.formClumpPyramid()
+  layout.positioning.placeNodes()
+
+  const positionById = {}
+  const scaledStemById = {}
+  for (const layoutNode of layout.layoutNodes.values()) {
+    positionById[layoutNode.id] = layoutNode.position
+    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+  }
+
+  const distanceById = {}
+  for (const layoutNode of layout.layoutNodes.values()) {
+    if (layoutNode.id === clumpId) {
+      distanceById[layoutNode.id] = 0
+      continue
+    }
+    distanceById[layoutNode.id] = new LineCoordinates({
+      x1: positionById[layoutNode.parent.id].x,
+      y1: positionById[layoutNode.parent.id].y,
+      x2: positionById[layoutNode.id].x,
+      y2: positionById[layoutNode.id].y
+    }).length
+  }
+
+  t.equal(positionById[clumpId].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
+  t.equal(positionById[clumpId].y.toFixed(0), (layout.settings.svgDistanceFromEdge + 1).toFixed(0))
+
+  t.ok(positionById[7].y > positionById[clumpId].y)
+  t.ok(positionById[7].x < positionById[clumpId].x)
+  t.ok(distanceById[7] < scaledStemById[7].ownBetween * 1.01)
+  t.ok(distanceById[7] > scaledStemById[7].ownBetween * 0.99)
+
+  t.ok(positionById[8].y > positionById[clumpId].y)
+  t.ok(positionById[8].x > positionById[clumpId].x)
+  t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
+  t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
+
+  t.end()
+})
+
+test('Visualizer layout - node allocation - can handle collapsets with clumpy leaves', function (t) {
+  const topology = [
+    ['1.2', 1],
+    ['1.3.4.5', 500 - 3],
+    ['1.3.6.7', 900 - 3],
+    ['1.3.6.8', 500 - 3]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  t.ok(dataSet)
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  t.ok(layout)
+  layout.processHierarchy({ collapseNodes: true })
+  // Arbitrary Map order being issue here
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 4, 6].every(c => ('' + key).includes(c)))
+  t.ok(clumpId)
+  layout.positioning.formClumpPyramid()
+  layout.positioning.placeNodes()
+
+  const positionById = {}
+  const scaledStemById = {}
+  for (const layoutNode of layout.layoutNodes.values()) {
+    positionById[layoutNode.id] = layoutNode.position
+    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+  }
+
+  const distanceById = {}
+  for (const layoutNode of layout.layoutNodes.values()) {
+    if (layoutNode.id === clumpId) {
+      distanceById[layoutNode.id] = 0
+      continue
+    }
+    distanceById[layoutNode.id] = new LineCoordinates({
+      x1: positionById[layoutNode.parent.id].x,
+      y1: positionById[layoutNode.parent.id].y,
+      x2: positionById[layoutNode.id].x,
+      y2: positionById[layoutNode.id].y
+    }).length
+  }
+
+  t.equal(positionById[clumpId].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
+  t.equal(positionById[clumpId].y.toFixed(0), (layout.settings.svgDistanceFromEdge).toFixed(0))
+
+  t.ok(positionById[5].y > positionById[clumpId].y)
+  t.ok(positionById[5].x < positionById[clumpId].x)
+  t.ok(distanceById[5] < scaledStemById[5].ownBetween * 1.01)
+  t.ok(distanceById[5] > scaledStemById[5].ownBetween * 0.99)
+
+  t.ok(positionById[7].y > positionById[clumpId].y)
+  t.ok(positionById[7].x === positionById[clumpId].x)
+  t.ok(distanceById[7] < scaledStemById[7].ownBetween * 1.01)
+  t.ok(distanceById[7] > scaledStemById[7].ownBetween * 0.99)
+
+  t.ok(positionById[8].y > positionById[clumpId].y)
+  t.ok(positionById[8].x > positionById[clumpId].x)
   t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
   t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
 

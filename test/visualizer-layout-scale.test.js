@@ -163,8 +163,7 @@ test('Visualizer layout - scale - scales based on selected subset of nodes', fun
   const dataSet = loadData(mockTopology(topology))
   const aggregateNode = dataSet.aggregateNodes.get(2)
 
-  const layout = new Layout([aggregateNode], { svgWidth, svgHeight, labelMinimumSpace: 0, lineWidth: 0 })
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: [aggregateNode] }, { svgWidth, svgHeight, labelMinimumSpace: 0, lineWidth: 0 })
   layout.generate()
 
   // TODO: re-evaluate and re-activate the logic of these tests against new scale logic
