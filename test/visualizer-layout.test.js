@@ -7,7 +7,7 @@ const Layout = require('../visualizer/layout/layout.js')
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
 function toLink (layoutNode) {
-  return layoutNode.id + ' => ' + layoutNode.children.join(',')
+  return layoutNode.id + ' => ' + layoutNode.children.join(';')
 }
 
 // T=Tiny, L=Long, C=Collapsed
@@ -77,14 +77,14 @@ test('Visualizer layout - collapse - collapses branches at stem', function (t) {
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2,4', '2 => 3', '3 => ', '4 => 5', '5 => '])
+  t.deepEqual(actualBefore, ['1 => 2;4', '2 => 3', '3 => ', '4 => 5', '5 => '])
   t.ok(layout.scale.scaleFactor < 10)
   t.ok(layout.scale.scaleFactor > 9)
   layout.collapseNodes()
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,4', 'clump:2,4 => 3,5', '5 => ', '3 => '])
+  t.deepEqual(actualAfter, ['1 => clump:2,4', 'clump:2,4 => 3;5', '5 => ', '3 => '])
 
   t.end()
 })
@@ -106,14 +106,14 @@ test('Visualizer layout - collapse - collapses both siblings and parents', funct
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2,4', '2 => 3', '3 => ', '4 => 5', '5 => '])
+  t.deepEqual(actualBefore, ['1 => 2;4', '2 => 3', '3 => ', '4 => 5', '5 => '])
   t.ok(layout.scale.scaleFactor < 10)
   t.ok(layout.scale.scaleFactor > 9)
   layout.collapseNodes()
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['clump:1,2,4 => 3,5', '5 => ', '3 => '])
+  t.deepEqual(actualAfter, ['clump:1,2,4 => 3;5', '5 => ', '3 => '])
 
   t.end()
 })
@@ -136,14 +136,14 @@ test('Visualizer layout - collapse - collapses children and parents while ignori
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2,4', '2 => 3', '3 => ', '4 => 5', '5 => '])
+  t.deepEqual(actualBefore, ['1 => 2;4', '2 => 3', '3 => ', '4 => 5', '5 => '])
   t.ok(layout.scale.scaleFactor < 10)
   t.ok(layout.scale.scaleFactor > 9)
   layout.collapseNodes()
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['clump:1,2 => 4,3', '4 => 5', '5 => ', '3 => '])
+  t.deepEqual(actualAfter, ['clump:1,2 => 3;4', '4 => 5', '5 => ', '3 => '])
 
   t.end()
 })
@@ -195,14 +195,58 @@ test('Visualizer layout - collapse - collapses subset with missing leaves', func
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2,5', '2 => 3', '3 => ', '5 => 6', '6 => '])
+  t.deepEqual(actualBefore, ['1 => 2;5', '2 => 3', '3 => ', '5 => 6', '6 => '])
   t.ok(layout.scale.scaleFactor < 10)
   t.ok(layout.scale.scaleFactor > 9)
   layout.collapseNodes()
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['clump:1,2,3,5 => 6', '6 => '])
+  t.deepEqual(actualAfter, ['clump:1,5,2,3 => 6', '6 => '])
+
+  t.end()
+})
+
+// T->L
+//  \>L->T
+//     \>T->T
+//     \>T->T
+//        \>T
+//     \>L->T
+//        \>T->T
+// gives
+// T->L
+//  \>L->C
+//     \>L->C
+test('Visualizer layout - collapse - xyz', function (t) {
+  const topology = [
+    ['1.2', 50],
+    ['1.3.4', 1],
+    ['1.3.5.6', 1],
+    ['1.3.7.8', 1],
+    ['1.3.7.9', 1],
+    ['1.3.10.11', 1],
+    ['1.3.10.12.13', 1]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
+  dataSet.clusterNodes.get(2).stats.async.within = 75 // make 2 long
+  dataSet.clusterNodes.get(3).stats.async.within = 75 // make 3 long
+  dataSet.clusterNodes.get(10).stats.async.within = 75 // make 10 long
+  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  layout.processBetweenData()
+  layout.scale.calculateScaleFactor()
+  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  t.deepEqual(actualBefore, ['1 => 2;3', '2 => ', '3 => 4;5;7;10', '4 => ', '5 => 6', '6 => ', '7 => 8;9', '8 => ', '9 => ', '10 => 11;12', '11 => ', '12 => 13', '13 => '])
+  console.log(layout.scale.scaleFactor)
+  t.ok(layout.scale.scaleFactor < 10)
+  t.ok(layout.scale.scaleFactor > 9)
+  layout.collapseNodes()
+  layout.processBetweenData()
+  layout.scale.calculateScaleFactor()
+  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  t.deepEqual(actualAfter, ['1 => 2;3', '3 => clump:4,5,6,7,8,9;10', '2 => ', 'clump:4,5,6,7,8,9 => ', '10 => clump:11,12,13', 'clump:11,12,13 => '])
 
   t.end()
 })

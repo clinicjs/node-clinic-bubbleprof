@@ -109,7 +109,7 @@ class Layout {
     }
   }
 
-  processHierarchy ({ collapseNodes } = {}) {
+  processHierarchy ({ collapseNodes = true } = {}) {
     this.processBetweenData()
     this.scale.calculateScaleFactor()
     if (collapseNodes) {
@@ -140,72 +140,75 @@ class Layout {
     }
     this.layoutNodes = newLayoutNodes
 
+    // TODO: optimize
     function squash (layoutNode, parent) {
       // Skip ArtificialNodes
       if (layoutNode instanceof ArtificialNode) return layoutNode
 
       // Squash children first
       const childrenAboveThreshold = []
+      const childrenBelowThreshold = []
       const collapsedChildren = []
       for (const childId of layoutNode.children) {
         const child = layoutNodes.get(childId)
         const squashed = squash(child, layoutNode)
-        if (squashed) {
-          collapsedChildren.push(squashed)
+        if (isBelowThreshold(child.node)) {
+          squashed ? collapsedChildren.push(squashed) : childrenBelowThreshold.push(child)
         } else {
-          hierarchyOrder.unshift(childId)
           childrenAboveThreshold.push(child)
         }
       }
 
+      // For detecting children-grandchildren collision
+      const childToCollapse = new Map()
+      for (const collapsedChild of collapsedChildren) {
+        for (const layoutNode of collapsedChild.collapsedNodes) {
+          childToCollapse.set(layoutNode.id, collapsedChild)
+        }
+      }
+      const collapsibleChildren = childrenBelowThreshold.concat(flatMapDeep(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
+      const grandChildren = flatMapDeep(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
+      let combinedSelfCollapse
+      let combinedChildrenCollapse
       const selfBelowThreshold = isBelowThreshold(layoutNode.node)
-      const nodesBelowThreshold = selfBelowThreshold ? [layoutNode].concat(collapsedChildren) : collapsedChildren
-      const flatLayoutNodes = flatMapDeep(nodesBelowThreshold.map(layoutNode => layoutNode.collapsedNodes || layoutNode))
-      const grandChildren = flatMapDeep(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.children))
-      const collapsedLayoutNode = new CollapsedLayoutNode(flatLayoutNodes, parent, childrenAboveThreshold.map(child => child.id).concat(grandChildren))
-      const collapsedSize = collapsedLayoutNode && collapsedLayoutNode.collapsedNodes.length
+      if (selfBelowThreshold && collapsibleChildren.length) {
+        // Combine children and self
+        combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
+      } else if (collapsibleChildren.length >= 2) {
+        // Combine children only
+        combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
+        layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
+      }
 
-      const isParentCollapsible = parent && isBelowThreshold(parent.node)
-      if (!selfBelowThreshold) {
-        if (collapsedSize >= 1) {
-          // Merged children
-          if (!layoutNodes.has(collapsedLayoutNode.id)) {
-            indexCollapsedLayoutNode(collapsedLayoutNode)
-            hierarchyOrder.unshift(collapsedLayoutNode.id)
-          }
-          layoutNode.children = [collapsedLayoutNode, ...childrenAboveThreshold].map(child => child.id)
+      let nodesToIndex
+      if (selfBelowThreshold) {
+        // If self collapsible, index only childrenAboveThreshold
+        nodesToIndex = childrenAboveThreshold
+      } else {
+        // If self not collapsible, index all children
+        nodesToIndex = childrenAboveThreshold.concat(combinedChildrenCollapse || childrenBelowThreshold.concat(collapsedChildren))
+      }
+      // If no parent index self
+      if (!parent) {
+        nodesToIndex.push(combinedSelfCollapse || layoutNode)
+      }
+      for (const layoutNode of nodesToIndex) {
+        if (layoutNode instanceof CollapsedLayoutNode) {
+          indexLayoutNode(layoutNode)
         }
-        if (!parent) {
-          hierarchyOrder.unshift(layoutNode.id)
-        }
-      } else if (selfBelowThreshold && !isParentCollapsible && collapsedSize >= 2) {
-        // Merged self and children
-        indexCollapsedLayoutNode(collapsedLayoutNode)
-        hierarchyOrder.unshift(collapsedLayoutNode.id)
-      } else if (selfBelowThreshold && !parent) {
-        // Short top-level node
         hierarchyOrder.unshift(layoutNode.id)
       }
-      return selfBelowThreshold ? collapsedLayoutNode : null
-    }
 
-    function indexCollapsedLayoutNode (collapsedLayoutNode) {
-      if (!collapsedLayoutNode.parent || !isBelowThreshold(collapsedLayoutNode.parent.node)) {
-        layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
-      }
+      return combinedSelfCollapse || null
+    }
+    function indexLayoutNode (collapsedLayoutNode) {
+      layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
       for (const childId of collapsedLayoutNode.children) {
         layoutNodes.get(childId).parent = collapsedLayoutNode
-        // Reindex child to position it after this clump
-        // TODO: optimize this
-        // const child = layoutNodes.get(childId)
-        // layoutNodes.delete(childId)
-        // layoutNodes.set(childId, child)
       }
       for (const layoutNode of collapsedLayoutNode.collapsedNodes) {
         layoutNode.parent = null
         layoutNode.children = []
-        // layoutNodes.delete(layoutNode.id)
-        // layoutNodes.delete('clump:' + layoutNode.id)
       }
     }
 
