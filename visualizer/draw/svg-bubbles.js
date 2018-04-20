@@ -69,7 +69,7 @@ class Bubbles extends SvgContentGroup {
   }
 
   getRadius (layoutNode) {
-    return this.ui.layout.scale.getCircleRadius(layoutNode.node.getWithinTime())
+    return this.ui.layout.scale.getCircleRadius(layoutNode.getWithinTime())
   }
 
   getInboundConnection (layoutNode) {

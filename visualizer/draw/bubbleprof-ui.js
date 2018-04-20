@@ -38,13 +38,18 @@ class BubbleprofUI extends EventEmitter {
   }
 
   createSubLayout (layoutNode) {
-    const node = layoutNode.node
-    if (node.nodes && node.nodes.size) {
-      const newLayout = new Layout([...node.nodes.values()], this.layout.settings)
-      newLayout.prepareSublayoutNodes(layoutNode.inboundConnection)
-      newLayout.generate()
+    const collapsed = layoutNode.collapsedNodes
+    const nodesArray = collapsed ? collapsed.map(item => item.node) : [...layoutNode.node.nodes.values()]
 
-      const nodeLinkSection = this.sections.get('node-link')
+    if (nodesArray && nodesArray.length) {
+      const connection = layoutNode.inboundConnection
+      const newLayout = new Layout({
+        dataNodes: nodesArray,
+        connection: connection || { targetNode: layoutNode.node }
+      }, this.layout.settings)
+      newLayout.generate({ collapseNodes: true })
+
+      const nodeLinkSection = this.originalUI.sections.get('node-link')
       const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection, this)
 
       const sublayout = newUI.sections.get('sublayout')
@@ -66,7 +71,8 @@ class BubbleprofUI extends EventEmitter {
 
   selectNode (layoutNode) {
     const dataNode = layoutNode.node
-    if (dataNode.linkTo) {
+    console.log(layoutNode)
+    if (layoutNode.constructor.name !== 'CollapsedLayoutNode' && dataNode.linkTo) {
       const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
       this.parentUI.createSubLayout(targetLayoutNode)
       // TODO: replace with something better designed e.g. a back button for within sublayouts

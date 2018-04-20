@@ -5,9 +5,10 @@ const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
+const { validateNumber } = require('../validation.js')
 
 class Layout {
-  constructor (nodes, settings, collapseNodes = false) {
+  constructor ({ dataNodes, connection }, settings) {
     const defaultSettings = {
       svgWidth: 1000,
       svgHeight: 1000,
@@ -18,84 +19,90 @@ class Layout {
     }
     this.settings = Object.assign(defaultSettings, settings)
 
-    // TODO: phase out this.nodes, use layoutNodes exclusively
-    this.nodes = nodes
-    this.nodesMap = new Map(nodes.map(node => [node.id, node]))
-
-    // TODO: re-evaluate this, does it still make sense to initialise these now?
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
 
     this.connections = []
     this.connectionsByTargetId = new Map()
 
-    this.layoutNodes = new Map()
-    this.stems = new Map()
+    if (connection) {
+      this.prepareSublayoutNodes(dataNodes, connection)
+    } else {
+      this.prepareLayoutNodes(dataNodes)
+    }
   }
 
-  prepareLayoutNodes () {
+  // Note: This currently does not support missing midpoints (implicit children)
+  prepareLayoutNodes (dataNodes) {
+    this.layoutNodes = new Map()
+
+    const dataNodeById = new Map(dataNodes.map(node => [node.id, node]))
     const createLayoutNode = (nodeId, parentLayoutNode) => {
-      const node = this.nodesMap.get(nodeId)
-      // if nodeId is a member of a clump, node.id is the id of the clump itself
-      if (this.layoutNodes.has(node.id)) return
+      const dataNode = dataNodeById.get(nodeId)
+      if (!dataNode || this.layoutNodes.has(dataNode.id)) return
 
-      const layoutNode = new LayoutNode(node, parentLayoutNode)
-      this.layoutNodes.set(node.id, layoutNode)
+      const layoutNode = new LayoutNode(dataNode, parentLayoutNode)
+      this.layoutNodes.set(dataNode.id, layoutNode)
 
-      if (parentLayoutNode) parentLayoutNode.children.push(node.id)
-      for (const childNodeId of node.children) {
+      if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
+      for (const childNodeId of dataNode.children) {
         createLayoutNode(childNodeId, layoutNode)
       }
     }
-    createLayoutNode(this.nodes[0].id)
+    const topDataNodes = dataNodes.filter(dataNode => !dataNode.parent)
+    for (const dataNode of topDataNodes) {
+      createLayoutNode(dataNode.id)
+    }
   }
 
   // For layouts inside a clusterNode, rather than layouts of all cluterNodes
-  prepareSublayoutNodes (connection) {
+  prepareSublayoutNodes (dataNodes, connection) {
     // This sublayout is of nodes within targetNode. Some have parents within sourceNode
-    const linkToSource = !connection ? null : new ArtificialNode({
+
+    const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
+
+    const linkToSource = !connection.sourceNode ? null : new ArtificialNode({
       id: connection.sourceNode.id,
       isRoot: true,
       children: []
     }, connection.sourceNode)
 
     if (linkToSource) {
-      this.nodesMap.set(linkToSource.id, linkToSource)
-      this.nodes.unshift(linkToSource)
+      dataNodes.unshift(linkToSource)
     }
 
     // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
-    for (const node of this.nodes) {
+    for (const dataNode of dataNodes) {
       // if (!nodeType) nodeType = node.constructor.name
 
-      if (linkToSource && node.isBetweenClusters) {
-        linkToSource.children.push(node.id)
+      if (linkToSource && !includedIds.has(dataNode.parentId)) {
+        linkToSource.children.push(dataNode.id)
       }
-      for (const childId of node.children) {
+      for (const childId of dataNode.children) {
         // If this child is in another cluster, add a dummy leaf node -> clickable link to that cluster
-        if (!this.nodes.some(node => node.id === childId)) {
-          const childNode = node.getSameType(childId)
+        if (!dataNodes.some(dataNode => dataNode.id === childId)) {
+          const childNode = dataNode.getSameType(childId)
 
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const linkOnwards = new ArtificialNode({
             id: childId,
             children: [],
-            parentId: node.id
+            parentId: dataNode.id
+          // Use the name, mark etc of the clusterNode the target node is inside
           }, childNode.clusterNode)
 
-          this.nodesMap.set(linkOnwards.id, linkOnwards)
-          this.nodes.push(linkOnwards)
+          dataNodes.push(linkOnwards)
         }
       }
     }
-    this.prepareLayoutNodes()
+    this.prepareLayoutNodes(dataNodes)
   }
 
-  processBetweenData () {
+  processBetweenData (generateConnections = true) {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
 
-      if (layoutNode.parent) {
+      if (generateConnections && layoutNode.parent) {
         const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
         this.connectionsByTargetId.set(layoutNode.id, connection)
         this.connections.push(connection)
@@ -104,63 +111,116 @@ class Layout {
     }
   }
 
-  // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate () {
-    this.processBetweenData()
+  processHierarchy ({ collapseNodes = false } = {}) {
+    this.processBetweenData(!collapseNodes)
     this.scale.calculateScaleFactor()
+    if (collapseNodes) {
+      this.collapseNodes()
+      this.processBetweenData(true)
+      this.scale.calculateScaleFactor()
+    }
+  }
+
+  // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
+  generate (settings) {
+    this.processHierarchy(settings)
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
   }
-  static collapseNodes (nodes, scale) {
-    // TODO: rework this
-    const subsetNodeById = {}
-    for (const node of nodes) {
-      subsetNodeById[node.id] = node
-    }
-    const topNodes = nodes.filter(node => !subsetNodeById[node.parentId])
-    const collapsedNodes = []
-    for (const node of topNodes) {
-      clumpNodes(node)
-    }
-    return collapsedNodes
 
-    function isBelowThreshold (node) {
-      return (node.getWithinTime() + node.getBetweenTime()) * scale.scaleFactor < 10
+  collapseNodes () {
+    const { layoutNodes, scale } = this
+    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
+    // TODO: stop relying on coincidental Map.keys() order
+    const hierarchyOrder = []
+    for (const layoutNode of topLayoutNodes) {
+      squash(layoutNode)
     }
+    const newLayoutNodes = new Map()
+    for (const id of hierarchyOrder) {
+      newLayoutNodes.set(id, layoutNodes.get(id))
+    }
+    this.layoutNodes = newLayoutNodes
 
-    function clumpNodes (node, clump = null) {
-      if (isBelowThreshold(node)) {
-        if (!clump) {
-          clump = {
-            isCollapsed: true,
-            children: []
-          }
+    // TODO: optimize
+    function squash (layoutNode, parent) {
+      // Skip ArtificialNodes
+      if (layoutNode instanceof ArtificialNode) return layoutNode
+
+      // Squash children first
+      const childrenAboveThreshold = []
+      const childrenBelowThreshold = []
+      const collapsedChildren = []
+      for (const childId of layoutNode.children) {
+        const child = layoutNodes.get(childId)
+        const squashed = squash(child, layoutNode)
+        if (isBelowThreshold(child.node)) {
+          squashed ? collapsedChildren.push(squashed) : childrenBelowThreshold.push(child)
+        } else {
+          childrenAboveThreshold.push(child)
         }
-        // Node considered tiny, include it in a clump
-        clump.children.push(node)
+      }
+
+      // For detecting children-grandchildren collision
+      const childToCollapse = new Map()
+      for (const collapsedChild of collapsedChildren) {
+        for (const layoutNode of collapsedChild.collapsedNodes) {
+          childToCollapse.set(layoutNode.id, collapsedChild)
+        }
+      }
+      const collapsibleChildren = childrenBelowThreshold.concat(flatMapDeep(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
+      const grandChildren = flatMapDeep(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
+      let combinedSelfCollapse
+      let combinedChildrenCollapse
+      const selfBelowThreshold = isBelowThreshold(layoutNode.node)
+      if (selfBelowThreshold && collapsibleChildren.length) {
+        // Combine children and self
+        combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
+      } else if (collapsibleChildren.length >= 2) {
+        // Combine children only
+        combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
+        layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
+      }
+
+      let nodesToIndex
+      if (selfBelowThreshold) {
+        // If self collapsible, index only childrenAboveThreshold
+        nodesToIndex = childrenAboveThreshold
       } else {
-        // Node considered long, include it as standalone
-        collapsedNodes.push(node)
-        clump = null
+        // If self not collapsible, index all children
+        nodesToIndex = childrenAboveThreshold.concat(combinedChildrenCollapse || childrenBelowThreshold.concat(collapsedChildren))
       }
-      const indexBeforeBranching = collapsedNodes.length
-      const childClumps = node.children.map(childId => {
-        const child = subsetNodeById[childId]
-        return child ? clumpNodes(child, clump) : null
-      }).filter(hasFormedClump => !!hasFormedClump)
-      // Combine sibling clumps
-      for (let i = 1; i < childClumps.length; ++i) {
-        if (childClumps[i] !== childClumps[0]) {
-          childClumps[0].children = childClumps[0].children.concat(childClumps[i].children)
+      // If no parent index self
+      if (!parent) {
+        nodesToIndex.push(combinedSelfCollapse || layoutNode)
+      }
+      for (const layoutNode of nodesToIndex) {
+        if (layoutNode instanceof CollapsedLayoutNode) {
+          indexLayoutNode(layoutNode)
         }
-        childClumps.splice(i, 1)
-      }
-      // Include combined clump
-      if (childClumps[0] && collapsedNodes[indexBeforeBranching] !== childClumps[0]) {
-        collapsedNodes.splice(indexBeforeBranching, 0, childClumps[0])
+        hierarchyOrder.unshift(layoutNode.id)
       }
 
-      return clump
+      return combinedSelfCollapse || null
+    }
+    function indexLayoutNode (collapsedLayoutNode) {
+      layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
+      for (const childId of collapsedLayoutNode.children) {
+        layoutNodes.get(childId).parent = collapsedLayoutNode
+      }
+      for (const layoutNode of collapsedLayoutNode.collapsedNodes) {
+        layoutNode.parent = null
+        layoutNode.children = []
+      }
+    }
+
+    function isBelowThreshold (dataNode) {
+      return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.scaleFactor < 10
+    }
+
+    // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
+    function flatMapDeep (value) {
+      return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
     }
   }
 }
@@ -172,8 +232,55 @@ class LayoutNode {
     this.stem = null
     this.position = null
     this.inboundConnection = null
-    this.parent = parent || null
+    this.parent = parent
     this.children = []
+  }
+  getBetweenTime () {
+    return this.node.getBetweenTime()
+  }
+  getWithinTime () {
+    return this.node.getWithinTime()
+  }
+  validateStat (...args) {
+    return this.node.validateStat(...args)
+  }
+}
+
+class CollapsedLayoutNode {
+  constructor (layoutNodes, parent, children) {
+    this.id = 'clump:' + layoutNodes.map(layoutNode => layoutNode.id).join(',')
+    this.collapsedNodes = layoutNodes
+    this.parent = parent
+    this.children = children || []
+
+    for (const layoutNode of layoutNodes) {
+      const node = layoutNode.node
+      if (!this.node) {
+        this.node = new ArtificialNode({
+          nodeType: node.constructor.name
+        }, node)
+      } else {
+        this.node.aggregateStats(node)
+        this.applyDecimals(node)
+      }
+    }
+  }
+  getBetweenTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
+  }
+  getWithinTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
+  }
+  validateStat (num, statType = '', aboveZero = false) {
+    const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
+    return validateNumber(num, targetDescription, aboveZero)
+  }
+  applyDecimals (otherNode) {
+    this.node.aggregateDecimals(otherNode, 'type', 'between')
+    this.node.aggregateDecimals(otherNode, 'type', 'within')
+    this.node.aggregateDecimals(otherNode, 'typeCategory', 'between')
+    this.node.aggregateDecimals(otherNode, 'typeCategory', 'within')
+    // TODO: aggregate party, draw appropriate pie
   }
 }
 
@@ -199,6 +306,30 @@ class ArtificialNode extends ClusterNode {
   }
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
+  }
+  aggregateStats (dataNode) {
+    this.stats.setSync(this.stats.sync + dataNode.stats.sync)
+    this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
+    this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
+
+    this.stats.rawTotals.sync += dataNode.stats.rawTotals.sync
+    this.stats.rawTotals.async.between += dataNode.stats.rawTotals.async.between
+    this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
+  }
+  aggregateDecimals (dataNode, classification, position) {
+    if (dataNode.constructor.name === 'AggregateNode') {
+      /* TODO: fix this
+      const label = otherNode[classification]
+      const newDecimal = otherNode.decimals[classification][position].get(label)
+      this.setDecimal(newDecimal, classification, position, label)
+      */
+    } else {
+      const byLabel = dataNode.decimals[classification][position]
+      for (const label of byLabel.keys()) {
+        const newDecimal = dataNode.decimals[classification][position].get(label)
+        this.setDecimal(newDecimal, classification, position, label)
+      }
+    }
   }
 }
 

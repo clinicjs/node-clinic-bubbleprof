@@ -25,14 +25,14 @@ class Positioning {
     this.nodeAllocation.process()
   }
   debugInspect () {
-    const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.node.id) - this.order.indexOf(leafB.node.id)
+    const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
     const arrangedLeaves = pickLeavesByLongest(this.layoutNodes, this.layout).sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
       const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
       const units = parseInt((magnitude * this.layout.scale.scaleFactor) / 25)
       const lengthAsDashes = new Array(units).fill('-').join('')
-      const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.node.id].join('.')
+      const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')
       return [nodeGenealogy, lengthAsDashes + ' ' + magnitude]
     })
 
@@ -125,7 +125,7 @@ class ClumpPyramid {
 
     // Assign orientation in relation to centered leaf
     // Note - first (i.e. longest) leaf will always be centered, thus its ancestor clumps have center orientation
-    const clumpOrientation = leaf === this.leadingLeaf.node ? 'center' : this.insertionSideToOrientation[insertAtSide]
+    const clumpOrientation = leaf === this.leadingLeaf ? 'center' : this.insertionSideToOrientation[insertAtSide]
     this.clumpById[ancestorId].orientation = clumpOrientation
 
     // Insert newly-created ancestor clump into its direct-parent clump
@@ -142,7 +142,7 @@ class ClumpPyramid {
     this.leadingLeaf = leavesByLongest[0]
     for (const layoutNodeLeaf of leavesByLongest) {
       let insertAtSide = this.nextPyramidSide()
-      const leaf = layoutNodeLeaf.node
+      const leaf = layoutNodeLeaf
       const stem = layoutNodeLeaf.stem
 
       const ancestors = stem.ancestors.ids.length ? stem.ancestors.ids : [leaf.parentId]
@@ -165,7 +165,7 @@ class ClumpPyramid {
         insertAtSide = this.orientationToInsertionSide[parentClump.orientation]
       }
       parentClump[insertAtSide](leaf.id)
-      const updateSide = leaf === this.leadingLeaf.node ? 'center' : this.insertionSideToOrientation[insertAtSide]
+      const updateSide = leaf === this.leadingLeaf ? 'center' : this.insertionSideToOrientation[insertAtSide]
       this.leavesOnSide[updateSide]++
     }
 

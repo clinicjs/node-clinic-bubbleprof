@@ -200,8 +200,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
 
   const dataSet = loadData(mockTopology(topology))
   const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
-  const layout = new Layout(subset)
-  layout.prepareLayoutNodes()
+  const layout = new Layout({ dataNodes: subset })
   layout.generate()
 
   const positioning = layout.positioning
@@ -210,6 +209,56 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   // TODO: Figure out why this changed
   // const expectedOrder = [16, 13, 18, 6, 14, 9, 15, 17]
   // t.deepEqual(positioning.order, expectedOrder)
+
+  t.end()
+})
+
+test('Visualizer layout - positioning - pyramid - can handle collapsets', function (t) {
+  const topology = [
+    ['1.9', 50],
+    ['1.2.3.4', 150],
+    ['1.2.3.5', 250],
+    ['1.2.6.7', 200],
+    ['1.2.8', 100]
+  ]
+  const expectedTopology = Object.assign([], topology)
+  shuffle(topology) // Pyramid result should be consistent independent of initial order
+
+  const dataSet = loadData(mockTopology(topology))
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
+  layout.processHierarchy({ collapseNodes: true })
+  // Arbitrary Map order being issue here
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 6].every(c => key.includes(c)))
+  t.ok(clumpId)
+  const positioning = layout.positioning
+  positioning.formClumpPyramid()
+
+  const expectedOrder = topologyToOrderedLeaves(expectedTopology)
+  t.deepEqual(positioning.order, expectedOrder)
+
+  t.end()
+})
+
+test('Visualizer layout - positioning - pyramid - can handle collapsets with clumpy leaves', function (t) {
+  const topology = [
+    ['1.9', 1],
+    ['1.2.3.4', 150],
+    ['1.2.3.5', 250],
+    ['1.2.6.7', 200],
+    ['1.2.8', 100]
+  ]
+  shuffle(topology) // Pyramid result should be consistent independent of initial order
+
+  const dataSet = loadData(mockTopology(topology))
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
+  layout.processHierarchy({ collapseNodes: true })
+  // Arbitrary Map order being issue here
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 6, 9].every(c => key.includes(c)))
+  t.ok(clumpId)
+  const positioning = layout.positioning
+  positioning.formClumpPyramid()
+
+  t.deepEqual(positioning.order, [4, 5, 7, 8])
 
   t.end()
 })
