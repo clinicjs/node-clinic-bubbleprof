@@ -80,11 +80,13 @@ function drawOuterUI () {
     htmlContent: staticKeyHtml
   }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
+  /* TODO: Add these back when features are implemented
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
     .addCollapseControl(true, { htmlContent: 'Locate a function or file name <span class="arrow"></span>' })
 
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
     .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
+  */
 
   // Footer
   const footerCollapseHTML = '<div class="text">Stack frames to investigate</div><div class="arrow"></div>'

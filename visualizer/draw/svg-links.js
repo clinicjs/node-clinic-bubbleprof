@@ -15,10 +15,10 @@ class Links extends SvgContentGroup {
 
   isBelowFullLabelThreshold (connection) {
     // If label doesn't have space to be x5 as wide as it is tall, use smaller label
-    return connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace * 5
+    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 5
   }
   isBelowLabelThreshold (connection) {
-    return connection.getVisibleLineLength() < this.ui.settings.minimumLabelSpace
+    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace
   }
   isBelowVisibilityThreshold (connection) {
     return connection.getVisibleLineLength() < 1
@@ -55,10 +55,11 @@ class Links extends SvgContentGroup {
     this.d3OuterLines = this.d3Links.append('path')
       .classed('link-outer', true)
       .classed('by-variable', true)
-      .style('stroke-width', this.ui.settings.strokeWidthOuter)
+      .style('stroke-width', this.ui.settings.lineWidth)
       .on('mouseover', connection => this.ui.emit('highlightParty', connection.targetNode.mark.get('party')))
       .on('mouseout', () => this.ui.emit('highlightParty', null))
 
+    // This line is invisible except for in debug/spiderweb mode
     this.d3InnerLines = this.d3Links.append('line')
       .classed('link-inner', true)
   }
@@ -86,6 +87,7 @@ class Links extends SvgContentGroup {
         .enter()
         .append('line')
         .attr('class', decimal => `type-${decimal[0]}`)
+        .style('stroke-width', this.ui.settings.lineWidth)
         .classed('link-segment', true)
         .on('mouseover', decimal => this.ui.emit('highlightType', decimal[0]))
         .on('mouseout', () => this.ui.emit('highlightType', null))
@@ -163,7 +165,7 @@ class Links extends SvgContentGroup {
       const sourceRadius = connection.getSourceRadius()
 
       // Use this offset to start lines at outer rim of circle radius
-      const offsetLength = sourceRadius + this.ui.settings.strokeWidthOuter / 2
+      const offsetLength = sourceRadius + this.ui.settings.lineWidth / 2
       const offsetBeforeLine = new LineCoordinates({
         radians: connectCentresCoords.radians,
         length: offsetLength,
@@ -209,7 +211,7 @@ class Links extends SvgContentGroup {
         if (degrees > 90) degrees -= 180
         if (degrees < -90) degrees += 180
 
-        d3TimeLabel.attr('y', 0 - this.ui.settings.strokePadding - this.ui.settings.strokeWidthOuter)
+        d3TimeLabel.attr('y', 0 - this.ui.settings.strokePadding - this.ui.settings.lineWidth)
         d3TimeLabel.attr('transform', `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${degrees})`)
       }
     })

@@ -139,31 +139,34 @@ main {
 #header .interactive-key {
   display: inline-block;
   margin: 0 3px;
-  padding: 2px;
+  padding: 2px 2px 4px 2px;
   border-bottom: 1px solid transparent;
 }
 
 #header .interactive-key label {
   color: var(--pure-white);
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .type-icon,
 .party-icon {
   display: inline-block;
-  width: 9px;
+  vertical-align: middle;
+  /* width and colour are set in js and type/party-specific CSS */
+  border-top-style: solid;
+  width: 11px;
 }
 
 .type-icon {
   margin: 4px;
   height: 1px;
-  border-top: 1px solid transparent;
 }
 
 .party-icon {
-  height: 8px;
+  height: 9px;
   margin: 1px 4px;
-  border-top: 2px solid transparent;
-  border-bottom: 2px solid transparent;
+  border-bottom-style: solid;
   background: var(--pure-black);
 }
 
@@ -178,12 +181,22 @@ body[data-highlight-type='other'] #header .interactive-key.type-other {
   border-bottom-color: var(--cyan);
 }
 
+body[data-highlight-party='user'] #header .interactive-key.party-user .party-icon,
+body[data-highlight-party='external'] #header .interactive-key.party-external .party-icon,
+body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .party-icon,
 body[data-highlight-type='files-streams'] #header .interactive-key.type-files-streams .type-icon,
 body[data-highlight-type='networks'] #header .interactive-key.type-networks .type-icon,
 body[data-highlight-type='crypto'] #header .interactive-key.type-crypto .type-icon,
 body[data-highlight-type='timing-promises'] #header .interactive-key.type-timing-promises .type-icon,
 body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon {
-  border-top-width: 2.5px;
+  border-top-width: 4px !important;
+}
+
+body[data-highlight-party='user'] #header .interactive-key.party-user .party-icon,
+body[data-highlight-party='external'] #header .interactive-key.party-external .party-icon,
+body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .party-icon {
+  border-bottom-width: 4px !important;
+  height: 11px;
 }
 
 /* Footer */
@@ -320,6 +333,7 @@ svg.bubbleprof .bubble-wrapper .name-label.flipped-label {
 }
 
 svg.bubbleprof .name-label {
+  font-weight: bold;
   font-size: 12pt;
 }
 
@@ -465,14 +479,14 @@ body[data-highlight-type='files-streams'] svg .type-files-streams,
 body[data-highlight-type='networks'] svg .type-networks,
 body[data-highlight-type='crypto'] svg .type-crypto,
 body[data-highlight-type='timing-promises'] svg .type-timing-promises,
-body[data-highlight-type='other'] svg .type-other {
-  stroke-width: 2.5px;
-}
+body[data-highlight-type='other'] svg .type-other,
 
 body[data-highlight-party='user'] svg .party-user .by-variable,
 body[data-highlight-party='external'] svg .party-external .by-variable ,
-body[data-highlight-type='nodecore'] svg .party-nodecore .by-variable {
-  stroke-width: 3px !important;
+body[data-highlight-party='nodecore'] svg .party-nodecore .by-variable,
+body[data-highlight-party='nodecore'] svg .party-root .by-variable {
+  /* !important overrides the stroke-width style set from js line width settings */
+  stroke-width: 4px !important;
 }
 
 /* Hover box */
