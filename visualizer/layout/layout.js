@@ -110,7 +110,7 @@ class Layout {
   }
 
   processHierarchy ({ collapseNodes = true } = {}) {
-    this.processBetweenData()
+    this.processBetweenData(!collapseNodes)
     this.scale.calculateScaleFactor()
     if (collapseNodes) {
       this.collapseNodes()
