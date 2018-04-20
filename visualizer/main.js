@@ -15,7 +15,7 @@ setTimeout(() => {
   window.data = dataSet
   console.log('data is exposed on window.data')
 
-  const layout = generateLayout(dataSet, ui.settings)
+  const layout = generateLayout(dataSet, Object.assign({ collapseNodes: true }, ui.settings))
   window.layout = layout
   console.log('layout is exposed on window.layout')
 

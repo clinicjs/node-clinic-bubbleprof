@@ -96,7 +96,7 @@ class Layout {
     this.prepareLayoutNodes(dataNodes)
   }
 
-  processBetweenData (generateConnections = false) {
+  processBetweenData (generateConnections = true) {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
 
@@ -109,7 +109,7 @@ class Layout {
     }
   }
 
-  processHierarchy ({ collapseNodes = true } = {}) {
+  processHierarchy ({ collapseNodes = false } = {}) {
     this.processBetweenData(!collapseNodes)
     this.scale.calculateScaleFactor()
     if (collapseNodes) {

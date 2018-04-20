@@ -45,7 +45,7 @@ class BubbleprofUI extends EventEmitter {
         dataNodes: [...node.nodes.values()],
         connection: connection || { targetNode: node }
       }, this.layout.settings)
-      newLayout.generate()
+      newLayout.generate({ collapseNodes: true })
 
       const nodeLinkSection = this.sections.get('node-link')
       const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection, this)
