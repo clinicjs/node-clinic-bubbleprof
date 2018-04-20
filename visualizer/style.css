@@ -332,12 +332,8 @@ svg.bubbleprof .bubble-wrapper .name-label.flipped-label {
   alignment-baseline: before-edge;
 }
 
-<<<<<<< HEAD
-#node-link svg .name-label {
-  font-weight: bold;
-=======
 svg.bubbleprof .name-label {
->>>>>>> master
+  font-weight: bold;
   font-size: 12pt;
 }
 
