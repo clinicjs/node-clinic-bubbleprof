@@ -49,6 +49,7 @@ class SvgContainer extends HtmlContent {
       this.d3Element
         .attr('id', this.contentProperties.id)
         .attr('preserveAspectRatio', preserveAspectRatio)
+        .classed('bubbleprof', true)
 
       this.ui.on('setData', () => {
         this.svgBounds.height = this.ui.layout.scale.finalSvgHeight || this.ui.layout.settings.svgHeight
