@@ -14,7 +14,7 @@ class Bubbles extends SvgContentGroup {
   }
 
   isBelowLabelThreshold (d) {
-    return this.getRadius(d) < this.ui.settings.minimumLabelSpace
+    return this.getRadius(d) < this.ui.settings.labelMinimumSpace
   }
   isBelowStrokeThreshold (d) {
     return this.getRadius(d) < this.ui.settings.strokePadding
@@ -23,10 +23,10 @@ class Bubbles extends SvgContentGroup {
     return this.getRadius(d) < 1
   }
   hasLongInboundLine (length) {
-    return length > this.ui.settings.minimumLabelSpace * 5
+    return length > this.ui.settings.labelMinimumSpace * 5
   }
   hasShortInboundLine (length) {
-    return length < this.ui.settings.minimumLabelSpace
+    return length < this.ui.settings.labelMinimumSpace
   }
 
   initializeFromData (dataArray) {
@@ -99,7 +99,7 @@ class Bubbles extends SvgContentGroup {
       const backwardsLine = new LineCoordinates({
         x1: x,
         y1: y,
-        length: this.ui.settings.minimumLabelSpace / 2,
+        length: this.ui.settings.labelMinimumSpace / 2,
         degrees: LineCoordinates.enforceDegreesRange(inboundLine.degrees - 180)
       })
       x = backwardsLine.x2
@@ -113,7 +113,7 @@ class Bubbles extends SvgContentGroup {
     this.d3OuterCircles = this.d3Bubbles.append('circle')
       .classed('bubble-outer', true)
       .classed('by-variable', true)
-      .style('stroke-width', this.ui.settings.strokeWidthOuter)
+      .style('stroke-width', this.ui.settings.lineWidth)
       .on('mouseover', d => this.ui.emit('highlightParty', d.node.mark.get('party')))
       .on('mouseout', () => this.ui.emit('highlightParty', null))
 
@@ -158,6 +158,7 @@ class Bubbles extends SvgContentGroup {
         .enter()
         .append('path')
         .attr('class', arcDatum => `type-${arcDatum.data[0]}`)
+        .style('stroke-width', this.ui.settings.lineWidth)
         .classed('donut-segment', true)
         .on('mouseover', arcDatum => this.ui.emit('highlightType', arcDatum.data[0]))
         .on('mouseout', () => this.ui.emit('highlightType', null))
@@ -168,7 +169,7 @@ class Bubbles extends SvgContentGroup {
 
     this.d3InnerCircles.attr('r', d => {
       // If below threshold, this will be an invisible mouseover target
-      return this.isBelowStrokeThreshold(d) ? this.ui.settings.minimumLabelSpace : this.getRadius(d) - this.ui.settings.strokePadding
+      return this.isBelowStrokeThreshold(d) ? this.ui.settings.labelMinimumSpace : this.getRadius(d) - this.ui.settings.strokePadding
     })
 
     if (this.typeDonutsMap) {
@@ -187,7 +188,7 @@ class Bubbles extends SvgContentGroup {
 
     this.d3TimeLabels.text(d => {
       const withinTime = this.ui.formatNumber(d.node.getWithinTime())
-      const withMs = withinTime + (this.getRadius(d) < this.ui.settings.minimumLabelSpace ? '' : '\u2009ms')
+      const withMs = withinTime + (this.getRadius(d) < this.ui.settings.labelMinimumSpace ? '' : '\u2009ms')
       return withMs
     })
 
@@ -224,7 +225,7 @@ class Bubbles extends SvgContentGroup {
       const lineToLabel = new LineCoordinates({
         x1: position.x,
         y1: position.y,
-        length: this.getRadius(d) + this.ui.settings.strokeWidthOuter,
+        length: this.getRadius(d) + this.ui.settings.lineWidth,
         degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
       })
 

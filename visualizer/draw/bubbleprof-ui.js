@@ -12,9 +12,9 @@ class BubbleprofUI extends EventEmitter {
 
     const defaultSettings = {
       numberFormatter: d3.format(',.0f'),
-      minimumLabelSpace: 14,
       strokePadding: 4,
-      strokeWidthOuter: 2
+      lineWidth: 2,
+      labelMinimumSpace: 14
     }
     this.settings = Object.assign(defaultSettings, settings)
 

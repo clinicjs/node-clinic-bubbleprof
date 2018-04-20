@@ -20,7 +20,7 @@ class InteractiveKey extends HtmlContent {
 
     if (!htmlContent) {
       this.contentProperties.htmlContent = `
-        <span class="${targetType}-icon"></span><label>${label}</label>
+        <span style="border-width: ${this.ui.settings.lineWidth}px;" class="${targetType}-icon"></span><label>${label}</label>
       `
     }
     super.initializeElements()
