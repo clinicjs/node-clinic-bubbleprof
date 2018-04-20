@@ -59,6 +59,8 @@ class Layout {
   prepareSublayoutNodes (dataNodes, connection) {
     // This sublayout is of nodes within targetNode. Some have parents within sourceNode
 
+    const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
+
     const linkToSource = !connection.sourceNode ? null : new ArtificialNode({
       id: connection.sourceNode.id,
       isRoot: true,
@@ -73,7 +75,7 @@ class Layout {
     for (const dataNode of dataNodes) {
       // if (!nodeType) nodeType = node.constructor.name
 
-      if (linkToSource && dataNode.isBetweenClusters) {
+      if (linkToSource && !includedIds.has(dataNode.parentId)) {
         linkToSource.children.push(dataNode.id)
       }
       for (const childId of dataNode.children) {
