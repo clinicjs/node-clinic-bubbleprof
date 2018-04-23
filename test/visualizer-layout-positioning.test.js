@@ -228,7 +228,7 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 6].every(c => key.includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 6].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   const positioning = layout.positioning
   positioning.formClumpPyramid()
@@ -253,7 +253,7 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 6, 9].every(c => key.includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 6, 9].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   const positioning = layout.positioning
   positioning.formClumpPyramid()
