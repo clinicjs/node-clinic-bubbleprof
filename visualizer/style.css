@@ -3,8 +3,8 @@ html {
   --main-bg-color: rgb(27, 30, 39);
   --overlay-bg-color: rgba(55, 61, 79, 0.99);
 
-  --banner-text-color: rgb(255, 255, 255);
   --banner-bg-color: rgb(41, 45, 57);
+  --banner-logo-color: rgba(255, 255, 255, 0.87);
 
   --nearform-red: rgb(237,24,40);
   --nearform-grey: rgb(121,122,124);
@@ -83,9 +83,16 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 /* Banner layout */
 
 #banner {
+  display: flex;
+  align-items: center;
   height: 65px;
   background: var(--banner-bg-color);
   position: relative;
+}
+
+#banner svg {
+  fill: var(--banner-logo-color);
+  margin-left: 12px;
 }
 
 #banner svg:last-child {
@@ -93,17 +100,6 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   height: 40px;
   right: 28px;
   top: 13px;
-}
-
-#banner::after {
-  content: 'BubbleProf';
-  font-size: 14pt;
-  font-weight: lighter;
-  color: var(--banner-text-color);
-
-  display: block;
-  margin-left: 35px;
-  line-height: 65px;
 }
 
 main {
