@@ -148,7 +148,9 @@ class ClinicBubbleprof extends events.EventEmitter {
       <title>Clinic Bubbleprof</title>
       <link rel="shortcut icon" type="image/png" href="${nearFormFaviconBase64}">
       <style>${styleFile}</style>
-      <div id="banner">${nearFormLogoFile}</div>
+      <div id="banner">
+        <a href="https://nearform.com" title="nearForm" target="_blank">${nearFormLogoFile}</a>
+      </div>
       <script>${scriptFile}</script>
     `
 
