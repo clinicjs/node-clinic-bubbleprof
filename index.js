@@ -101,7 +101,9 @@ class ClinicBubbleprof extends events.EventEmitter {
     const fakeDataPath = path.join(__dirname, 'visualizer', 'data.json')
     const stylePath = path.join(__dirname, 'visualizer', 'style.css')
     const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
+    const logoPath = path.join(__dirname, 'visualizer', 'app-logo.svg')
     const nearFormLogoPath = path.join(__dirname, 'visualizer', 'nearform-logo.svg')
+    const nearFormFaviconPath = path.join(__dirname, 'visualizer', 'nearform-favicon.png.b64')
 
     // Load data
     const paths = getLoggingPaths({ path: dataDirname })
@@ -121,7 +123,9 @@ class ClinicBubbleprof extends events.EventEmitter {
     }))
 
     // add logos
+    const logoFile = fs.createReadStream(logoPath)
     const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
+    const nearFormFaviconBase64 = fs.createReadStream(nearFormFaviconPath)
 
     // create script-file stream
     const b = browserify({
@@ -144,8 +148,12 @@ class ClinicBubbleprof extends events.EventEmitter {
       <!DOCTYPE html>
       <meta charset="utf8">
       <title>Clinic Bubbleprof</title>
+      <link rel="shortcut icon" type="image/png" href="${nearFormFaviconBase64}">
       <style>${styleFile}</style>
-      <div id="banner">${nearFormLogoFile}</div>
+      <div id="banner">
+        ${logoFile}
+        <a href="https://nearform.com" title="nearForm" target="_blank">${nearFormLogoFile}</a>
+      </div>
       <script>${scriptFile}</script>
     `
 
