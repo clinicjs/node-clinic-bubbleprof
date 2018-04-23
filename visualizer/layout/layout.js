@@ -173,7 +173,8 @@ class Layout {
       let combinedSelfCollapse
       let combinedChildrenCollapse
       const selfBelowThreshold = isBelowThreshold(layoutNode.node)
-      if (selfBelowThreshold && collapsibleChildren.length) {
+      const selfTopNode = topLayoutNodes.includes(layoutNode)
+      if (selfBelowThreshold && collapsibleChildren.length && !selfTopNode) {
         // Combine children and self
         combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
       } else if (collapsibleChildren.length >= 2) {
@@ -183,7 +184,7 @@ class Layout {
       }
 
       let nodesToIndex
-      if (selfBelowThreshold) {
+      if (selfBelowThreshold && !selfTopNode) {
         // If self collapsible, index only childrenAboveThreshold
         nodesToIndex = childrenAboveThreshold
       } else {

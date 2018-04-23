@@ -279,7 +279,7 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 3, 4, 6].every(c => ('' + key).includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 3, 4, 6].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
@@ -293,7 +293,7 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
 
   const distanceById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
-    if (layoutNode.id === clumpId) {
+    if (layoutNode.id === 1) {
       distanceById[layoutNode.id] = 0
       continue
     }
@@ -305,8 +305,8 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
     }).length
   }
 
-  t.equal(positionById[clumpId].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
-  t.equal(positionById[clumpId].y.toFixed(0), (layout.settings.svgDistanceFromEdge + 1).toFixed(0))
+  t.equal(positionById[1].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
+  t.equal(positionById[1].y.toFixed(0), (layout.settings.svgDistanceFromEdge + 1).toFixed(0))
 
   t.ok(positionById[7].y > positionById[clumpId].y)
   t.ok(positionById[7].x < positionById[clumpId].x)
@@ -334,7 +334,7 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 1, 2, 3, 4, 6].every(c => ('' + key).includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 4, 6].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
@@ -348,7 +348,7 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
 
   const distanceById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
-    if (layoutNode.id === clumpId) {
+    if (layoutNode.id === 1) {
       distanceById[layoutNode.id] = 0
       continue
     }
@@ -360,8 +360,8 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
     }).length
   }
 
-  t.equal(positionById[clumpId].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
-  t.equal(positionById[clumpId].y.toFixed(0), (layout.settings.svgDistanceFromEdge).toFixed(0))
+  t.equal(positionById[1].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
+  t.equal(positionById[1].y.toFixed(0), (layout.settings.svgDistanceFromEdge).toFixed(0))
 
   t.ok(positionById[5].y > positionById[clumpId].y)
   t.ok(positionById[5].x < positionById[clumpId].x)
