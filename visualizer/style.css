@@ -95,7 +95,7 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   margin-left: 12px;
 }
 
-#banner svg:last-child {
+#banner a:last-child svg {
   position: absolute;
   height: 40px;
   right: 28px;
