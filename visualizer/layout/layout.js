@@ -326,9 +326,8 @@ class ArtificialNode extends ClusterNode {
       */
     } else {
       const byLabel = dataNode.decimals[classification][position]
-      for (const label of byLabel.keys()) {
-        const newDecimal = dataNode.decimals[classification][position].get(label)
-        this.setDecimal(newDecimal, classification, position, label)
+      for (const [label, value] of byLabel) {
+        this.setDecimal(value, classification, position, label)
       }
     }
   }
