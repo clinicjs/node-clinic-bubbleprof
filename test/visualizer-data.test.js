@@ -158,7 +158,7 @@ test('Visualizer data - decimals by type, category and party', function (t) {
       for (const [position, expectedByLabel] of new Map(Object.entries(expectedByPosition))) {
         let runningTotal = 0
         for (const [label, expectedValue] of expectedByLabel) {
-          const actualValue = clusterNode.decimals[classification][position].get(label)
+          const actualValue = clusterNode.getDecimal(classification, position, label)
           runningTotal += actualValue
 
           const roundedValue = roundTo5Places(actualValue)

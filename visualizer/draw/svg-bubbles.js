@@ -146,7 +146,11 @@ class Bubbles extends SvgContentGroup {
 
       this.typeDonutsMap.set(d, donutWrapper)
 
-      const decimalsAsArray = Array.from(d.node.decimals.typeCategory.within.entries())
+      const decimalsAsArray = []
+      for (const label of d.node.decimals.typeCategory.within.keys()) {
+        const decimal = d.node.getDecimal('typeCategory', 'within', label)
+        decimalsAsArray.push([label, decimal])
+      }
 
       // Creates array of data objects like:
       // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }

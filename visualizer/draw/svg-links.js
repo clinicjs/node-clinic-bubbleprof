@@ -78,7 +78,12 @@ class Links extends SvgContentGroup {
     linesWithSegments.each((connection, i, nodes) => {
       const link = d3.select(nodes[i])
       const targetNode = connection.targetNode
-      const decimalsAsArray = Array.from(targetNode.decimals.typeCategory.between.entries())
+
+      const decimalsAsArray = []
+      for (const label of targetNode.decimals.typeCategory.between.keys()) {
+        const decimal = targetNode.getDecimal('typeCategory', 'between', label)
+        decimalsAsArray.push([label, decimal])
+      }
 
       link.append('g')
         .classed('link-segments', true)

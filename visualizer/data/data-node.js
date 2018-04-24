@@ -119,17 +119,21 @@ class ClusterNode extends DataNode {
     this.mark = node.mark ? DataNode.markFromArray(node.mark) : firstNode.mark
   }
   setDecimal (num, classification, position, label) {
+    const decimalsMap = this.decimals[classification][position]
+    const newValue = decimalsMap.has(label) ? decimalsMap.get(label) + num : num
+    decimalsMap.set(label, this.validateStat(newValue))
+  }
+  getDecimal (classification, position, label) {
     const raw = this.stats.rawTotals
     const rawTotal = position === 'within' ? raw.async.within + raw.sync : raw.async.between
-    const statType = `decimals.${classification}.${position}->${label}`
-    const decimal = (num === 0 && rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
 
-    const decimalsMap = this.decimals[classification][position]
-    if (decimalsMap.has(label)) {
-      decimalsMap.set(label, decimalsMap.get(label) + decimal)
-    } else {
-      decimalsMap.set(label, decimal)
-    }
+    const statType = `decimals.${classification}.${position}->${label}`
+    const num = this.decimals[classification][position].get(label)
+    const decimal = (num === 0 && rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
+    return decimal
+  }
+  getDecimalLabels (classification, position) {
+    return this.decimals[classification][position].keys()
   }
   get id () {
     return this.clusterId
