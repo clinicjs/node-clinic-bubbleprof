@@ -32,10 +32,11 @@ class Scale {
     const stretchedHeight = svgHeight * 1.5
     const availableHeight = (stretchedHeight) - (svgDistanceFromEdge * 2)
 
+    const longestStretched = new ScaleWeight('longest', leavesByShortest[leavesByShortest.length - 1], availableHeight, longest.scalable, longest.absolute)
     // Note - assumptions below depend on ClumpPyramid Positioning
     const scalesBySignificance = [
       // Longest should be no more (and ideally no less) than 1.5 height
-      new ScaleWeight('longest', leavesByShortest[leavesByShortest.length - 1], availableHeight, longest.scalable, longest.absolute),
+      longestStretched,
       // Shortest should be no more (and ideally no less) than half width
       new ScaleWeight('shortest', leavesByShortest[0], availableWidth, shortest.scalable, shortest.absolute),
       // q50 is usually angled like the hypotenuse in a 1-1-sqrt(2) triangle, which indicates 1/sqrt(2)=~71% of line length in width is ideal
@@ -49,14 +50,21 @@ class Scale {
     const largestDiameterNode = [...this.layoutNodes.values()].sort((a, b) => b.stem.ownDiameter - a.stem.ownDiameter)[0]
     // For diagram clarity, largest circle should be no more (and ideally no less) than quater of the viewport
     const diameterClamp = new ScaleWeight('diameter clamp', largestDiameterNode, smallestSide / 2, largestDiameterNode.stem.ownDiameter, 0)
+    const longestConstrained = new ScaleWeight('longest constrained', leavesByShortest[leavesByShortest.length - 1], svgHeight, longest.scalable, longest.absolute)
 
-    const accountedScales = scalesBySignificance.slice(0, leavesByShortest.length).concat([diameterClamp])
+    const accountedScales = [longestConstrained, ...scalesBySignificance.slice(0, leavesByShortest.length), diameterClamp]
     this.scalesBySmallest = accountedScales.sort((a, b) => a.weight - b.weight)
 
     this.decisiveWeight = this.scalesBySmallest[0]
+    if (this.scalesBySmallest[0] === longestConstrained && this.scalesBySmallest[1] === longestStretched) {
+      this.decisiveWeight = longestStretched
+    }
     this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
-    this.finalSvgHeight = this.decisiveWeight.available > svgHeight ? stretchedHeight : svgHeight
+    const isLineTooLong = this.decisiveWeight === longestStretched
+    const isDiameterAboveHeight = this.decisiveWeight === diameterClamp && smallestSide === availableHeight
+    const shouldStretchHeight = isLineTooLong || isDiameterAboveHeight
+    this.finalSvgHeight = shouldStretchHeight ? stretchedHeight : svgHeight
   }
 
   getLineLength (dataValue) {

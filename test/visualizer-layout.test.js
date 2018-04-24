@@ -69,7 +69,7 @@ test('Visualizer layout - collapse - collapses children and parents linearly wit
 test('Visualizer layout - collapse - collapses branches at stem', function (t) {
   const topology = [
     ['1.2.3.4', 25],
-    ['1.2.5.6', 100]
+    ['1.2.5.6', 75]
   ]
   const dataSet = loadData(mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
@@ -157,7 +157,7 @@ test('Visualizer layout - collapse - collapses children and parents while ignori
 test('Visualizer layout - collapse - collapses subset with missing root (except top nodes)', function (t) {
   const topology = [
     ['1.2.3.4.5', 45],
-    ['1.6.7.8.9', 100]
+    ['1.6.7.8.9', 75]
   ]
   const dataSet = loadData(mockTopology(topology))
   dataSet.clusterNodes.get(8).stats.async.within = 50 // make 8 long
