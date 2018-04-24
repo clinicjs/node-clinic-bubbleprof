@@ -58,6 +58,7 @@ class BubbleprofUI extends EventEmitter {
       sublayout.initializeElements()
       sublayout.d3Element.on('click', () => {
         sublayout.d3Element.remove()
+        window.layout = newUI.parentUI.layout
       })
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
@@ -135,6 +136,7 @@ class BubbleprofUI extends EventEmitter {
     const redraw = dataSet !== this.dataSet || layout !== this.layout
     this.dataSet = dataSet
     this.layout = layout
+    window.layout = layout
     this.emit('setData')
     if (redraw) this.draw()
   }
