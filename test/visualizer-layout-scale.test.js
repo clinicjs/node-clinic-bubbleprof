@@ -61,8 +61,26 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   const layout = generateLayout(dataSet, { svgWidth, svgHeight, labelMinimumSpace: 0, lineWidth: 0 })
   layout.scale.calculateScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
-  t.equal(layout.scale.finalSvgHeight, 1500)
+  t.equal(layout.scale.finalSvgHeight, svgHeight * 1.5)
   t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
+
+  t.end()
+})
+
+test('Visualizer layout - scale - constrained longest superseeds other weights (except stretched longest)', function (t) {
+  const topology = [
+    ['1.2', svgHeight * 3],
+    ['1.3', svgWidth * 1.2]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, { svgWidth, svgHeight, labelMinimumSpace: 0, lineWidth: 0 })
+  layout.scale.calculateScaleFactor()
+  t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
+  t.equal(layout.scale.scalesBySmallest[1].category, 'shortest')
+  t.equal(layout.scale.scalesBySmallest[2].category, 'longest')
+  t.equal(layout.scale.decisiveWeight.category, 'longest constrained')
+  t.equal(layout.scale.finalSvgHeight, svgHeight)
+  t.ok(layout.scale.scaleFactor < 0.35 && layout.scale.scaleFactor > 0.3)
 
   t.end()
 })
@@ -86,10 +104,12 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
     ['1.2', 1]
   ]
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet, { svgWidth, svgHeight: (250 + 30 + 30) * (1 / 1.5), labelMinimumSpace: 0, lineWidth: 0 })
+  const inputHeight = (250 + 30 + 30) * (1 / 1.5)
+  const layout = generateLayout(dataSet, { svgWidth, svgHeight: inputHeight, labelMinimumSpace: 0, lineWidth: 0 })
   layout.layoutNodes.get(2).stem.ownDiameter = 500
   layout.scale.calculateScaleFactor()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
+  t.equal(layout.scale.finalSvgHeight, inputHeight * 1.5)
   t.ok(layout.scale.scaleFactor < 0.3 && layout.scale.scaleFactor > 0.2)
 
   t.end()
