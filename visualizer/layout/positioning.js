@@ -26,11 +26,13 @@ class Positioning {
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const arrangedLeaves = pickLeavesByLongest(this.layoutNodes, this.layout).sort(intoOrder)
+    const leavesByLongest = pickLeavesByLongest(this.layoutNodes, this.layout)
+    const longestStemLength = leavesByLongest[0].stem.getTotalStemLength().combined
+    const arrangedLeaves = leavesByLongest.sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
       const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
-      const units = parseInt((magnitude * this.layout.scale.scaleFactor) / 25)
+      const units = parseInt((magnitude / longestStemLength) * 50)
       const lengthAsDashes = new Array(units).fill('-').join('')
       const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')
       return [nodeGenealogy, lengthAsDashes + ' ' + magnitude]
@@ -44,6 +46,7 @@ class Positioning {
       }
     }
     rows.forEach(normalize)
+    rows.unshift([])
 
     return rows.map(row => row.join('  ')).join('\n')
   }
