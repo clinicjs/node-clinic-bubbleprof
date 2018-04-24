@@ -61,8 +61,10 @@ class Scale {
     }
     this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
-    const isHeightClamped = this.decisiveWeight === diameterClamp && smallestSide === availableHeight
-    this.finalSvgHeight = this.decisiveWeight === longestStretched || isHeightClamped ? stretchedHeight : svgHeight
+    const isLineTooLong = this.decisiveWeight === longestStretched
+    const isDiameterAboveHeight = this.decisiveWeight === diameterClamp && smallestSide === availableHeight
+    const shouldStretchHeight = isLineTooLong || isDiameterAboveHeight
+    this.finalSvgHeight = shouldStretchHeight ? stretchedHeight : svgHeight
   }
 
   getLineLength (dataValue) {
