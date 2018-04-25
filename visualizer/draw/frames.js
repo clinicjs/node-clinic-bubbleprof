@@ -3,29 +3,12 @@
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
 
+const flatArray = arr => arr.reduce((accum,current) => accum.concat(Array.isArray(current) ? flatArray(current) : current),[])
+
 class Frames extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
     super(d3Container, contentProperties)
-    this.frames = null
-  }
-
-  groupFrames (frames) {
-    let previousFrame
-    let previousGroup
-    const groupedFrames = []
-
-    for (const frame of frames) {
-      if (!previousFrame || previousFrame.data.party[1] !== frame.data.party[1]) {
-        const group = [frame]
-        group.isGroup = true
-        groupedFrames.push(group)
-        previousGroup = group
-      } else {
-        previousGroup.push(frame)
-      }
-      previousFrame = frame
-    }
-    this.frames = groupedFrames
+    this.framesByNode = []
   }
 
   initializeElements () {
@@ -48,12 +31,12 @@ class Frames extends HtmlContent {
       .classed('no-frames-message', true)
 
     this.ui.on('outputFrames', (aggregateNode) => {
-      this.frames = aggregateNode.frames || null
       this.node = aggregateNode
 
       this.isRoot = aggregateNode.isRoot
 
-      this.groupFrames(this.frames || [])
+      groupFrames(this.node, this.framesByNode)
+
       if (aggregateNode) {
         const footer = this.ui.sections.get('footer')
         footer.collapseControl.isCollapsed = false
@@ -69,19 +52,23 @@ class Frames extends HtmlContent {
     this.d3ContentWrapper.selectAll('.frame-item').remove()
     this.d3ContentWrapper.selectAll('.frame-group').remove()
 
-    if (this.frames) {
-      this.drawFrames(this.frames, this.d3ContentWrapper)
+    if (this.framesByNode) {
+      this.drawFrames(this.framesByNode, this.d3ContentWrapper)
     }
     if (this.node) {
-      this.d3NoFrames.text(`
-        ${this.ui.formatNumber(this.node.getBetweenTime())} ms in asynchronous delays, ${this.ui.formatNumber(this.node.getWithinTime())} ms in synchronous delays.
-      `)
+      this.d3NoFrames.text(`Showing async stack trace from async_hook "${this.node.name}"`)
     }
+  }
+
+  getDelaysText (aggregateNode) {
+    const betweenFigure = this.ui.formatNumber(aggregateNode.getBetweenTime())
+    const withinFigure = this.ui.formatNumber(aggregateNode.getWithinTime())
+    return `<span class="figure">${betweenFigure} ms</span> in asynchronous delays, <span class="figure">${withinFigure} ms</span> in synchronous delays.`
   }
 
   drawFrames (frames, d3AppendTo) {
     if (!frames.length) {
-      const d3Group = this.d3ContentWrapper.append('div')
+      const d3Group = d3AppendTo.append('div')
         .classed('frame-group', true)
         .on('click', () => {
           d3Group.classed('collapsed', !d3Group.classed('collapsed'))
@@ -102,17 +89,32 @@ class Frames extends HtmlContent {
     }
     for (const frame of frames) {
       if (frame.isGroup) {
-        const d3Group = this.d3ContentWrapper.append('div')
+        const d3Group = d3AppendTo.append('div')
           .classed('frame-group', true)
-          .classed(frame[0].data.party[0], true)
-          .classed('collapsed', frame[0].data.party[0] !== 'user')
+
+        const d3SubCollapseControl = d3Group.append('div')
+          .classed('sub-collapse-control', true)
+
+        let header = '<span class="arrow"></span>'
+        if (frame.dataNode) {
+          const isThisNode = frame.dataNode === this.node
+          d3Group.classed('node-frame-group', true)
+            .classed('collapsed', !isThisNode)
+          header += `${flatArray(frame).length} frames from `
+          header += `${isThisNode ? 'this async_hook' : `earlier async_hook "${frame.dataNode.name}"`}`
+
+          header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
+        } else if (frame.party) {
+          d3Group.classed(frame.party, true)
+            .classed('collapsed', frame.party !== 'user')
+          header += `${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame.party}`
+        }
+        d3SubCollapseControl.html(header)
           .on('click', () => {
             d3Group.classed('collapsed', !d3Group.classed('collapsed'))
           })
 
-        d3Group.append('div')
-          .classed('sub-collapse-control', true)
-          .html(`<span class="arrow"></span>${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame[0].data.party[1]}`)
+        console.log('d3Group', d3Group)
 
         this.drawFrames(frame, d3Group)
       } else {
@@ -122,6 +124,33 @@ class Frames extends HtmlContent {
       }
     }
   }
+}
+
+function groupFrames (aggregateNode, framesByNode) {
+  let previousFrame
+  let previousGroup
+  const groupedFrames = []
+  groupedFrames.dataNode = aggregateNode
+  groupedFrames.isGroup = true
+
+  for (const frame of aggregateNode.frames) {
+    const party = frame.data.party
+    if (!previousFrame || previousFrame.data.party[1] !== party[1]) {
+      const group = [frame]
+      group.isGroup = true
+      group.party = party
+      groupedFrames.push(group)
+      previousGroup = group
+    } else {
+      previousGroup.push(frame)
+    }
+    previousFrame = frame
+  }
+
+  framesByNode.push(groupedFrames)
+
+  // Full async stack trace - recurse through aggregate ancestry to the root aggregate node
+  if (aggregateNode.parentId) groupFrames(aggregateNode.getParentNode(), framesByNode)
 }
 
 module.exports = Frames

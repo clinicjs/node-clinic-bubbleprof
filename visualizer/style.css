@@ -256,8 +256,38 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   font-weight: bold;
 }
 
+#frames-panel .collapsed .frame-group .sub-collapse-control {
+  display: none;
+}
+
 #frames-panel .collapsed .frame-item {
   display: none;
+}
+
+#frames-panel .frame-group .delays {
+  font-weight: normal;
+  color: var(--grey-highlight);
+  padding-bottom: 3px;
+  margin: 0;
+}
+
+#frames-panel .frame-group .delays .delay {
+  color: var(--pure-white);
+}
+
+#frames-panel .frame-group.node-frame-group {
+  padding: 3px 0 0 3px;
+}
+
+#frames-panel .node-frame-group .frame-group,
+#frames-panel .frame-group .delays {
+  border-left: 1px solid var(--nearform-grey);
+  margin-left: 3px;
+  padding-left: 15px;
+}
+
+#frames-panel .frame-group.collapsed .delays {
+  border-left: none;
 }
 
 #frames-panel .frame-item {
