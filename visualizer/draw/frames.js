@@ -3,7 +3,11 @@
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
 
-const flatArray = arr => arr.reduce((accum,current) => accum.concat(Array.isArray(current) ? flatArray(current) : current),[])
+// Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
+// TODO: this duplicates a function in layout/positioning.js, use shared helper functions
+function flatMapDeep (value) {
+  return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
+}
 
 class Frames extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
@@ -108,7 +112,7 @@ class Frames extends HtmlContent {
             .classed('collapsed', !isThisNode)
             .classed('this-node', isThisNode)
 
-          header += `${flatArray(frame).length} frames from `
+          header += `${flatMapDeep(frame).length} frames from `
           header += `${isThisNode ? 'this async_hook' : `previous async_hook "${frame.dataNode.name}"`}`
           header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
         } else if (frame.party) {
