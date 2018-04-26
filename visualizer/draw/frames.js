@@ -112,6 +112,15 @@ class Frames extends HtmlContent {
             .classed('collapsed', !isThisNode)
             .classed('this-node', isThisNode)
 
+          if (!isThisNode) {
+            d3Group.insert('a', ':first-child')
+              .classed('jump-to-node', true)
+              .text('Select on diagram')
+              .on('click', () => {
+                this.ui.jumpToAggregateNode(frame.dataNode)
+              })
+          }
+
           header += `${flatMapDeep(frame).length} frames from `
           header += `${isThisNode ? 'this async_hook' : `previous async_hook "${frame.dataNode.name}"`}`
           header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
@@ -119,8 +128,11 @@ class Frames extends HtmlContent {
           d3Group.classed(frame.party[0], true)
             .classed('collapsed', frame.party[0] !== 'user')
           header += `${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame.party[1]}`
+          d3SubCollapseControl.html(header)
         }
-        d3SubCollapseControl.html(header)
+
+        d3SubCollapseControl
+          .html(header)
           .on('click', () => {
             d3Group.classed('collapsed', !d3Group.classed('collapsed'))
           })

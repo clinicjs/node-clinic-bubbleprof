@@ -255,6 +255,15 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   margin: 12px 0;
 }
 
+#frames-panel .jump-to-node {
+  display: block;
+  float: right;
+  font-weight: bold;
+  color: var(--cyan);
+  cursor: pointer;
+  margin-right: 32px;
+}
+
 #frames-panel .sub-collapse-control {
   cursor: pointer;
   color: var(--cyan);
@@ -277,7 +286,9 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 }
 
 #frames-panel .sub-collapse-control:hover,
-#frames-panel .sub-collapse-control:focus {
+#frames-panel .sub-collapse-control:focus,
+#frames-panel .jump-to-node:hover,
+#frames-panel .jump-to-node:focus {
   color: var(--cyan-highlight);
 }
 
