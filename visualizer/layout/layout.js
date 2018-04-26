@@ -89,7 +89,7 @@ class Layout {
             children: [],
             parentId: dataNode.id
           // Use the name, mark etc of the clusterNode the target node is inside
-          }, childNode.clusterNode)
+          }, childNode.clusterId ? childNode : childNode.clusterNode)
 
           dataNodes.push(linkOnwards)
         }
