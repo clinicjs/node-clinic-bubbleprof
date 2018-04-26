@@ -57,12 +57,13 @@ class BubbleprofUI extends EventEmitter {
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
       sublayout.initializeElements()
       sublayout.d3Element.on('click', () => {
-        sublayout.d3Element.remove()
+        newUI.deselectNode()
         window.layout = newUI.parentUI.layout
       })
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       newUI.setData(this.dataSet, newLayout)
+      return newUI
     }
   }
 
@@ -72,21 +73,77 @@ class BubbleprofUI extends EventEmitter {
 
   selectNode (layoutNode) {
     const dataNode = layoutNode.node
-    console.log(layoutNode)
+
     if (layoutNode.constructor.name !== 'CollapsedLayoutNode' && dataNode.linkTo) {
       const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
-      this.parentUI.createSubLayout(targetLayoutNode)
       // TODO: replace with something better designed e.g. a back button for within sublayouts
-      this.sections.get('sublayout').d3Element.remove()
+      this.deselectNode()
+      return this.parentUI.createSubLayout(targetLayoutNode)
     } else if (dataNode.constructor.name === 'AggregateNode') {
       this.outputFrames(dataNode)
+      return this
     } else {
-      this.createSubLayout(layoutNode)
+      return this.createSubLayout(layoutNode)
     }
+  }
+
+  deselectNode () {
+    if (this.sections.has('sublayout')) {
+      this.sections.get('sublayout').d3Element.remove()
+    }
+    this.originalUI.emit('outputFrames', null)
+  }
+
+  // Selects a node that may or may not be collapsed
+  jumpToNode (dataNode) {
+    const nodeId = dataNode.id
+    if (this.layout.layoutNodes.has(nodeId)) {
+      return this.selectNode(this.layout.layoutNodes.get(nodeId))
+    } else {
+      const collapsedLayoutNode = this.findCollapsedNode(nodeId)
+      const newUI = this.selectNode(collapsedLayoutNode)
+      newUI.jumpToNode(dataNode)
+    }
+  }
+
+  jumpToAggregateNode (aggregateNode) {
+    const nodeId = aggregateNode.id
+    if (this.layout.layoutNodes.has(nodeId)) {
+      return this.selectNode(this.layout.layoutNodes.get(nodeId))
+    }
+    this.deselectNode()
+    if (this.parentUI) this.parentUI.deselectNode()
+
+    const newUI = this.originalUI.jumpToNode(aggregateNode.clusterNode)
+
+    if (newUI.layout.layoutNodes.has(nodeId)) {
+      return newUI.selectNode(newUI.layout.layoutNodes.get(nodeId))
+    } else {
+      const collapsedLayoutNode = newUI.findCollapsedNode(nodeId)
+      const newerUI = newUI.selectNode(collapsedLayoutNode)
+      newerUI.jumpToNode(aggregateNode)
+    }
+  }
+
+  findCollapsedNode (nodeId) {
+    for (const layoutNode of this.layout.layoutNodes.values()) {
+      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((item) => item.id === nodeId)) {
+        return layoutNode
+      }
+    }
+    throw new Error(`Couldn't find id ${nodeId} in ${this.layout}`)
   }
 
   outputFrames (aggregateNode) {
     this.originalUI.emit('outputFrames', aggregateNode)
+  }
+
+  collapseFooter (collapseBool) {
+    // Pass true to close, false to close, nothing to toggle
+    const footer = this.originalUI.sections.get('footer')
+    if (typeof collapseBool === 'undefined') collapseBool = !footer.collapseControl.isCollapsed
+    footer.collapseControl.isCollapsed = collapseBool
+    footer.draw()
   }
 
   truncateLabel (labelString, maxWords, maxChars) {
