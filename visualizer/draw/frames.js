@@ -19,32 +19,34 @@ class Frames extends HtmlContent {
     this.d3Element.append('span')
       .classed('close', true)
       .on('click', () => {
-        const footer = this.ui.sections.get('footer')
-        footer.collapseControl.isCollapsed = true
-        footer.draw()
+        this.ui.collapseFooter(true)
       })
 
-    this.d3NoFrames = this.d3ContentWrapper.append('p')
-      .text(`
-        Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
-      `)
-      .classed('no-frames-message', true)
+    this.d3Heading = this.d3ContentWrapper.append('div')
+      .classed('heading', true)
 
     this.ui.on('outputFrames', (aggregateNode) => {
-      this.node = aggregateNode
-
-      this.isRoot = aggregateNode.isRoot
-
-      groupFrames(this.node, this.framesByNode)
-
       if (aggregateNode) {
-        const footer = this.ui.sections.get('footer')
-        footer.collapseControl.isCollapsed = false
-        footer.draw()
+        this.setData(aggregateNode)
       } else {
-        this.draw()
+        this.reset()
       }
     })
+  }
+
+  reset () {
+    this.node = null
+    this.framesByNode = []
+    this.ui.collapseFooter(true)
+  }
+
+  setData (aggregateNode) {
+    this.node = aggregateNode
+    this.isRoot = aggregateNode.isRoot
+
+    this.framesByNode = []
+    groupFrames(this.node, this.framesByNode)
+    this.ui.collapseFooter(false)
   }
 
   draw () {
@@ -52,11 +54,13 @@ class Frames extends HtmlContent {
     this.d3ContentWrapper.selectAll('.frame-item').remove()
     this.d3ContentWrapper.selectAll('.frame-group').remove()
 
-    if (this.framesByNode) {
-      this.drawFrames(this.framesByNode, this.d3ContentWrapper)
-    }
     if (this.node) {
-      this.d3NoFrames.text(`Showing async stack trace from async_hook "${this.node.name}"`)
+      this.drawFrames(this.framesByNode, this.d3ContentWrapper)
+      this.d3Heading.text(`Showing async stack trace from async_hook "${this.node.name}"`)
+    } else {
+      this.d3Heading.text(`
+        Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
+      `)
     }
   }
 
@@ -81,7 +85,7 @@ class Frames extends HtmlContent {
       const d3EmptyFrameItem = d3Group.append('div')
         .classed('frame-item', true)
 
-      if (this.isRoot) {
+      if (frames.dataNode && frames.dataNode.isRoot) {
         d3EmptyFrameItem.text('This is the root node, representing the starting point of your application. No stack frames are available.')
       } else {
         d3EmptyFrameItem.text('No frames are available for this async_hook. It could be from a native module, or something not integrated with the async_hooks API.')
@@ -116,8 +120,6 @@ class Frames extends HtmlContent {
           .on('click', () => {
             d3Group.classed('collapsed', !d3Group.classed('collapsed'))
           })
-
-        console.log('d3Group', d3Group)
 
         this.drawFrames(frame, d3Group)
       } else {
