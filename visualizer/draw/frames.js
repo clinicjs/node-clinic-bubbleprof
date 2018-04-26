@@ -23,7 +23,7 @@ class Frames extends HtmlContent {
     this.d3Element.append('span')
       .classed('close', true)
       .on('click', () => {
-        this.ui.collapseFooter(true)
+        this.parentContent.collapseClose()
       })
 
     this.d3Heading = this.d3ContentWrapper.append('div')
@@ -41,7 +41,7 @@ class Frames extends HtmlContent {
   reset () {
     this.node = null
     this.framesByNode = []
-    this.ui.collapseFooter(true)
+    this.parentContent.collapseClose()
   }
 
   setData (aggregateNode) {
@@ -50,7 +50,7 @@ class Frames extends HtmlContent {
 
     this.framesByNode = []
     groupFrames(this.node, this.framesByNode)
-    this.ui.collapseFooter(false)
+    this.parentContent.collapseOpen()
   }
 
   draw () {

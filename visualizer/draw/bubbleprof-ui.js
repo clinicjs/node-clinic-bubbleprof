@@ -93,14 +93,6 @@ class BubbleprofUI extends EventEmitter {
     this.originalUI.emit('outputFrames', aggregateNode)
   }
 
-  collapseFooter (collapseBool) {
-    // Pass true to close, false to close, nothing to toggle
-    const footer = this.originalUI.sections.get('footer')
-    if (typeof collapseBool === 'undefined') collapseBool = !footer.collapseControl.isCollapsed
-    footer.collapseControl.isCollapsed = collapseBool
-    footer.draw()
-  }
-
   truncateLabel (labelString, maxWords, maxChars) {
     const labelWords = labelString.split(' ')
     let truncatedLabel = labelString
