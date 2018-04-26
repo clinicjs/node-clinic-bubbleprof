@@ -401,9 +401,10 @@ svg.bubbleprof .link-outer {
   cursor: pointer;
 }
 
-/* Temporary partial fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
-section#sublayout:not(:last-child) {
-   display: none;
+/* Temporary fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
+section#sublayout:not(:last-child),
+svg#node-link-svg:not(:nth-last-child(2)) {
+  display: none;
 }
 
 /* Sidebar */
