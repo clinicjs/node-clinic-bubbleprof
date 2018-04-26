@@ -98,16 +98,19 @@ class Frames extends HtmlContent {
         let header = '<span class="arrow"></span>'
         if (frame.dataNode) {
           const isThisNode = frame.dataNode === this.node
-          d3Group.classed('node-frame-group', true)
-            .classed('collapsed', !isThisNode)
-          header += `${flatArray(frame).length} frames from `
-          header += `${isThisNode ? 'this async_hook' : `earlier async_hook "${frame.dataNode.name}"`}`
 
+          d3Group
+            .classed('node-frame-group', true)
+            .classed('collapsed', !isThisNode)
+            .classed('this-node', isThisNode)
+
+          header += `${flatArray(frame).length} frames from `
+          header += `${isThisNode ? 'this async_hook' : `previous async_hook "${frame.dataNode.name}"`}`
           header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
         } else if (frame.party) {
-          d3Group.classed(frame.party, true)
-            .classed('collapsed', frame.party !== 'user')
-          header += `${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame.party}`
+          d3Group.classed(frame.party[0], true)
+            .classed('collapsed', frame.party[0] !== 'user')
+          header += `${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame.party[1]}`
         }
         d3SubCollapseControl.html(header)
           .on('click', () => {

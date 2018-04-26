@@ -253,7 +253,15 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 #frames-panel .sub-collapse-control {
   cursor: pointer;
   color: var(--cyan);
+}
+
+#frames-panel .this-node > .sub-collapse-control {
   font-weight: bold;
+  color: var(--cyan-highlight);
+}
+
+#frames-panel .user > .sub-collapse-control {
+  color: var(--cyan-highlight);
 }
 
 #frames-panel .collapsed .frame-group .sub-collapse-control {
@@ -271,7 +279,7 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   margin: 0;
 }
 
-#frames-panel .frame-group .delays .delay {
+#frames-panel .frame-group .delays .figure {
   color: var(--pure-white);
 }
 
@@ -288,6 +296,10 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 
 #frames-panel .frame-group.collapsed .delays {
   border-left: none;
+}
+
+#frames-panel .frame-group:not(.collapsed) .frame-group:last-child {
+  padding-bottom: 6px;
 }
 
 #frames-panel .frame-item {
@@ -314,7 +326,7 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 
 #frames-panel .sub-collapse-control .arrow {
   display: inline-block;
-  margin: 0 8px -3px -3px;
+  margin: 0 6px -3px -3px;
 }
 
 #frames-panel .close {
