@@ -26,6 +26,9 @@ class BubbleprofUI extends EventEmitter {
     this.parentUI = parentUI
     this.originalUI = parentUI ? getOriginalUI(parentUI) : this
 
+    this.highlightedNode = null
+    this.selectedNode = null
+
     // Main divisions of the page
     this.sections = new Map()
 
@@ -71,6 +74,7 @@ class BubbleprofUI extends EventEmitter {
   }
 
   selectNode (layoutNode) {
+    this.selectedNode = layoutNode
     const dataNode = layoutNode.node
     console.log(layoutNode)
     if (layoutNode.constructor.name !== 'CollapsedLayoutNode' && dataNode.linkTo) {
@@ -83,6 +87,11 @@ class BubbleprofUI extends EventEmitter {
     } else {
       this.createSubLayout(layoutNode)
     }
+  }
+
+  highlightNode (layoutNode = null) {
+    this.highlightedNode = layoutNode
+    this.emit('hover', layoutNode)
   }
 
   outputFrames (aggregateNode) {

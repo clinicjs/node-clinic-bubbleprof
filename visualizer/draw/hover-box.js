@@ -34,11 +34,11 @@ class HoverBox extends HtmlContent {
 
     if (layoutNode) {
       this.d3Element.on('mouseover', () => {
-        this.ui.emit('hover', layoutNode)
+        this.ui.highlightNode(layoutNode)
       })
 
       this.d3Element.on('mouseout', () => {
-        this.ui.emit('hover', null)
+        this.ui.highlightNode(null)
       })
 
       const svg = this.contentProperties.svg
