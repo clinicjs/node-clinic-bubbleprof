@@ -2,11 +2,9 @@
 
 const { pickLeavesByLongest } = require('./stems.js')
 const NodeAllocation = require('./node-allocation.js')
+const arrayFlatten = require('array-flatten')
 
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
-function flatMapDeep (value) {
-  return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
-}
 
 class Positioning {
   constructor (layout) {
@@ -172,7 +170,7 @@ class ClumpPyramid {
       this.leavesOnSide[updateSide]++
     }
 
-    this.order = flatMapDeep(roots.map(rootId => flatMapDeep(this.clumpById[rootId])))
+    this.order = arrayFlatten(roots.map(rootId => arrayFlatten(this.clumpById[rootId])))
   }
 }
 

@@ -41,6 +41,25 @@ class HtmlContent {
     return this.collapseControl
   }
 
+  collapseOpen () {
+    this.collapseChange(false)
+  }
+
+  collapseClose () {
+    this.collapseChange(true)
+  }
+
+  collapseToggle () {
+    this.collapseChange()
+  }
+
+  collapseChange (closeBool) {
+    if (!this.collapseControl) return
+    if (typeof closeBool === 'undefined') closeBool = !this.collapseControl.isCollapsed
+    this.collapseControl.isCollapsed = closeBool
+    this.draw()
+  }
+
   addLoadingAnimation (contentProperties = {}) {
     this.loadingAnimation = new LoadingAnimation(this, contentProperties)
     return this.loadingAnimation
@@ -103,12 +122,8 @@ class CollapseControl extends HtmlContent {
     this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
 
     this.d3Element.on('click', () => {
-      this.toggleCollapse()
-      this.draw()
+      this.parentContent.collapseToggle()
     })
-  }
-  toggleCollapse () {
-    this.isCollapsed = !this.isCollapsed
   }
   draw () {
     super.draw()
