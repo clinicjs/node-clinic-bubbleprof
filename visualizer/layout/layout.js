@@ -5,6 +5,7 @@ const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
+const arrayFlatten = require('array-flatten')
 const { validateNumber } = require('../validation.js')
 
 class Layout {
@@ -168,8 +169,8 @@ class Layout {
           childToCollapse.set(layoutNode.id, collapsedChild)
         }
       }
-      const collapsibleChildren = childrenBelowThreshold.concat(flatMapDeep(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
-      const grandChildren = flatMapDeep(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
+      const collapsibleChildren = childrenBelowThreshold.concat(arrayFlatten(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
+      const grandChildren = arrayFlatten(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
       let combinedSelfCollapse
       let combinedChildrenCollapse
       const selfBelowThreshold = isBelowThreshold(layoutNode.node)
@@ -217,11 +218,6 @@ class Layout {
 
     function isBelowThreshold (dataNode) {
       return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.scaleFactor < 10
-    }
-
-    // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
-    function flatMapDeep (value) {
-      return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
     }
   }
 }
