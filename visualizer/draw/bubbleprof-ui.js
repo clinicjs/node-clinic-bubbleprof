@@ -5,6 +5,7 @@ const d3 = require('./d3-subset.js')
 const EventEmitter = require('events')
 const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
+const HoverBox = require('./hover-box.js')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings, appendTo, parentUI = null) {
@@ -58,11 +59,14 @@ class BubbleprofUI extends EventEmitter {
       const sublayout = newUI.sections.get('sublayout')
       sublayout.addCollapseControl()
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
+      sublayout.addContent(HoverBox, {svg: sublayoutSvg})
+
       sublayout.initializeElements()
       sublayout.d3Element.on('click', () => {
         sublayout.d3Element.remove()
         window.layout = newUI.parentUI.layout
       })
+
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       newUI.setData(this.dataSet, newLayout)
