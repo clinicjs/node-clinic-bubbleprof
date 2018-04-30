@@ -498,8 +498,8 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   width: 320px;
   background-color: var(--pure-black);
   color: var(--nearform-grey);
-  padding-bottom: 14px;
   margin-left: 6px;
+  z-index: 25;
 }
 
 .hover-box:before {
@@ -538,6 +538,15 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   color: var(--nearform-grey);
   display: inline-block;
   margin: 0 4px 0 0;
+}
+
+.hover-box .click-message {
+  background: var(--cyan);
+  color: var(--pure-white);
+  padding: 14px;
+  font-size: var(--main-text-size);
+  font-weight: bold;
+  border-top: 2px solid var(--main-bg-color);
 }
 
 /* Global classes linking styles to data properties */

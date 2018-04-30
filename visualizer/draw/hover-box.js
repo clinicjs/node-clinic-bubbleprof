@@ -23,6 +23,9 @@ class HoverBox extends HtmlContent {
     this.betweenTime = this.d3Element.append('p')
     this.withinTime = this.d3Element.append('p')
 
+    this.d3ClickMessage = this.d3Element.append('div')
+      .classed('click-message', true)
+
     this.ui.on('hover', layoutNode => {
       this.isHidden = !layoutNode
       this.draw(layoutNode)
@@ -56,11 +59,35 @@ class HoverBox extends HtmlContent {
       this.d3Element.style('top', top + 'px')
       this.d3Element.style('left', left + 'px')
 
-      const node = layoutNode.node
-      this.d3Title.text(node.name)
-      this.d3Subtitle.text(`${node.constructor.name} #${node.id})`)
-      this.betweenTime.html(`<strong>${this.ui.formatNumber(node.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
-      this.withinTime.html(`<strong>${this.ui.formatNumber(node.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
+      const dataNode = layoutNode.node
+      const nodeType = dataNode.constructor.name
+
+      this.d3Title.text(dataNode.name)
+      this.d3Subtitle.text(`${dataNode.constructor.name} #${dataNode.id})`)
+
+      // TODO: find a more appropriate way to communicate the time of ShortcutNodes, taking into
+      // account that they refer to nodes at a different level so aren't directly comparable
+      if (nodeType !== 'ShortcutNode') {
+        this.betweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
+        this.withinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
+      }
+
+      switch (nodeType) {
+        case 'AggregateNode':
+          this.d3ClickMessage.text('Click to display stack trace')
+          this.d3Element.attr('name', 'aggregate-node')
+          break
+        case 'ShortcutNode':
+          this.d3ClickMessage.text(`Click to navigate to "${dataNode.name}"`)
+          this.d3Element.attr('name', 'shortcut-node')
+          break
+        case 'ArtificialNode':
+        case 'ClusterNode':
+          const nodesCount = nodeType === 'ClusterNode' ? dataNode.nodes.size : layoutNode.collapsedNodes.length
+          this.d3ClickMessage.text(`Click to expand ${nodesCount} grouped async_hooks`)
+          this.d3Element.attr('name', 'cluster-node')
+          break
+      }
     }
   }
 }
