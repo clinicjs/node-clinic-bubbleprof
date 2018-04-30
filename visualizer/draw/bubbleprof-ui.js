@@ -63,7 +63,7 @@ class BubbleprofUI extends EventEmitter {
 
       sublayout.initializeElements()
       sublayout.d3Element.on('click', () => {
-        sublayout.d3Element.remove()
+        newUI.deselectNode()
         window.layout = newUI.parentUI.layout
       })
 
@@ -82,14 +82,19 @@ class BubbleprofUI extends EventEmitter {
     const dataNode = layoutNode.node
     if (dataNode.constructor.name === 'ShortcutNode') {
       const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.shortcutTo.id)
-      this.parentUI.createSubLayout(targetLayoutNode)
       // TODO: replace with something better designed e.g. a back button for within sublayouts
-      this.sections.get('sublayout').d3Element.remove()
+      this.deselectNode()
+      this.parentUI.createSubLayout(targetLayoutNode)
     } else if (dataNode.constructor.name === 'AggregateNode') {
       this.outputFrames(dataNode)
     } else {
       this.createSubLayout(layoutNode)
     }
+  }
+
+  deselectNode () {
+    this.sections.get('sublayout').d3Element.remove()
+    this.originalUI.emit('outputFrames', null)
   }
 
   highlightNode (layoutNode = null) {
