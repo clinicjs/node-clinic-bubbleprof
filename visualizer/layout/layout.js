@@ -61,37 +61,37 @@ class Layout {
 
     const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
 
-    const linkToSource = !connection.sourceNode ? null : new ArtificialNode({
+    const shortcutToSource = !connection.sourceNode ? null : new ShortcutNode({
       id: connection.sourceNode.id,
       isRoot: true,
       children: []
     }, connection.sourceNode)
 
-    if (linkToSource) {
-      dataNodes.unshift(linkToSource)
+    if (shortcutToSource) {
+      dataNodes.unshift(shortcutToSource)
     }
 
     // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
     for (const dataNode of dataNodes) {
       // if (!nodeType) nodeType = node.constructor.name
 
-      if (linkToSource && !includedIds.has(dataNode.parentId)) {
-        linkToSource.children.push(dataNode.id)
+      if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
+        shortcutToSource.children.push(dataNode.id)
       }
       for (const childId of dataNode.children) {
-        // If this child is in another cluster, add a dummy leaf node -> clickable link to that cluster
+        // If this child is in another cluster, add a dummy leaf node -> clickable link/shortcut to that cluster
         if (!dataNodes.some(dataNode => dataNode.id === childId)) {
           const childNode = dataNode.getSameType(childId)
 
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
-          const linkOnwards = new ArtificialNode({
+          const shortcutNode = new ShortcutNode({
             id: childId,
             children: [],
             parentId: dataNode.id
           // Use the name, mark etc of the clusterNode the target node is inside
           }, childNode.clusterId ? childNode : childNode.clusterNode)
 
-          dataNodes.push(linkOnwards)
+          dataNodes.push(shortcutNode)
         }
       }
     }
@@ -144,7 +144,7 @@ class Layout {
 
     // TODO: optimize
     function squash (layoutNode, parent) {
-      // Skip ArtificialNodes
+      // Skip ArtificialNodes (including ShortcutNodes)
       if (layoutNode instanceof ArtificialNode) return layoutNode
 
       // Squash children first
@@ -295,14 +295,10 @@ class ArtificialNode extends ClusterNode {
     super(nodeProperties, nodeToCopy.dataSet)
 
     const defaultProperties = {
-      replacesIds: [this.id],
       nodeType: 'AggregateNode'
     }
     const node = Object.assign(defaultProperties, rawNode)
 
-    this.linkTo = nodeToCopy
-
-    this.replacesIds = this.replacesIds
     this.nodeType = node.nodeType
   }
   getSameType (nodeId) {
@@ -330,6 +326,13 @@ class ArtificialNode extends ClusterNode {
         this.setDecimal(value, classification, position, label)
       }
     }
+  }
+}
+
+class ShortcutNode extends ArtificialNode {
+  constructor (rawNode, nodeToCopy) {
+    super(rawNode, nodeToCopy)
+    this.shortcutTo = nodeToCopy
   }
 }
 
