@@ -80,7 +80,6 @@ class BubbleprofUI extends EventEmitter {
   selectNode (layoutNode) {
     this.selectedNode = layoutNode
     const dataNode = layoutNode.node
-    console.log(layoutNode)
     if (layoutNode.constructor.name !== 'CollapsedLayoutNode' && dataNode.linkTo) {
       const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
       this.parentUI.createSubLayout(targetLayoutNode)
