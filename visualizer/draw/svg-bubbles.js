@@ -223,7 +223,7 @@ class Bubbles extends SvgContentGroup {
       const withinTimeMs = withinTime + (this.getRadius(d) < labelMinimumSpace ? '' : '\u2009ms')
       d3TimeLabel.text(withinTimeMs)
 
-      if (d.name === 'miscellaneous' && !d.parent) {
+      if (d.node.name === 'miscellaneous' && !d.parent) {
         d3NameLabel.text('Starts here')
       } else if (useLongerLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 4, 21))
