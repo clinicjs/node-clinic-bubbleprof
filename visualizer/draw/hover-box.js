@@ -26,6 +26,7 @@ class HoverBox extends HtmlContent {
 
     this.d3TimeBlock = this.d3Element.append('div')
       .classed('block', true)
+      .classed('time-block', true)
 
     this.d3BetweenTime = this.d3TimeBlock.append('p')
     this.d3WithinTime = this.d3TimeBlock.append('p')
@@ -53,7 +54,10 @@ class HoverBox extends HtmlContent {
       // The SVG element scales like a responsive image, the HTML hover box doesn't
       // So the exact pixel position of the hover box depends on the SVG's current width
       const svg = this.contentProperties.svg
-      const svgWidth = svg.d3Element.node().getBoundingClientRect().width
+      const {
+        width: svgWidth,
+        height: svgHeight
+      } = svg.d3Element.node().getBoundingClientRect()
       const responsiveScaleFactor = svgWidth / svg.svgBounds.width
 
       const nodePosition = layoutNode.position
@@ -95,6 +99,9 @@ class HoverBox extends HtmlContent {
         this.ui.selectNode(layoutNode)
         this.ui.highlightNode(null)
       })
+
+      const boxHeight = this.d3Element.node().getBoundingClientRect().height
+      this.d3Element.classed('off-bottom', top + boxHeight > svgHeight)
     }
   }
 }

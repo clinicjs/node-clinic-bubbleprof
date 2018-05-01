@@ -597,6 +597,13 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   left: 0;
 }
 
+.hover-box.off-bottom .time-block {
+  bottom: 100%;
+  position: absolute;
+  background: var(--pure-black);
+  border-bottom: 2px solid var(--main-bg-color);
+}
+
 .hover-box p {
   margin: 0;
   padding: 6px 0;
