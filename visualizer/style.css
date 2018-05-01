@@ -569,23 +569,44 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   width: 320px;
   background-color: var(--pure-black);
   color: var(--nearform-grey);
-  padding-bottom: 14px;
   margin-left: 6px;
+  z-index: 25;
+  margin-top: -26px;
 }
 
-.hover-box:before {
+.hover-box .block {
+  padding: 14px;
+}
+
+.hover-box .block:not(:last-child) {
+  border-bottom: 2px solid var(--main-bg-color);
+}
+
+.hover-box .title-block {
+  cursor: pointer;
+  position: relative;
+}
+
+.hover-box .title-block:before {
   content: "";
   display: block;
   position: absolute;
-  margin-left: -8px;
-  border: 6px solid transparent;
+  margin-left: -18px;
+  border: 10px solid transparent;
   border-right-color: var(--pure-black);
-  border-top-color: var(--pure-black);
+  left: 0;
+}
+
+.hover-box.off-bottom .time-block {
+  bottom: 100%;
+  position: absolute;
+  background: var(--pure-black);
+  border-bottom: 2px solid var(--main-bg-color);
 }
 
 .hover-box p {
   margin: 0;
-  padding: 6px 14px;
+  padding: 6px 0;
   font-size: var(--main-text-size)
 }
 
@@ -596,19 +617,17 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
 
 .hover-box h2 {
   margin: 0;
-  padding: 14px;
   font-size: 13pt;
   color: var(--pure-white);
-  font-weight: normal;
-  padding-bottom: 6px;
-  border-bottom: 2px solid var(--main-bg-color);
+  font-weight: bold;
 }
 
-.hover-box h2 .subtitle {
-  font-size: 12pt;
-  color: var(--nearform-grey);
-  display: inline-block;
-  margin: 0 4px 0 0;
+.hover-box .click-message {
+  display: block;
+  position: relative;
+  color: var(--cyan);
+  font-size: var(--main-text-size);
+  font-weight: bold;
 }
 
 /* Global classes linking styles to data properties */

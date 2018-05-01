@@ -5,6 +5,7 @@ const d3 = require('./d3-subset.js')
 const EventEmitter = require('events')
 const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
+const HoverBox = require('./hover-box.js')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings, appendTo, parentUI = null) {
@@ -25,6 +26,9 @@ class BubbleprofUI extends EventEmitter {
     }
     this.parentUI = parentUI
     this.originalUI = parentUI ? getOriginalUI(parentUI) : this
+
+    this.highlightedNode = null
+    this.selectedNode = null
 
     // Main divisions of the page
     this.sections = new Map()
@@ -55,11 +59,14 @@ class BubbleprofUI extends EventEmitter {
       const sublayout = newUI.sections.get('sublayout')
       sublayout.addCollapseControl()
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
+      sublayout.addContent(HoverBox, {svg: sublayoutSvg})
+
       sublayout.initializeElements()
       sublayout.d3Element.on('click', () => {
         newUI.deselectNode()
         window.layout = newUI.parentUI.layout
       })
+
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       newUI.setData(this.dataSet, newLayout)
@@ -71,9 +78,10 @@ class BubbleprofUI extends EventEmitter {
   }
 
   selectNode (layoutNode) {
+    this.selectedNode = layoutNode
     const dataNode = layoutNode.node
-    if (layoutNode.constructor.name !== 'CollapsedLayoutNode' && dataNode.linkTo) {
-      const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.linkTo.id)
+    if (dataNode.constructor.name === 'ShortcutNode') {
+      const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.shortcutTo.id)
       // TODO: replace with something better designed e.g. a back button for within sublayouts
       this.deselectNode()
       this.parentUI.createSubLayout(targetLayoutNode)
@@ -87,6 +95,11 @@ class BubbleprofUI extends EventEmitter {
   deselectNode () {
     this.sections.get('sublayout').d3Element.remove()
     this.originalUI.emit('outputFrames', null)
+  }
+
+  highlightNode (layoutNode = null) {
+    this.highlightedNode = layoutNode
+    this.emit('hover', layoutNode)
   }
 
   outputFrames (aggregateNode) {

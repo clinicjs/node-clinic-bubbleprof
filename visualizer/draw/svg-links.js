@@ -40,6 +40,8 @@ class Links extends SvgContentGroup {
       .classed('below-threshold-1', (d) => this.isBelowFullLabelThreshold(d))
       .classed('below-threshold-2', (d) => this.isBelowLabelThreshold(d))
       .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
+      .on('mouseover', d => this.ui.highlightNode(d.targetLayoutNode))
+      .on('mouseout', () => this.ui.highlightNode(null))
       .on('click', connection => {
         d3.event.stopPropagation()
         this.ui.selectNode(connection.targetLayoutNode)
