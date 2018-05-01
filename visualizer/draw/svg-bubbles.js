@@ -240,18 +240,32 @@ class Bubbles extends SvgContentGroup {
         degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
       })
 
-      let degrees = lineToLabel.degrees + 90
       let flipDegreesLabel = false
+      let degrees = lineToLabel.degrees
+      let xOffset
+      let yOffset
 
-      if (degrees > 90 || degrees < -90) {
-        degrees -= 180
-        flipDegreesLabel = true
+      if (!useLongerLabel && !d.children.length && (inboundDegrees < 45 || inboundDegrees > 135)) {
+        // Draw label after bubble, continuing incoming line
+        if (inboundDegrees > 90) {
+          d3NameLabel.classed('pointing-left', true)
+        } else {
+          d3NameLabel.classed('pointing-right', true)
+          degrees = LineCoordinates.enforceDegreesRange(degrees + 180)
+        }
+      } else {
+        // Draw label above bubble, perpendicular to incoming line
+        degrees += 90
+
+        if (degrees > 90 || degrees < -90) {
+          degrees -= 180
+          flipDegreesLabel = true
+        }
+        d3NameLabel.classed('flipped-label', flipDegreesLabel)
       }
-      d3NameLabel.classed('flipped-label', flipDegreesLabel)
 
-      const xOffset = lineToLabel.x2 - position.x
-      const yOffset = lineToLabel.y2 - position.y
-
+      xOffset = lineToLabel.x2 - position.x
+      yOffset = lineToLabel.y2 - position.y
       d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
     })
   }
