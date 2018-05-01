@@ -91,6 +91,10 @@ class HoverBox extends HtmlContent {
           this.d3Element.attr('name', 'cluster-node')
           break
       }
+      this.d3ClickMessage.on('click', () => {
+        this.ui.selectNode(layoutNode)
+        this.ui.highlightNode(null)
+      })
     }
   }
 }
