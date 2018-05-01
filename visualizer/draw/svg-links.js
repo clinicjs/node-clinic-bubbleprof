@@ -46,9 +46,9 @@ class Links extends SvgContentGroup {
       })
 
     this.addLines()
-    this.addLabel()
-
     if (this.nodeType === 'ClusterNode') { this.addLineSegments() }
+
+    this.addLabels()
   }
 
   addLines () {
@@ -64,7 +64,7 @@ class Links extends SvgContentGroup {
       .classed('link-inner', true)
   }
 
-  addLabel () {
+  addLabels () {
     this.d3TimeLabels = this.d3Links.append('text')
       .classed('time-label', true)
       .classed('text-label', true)

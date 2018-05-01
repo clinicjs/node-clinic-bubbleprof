@@ -420,6 +420,15 @@ svg.bubbleprof .below-threshold-3 .name-label {
 
 svg.bubbleprof .time-label {
   font-size: 9pt;
+  font-weight: bold;
+}
+
+svg.bubbleprof .link-wrapper .time-label {
+  alignment-baseline: before-edge;
+  paint-order: stroke fill;
+  stroke: var(--main-bg-color);
+  stroke-width: 4px;
+  stroke-opacity: 0.9;
 }
 
 svg.bubbleprof .below-threshold-1.bubble-wrapper .time-label {
