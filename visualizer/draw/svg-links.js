@@ -14,11 +14,12 @@ class Links extends SvgContentGroup {
   }
 
   isBelowFullLabelThreshold (connection) {
-    // If label doesn't have space to be x5 as wide as it is tall, use smaller label
-    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 5
+    // If label doesn't have space to be x6 as wide as it is tall, use smaller label
+    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 6
   }
   isBelowLabelThreshold (connection) {
-    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace
+    // For label to not look messy, we need space for it and same again either side
+    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 3
   }
   isBelowVisibilityThreshold (connection) {
     return connection.getVisibleLineLength() < 1
@@ -48,9 +49,9 @@ class Links extends SvgContentGroup {
       })
 
     this.addLines()
-    this.addLabel()
-
     if (this.nodeType === 'ClusterNode') { this.addLineSegments() }
+
+    this.addLabels()
   }
 
   addLines () {
@@ -66,7 +67,7 @@ class Links extends SvgContentGroup {
       .classed('link-inner', true)
   }
 
-  addLabel () {
+  addLabels () {
     this.d3TimeLabels = this.d3Links.append('text')
       .classed('time-label', true)
       .classed('text-label', true)
