@@ -59,9 +59,9 @@ class Bubbles extends SvgContentGroup {
       })
 
     this.addCircles()
-    if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
-
     this.addLabels()
+
+    if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
   }
 
   getNodePosition (layoutNode) {
