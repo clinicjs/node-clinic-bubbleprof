@@ -67,17 +67,13 @@ class HoverBox extends HtmlContent {
       this.d3Element.style('top', top + 'px')
       this.d3Element.style('left', left + 'px')
 
-      const dataNode = layoutNode.node
-      const nodeType = dataNode.constructor.name
+      const nodeType = layoutNode.node.constructor.name
+      const dataNode = nodeType === 'ShortcutNode' ? layoutNode.node.shortcutTo : layoutNode.node
 
       this.d3Title.text(dataNode.name)
 
-      // TODO: find a more appropriate way to communicate the time of ShortcutNodes, taking into
-      // account that they refer to nodes at a different level so aren't directly comparable
-      if (nodeType !== 'ShortcutNode') {
-        this.d3BetweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
-        this.d3WithinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
-      }
+      this.d3BetweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
+      this.d3WithinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
 
       switch (nodeType) {
         case 'AggregateNode':
