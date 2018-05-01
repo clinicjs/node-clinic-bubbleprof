@@ -627,6 +627,7 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   position: relative;
   color: var(--cyan);
   font-size: var(--main-text-size);
+  font-weight: bold;
 }
 
 /* Global classes linking styles to data properties */
