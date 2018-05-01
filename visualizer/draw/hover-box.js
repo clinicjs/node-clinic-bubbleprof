@@ -95,9 +95,9 @@ class HoverBox extends HtmlContent {
           this.d3Element.attr('name', 'cluster-node')
           break
       }
-      this.d3ClickMessage.on('click', () => {
-        this.ui.selectNode(layoutNode)
+      this.d3TitleBlock.on('click', () => {
         this.ui.highlightNode(null)
+        this.ui.selectNode(layoutNode)
       })
 
       const boxHeight = this.d3Element.node().getBoundingClientRect().height
