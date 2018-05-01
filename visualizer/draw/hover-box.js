@@ -1,6 +1,6 @@
 'use strict'
 
-// const d3 = require('./d3-subset.js') // Currently unused but will be used
+const d3 = require('./d3-subset.js')
 const HtmlContent = require('./html-content.js')
 
 class HoverBox extends HtmlContent {
@@ -96,6 +96,7 @@ class HoverBox extends HtmlContent {
           break
       }
       this.d3TitleBlock.on('click', () => {
+        d3.event.stopPropagation()
         this.ui.highlightNode(null)
         this.ui.selectNode(layoutNode)
       })
