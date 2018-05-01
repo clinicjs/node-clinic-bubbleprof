@@ -571,21 +571,35 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   color: var(--nearform-grey);
   margin-left: 6px;
   z-index: 25;
+  margin-top: -26px;
 }
 
-.hover-box:before {
+.hover-box .block {
+  padding: 14px;
+}
+
+.hover-box .block:not(:last-child) {
+  border-bottom: 2px solid var(--main-bg-color);
+}
+
+.hover-box .title-block {
+  cursor: pointer;
+  position: relative;
+}
+
+.hover-box .title-block:before {
   content: "";
   display: block;
   position: absolute;
-  margin-left: -8px;
-  border: 6px solid transparent;
+  margin-left: -18px;
+  border: 10px solid transparent;
   border-right-color: var(--pure-black);
-  border-top-color: var(--pure-black);
+  left: 0;
 }
 
 .hover-box p {
   margin: 0;
-  padding: 6px 14px;
+  padding: 6px 0;
   font-size: var(--main-text-size)
 }
 
@@ -596,28 +610,16 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
 
 .hover-box h2 {
   margin: 0;
-  padding: 14px;
   font-size: 13pt;
   color: var(--pure-white);
-  font-weight: normal;
-  padding-bottom: 6px;
-  border-bottom: 2px solid var(--main-bg-color);
-}
-
-.hover-box h2 .subtitle {
-  font-size: 12pt;
-  color: var(--nearform-grey);
-  display: inline-block;
-  margin: 0 4px 0 0;
+  font-weight: bold;
 }
 
 .hover-box .click-message {
-  background: var(--cyan);
-  color: var(--pure-white);
-  padding: 14px;
+  display: block;
+  position: relative;
+  color: var(--cyan);
   font-size: var(--main-text-size);
-  font-weight: bold;
-  border-top: 2px solid var(--main-bg-color);
 }
 
 /* Global classes linking styles to data properties */

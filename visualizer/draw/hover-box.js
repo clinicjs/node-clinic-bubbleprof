@@ -16,15 +16,19 @@ class HoverBox extends HtmlContent {
     this.d3Element.classed('hover-box', true)
     this.d3Element.classed('hidden', true)
 
-    this.d3Title = this.d3Element.append('h2')
-    this.d3Subtitle = this.d3Title.append('span')
-      .classed('subtitle', true)
+    this.d3TitleBlock = this.d3Element.append('div')
+      .classed('block', true)
+      .classed('title-block', true)
 
-    this.betweenTime = this.d3Element.append('p')
-    this.withinTime = this.d3Element.append('p')
-
-    this.d3ClickMessage = this.d3Element.append('div')
+    this.d3Title = this.d3TitleBlock.append('h2')
+    this.d3ClickMessage = this.d3TitleBlock.append('a')
       .classed('click-message', true)
+
+    this.d3TimeBlock = this.d3Element.append('div')
+      .classed('block', true)
+
+    this.d3BetweenTime = this.d3TimeBlock.append('p')
+    this.d3WithinTime = this.d3TimeBlock.append('p')
 
     this.ui.on('hover', layoutNode => {
       this.isHidden = !layoutNode
@@ -63,13 +67,12 @@ class HoverBox extends HtmlContent {
       const nodeType = dataNode.constructor.name
 
       this.d3Title.text(dataNode.name)
-      this.d3Subtitle.text(`${dataNode.constructor.name} #${dataNode.id})`)
 
       // TODO: find a more appropriate way to communicate the time of ShortcutNodes, taking into
       // account that they refer to nodes at a different level so aren't directly comparable
       if (nodeType !== 'ShortcutNode') {
-        this.betweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
-        this.withinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
+        this.d3BetweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
+        this.d3WithinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
       }
 
       switch (nodeType) {
