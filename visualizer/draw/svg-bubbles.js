@@ -88,25 +88,27 @@ class Bubbles extends SvgContentGroup {
     })
   }
 
-  getTransformPosition (d, xOffset = 0, yOffset = 0) {
+  getTransformPosition (d, backwardsOffset = 0) {
     const position = this.getNodePosition(d)
     let { x, y } = position
     const connection = this.getInboundConnection(d)
 
-    if (this.isBelowVisibilityThreshold(d) && connection && this.ui.layout.layoutNodes.has(connection.sourceNode.id)) {
+    const isBelowBackwardsThreshold = d.children.length ? this.isBelowVisibilityThreshold(d) : this.isBelowLabelThreshold(d)
+
+    if (isBelowBackwardsThreshold && connection && this.ui.layout.layoutNodes.has(connection.sourceNode.id)) {
       // Move it back to the mid point of the gap
       const inboundLine = this.getInboundLine(d)
       const backwardsLine = new LineCoordinates({
         x1: x,
         y1: y,
-        length: this.ui.settings.labelMinimumSpace / 2,
+        length: this.ui.settings.labelMinimumSpace / 2 + backwardsOffset,
         degrees: LineCoordinates.enforceDegreesRange(inboundLine.degrees - 180)
       })
       x = backwardsLine.x2
       y = backwardsLine.y2
     }
 
-    return `translate(${x + xOffset},${y + yOffset})`
+    return `translate(${x},${y})`
   }
 
   addCircles () {
@@ -169,16 +171,15 @@ class Bubbles extends SvgContentGroup {
     })
   }
   draw () {
-    this.d3OuterCircles.attr('r', d => this.getRadius(d))
-
-    this.d3InnerCircles.attr('r', d => {
-      // If below threshold, this will be an invisible mouseover target
-      return this.isBelowStrokeThreshold(d) ? this.ui.settings.labelMinimumSpace : this.getRadius(d) - this.ui.settings.strokePadding
-    })
+    const {
+      labelMinimumSpace,
+      strokePadding,
+      lineWidth
+    } = this.ui.settings
 
     if (this.typeDonutsMap) {
       for (const [d, donutWrapper] of this.typeDonutsMap) {
-        const donutRadius = this.getRadius(d) - this.ui.settings.strokePadding
+        const donutRadius = this.getRadius(d) - strokePadding
 
         const arcMaker = d3.arc()
           .innerRadius(donutRadius)
@@ -188,33 +189,41 @@ class Bubbles extends SvgContentGroup {
           .attr('d', arcDatum => arcMaker(arcDatum))
       }
     }
-    this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
 
-    this.d3TimeLabels.text(d => {
-      const withinTime = this.ui.formatNumber(d.node.getWithinTime())
-      const withMs = withinTime + (this.getRadius(d) < this.ui.settings.labelMinimumSpace ? '' : '\u2009ms')
-      return withMs
-    })
+    this.d3Bubbles.each((d, i, nodes) => {
+      const d3BubbleWrapper = d3.select(nodes[i])
 
-    this.d3NameLabels.each((d, i, nodes) => {
-      const d3NameLabel = d3.select(nodes[i])
+      const d3OuterCircle = d3BubbleWrapper.select('.bubble-outer')
+      const d3InnerCircle = d3BubbleWrapper.select('.bubble-inner')
+      const d3NameLabel = d3BubbleWrapper.select('.name-label')
+      const d3TimeLabel = d3BubbleWrapper.select('.time-label')
+
+      // Establish relative size and inbound angle for this bubble
       let inboundDegrees = 90
-      let useLongerLabel = true
+      let useLongerLabel = !this.isBelowLabelThreshold(d)
       let useMicroLabel = false
-
       if (d.parent) {
         const connection = this.getInboundConnection(d)
         const length = connection.getVisibleLineLength()
         const hasLongInboundLine = this.hasLongInboundLine(length)
-
-        useLongerLabel = !this.isBelowLabelThreshold(d) || hasLongInboundLine
+        useLongerLabel = useLongerLabel || hasLongInboundLine
         useMicroLabel = !useLongerLabel && this.hasShortInboundLine(length)
-
         d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
         inboundDegrees = this.getInboundLine(d).degrees
       }
+      const labelPointsOnwards = !useLongerLabel && !d.children.length && (inboundDegrees < 45 || inboundDegrees > 135)
+      const backwardsOffset = labelPointsOnwards ? labelMinimumSpace / 2 + lineWidth : 0
 
-      if (d.name === 'miscellaneous' && !d.parent) {
+      d3BubbleWrapper.attr('transform', this.getTransformPosition(d, backwardsOffset))
+
+      d3OuterCircle.attr('r', this.getRadius(d))
+      d3InnerCircle.attr('r', this.isBelowStrokeThreshold(d) ? labelMinimumSpace : this.getRadius(d) - strokePadding)
+
+      const withinTime = this.ui.formatNumber(d.node.getWithinTime())
+      const withinTimeMs = withinTime + (this.getRadius(d) < labelMinimumSpace ? '' : '\u2009ms')
+      d3TimeLabel.text(withinTimeMs)
+
+      if (d.node.name === 'miscellaneous' && !d.parent) {
         d3NameLabel.text('Starts here')
       } else if (useLongerLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 4, 21))
@@ -225,26 +234,41 @@ class Bubbles extends SvgContentGroup {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 9))
       }
 
+      const negateIfOnwardsLabel = labelPointsOnwards ? -1 : 1
       const position = this.getNodePosition(d)
       const lineToLabel = new LineCoordinates({
         x1: position.x,
         y1: position.y,
-        length: this.getRadius(d) + this.ui.settings.lineWidth,
+        length: this.getRadius(d) * negateIfOnwardsLabel + lineWidth - backwardsOffset,
         degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
       })
 
-      let degrees = lineToLabel.degrees + 90
       let flipDegreesLabel = false
+      let degrees = lineToLabel.degrees
+      let xOffset
+      let yOffset
 
-      if (degrees > 90 || degrees < -90) {
-        degrees -= 180
-        flipDegreesLabel = true
+      if (labelPointsOnwards) {
+        // Draw label after bubble, continuing incoming line
+        if (inboundDegrees > 90 || inboundDegrees < -90) {
+          d3NameLabel.classed('pointing-left', true)
+        } else {
+          d3NameLabel.classed('pointing-right', true)
+          degrees = LineCoordinates.enforceDegreesRange(degrees + 180)
+        }
+      } else {
+        // Draw label above bubble, perpendicular to incoming line
+        degrees += 90
+
+        if (degrees > 90 || degrees < -90) {
+          degrees -= 180
+          flipDegreesLabel = true
+        }
+        d3NameLabel.classed('flipped-label', flipDegreesLabel)
       }
-      d3NameLabel.classed('flipped-label', flipDegreesLabel)
 
-      const xOffset = lineToLabel.x2 - position.x
-      const yOffset = lineToLabel.y2 - position.y
-
+      xOffset = lineToLabel.x2 - position.x
+      yOffset = lineToLabel.y2 - position.y
       d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
     })
   }

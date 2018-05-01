@@ -393,6 +393,16 @@ svg.bubbleprof .name-label {
   font-size: 12pt;
 }
 
+svg.bubbleprof .bubble-wrapper text.name-label.pointing-right {
+  text-anchor: start;
+  alignment-baseline: middle;
+}
+
+svg.bubbleprof .bubble-wrapper text.name-label.pointing-left {
+  text-anchor: end;
+  alignment-baseline: middle;
+}
+
 svg.bubbleprof .below-threshold-1 .name-label {
   font-size: 11pt;
   opacity: 0.9;
