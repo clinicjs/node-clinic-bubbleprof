@@ -14,11 +14,12 @@ class Links extends SvgContentGroup {
   }
 
   isBelowFullLabelThreshold (connection) {
-    // If label doesn't have space to be x5 as wide as it is tall, use smaller label
-    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 5
+    // If label doesn't have space to be x6 as wide as it is tall, use smaller label
+    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 6
   }
   isBelowLabelThreshold (connection) {
-    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace
+    // For label to not look messy, we need space for it and same again either side
+    return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 3
   }
   isBelowVisibilityThreshold (connection) {
     return connection.getVisibleLineLength() < 1
