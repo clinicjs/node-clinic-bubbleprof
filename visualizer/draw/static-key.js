@@ -39,23 +39,23 @@ const svgDonut = `
 
 const keyHtml = `
   <p>
-    Bubbleprof observes the async_hooks created in your application, measures their delays, and groups them to map out where the delays most occur in your application's async flow.
+    Bubbleprof observes the async operations of your application, groups them, measures their delays, and draws a map of the delays in your application's async flow.
   </p>
   <p>
     ${svgBubble}
-    Each bubble represents the delays while the flow stayed within your own code, a module, or node core.
+    The size of each bubble represents time within a group of operations. These are grouped where the flow stayed within either your own code, a module, or node core. Tiny adjacent groups are also grouped to reduce clutter.
   </p>
   <p>
     ${svgLink}
-    The length of arrows pointing out from a bubble show delays while moving on to the next module or party.
+    The length of arrows connecting bubbles shows the delays while the flow moves from one group to another.
   </p>
   <p>
     ${svgDonut}
-    Inner coloured lines indicate the types of async_hooks responsible for this delay. Click to explore.
+    Inner coloured lines indicate the mix of types of async operation responsible for this delay. Click to explore.
   </p>
   <p>
     ${svgText}
-    The lengths of the lines between and around the bubbles indicate the aggregated delay in miliseconds (ms).
+    Line lengths between and around the bubbles and numeric labels reflect the aggregated delay in miliseconds (ms).
   </p>
 `
 
