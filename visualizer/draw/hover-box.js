@@ -6,7 +6,7 @@ const HtmlContent = require('./html-content.js')
 class HoverBox extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
     super(d3Container, contentProperties)
-    if (!this.contentProperties.svg) throw new Error('InteractiveKey requires contentProperties.svg to be defined')
+    if (!this.contentProperties.svg) throw new Error('HoverBox requires contentProperties.svg to be defined')
 
     this.isHidden = true
   }
@@ -87,7 +87,7 @@ class HoverBox extends HtmlContent {
         case 'ArtificialNode':
         case 'ClusterNode':
           const nodesCount = nodeType === 'ClusterNode' ? dataNode.nodes.size : layoutNode.collapsedNodes.length
-          this.d3ClickMessage.text(`Click to expand ${nodesCount} grouped async_hooks`)
+          this.d3ClickMessage.text(`Click to expand ${nodesCount} grouped items`)
           this.d3Element.attr('name', 'cluster-node')
           break
       }

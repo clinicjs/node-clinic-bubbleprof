@@ -58,7 +58,7 @@ class Frames extends HtmlContent {
 
     if (this.node) {
       this.drawFrames(this.framesByNode, this.d3ContentWrapper)
-      this.d3Heading.text(`Showing async stack trace from async_hook "${this.node.name}"`)
+      this.d3Heading.text(`Showing async stack trace from async operation "${this.node.name}"`)
     } else {
       this.d3Heading.text(`
         Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
@@ -90,7 +90,7 @@ class Frames extends HtmlContent {
       if (frames.dataNode && frames.dataNode.isRoot) {
         d3EmptyFrameItem.text('This is the root node, representing the starting point of your application. No stack frames are available.')
       } else {
-        d3EmptyFrameItem.text('No frames are available for this async_hook. It could be from a native module, or something not integrated with the async_hooks API.')
+        d3EmptyFrameItem.text('No frames are available for this async operation. It could be from a native module, or something not integrated with the Async Hooks API.')
       }
     }
     for (const frame of frames) {
@@ -111,7 +111,7 @@ class Frames extends HtmlContent {
             .classed('this-node', isThisNode)
 
           header += `${arrayFlatten(frame).length} frames from `
-          header += `${isThisNode ? 'this async_hook' : `previous async_hook "${frame.dataNode.name}"`}`
+          header += `${isThisNode ? 'this async operation' : `previous async operation "${frame.dataNode.name}"`}`
           header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
         } else if (frame.party) {
           d3Group.classed(frame.party[0], true)
