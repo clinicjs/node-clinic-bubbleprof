@@ -67,7 +67,6 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   t.end()
 })
 
-
 test('Visualizer layout - scale - constrained longest superseeds other weights (except stretched longest)', function (t) {
   const topology = [
     ['1.2.3.4', svgHeight * 3],
