@@ -217,7 +217,7 @@ class Layout {
     }
 
     function isBelowThreshold (dataNode) {
-      return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.scaleFactor < 10
+      return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.sizeIndependentScale < 10
     }
   }
 }
