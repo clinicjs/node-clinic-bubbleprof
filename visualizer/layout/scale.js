@@ -30,9 +30,10 @@ class Scale {
 
     const availableWidth = (svgWidth / 2) - svgDistanceFromEdge
     const stretchedHeight = svgHeight * 1.5
-    const availableHeight = (stretchedHeight) - (svgDistanceFromEdge * 2)
+    const availableStretchedHeight = stretchedHeight - (svgDistanceFromEdge * 2)
+    const availableHeight = svgHeight - (svgDistanceFromEdge * 2)
 
-    const longestStretched = new ScaleWeight('longest', leavesByShortest[leavesByShortest.length - 1], availableHeight, longest.scalable, longest.absolute)
+    const longestStretched = new ScaleWeight('longest', leavesByShortest[leavesByShortest.length - 1], availableStretchedHeight, longest.scalable, longest.absolute)
     // Note - assumptions below depend on ClumpPyramid Positioning
     const scalesBySignificance = [
       // Longest should be no more (and ideally no less) than 1.5 height
@@ -50,7 +51,7 @@ class Scale {
     const largestDiameterNode = [...this.layoutNodes.values()].sort((a, b) => b.stem.ownDiameter - a.stem.ownDiameter)[0]
     // For diagram clarity, largest circle should be no more (and ideally no less) than quater of the viewport
     const diameterClamp = new ScaleWeight('diameter clamp', largestDiameterNode, smallestSide / 2, largestDiameterNode.stem.ownDiameter, 0)
-    const longestConstrained = new ScaleWeight('longest constrained', leavesByShortest[leavesByShortest.length - 1], svgHeight, longest.scalable, longest.absolute)
+    const longestConstrained = new ScaleWeight('longest constrained', leavesByShortest[leavesByShortest.length - 1], availableHeight, longest.scalable, longest.absolute)
 
     const accountedScales = [longestConstrained, ...scalesBySignificance.slice(0, leavesByShortest.length), diameterClamp]
     this.scalesBySmallest = accountedScales.sort((a, b) => a.weight - b.weight)
