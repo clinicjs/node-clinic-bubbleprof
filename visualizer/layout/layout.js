@@ -163,7 +163,7 @@ class Layout {
           childrenAboveThreshold.push(child)
 
           // Children squashed from above will add a collapsed node to the layout
-          if (squashed) squashedCounter --
+          if (squashed) squashedCounter--
         }
       }
 
