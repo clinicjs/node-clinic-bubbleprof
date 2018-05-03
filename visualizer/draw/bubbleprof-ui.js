@@ -80,15 +80,29 @@ class BubbleprofUI extends EventEmitter {
   selectNode (layoutNode) {
     this.selectedNode = layoutNode
     const dataNode = layoutNode.node
-    if (dataNode.constructor.name === 'ShortcutNode') {
-      const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.shortcutTo.id)
-      // TODO: replace with something better designed e.g. a back button for within sublayouts
-      this.deselectNode()
-      this.parentUI.createSubLayout(targetLayoutNode)
-    } else if (dataNode.constructor.name === 'AggregateNode') {
-      this.outputFrames(dataNode)
-    } else {
-      this.createSubLayout(layoutNode)
+    switch (dataNode.constructor.name) {
+      case 'ShortcutNode':
+        const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.shortcutTo.id)
+        // TODO: replace with something better designed e.g. a back button for within sublayouts
+        this.deselectNode()
+        this.parentUI.createSubLayout(targetLayoutNode)
+        break
+
+      case 'AggregateNode':
+        this.outputFrames(dataNode)
+        break
+
+      case 'ClusterNode':
+        if (dataNode.nodes.size === 1) {
+          this.outputFrames(dataNode.nodes.values().next().value)
+        } else {
+          this.createSubLayout(layoutNode)
+        }
+        break
+
+      default:
+        this.createSubLayout(layoutNode)
+        break
     }
   }
 
