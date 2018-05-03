@@ -69,6 +69,12 @@ class Scale {
     }
     this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
+    // For collapsing nodes, we need a threshold that is independent of the SVG size so that
+    // the same data gives the same number of visible nodes if presented in different sized SVG
+    // 680 is based on common window sizes and tested to give reasonable collapsing
+    const sizeIndependentWeight = new ScaleWeight('size-independent', null, 680, longestStretched.scalableToContain, longestStretched.absoluteToContain)
+    this.sizeIndependentScale = sizeIndependentWeight.weight
+
     const isLineTooLong = this.decisiveWeight === longestStretched
     const isDiameterAboveHeight = this.decisiveWeight === diameterClamp && smallestSide === availableHeight
     const shouldStretchHeight = isLineTooLong || isDiameterAboveHeight
