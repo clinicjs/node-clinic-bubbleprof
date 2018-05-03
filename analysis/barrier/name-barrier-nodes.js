@@ -180,6 +180,9 @@ function inferType (node, sysInfo) {
   for (let i = 0; i < node.frames.length; i++) {
     const f = node.frames.get(i)
     if (!f.isNodecore(sysInfo)) return null
+    if (f.typeName === 'ServerResponse' && f.functionName === 'write') {
+      return ['connection', 'write']
+    }
     if (f.typeName === 'ServerResponse' && f.functionName === 'end') {
       return ['connection', 'end']
     }
