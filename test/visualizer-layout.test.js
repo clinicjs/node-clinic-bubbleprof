@@ -190,7 +190,8 @@ test('Visualizer layout - collapse - collapses subset with missing leaves (excep
   ]
   const dataSet = loadData(mockTopology(topology))
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  dataSet.clusterNodes.get(7).stats.async.within = 75 // make 7 long
+  dataSet.clusterNodes.get(7).stats.async.within = 75 // make 7 wide
+  dataSet.clusterNodes.get(7).stats.async.between = 75 // make 7 long
   const subset = [1, 2, 3, 4, 6, 7].map(nodeId => dataSet.clusterNodes.get(nodeId))
   const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
   layout.processBetweenData()
