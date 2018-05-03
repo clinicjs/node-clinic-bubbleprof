@@ -131,20 +131,19 @@ class Layout {
 
   collapseNodes () {
     const { layoutNodes, scale } = this
-    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
     // TODO: stop relying on coincidental Map.keys() order
+    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
+
+    // Set an upper limit so not too much gets squashed
+    // Else it's possible for everything to be squashed, making drilling down impossible/infinite
+    const squashingLimit = layoutNodes.size - 3
+    if (squashingLimit <= 1) return
+
+    let squashedCounter = 0
     const hierarchyOrder = []
-    for (const layoutNode of topLayoutNodes) {
-      squash(layoutNode)
-    }
-    const newLayoutNodes = new Map()
-    for (const id of hierarchyOrder) {
-      newLayoutNodes.set(id, layoutNodes.get(id))
-    }
-    this.layoutNodes = newLayoutNodes
 
     // TODO: optimize
-    function squash (layoutNode, parent) {
+    const squash = (layoutNode, parent) => {
       // Skip ArtificialNodes (including ShortcutNodes)
       if (layoutNode instanceof ArtificialNode) return layoutNode
 
@@ -154,11 +153,27 @@ class Layout {
       const collapsedChildren = []
       for (const childId of layoutNode.children) {
         const child = layoutNodes.get(childId)
-        const squashed = squash(child, layoutNode)
-        if (isBelowThreshold(child.node)) {
+
+        // Recurse, potentially squashing descendents, unless we've already hit the limit
+        const squashed = squashedCounter <= squashingLimit ? squash(child, layoutNode) : null
+
+        if (isBelowThreshold(child)) {
           squashed ? collapsedChildren.push(squashed) : childrenBelowThreshold.push(child)
         } else {
           childrenAboveThreshold.push(child)
+
+          // Children squashed from above will add a collapsed node to the layout
+          if (squashed) squashedCounter --
+        }
+      }
+
+      if (squashedCounter + childrenBelowThreshold.length > squashingLimit) {
+        // We've squashed too many, unsquash the largest first
+        childrenBelowThreshold.sort((a, b) => a.getTotalTime() - b.getTotalTime())
+
+        while (childrenBelowThreshold.length && squashedCounter + childrenBelowThreshold.length > squashingLimit) {
+          const largestSquashedHere = childrenBelowThreshold.pop()
+          childrenAboveThreshold.push(largestSquashedHere)
         }
       }
 
@@ -173,15 +188,21 @@ class Layout {
       const grandChildren = arrayFlatten(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
       let combinedSelfCollapse
       let combinedChildrenCollapse
-      const selfBelowThreshold = isBelowThreshold(layoutNode.node)
+      const selfBelowThreshold = isBelowThreshold(layoutNode)
       const selfTopNode = topLayoutNodes.includes(layoutNode)
       if (selfBelowThreshold && collapsibleChildren.length && !selfTopNode) {
         // Combine children and self
         combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
+
+        // Count squashed children at this level, from the level above has been counted already when recursing up the tree
+        squashedCounter += childrenBelowThreshold.length
       } else if (collapsibleChildren.length >= 2) {
         // Combine children only
         combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
         layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
+
+        // Minus one because collapse doesn't contain this node and adds collapsedLayoutNode to layout
+        squashedCounter += childrenBelowThreshold.length
       }
 
       let nodesToIndex
@@ -204,7 +225,17 @@ class Layout {
       }
 
       return combinedSelfCollapse || null
+    } // End of squash()
+
+    for (const layoutNode of topLayoutNodes) {
+      squash(layoutNode)
     }
+    const newLayoutNodes = new Map()
+    for (const id of hierarchyOrder) {
+      newLayoutNodes.set(id, layoutNodes.get(id))
+    }
+    this.layoutNodes = newLayoutNodes
+
     function indexLayoutNode (collapsedLayoutNode) {
       layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
       for (const childId of collapsedLayoutNode.children) {
@@ -216,8 +247,8 @@ class Layout {
       }
     }
 
-    function isBelowThreshold (dataNode) {
-      return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.sizeIndependentScale < 10
+    function isBelowThreshold (layoutNode) {
+      return layoutNode.getTotalTime() * scale.sizeIndependentScale < 10
     }
   }
 }
@@ -237,6 +268,9 @@ class LayoutNode {
   }
   getWithinTime () {
     return this.node.getWithinTime()
+  }
+  getTotalTime () {
+    return this.getBetweenTime() + this.getWithinTime()
   }
   validateStat (...args) {
     return this.node.validateStat(...args)
