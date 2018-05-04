@@ -11,14 +11,26 @@ const { validateNumber } = require('../validation.js')
 class Layout {
   constructor ({ dataNodes, connection }, settings) {
     const defaultSettings = {
-      svgWidth: 1000,
-      svgHeight: 1000,
       svgDistanceFromEdge: 30,
-      // lineWidth and labelMinimumSpace will usually be passed in from UI settings
-      lineWidth: 2,
-      labelMinimumSpace: 14
+      lineWidth: 1.5,
+      labelMinimumSpace: 12,
+      viewMode: 'fit'
     }
     this.settings = Object.assign(defaultSettings, settings)
+
+    switch (this.settings.viewMode) {
+      case 'fit':
+      case 'maximised':
+        const nodeLinkBBox = document.getElementById('node-link').getBoundingClientRect()
+
+        this.settings.svgHeight = nodeLinkBBox.height
+        this.settings.svgWidth = nodeLinkBBox.width
+        break
+      case 'scroll':
+        this.settings.svgHeight = settings.svgHeight || 1000
+        this.settings.svgWidth = settings.svgWidth || 1000
+        break
+    }
 
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)

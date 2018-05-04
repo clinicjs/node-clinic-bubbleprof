@@ -26,18 +26,19 @@ class Scale {
 
     const {
       svgWidth,
-      svgDistanceFromEdge
+      svgDistanceFromEdge,
+      viewMode
     } = this.layout.settings
 
-    // TODO: remove this when fit to screen is fully implemented. Reduces scrolling on tiny sublayouts.
-    const svgHeightAdjustment = nodesCount < 4 ? 0.2 * (nodesCount + 1) : 1
+    // Reduces scrolling on tiny sublayouts. Only needed on scroll view mode
+    const svgHeightAdjustment = nodesCount < 4 && viewMode === 'scroll' ? 0.2 * (nodesCount + 1) : 1
     const svgHeight = this.layout.settings.svgHeight * svgHeightAdjustment
 
     const availableHeight = svgHeight - (svgDistanceFromEdge * 2)
     const availableWidth = (svgWidth / 2) - svgDistanceFromEdge
 
-    // Only stretch if it's a complex profile with many nodes that needs more space
-    const stretchedHeight = svgHeight * (nodesCount > 6 ? 1.5 : 1)
+    // Only stretch if we're in scroll mode and it's a complex profile with many nodes that needs more space
+    const stretchedHeight = svgHeight * (nodesCount > 6 && viewMode === 'scroll' ? 1.5 : 1)
     const availableStretchedHeight = stretchedHeight - (svgDistanceFromEdge * 2)
 
     const longestStretched = new ScaleWeight('longest', leavesByShortest[leavesByShortest.length - 1], availableStretchedHeight, longest.scalable, longest.absolute)

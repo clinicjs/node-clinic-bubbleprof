@@ -15,7 +15,8 @@ class BubbleprofUI extends EventEmitter {
       numberFormatter: d3.format(',.0f'),
       strokePadding: 4,
       lineWidth: 2,
-      labelMinimumSpace: 14
+      labelMinimumSpace: 14,
+      viewMode: 'fit'
     }
     this.settings = Object.assign(defaultSettings, settings)
 
@@ -145,6 +146,7 @@ class BubbleprofUI extends EventEmitter {
   initializeElements () {
     const d3Body = d3.select('body')
     d3Body.classed('initialized', true)
+    d3Body.attr('data-view-mode', this.settings.viewMode)
 
     this.mainContainer.d3Element = d3Body.append('main')
     this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element

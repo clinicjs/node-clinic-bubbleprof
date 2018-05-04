@@ -368,6 +368,27 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   display: block;
 }
 
+/* View modes: 'maximised', 'fit', 'scroll'; */
+/*
+body[data-view-mode='fit'] main {
+  max-height: calc(100vh - var(--banner-height) - var(--footer-height));
+  overflow: auto;
+}
+*/
+
+body[data-view-mode='fit'] #node-link {
+  position: sticky;
+  top: 52px; /* TODO: add responsive breakpoints and make this relative to them */
+  max-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
+  min-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
+}
+
+/*
+body[data-view-mode='fit'] #side-bar {
+  margin-bottom: 16px;
+}
+*/
+
 /* Node-link diagram and container */
 
 #node-link {
