@@ -15,7 +15,7 @@ function toLink (layoutNode) {
 // T->T->T->L gives T->C->L
 test('Visualizer layout - collapse - collapses children and parents linearly (except root)', function (t) {
   const topology = [
-    ['1.2.3.4', 150]
+    ['1.2.3.4.5.6', 150]
   ]
   const dataSet = loadData(mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
@@ -24,14 +24,14 @@ test('Visualizer layout - collapse - collapses children and parents linearly (ex
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => '])
+  t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => '])
   t.ok(layout.scale.scaleFactor < 7)
   t.ok(layout.scale.scaleFactor > 6)
   layout.collapseNodes()
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => '])
+  t.deepEqual(actualAfter, ['1 => clump:2,3,4,5', 'clump:2,3,4,5 => 6', '6 => '])
 
   t.end()
 })
