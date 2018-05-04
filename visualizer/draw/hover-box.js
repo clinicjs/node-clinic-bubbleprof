@@ -75,7 +75,12 @@ class HoverBox extends HtmlContent {
       this.d3BetweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
       this.d3WithinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
 
-      switch (nodeType) {
+      // If a clusterNode only contains one aggregate, no point clicking down into it, just give us the frames
+      const isIgnorableCluster = nodeType === 'ClusterNode' && layoutNode.node.nodes.size === 1
+      const clickableDataNode = isIgnorableCluster ? layoutNode.node.nodes.values().next().value : layoutNode.node
+      const clickableNodeType = clickableDataNode.constructor.name
+
+      switch (clickableNodeType) {
         case 'AggregateNode':
           this.d3ClickMessage.text('Click to display stack trace')
           this.d3Element.attr('name', 'aggregate-node')
