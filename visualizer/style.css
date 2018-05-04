@@ -30,10 +30,14 @@ html {
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
-
   --close-x: "×";
 
+  /* Define text sizes */
   --main-text-size: 10pt;
+
+  /* Define element sizes used in calculations by other elements */
+  --banner-height: 65px;
+  --footer-height: 65px;
 }
 
 /* Main layout */
@@ -86,7 +90,7 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 #banner {
   display: flex;
   align-items: center;
-  height: 65px;
+  height: var(--banner-height);
   background: var(--banner-bg-color);
   position: relative;
 }
@@ -212,7 +216,7 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   background: var(--cyan);
   overflow: hidden;
   cursor: pointer;
-  height: 65px;
+  height: var(--footer-height);
   width: 100%;
   cursor: pointer;
 }
