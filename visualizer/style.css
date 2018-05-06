@@ -491,7 +491,7 @@ svg.bubbleprof .link-outer {
   margin-bottom: 65px;
 }
 
-#sublayout:after {
+#node-link .sublayout:after {
   display: block;
   top: 8px;
   right: 8px;
@@ -507,7 +507,7 @@ svg.bubbleprof .link-outer {
 }
 
 /* Temporary fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
-section#sublayout:not(:last-child),
+section.sublayout:not(:last-child),
 svg#node-link-svg:not(:nth-last-child(2)) {
   display: none;
 }

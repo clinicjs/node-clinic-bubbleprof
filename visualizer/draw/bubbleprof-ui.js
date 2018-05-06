@@ -8,18 +8,18 @@ const SvgContainer = require('./svg-container.js')
 const HoverBox = require('./hover-box.js')
 
 class BubbleprofUI extends EventEmitter {
-  constructor (sections = [], settings, appendTo, parentUI = null) {
+  constructor (sections = [], settings = {}, appendTo, parentUI = null) {
     super()
 
-    const defaultSettings = {
+    let defaultSettings = {
       numberFormatter: d3.format(',.0f'),
       strokePadding: 3,
-      lineWidth: 1.5,
-      labelMinimumSpace: 12,
+      nodeLinkId: 'node-link',
+      classNames: '',
       viewMode: 'fit'
     }
-    this.settings = Object.assign(defaultSettings, settings)
 
+    this.settings = Object.assign(defaultSettings, settings)
     this.mainContainer = {}
 
     function getOriginalUI (parentUI) {
@@ -37,9 +37,36 @@ class BubbleprofUI extends EventEmitter {
     for (const sectionName of sections) {
       this.sections.set(sectionName, new HtmlContent(appendTo, {
         htmlElementType: 'section',
-        id: sectionName
+        id: sectionName,
+        classNames: this.settings.classNames
       }, this))
     }
+  }
+
+  getNodeLinkSection () {
+    return this.sections.get(this.settings.nodeLinkId)
+  }
+
+  getSettingsForLayout () {
+    const settings = {}
+    switch (this.settings.viewMode) {
+      case 'fit':
+      case 'maximised':
+        const boundingBox = this.originalUI.getNodeLinkSection().d3Element.node().getBoundingClientRect()
+        settings.svgHeight = boundingBox.height
+        settings.svgWidth = boundingBox.width
+        settings.allowStretch = false
+        break
+      case 'scroll':
+      default:
+        settings.allowStretch = true
+        break
+    }
+
+    if (this.layout) {
+      settings.collapseNodes = this.layout.settings.collapseNodes
+    }
+    return settings
   }
 
   createSubLayout (layoutNode) {
@@ -48,16 +75,22 @@ class BubbleprofUI extends EventEmitter {
 
     if (nodesArray && nodesArray.length) {
       const connection = layoutNode.inboundConnection
+
       const newLayout = new Layout({
         dataNodes: nodesArray,
         connection: connection || { targetNode: layoutNode.node }
-      }, this.layout.settings)
-      newLayout.generate({ collapseNodes: true })
+      }, this.getSettingsForLayout())
+      newLayout.generate()
 
-      const nodeLinkSection = this.originalUI.sections.get('node-link')
-      const newUI = new BubbleprofUI(['sublayout'], {}, nodeLinkSection, this)
+      const nodeLinkSection = this.originalUI.getNodeLinkSection()
 
-      const sublayout = newUI.sections.get('sublayout')
+      const nodeLinkId = 'node-link-' + layoutNode.id
+      const newUI = new BubbleprofUI([nodeLinkId], {
+        nodeLinkId,
+        classNames: 'sublayout'
+      }, nodeLinkSection, this)
+      const sublayout = newUI.sections.get(nodeLinkId)
+
       sublayout.addCollapseControl()
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
@@ -108,7 +141,7 @@ class BubbleprofUI extends EventEmitter {
   }
 
   deselectNode () {
-    this.sections.get('sublayout').d3Element.remove()
+    this.getNodeLinkSection().d3Element.remove()
     this.originalUI.emit('outputFrames', null)
   }
 
@@ -169,6 +202,10 @@ class BubbleprofUI extends EventEmitter {
     const redraw = dataSet !== this.dataSet || layout !== this.layout
     this.dataSet = dataSet
     this.layout = layout
+
+    // Copy layout settings like lineWidth
+    Object.assign(this.settings, layout.settings)
+
     window.layout = layout
     this.emit('setData')
     if (redraw) this.draw()

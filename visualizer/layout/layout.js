@@ -11,26 +11,15 @@ const { validateNumber } = require('../validation.js')
 class Layout {
   constructor ({ dataNodes, connection }, settings) {
     const defaultSettings = {
+      collapseNodes: false,
       svgDistanceFromEdge: 30,
       lineWidth: 1.5,
       labelMinimumSpace: 12,
-      viewMode: 'fit'
+      svgWidth: 750,
+      svgHeight: 750,
+      allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)
-
-    switch (this.settings.viewMode) {
-      case 'fit':
-      case 'maximised':
-        const nodeLinkBBox = document.getElementById('node-link').getBoundingClientRect()
-
-        this.settings.svgHeight = nodeLinkBBox.height
-        this.settings.svgWidth = nodeLinkBBox.width
-        break
-      case 'scroll':
-        this.settings.svgHeight = settings.svgHeight || 750
-        this.settings.svgWidth = settings.svgWidth || 750
-        break
-    }
 
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
@@ -124,10 +113,12 @@ class Layout {
     }
   }
 
-  processHierarchy ({ collapseNodes = false } = {}) {
-    this.processBetweenData(!collapseNodes)
+  processHierarchy (settingsOverride) {
+    const settings = settingsOverride || this.settings
+
+    this.processBetweenData(!settings.collapseNodes)
     this.scale.calculateScaleFactor()
-    if (collapseNodes) {
+    if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
       this.scale.calculateScaleFactor()
@@ -135,8 +126,8 @@ class Layout {
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate (settings) {
-    this.processHierarchy(settings)
+  generate (settingsOverride) {
+    this.processHierarchy(settingsOverride)
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
   }
