@@ -402,15 +402,15 @@ svg.bubbleprof text.text-label {
 }
 
 svg.bubbleprof .bubble-wrapper .time-label {
-  alignment-baseline: middle;
+  dominant-baseline: middle;
 }
 
 svg.bubbleprof .bubble-wrapper .name-label {
-  alignment-baseline: after-edge;
+  dominant-baseline: text-after-edge;
 }
 
 svg.bubbleprof .bubble-wrapper .name-label.flipped-label {
-  alignment-baseline: before-edge;
+  dominant-baseline: text-before-edge;
 }
 
 svg.bubbleprof .name-label {
@@ -420,12 +420,12 @@ svg.bubbleprof .name-label {
 
 svg.bubbleprof .bubble-wrapper text.name-label.pointing-right {
   text-anchor: start;
-  alignment-baseline: middle;
+  dominant-baseline: middle;
 }
 
 svg.bubbleprof .bubble-wrapper text.name-label.pointing-left {
   text-anchor: end;
-  alignment-baseline: middle;
+  dominant-baseline: middle;
 }
 
 svg.bubbleprof .below-threshold-1 .name-label {
@@ -453,7 +453,7 @@ svg.bubbleprof .time-label {
 }
 
 svg.bubbleprof .link-wrapper .time-label {
-  alignment-baseline: hanging;
+  dominant-baseline: hanging;
 }
 
 svg.bubbleprof .below-threshold-1.bubble-wrapper .time-label {
