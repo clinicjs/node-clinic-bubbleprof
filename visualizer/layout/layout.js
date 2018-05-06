@@ -27,8 +27,8 @@ class Layout {
         this.settings.svgWidth = nodeLinkBBox.width
         break
       case 'scroll':
-        this.settings.svgHeight = settings.svgHeight || 1000
-        this.settings.svgWidth = settings.svgWidth || 1000
+        this.settings.svgHeight = settings.svgHeight || 750
+        this.settings.svgWidth = settings.svgWidth || 750
         break
     }
 
