@@ -193,20 +193,21 @@ class Bubbles extends SvgContentGroup {
       let inboundDegrees = 90
       let useLongerLabel = !this.isBelowLabelThreshold(d)
       let useMicroLabel = false
+      let hasLongInboundLine = false
+
       if (d.parent) {
         const connection = this.getInboundConnection(d)
         const length = connection.getVisibleLineLength()
-        const hasLongInboundLine = this.hasLongInboundLine(length)
+        hasLongInboundLine = this.hasLongInboundLine(length)
         useLongerLabel = useLongerLabel || hasLongInboundLine
         useMicroLabel = !useLongerLabel && this.hasShortInboundLine(length)
-        d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
         inboundDegrees = this.getInboundLine(d).degrees
       }
       const labelPointsOnwards = !useLongerLabel && !d.children.length && (inboundDegrees < 45 || inboundDegrees > 135)
       const backwardsOffset = labelPointsOnwards ? labelMinimumSpace / 2 + lineWidth : 0
 
+      d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
       d3BubbleWrapper.attr('transform', this.getTransformPosition(d, backwardsOffset))
-
       d3OuterCircle.attr('r', this.getRadius(d))
       d3InnerCircle.attr('r', this.isBelowStrokeThreshold(d) ? labelMinimumSpace : this.getRadius(d) - strokePadding)
 
@@ -214,16 +215,18 @@ class Bubbles extends SvgContentGroup {
       const withinTimeMs = withinTime + (this.getRadius(d) < labelMinimumSpace ? '' : '\u2009ms')
       d3TimeLabel.text(withinTimeMs)
 
+      let smallerLabel = false
       if (d.node.name === 'miscellaneous' && !d.parent) {
         d3NameLabel.text('Starts here')
       } else if (useLongerLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 4, 21))
       } else if (useMicroLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 6))
-        d3NameLabel.classed('smaller-label', true)
+        smallerLabel = true
       } else {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 9))
       }
+      d3NameLabel.classed('smaller-label', smallerLabel)
 
       const negateIfOnwardsLabel = labelPointsOnwards ? -1 : 1
       const position = this.getNodePosition(d)
@@ -238,13 +241,15 @@ class Bubbles extends SvgContentGroup {
       let degrees = lineToLabel.degrees
       let xOffset
       let yOffset
+      let pointingLeft = false
+      let pointingRight = false
 
       if (labelPointsOnwards) {
         // Draw label after bubble, continuing incoming line
         if (inboundDegrees > 90 || inboundDegrees < -90) {
-          d3NameLabel.classed('pointing-left', true)
+          pointingLeft = true
         } else {
-          d3NameLabel.classed('pointing-right', true)
+          pointingRight = true
           degrees = LineCoordinates.enforceDegreesRange(degrees + 180)
         }
       } else {
@@ -255,8 +260,10 @@ class Bubbles extends SvgContentGroup {
           degrees -= 180
           flipDegreesLabel = true
         }
-        d3NameLabel.classed('flipped-label', flipDegreesLabel)
       }
+      d3NameLabel.classed('pointing-right', pointingRight)
+      d3NameLabel.classed('pointing-left', pointingLeft)
+      d3NameLabel.classed('flipped-label', flipDegreesLabel)
 
       xOffset = lineToLabel.x2 - position.x
       yOffset = lineToLabel.y2 - position.y
