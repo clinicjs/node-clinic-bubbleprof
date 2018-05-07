@@ -623,14 +623,27 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   position: relative;
 }
 
+.hover-box.horizontal-flip {
+  margin-left: -6px;
+}
+
 .hover-box .title-block:before {
   content: "";
   display: block;
   position: absolute;
-  margin-left: -18px;
   border: 10px solid transparent;
+}
+
+.hover-box:not(.horizontal-flip) .title-block:before {
   border-right-color: var(--pure-black);
+  margin-left: -18px;
   left: 0;
+}
+
+.hover-box.horizontal-flip .title-block:before {
+  border-left-color: var(--pure-black);
+  margin-right: -18px;
+  right: 0;
 }
 
 .hover-box.off-bottom .time-block {

@@ -19,7 +19,6 @@ class HoverBox extends HtmlContent {
     this.d3VerticalArrow = this.d3Element.append('div')
       .classed('vertical-arrow', true)
 
-
     this.d3TitleBlock = this.d3Element.append('div')
       .classed('block', true)
       .classed('title-block', true)
@@ -41,31 +40,33 @@ class HoverBox extends HtmlContent {
     })
   }
 
-  positionWithSidebar (nodePosition, responsiveScaleFactor, svgHeight) {
+  positionWithSidebar (nodePosition, responsiveScaleFactor, svgHeight, bBox) {
+    const { width, height } = bBox
     const top = nodePosition.y * responsiveScaleFactor
     const left = nodePosition.x * responsiveScaleFactor
 
-    this.d3Element.style('top', top + 'px')
-    this.d3Element.style('left', left + 'px')
+    const horizontalFlip = left + width > window.innerWidth
 
-    const boxHeight = this.d3Element.node().getBoundingClientRect().height
-    this.d3Element.classed('off-bottom', top + boxHeight > svgHeight)
+    this.d3Element.style('top', top + 'px')
+    this.d3Element.style('left', (horizontalFlip ? left - width : left) + 'px')
+
+    this.d3Element.classed('off-bottom', top + height > svgHeight)
+    this.d3Element.classed('horizontal-flip', horizontalFlip)
     this.d3Element.classed('use-vertical-arrow', false)
   }
 
-  positionWithoutSidebar (nodePosition, responsiveScaleFactor, svgContainerBounds) {
+  positionWithoutSidebar (nodePosition, responsiveScaleFactor, svgContainerBounds, bBox) {
+    const { width, height } = bBox
     const verticalArrowPadding = 12
     const initialTop = nodePosition.y * responsiveScaleFactor + verticalArrowPadding
     const initialLeft = nodePosition.x * responsiveScaleFactor - verticalArrowPadding
-
-    const { width, height } = this.d3Element.node().getBoundingClientRect()
 
     let arrowOffset = verticalArrowPadding
     let adjustedLeft = initialLeft - verticalArrowPadding
     const overflowX = initialLeft + width - svgContainerBounds.width
     if (overflowX > 0) {
       adjustedLeft -= overflowX
-      arrowOffset = overflowX - verticalArrowPadding
+      arrowOffset = overflowX
     }
 
     let verticalFlip = false
@@ -83,6 +84,7 @@ class HoverBox extends HtmlContent {
 
     this.d3Element.classed('off-bottom', verticalFlip)
     this.d3Element.classed('use-vertical-arrow', true)
+    this.d3Element.classed('horizontal-flip', false)
   }
 
   draw (layoutNode) {
@@ -109,11 +111,13 @@ class HoverBox extends HtmlContent {
 
       // Ensure off-bottom class is not applied before calculating if it's needed
       this.d3Element.classed('off-bottom', false)
+      const bBox = this.d3Element.node().getBoundingClientRect()
+      const arrowSpacing = 12
 
-      if (window.innerHeight < window.innerWidth) {
-        this.positionWithSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds.height)
+      if (window.innerWidth > bBox.width * 2 + arrowSpacing && window.innerHeight < window.innerWidth) {
+        this.positionWithSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds.height, bBox)
       } else {
-        this.positionWithoutSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds)
+        this.positionWithoutSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds, bBox)
       }
 
       const nodeType = layoutNode.node.constructor.name
