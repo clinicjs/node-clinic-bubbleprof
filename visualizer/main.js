@@ -20,7 +20,7 @@ setTimeout(() => {
   console.log('layout is exposed on window.layout')
 
   /* istanbul ignore next */
-  ui.setData(dataSet, layout)
+  ui.setData(layout)
   /* istanbul ignore next */
   ui.emit('complete')
 })

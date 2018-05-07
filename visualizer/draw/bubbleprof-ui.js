@@ -90,20 +90,20 @@ class BubbleprofUI extends EventEmitter {
         classNames: 'sublayout'
       }, nodeLinkSection, this)
       const sublayout = newUI.sections.get(nodeLinkId)
-
       sublayout.addCollapseControl()
+
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
+      sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
+      sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
 
-      sublayout.initializeElements()
+      newUI.initializeElements()
       sublayout.d3Element.on('click', () => {
         newUI.deselectNode()
         window.layout = newUI.parentUI.layout
       })
 
-      sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
-      sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
-      newUI.setData(this.dataSet, newLayout)
+      newUI.setData(newLayout)
     }
   }
 
@@ -159,6 +159,25 @@ class BubbleprofUI extends EventEmitter {
     this.emit(`collapse-${eventName}`)
   }
 
+  windowResize () {
+    const debounceDelay = 300
+    this.resizeAt = Date.now() + debounceDelay
+    setTimeout(() => {
+      // Cancel this if a later re-occurence bumped the timer
+      if (this.resizeAt && this.resizeAt > Date.now()) return
+
+      // If we're ready to go, block all timers currently queued
+      this.resizeAt = null
+
+      // Redo layout asyncronously, so if it takes a while, it doesn't cause queue collision
+      setTimeout(() => {
+        const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
+        newLayout.generate()
+        this.setData(newLayout)
+      })
+    }, debounceDelay)
+  }
+
   truncateLabel (labelString, maxWords, maxChars) {
     const labelWords = labelString.split(' ')
     let truncatedLabel = labelString
@@ -201,19 +220,24 @@ class BubbleprofUI extends EventEmitter {
     this.on('highlightParty', (className) => {
       d3Body.attr('data-highlight-party', className || null)
     })
+
+    window.addEventListener('resize', () => this.windowResize())
   }
 
-  setData (dataSet, layout) {
-    const redraw = dataSet !== this.dataSet || layout !== this.layout
-    this.dataSet = dataSet
+  setData (layout) {
+    if (layout === this.layout) return
+    const initialize = !this.layout
+
     this.layout = layout
-
-    // Copy layout settings like lineWidth
-    Object.assign(this.settings, layout.settings)
-
     window.layout = layout
     this.emit('setData')
-    if (redraw) this.draw()
+
+    if (initialize) {
+      // Copy layout settings like lineWidth
+      Object.assign(this.settings, layout.settings)
+      this.emit('initializeFromData')
+    }
+    this.emit('svgDraw')
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method

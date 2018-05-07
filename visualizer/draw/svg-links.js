@@ -5,14 +5,6 @@ const SvgContentGroup = require('./svg-content.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Links extends SvgContentGroup {
-  constructor (svgContainer, contentProperties) {
-    super(svgContainer, contentProperties)
-
-    this.ui.on('setData', () => {
-      this.initializeFromData(this.ui.layout.connections)
-    })
-  }
-
   isBelowFullLabelThreshold (connection) {
     // If label doesn't have space to be x6 as wide as it is tall, use smaller label
     return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 6
@@ -25,9 +17,13 @@ class Links extends SvgContentGroup {
     return connection.getVisibleLineLength() < 1
   }
 
-  initializeFromData (dataArray) {
-    super.initializeFromData(dataArray)
+  setData () {
+    const dataArray = this.ui.layout.connections
+    const identfier = '.links-group .link-wrapper'
+    super.setData(dataArray, identfier)
+  }
 
+  initializeFromData () {
     this.d3Element.classed('links-group', true)
 
     this.d3OuterLines = null

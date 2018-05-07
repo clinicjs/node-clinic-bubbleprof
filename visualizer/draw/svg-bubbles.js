@@ -5,14 +5,6 @@ const SvgContentGroup = require('./svg-content.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Bubbles extends SvgContentGroup {
-  constructor (svgContainer, contentProperties) {
-    super(svgContainer, contentProperties)
-
-    this.ui.on('setData', () => {
-      this.initializeFromData([...this.ui.layout.layoutNodes.values()])
-    })
-  }
-
   isBelowLabelThreshold (d) {
     return this.getRadius(d) < this.ui.settings.labelMinimumSpace
   }
@@ -29,9 +21,13 @@ class Bubbles extends SvgContentGroup {
     return length < this.ui.settings.labelMinimumSpace
   }
 
-  initializeFromData (dataArray) {
-    super.initializeFromData(dataArray)
+  setData () {
+    const dataArray = [...this.ui.layout.layoutNodes.values()]
+    const identfier = '.bubbles-group .bubble-wrapper'
+    super.setData(dataArray, identfier)
+  }
 
+  initializeFromData () {
     this.d3Element.classed('bubbles-group', true)
 
     this.d3OuterCircles = null
