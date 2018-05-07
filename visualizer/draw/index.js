@@ -78,6 +78,7 @@ function drawOuterUI () {
     htmlContent: '<div class="text">Details</div><div class="arrow"></div>',
     classNames: 'bar',
     closeIcon: '×',
+    collapseEvent: 'main-overlay',
     portraitOnly: true
   })
 
@@ -100,6 +101,7 @@ function drawOuterUI () {
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
     classNames: 'bar',
+    collapseEvent: 'main-overlay',
     closeIcon: '×'
   })
   footer.addContent(Frames, { id: 'frames-panel', classNames: 'side-bar-item' })

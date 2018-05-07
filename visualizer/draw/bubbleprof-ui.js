@@ -154,6 +154,11 @@ class BubbleprofUI extends EventEmitter {
     this.originalUI.emit('outputFrames', aggregateNode)
   }
 
+  collapseEvent (eventName) {
+    // Called when a collapsable with a given collapseEvent name opens, to close all others
+    this.emit(`collapse-${eventName}`)
+  }
+
   truncateLabel (labelString, maxWords, maxChars) {
     const labelWords = labelString.split(' ')
     let truncatedLabel = labelString
