@@ -25,6 +25,13 @@ class Bubbles extends SvgContentGroup {
     const dataArray = [...this.ui.layout.layoutNodes.values()]
     const identfier = '.bubbles-group .bubble-wrapper'
     super.setData(dataArray, identfier)
+
+    if (this.typeDonutsMap) {
+      for (const [nodeId, donutWrapper] of this.typeDonutsMap) {
+        const arcData = defineArcData(this.ui.layout.layoutNodes.get(nodeId).node)
+        donutWrapper.selectAll('.donut-segment').data(arcData)
+      }
+    }
   }
 
   initializeFromData () {
@@ -37,10 +44,6 @@ class Bubbles extends SvgContentGroup {
     this.typeDonutsMap = null
 
     this.d3Bubbles = this.d3Enter.append('g')
-      // In rare cases, there is an unavoidable overlap of bubbles. There's no svg z-index
-      // so we sort the appending such that smallest bubbles stack above larger bubbles
-      .sort((a, b) => this.getRadius(b) - this.getRadius(a))
-
       .attr('id', d => `${d.node.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.node.mark.get('party')}`)
       .classed('bubble-wrapper', true)
@@ -142,18 +145,9 @@ class Bubbles extends SvgContentGroup {
       const donutWrapper = bubble.append('g')
         .classed('bubble-donut', true)
 
-      this.typeDonutsMap.set(d, donutWrapper)
+      this.typeDonutsMap.set(d.id, donutWrapper)
 
-      const decimalsAsArray = []
-      for (const label of d.node.decimals.typeCategory.within.keys()) {
-        const decimal = d.node.getDecimal('typeCategory', 'within', label)
-        decimalsAsArray.push([label, decimal])
-      }
-
-      // Creates array of data objects like:
-      // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
-      const arcData = d3.pie()
-        .value((arcDatum) => arcDatum[1])(decimalsAsArray)
+      const arcData = defineArcData(d.node)
 
       donutWrapper.selectAll('.donut-segment')
         .data(arcData)
@@ -174,7 +168,8 @@ class Bubbles extends SvgContentGroup {
     } = this.ui.settings
 
     if (this.typeDonutsMap) {
-      for (const [d, donutWrapper] of this.typeDonutsMap) {
+      for (const [id, donutWrapper] of this.typeDonutsMap) {
+        const d = this.ui.layout.layoutNodes.get(id)
         const donutRadius = this.getRadius(d) - strokePadding
 
         const arcMaker = d3.arc()
@@ -268,6 +263,18 @@ class Bubbles extends SvgContentGroup {
       d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
     })
   }
+}
+
+function defineArcData (dataNode) {
+  const decimalsAsArray = []
+  for (const label of dataNode.decimals.typeCategory.within.keys()) {
+    const decimal = dataNode.getDecimal('typeCategory', 'within', label)
+    decimalsAsArray.push([label, decimal])
+  }
+
+  // Creates array of data objects like:
+  // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
+  return d3.pie().value((arcDatum) => arcDatum[1])(decimalsAsArray)
 }
 
 module.exports = Bubbles
