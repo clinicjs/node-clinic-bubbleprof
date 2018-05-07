@@ -1,7 +1,8 @@
 html {
   /* Define colors */
   --main-bg-color: rgb(27, 30, 39);
-  --overlay-bg-color: rgba(55, 61, 79, 0.99);
+  --overlay-bg-color: rgba(55, 61, 79, 0.94);
+  --main-bg-translucent: rgba(27, 30, 39, 0.94);
 
   --banner-bg-color: rgb(41, 45, 57);
   --banner-logo-color: rgba(255, 255, 255, 0.87);
@@ -212,18 +213,25 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 }
 
 #footer .bar {
-  border-top: 1px solid var(--cyan-highlight);
+  width: 25%;
   background: var(--cyan);
+}
+
+#footer .bar {
+  display: flex;
+}
+
+#side-bar .bar, /* #side-bar .bar is invisible unless in portrait view appears in footer */
+#footer .bar {
+  border-top: 1px solid var(--cyan-highlight);
   overflow: hidden;
   cursor: pointer;
   height: var(--footer-height);
-  width: 25%;
-  cursor: pointer;
-  display: flex;
   flex-direction: row-reverse;
   justify-content: flex-end;
 }
 
+#side-bar .bar .text,
 #footer .bar .text {
   font-size: 14pt;
   font-variant: all-small-caps;
@@ -232,6 +240,7 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   line-height: 64px;
 }
 
+#side-bar .bar .arrow,
 #footer .bar .arrow {
   margin: 16px 10px;
   height: 34px;
@@ -245,17 +254,22 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   transform: rotate(90deg)
 }
 
-#frames-panel {
+#footer-inner {
   background: var(--overlay-bg-color);
-  padding: 18px 28px;
-  color: var(--pure-white);
-  font-size: var(--main-text-size);
-  max-height: 300px;
-  overflow-y: auto;
   position: fixed;
   bottom: 0;
   left: 0;
   width: 75%;
+  overflow-y: auto;
+  max-height: calc(50vh - var(--footer-height));
+  padding: 8px 0;
+}
+
+#frames-panel {
+  margin: 18px 0;
+  padding: 0px 28px;
+  color: var(--pure-white);
+  font-size: var(--main-text-size);
 }
 
 #frames-panel .heading {
@@ -354,21 +368,18 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   margin: 0 6px -3px -3px;
 }
 
-#frames-panel .close {
+#side-bar .close,
+#footer .close {
   width: 24px;
   height: 24px;
-  color: var(--cyan-highlight);
-  position: absolute;
-  right: 28px;
-  top: 18px;
+  position: sticky;
+  top: 0;
+  float: right;
   display: block;
+  line-height: 14px;
   font-size: 30px;
   cursor: pointer;
-}
-
-#frames-panel .close:after {
-  content: var(--close-x);
-  display: block;
+  color: var(--cyan-highlight);
 }
 
 /* View modes: 'maximised', 'fit', 'scroll'; */
@@ -791,5 +802,88 @@ body:not(.initialized):after {
   100% {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
+  }
+}
+
+@media screen and (orientation: landscape) {
+  .portrait-only {
+    display: none !important;
+  }
+}
+
+@media screen and (orientation: portrait) {
+  .portrait-collapsed .collapsible-content-wrapper {
+    display: none;
+  }
+
+  #side-bar,
+  #node-link {
+    width: 100%;
+  }
+
+  #side-bar {
+    position: fixed;
+    bottom: 0;
+    margin: 0;
+    left: 0;
+    z-index: 2;
+    padding: 0;
+    border: none;
+  }
+
+  #footer {
+    right: 0;
+  }
+
+  #footer .bar {
+    width: 100%;
+  }
+
+  #footer,
+  #side-bar {
+    width: 50%;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  #side-bar .bar {
+    height: 65px;
+    display: flex;
+    flex-direction: row-reverse;
+    background: var(--cyan);
+    border-right: 1px solid var(--main-bg-color);
+  }
+
+  #footer .bar .arrow,
+  #side-bar .bar .arrow {
+    transform: rotate(0deg)
+  }
+
+  #footer.collapsed .bar .arrow,
+  #side-bar.portrait-collapsed .bar .arrow {
+    transform: rotate(180deg)
+  }
+
+  #footer-inner {
+    position: relative;
+    width: 200%;
+    left: -100%;
+  }
+
+  #side-bar-inner {
+    max-height: calc(50vh - var(--footer-height));
+    overflow: auto;
+    width: 200%;
+    padding: 8px 24px;
+    border-top: 1px solid var(--cyan);
+    background: var(--main-bg-translucent);
+  }
+
+  #side-bar .close {
+    margin-right: -24px
+  }
+
+  .side-bar-item:first-of-type {
+    margin-top: 12px;
   }
 }

@@ -74,6 +74,12 @@ function drawOuterUI () {
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
+  sideBar.addCollapseControl(true, {
+    htmlContent: '<div class="text">Details</div><div class="arrow"></div>',
+    classNames: 'bar',
+    closeIcon: '×',
+    portraitOnly: true
+  })
 
   sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
@@ -93,7 +99,8 @@ function drawOuterUI () {
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
-    classNames: 'bar'
+    classNames: 'bar',
+    closeIcon: '×'
   })
   footer.addContent(Frames, { id: 'frames-panel', classNames: 'side-bar-item' })
 

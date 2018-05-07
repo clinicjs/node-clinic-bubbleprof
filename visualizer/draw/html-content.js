@@ -83,6 +83,16 @@ class HtmlContent {
       this.collapseControl.initializeElements()
       this.d3ContentWrapper = this.d3Element.append('div')
         .classed('collapsible-content-wrapper', true)
+
+      if (id) this.d3ContentWrapper.attr('id', `${id}-inner`)
+
+      if (this.collapseControl.closeIcon) {
+        this.d3ContentWrapper.insert('span', ':first-child')
+          .html(this.collapseControl.closeIcon)
+          .classed('close', true)
+          .classed('portrait-only', this.collapseControl.portraitOnly)
+          .on('click', () => this.collapseClose())
+      }
     }
 
     if (this.loadingAnimation) this.loadingAnimation.initializeElements()
@@ -114,12 +124,17 @@ class CollapseControl extends HtmlContent {
   constructor (parentContent, contentProperties, isCollapsed) {
     super(parentContent, contentProperties)
     this.isCollapsed = isCollapsed
+    this.closeIcon = contentProperties.closeIcon
+    this.portraitOnly = contentProperties.portraitOnly
+    this.collapseClassName = this.portraitOnly ? 'portrait-collapsed' : 'collapsed'
   }
   initializeElements () {
     super.initializeElements()
 
     this.d3Element.classed('collapse-control', true)
-    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
+    this.parentContent.d3Element.classed(this.collapseClassName, this.isCollapsed)
+
+    if (this.portraitOnly) this.d3Element.classed('portrait-only', true)
 
     this.d3Element.on('click', () => {
       this.parentContent.collapseToggle()
@@ -127,7 +142,7 @@ class CollapseControl extends HtmlContent {
   }
   draw () {
     super.draw()
-    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
+    this.parentContent.d3Element.classed(this.collapseClassName, this.isCollapsed)
   }
 }
 
