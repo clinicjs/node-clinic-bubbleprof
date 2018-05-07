@@ -160,12 +160,18 @@ class BubbleprofUI extends EventEmitter {
   }
 
   windowResize () {
+    const timeAtStart = Date.now()
+    const nodeLinkSection = this.getNodeLinkSection()
+    nodeLinkSection.d3Element.classed('redraw', true)
     const debounceDelay = 300
-    this.resizeAt = Date.now() + debounceDelay
+
+    // To avoid getting stuck if there's a momentary slowdown wait until 90% of delay time
+    this.resizeAt = timeAtStart + debounceDelay * 0.9
     setTimeout(() => {
       // Cancel this if a later re-occurence bumped the timer
-      if (this.resizeAt && this.resizeAt > Date.now()) return
-
+      if (this.resizeAt && this.resizeAt > Date.now()) {
+        return
+      }
       // If we're ready to go, block all timers currently queued
       this.resizeAt = null
 
@@ -174,6 +180,7 @@ class BubbleprofUI extends EventEmitter {
         const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
         newLayout.generate()
         this.setData(newLayout)
+        nodeLinkSection.d3Element.classed('redraw', false)
       })
     }, debounceDelay)
   }
