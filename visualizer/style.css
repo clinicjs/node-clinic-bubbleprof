@@ -208,7 +208,7 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   bottom: 0;
   z-index: 2;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: row-reverse;
 }
 
 #footer .bar {
@@ -217,8 +217,11 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   overflow: hidden;
   cursor: pointer;
   height: var(--footer-height);
-  width: 100%;
+  width: 25%;
   cursor: pointer;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 #footer .bar .text {
@@ -226,24 +229,20 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   font-variant: all-small-caps;
   font-weight: bold;
   color: var(--pure-white);
-
-  margin-left: 37px;
   line-height: 64px;
-  float: left;
 }
 
 #footer .bar .arrow {
-  float: left;
   margin: 16px 10px;
   height: 34px;
   width: 34px;
   background-image: var(--down-white-chevron-arrow);
   background-size: cover;
-  transform: scaleY(-1);
+  transform: rotate(270deg);
 }
 
 #footer.collapsed .bar .arrow {
-  transform: scaleY(1);
+  transform: rotate(90deg)
 }
 
 #frames-panel {
@@ -252,7 +251,11 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   color: var(--pure-white);
   font-size: var(--main-text-size);
   max-height: 300px;
-  overflow: auto;
+  overflow-y: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 75%;
 }
 
 #frames-panel .heading {
@@ -381,7 +384,6 @@ body[data-view-mode='fit'] #node-link {
 
 #node-link {
   position: relative;
-  padding-bottom: 65px;
   width: 75%;
 }
 
