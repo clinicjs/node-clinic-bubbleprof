@@ -16,6 +16,10 @@ class HoverBox extends HtmlContent {
     this.d3Element.classed('hover-box', true)
     this.d3Element.classed('hidden', true)
 
+    this.d3VerticalArrow = this.d3Element.append('div')
+      .classed('vertical-arrow', true)
+
+
     this.d3TitleBlock = this.d3Element.append('div')
       .classed('block', true)
       .classed('title-block', true)
@@ -37,6 +41,50 @@ class HoverBox extends HtmlContent {
     })
   }
 
+  positionWithSidebar (nodePosition, responsiveScaleFactor, svgHeight) {
+    const top = nodePosition.y * responsiveScaleFactor
+    const left = nodePosition.x * responsiveScaleFactor
+
+    this.d3Element.style('top', top + 'px')
+    this.d3Element.style('left', left + 'px')
+
+    const boxHeight = this.d3Element.node().getBoundingClientRect().height
+    this.d3Element.classed('off-bottom', top + boxHeight > svgHeight)
+    this.d3Element.classed('use-vertical-arrow', false)
+  }
+
+  positionWithoutSidebar (nodePosition, responsiveScaleFactor, svgContainerBounds) {
+    const verticalArrowPadding = 12
+    const initialTop = nodePosition.y * responsiveScaleFactor + verticalArrowPadding
+    const initialLeft = nodePosition.x * responsiveScaleFactor - verticalArrowPadding
+
+    const { width, height } = this.d3Element.node().getBoundingClientRect()
+
+    let arrowOffset = verticalArrowPadding
+    let adjustedLeft = initialLeft - verticalArrowPadding
+    const overflowX = initialLeft + width - svgContainerBounds.width
+    if (overflowX > 0) {
+      adjustedLeft -= overflowX
+      arrowOffset = overflowX - verticalArrowPadding
+    }
+
+    let verticalFlip = false
+    let adjustedTop = initialTop
+    const overflowY = initialTop + height - svgContainerBounds.height
+    if (overflowY > 0) {
+      const titleBlockHeight = this.d3TitleBlock.node().getBoundingClientRect().height
+      adjustedTop -= titleBlockHeight + verticalArrowPadding * 2
+      verticalFlip = true
+    }
+
+    this.d3Element.style('top', adjustedTop + 'px')
+    this.d3Element.style('left', adjustedLeft + 'px')
+    this.d3VerticalArrow.style('left', arrowOffset + 'px')
+
+    this.d3Element.classed('off-bottom', verticalFlip)
+    this.d3Element.classed('use-vertical-arrow', true)
+  }
+
   draw (layoutNode) {
     super.draw()
 
@@ -54,18 +102,19 @@ class HoverBox extends HtmlContent {
       // The SVG element scales like a responsive image, the HTML hover box doesn't
       // So the exact pixel position of the hover box depends on the SVG's current width
       const svg = this.contentProperties.svg
-      const {
-        width: svgWidth,
-        height: svgHeight
-      } = svg.d3Element.node().getBoundingClientRect()
-      const responsiveScaleFactor = svgWidth / svg.svgBounds.width
+      const svgContainerBounds = svg.d3Element.node().getBoundingClientRect()
+      const responsiveScaleFactor = svgContainerBounds.width / svg.svgBounds.width
 
       const nodePosition = layoutNode.position
-      const top = nodePosition.y * responsiveScaleFactor
-      const left = nodePosition.x * responsiveScaleFactor
 
-      this.d3Element.style('top', top + 'px')
-      this.d3Element.style('left', left + 'px')
+      // Ensure off-bottom class is not applied before calculating if it's needed
+      this.d3Element.classed('off-bottom', false)
+
+      if (window.innerHeight < window.innerWidth) {
+        this.positionWithSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds.height)
+      } else {
+        this.positionWithoutSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds)
+      }
 
       const nodeType = layoutNode.node.constructor.name
       const dataNode = nodeType === 'ShortcutNode' ? layoutNode.node.shortcutTo : layoutNode.node
@@ -101,9 +150,6 @@ class HoverBox extends HtmlContent {
         this.ui.highlightNode(null)
         this.ui.selectNode(layoutNode)
       })
-
-      const boxHeight = this.d3Element.node().getBoundingClientRect().height
-      this.d3Element.classed('off-bottom', top + boxHeight > svgHeight)
     }
   }
 }

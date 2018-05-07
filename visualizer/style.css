@@ -640,6 +640,10 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   border-bottom: 2px solid var(--main-bg-color);
 }
 
+.hover-box.off-bottom .title-block {
+  border-bottom: none;
+}
+
 .hover-box p {
   margin: 0;
   padding: 6px 0;
@@ -664,6 +668,42 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   color: var(--cyan);
   font-size: var(--main-text-size);
   font-weight: bold;
+}
+
+.hover-box .vertical-arrow {
+  display: none;
+  margin-left: 6px;
+}
+
+.hover-box.use-vertical-arrow {
+  margin: 0;
+}
+
+.hover-box.use-vertical-arrow .title-block:before {
+  display: none;
+}
+
+.hover-box.use-vertical-arrow .vertical-arrow {
+  display: block;
+  position: absolute;
+  left: 6px;
+  width: 0;
+  height: 0;
+  border: 10px solid transparent;
+}
+
+.hover-box.use-vertical-arrow:not(.off-bottom) .vertical-arrow {
+  border-bottom-color: var(--pure-black);
+  border-top: none;
+  top: 0;
+  margin-top: -9px;
+}
+
+.hover-box.use-vertical-arrow.off-bottom .vertical-arrow {
+  border-top-color: var(--pure-black);
+  border-bottom: none;
+  bottom: 0;
+  margin-bottom: -9px;
 }
 
 /* Global classes linking styles to data properties */
