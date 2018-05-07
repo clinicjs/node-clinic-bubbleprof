@@ -858,6 +858,40 @@ body:not(.initialized):after {
   }
 }
 
+@media only screen and (max-width: 600px){
+  #header {
+    max-height: 56px;
+    overflow-y: auto;
+    display: block;
+    margin: 4px;
+  }
+  #header .panel {
+    display: inline;
+    margin: 0;
+  }
+  #header label {
+    display: none;
+  }
+}
+@media only screen and (max-width: 420px){
+  #header .panel .interactive-key {
+    font-size: 9pt;
+    padding: 0;
+  }
+  #banner svg {
+    margin: 0;
+    transform: scale(0.9);
+  }
+}
+@media only screen and (max-width: 380px){
+  #banner a:first-child {
+    margin-left: -20px;
+  }
+  #banner a:last-child svg {
+    right: 0;
+  }
+}
+
 @media screen and (orientation: landscape) {
   .portrait-only {
     display: none !important;
