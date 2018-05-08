@@ -2,6 +2,7 @@
 
 const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
+const debounce = require('lodash/debounce')
 const EventEmitter = require('events')
 const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
@@ -159,30 +160,10 @@ class BubbleprofUI extends EventEmitter {
     this.emit(`collapse-${eventName}`)
   }
 
-  windowResize () {
-    const timeAtStart = Date.now()
-    const nodeLinkSection = this.getNodeLinkSection()
-    nodeLinkSection.d3Element.classed('redraw', true)
-    const debounceDelay = 300
-
-    // To avoid getting stuck if there's a momentary slowdown wait until 90% of delay time
-    this.resizeAt = timeAtStart + debounceDelay * 0.9
-    setTimeout(() => {
-      // Cancel this if a later re-occurence bumped the timer
-      if (this.resizeAt && this.resizeAt > Date.now()) {
-        return
-      }
-      // If we're ready to go, block all timers currently queued
-      this.resizeAt = null
-
-      // Redo layout asyncronously, so if it takes a while, it doesn't cause queue collision
-      setTimeout(() => {
-        const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
-        newLayout.generate()
-        this.setData(newLayout)
-        nodeLinkSection.d3Element.classed('redraw', false)
-      })
-    }, debounceDelay)
+  redrawLayout() {
+    const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
+    newLayout.generate()
+    this.setData(newLayout)
   }
 
   truncateLabel (labelString, maxWords, maxChars) {
@@ -228,7 +209,24 @@ class BubbleprofUI extends EventEmitter {
       d3Body.attr('data-highlight-party', className || null)
     })
 
-    window.addEventListener('resize', () => this.windowResize())
+    const debounceTime = 300
+    const nodeLinkSection = this.getNodeLinkSection()
+
+    const onWindowResizeBegin = debounce(() => {
+      nodeLinkSection.d3Element.classed('redraw', true)
+
+      // Use a shorter time period than the trailing debounce to prevent getting stuck
+    }, debounceTime * 0.9, { leading: true })
+
+    const onWindowResizeEnd = debounce(() => {
+      this.redrawLayout()
+      nodeLinkSection.d3Element.classed('redraw', false)
+    }, debounceTime)
+
+    window.addEventListener('resize', () => {
+      onWindowResizeBegin()
+      onWindowResizeEnd()
+    })
   }
 
   setData (layout) {
