@@ -58,6 +58,8 @@ class SvgContainer extends HtmlContent {
         this.d3Element.attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
       })
     }
+    if (this.bubbles) this.bubbles.initializeElements()
+    if (this.links) this.links.initializeElements()
   }
 
   draw () {

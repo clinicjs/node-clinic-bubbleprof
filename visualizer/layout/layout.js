@@ -20,6 +20,10 @@ class Layout {
       allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)
+    this.initialInput = {
+      dataNodes,
+      connection
+    }
 
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)

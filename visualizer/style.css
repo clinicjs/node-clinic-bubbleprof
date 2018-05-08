@@ -500,6 +500,10 @@ svg.bubbleprof .link-outer {
   z-index: 11;
 }
 
+#node-link.redraw {
+  z-index: 1;
+}
+
 #node-link .sublayout:after {
   display: block;
   top: 8px;
@@ -853,6 +857,24 @@ body:not(.initialized):before {
 body:not(.initialized):after {
   content: "Preparing file";
   top: 115px;
+}
+
+#node-link .loading-indicator {
+  background: var(--main-bg-translucent);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+  margin: 0;
+}
+
+#node-link.redraw .loading-indicator {
+  display: block;
+}
+
+#node-link.redraw .loading-indicator:after {
+  content: "Redrawing";
 }
 
 @keyframes loading {

@@ -5,14 +5,6 @@ const SvgContentGroup = require('./svg-content.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Links extends SvgContentGroup {
-  constructor (svgContainer, contentProperties) {
-    super(svgContainer, contentProperties)
-
-    this.ui.on('setData', () => {
-      this.initializeFromData(this.ui.layout.connections)
-    })
-  }
-
   isBelowFullLabelThreshold (connection) {
     // If label doesn't have space to be x6 as wide as it is tall, use smaller label
     return connection.getVisibleLineLength() < this.ui.settings.labelMinimumSpace * 6
@@ -25,17 +17,25 @@ class Links extends SvgContentGroup {
     return connection.getVisibleLineLength() < 1
   }
 
-  initializeFromData (dataArray) {
-    super.initializeFromData(dataArray)
+  setData () {
+    const dataArray = this.ui.layout.connections
+    const identfier = '.links-group .link-wrapper'
+    super.setData(dataArray, identfier)
 
+    if (this.segmentedLinesMap) {
+      for (const [targetId, segmentGroup] of this.segmentedLinesMap) {
+        const decimalsArray = getDecimalsArray(this.ui.layout.connectionsByTargetId.get(targetId).targetNode)
+        segmentGroup.selectAll('.link-segment').data(decimalsArray)
+      }
+    }
+  }
+
+  initializeFromData () {
     this.d3Element.classed('links-group', true)
 
     this.d3OuterLines = null
     this.d3InnerLines = null
     this.d3Links = this.d3Enter.append('g')
-      // Match the stacking order of the source bubbles
-      .sort((a, b) => b.getSourceRadius() - a.getSourceRadius())
-
       .attr('class', connection => `party-${connection.targetNode.mark.get('party')}`)
       .classed('link-wrapper', true)
       .classed('below-threshold-1', (d) => this.isBelowFullLabelThreshold(d))
@@ -82,11 +82,7 @@ class Links extends SvgContentGroup {
       const link = d3.select(nodes[i])
       const targetNode = connection.targetNode
 
-      const decimalsAsArray = []
-      for (const label of targetNode.decimals.typeCategory.between.keys()) {
-        const decimal = targetNode.getDecimal('typeCategory', 'between', label)
-        decimalsAsArray.push([label, decimal])
-      }
+      const decimalsAsArray = getDecimalsArray(targetNode)
 
       link.append('g')
         .classed('link-segments', true)
@@ -100,7 +96,7 @@ class Links extends SvgContentGroup {
         .on('mouseover', decimal => this.ui.emit('highlightType', decimal[0]))
         .on('mouseout', () => this.ui.emit('highlightType', null))
 
-      this.segmentedLinesMap.set(connection, link.selectAll('line.link-segment'))
+      this.segmentedLinesMap.set(connection.targetId, link.selectAll('line.link-segment'))
     })
   }
 
@@ -184,8 +180,9 @@ class Links extends SvgContentGroup {
       const visibleLength = connection.getVisibleLineLength()
       d3OuterLine.attr('d', this.getOuterLinePath(offsetBeforeLine, visibleLength))
 
-      if (this.segmentedLinesMap && this.segmentedLinesMap.has(connection)) {
-        const d3SegmentsGroup = this.segmentedLinesMap.get(connection)
+      const targetId = connection.targetId
+      if (this.segmentedLinesMap && this.segmentedLinesMap.has(targetId)) {
+        const d3SegmentsGroup = this.segmentedLinesMap.get(targetId)
 
         let segmentCoordinates = offsetBeforeLine
 
@@ -231,6 +228,15 @@ class Links extends SvgContentGroup {
     d3Line.attr('y1', lineCoords.y1)
     d3Line.attr('y2', lineCoords.y2)
   }
+}
+
+function getDecimalsArray (targetNode) {
+  const decimalsArray = []
+  for (const label of targetNode.decimals.typeCategory.between.keys()) {
+    const decimal = targetNode.getDecimal('typeCategory', 'between', label)
+    decimalsArray.push([label, decimal])
+  }
+  return decimalsArray
 }
 
 module.exports = Links

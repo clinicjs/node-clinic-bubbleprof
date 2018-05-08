@@ -5,14 +5,6 @@ const SvgContentGroup = require('./svg-content.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Bubbles extends SvgContentGroup {
-  constructor (svgContainer, contentProperties) {
-    super(svgContainer, contentProperties)
-
-    this.ui.on('setData', () => {
-      this.initializeFromData([...this.ui.layout.layoutNodes.values()])
-    })
-  }
-
   isBelowLabelThreshold (d) {
     return this.getRadius(d) < this.ui.settings.labelMinimumSpace
   }
@@ -29,9 +21,20 @@ class Bubbles extends SvgContentGroup {
     return length < this.ui.settings.labelMinimumSpace
   }
 
-  initializeFromData (dataArray) {
-    super.initializeFromData(dataArray)
+  setData () {
+    const dataArray = [...this.ui.layout.layoutNodes.values()]
+    const identfier = '.bubbles-group .bubble-wrapper'
+    super.setData(dataArray, identfier)
 
+    if (this.typeDonutsMap) {
+      for (const [nodeId, donutWrapper] of this.typeDonutsMap) {
+        const arcData = defineArcData(this.ui.layout.layoutNodes.get(nodeId).node)
+        donutWrapper.selectAll('.donut-segment').data(arcData)
+      }
+    }
+  }
+
+  initializeFromData () {
     this.d3Element.classed('bubbles-group', true)
 
     this.d3OuterCircles = null
@@ -41,10 +44,6 @@ class Bubbles extends SvgContentGroup {
     this.typeDonutsMap = null
 
     this.d3Bubbles = this.d3Enter.append('g')
-      // In rare cases, there is an unavoidable overlap of bubbles. There's no svg z-index
-      // so we sort the appending such that smallest bubbles stack above larger bubbles
-      .sort((a, b) => this.getRadius(b) - this.getRadius(a))
-
       .attr('id', d => `${d.node.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.node.mark.get('party')}`)
       .classed('bubble-wrapper', true)
@@ -146,18 +145,9 @@ class Bubbles extends SvgContentGroup {
       const donutWrapper = bubble.append('g')
         .classed('bubble-donut', true)
 
-      this.typeDonutsMap.set(d, donutWrapper)
+      this.typeDonutsMap.set(d.id, donutWrapper)
 
-      const decimalsAsArray = []
-      for (const label of d.node.decimals.typeCategory.within.keys()) {
-        const decimal = d.node.getDecimal('typeCategory', 'within', label)
-        decimalsAsArray.push([label, decimal])
-      }
-
-      // Creates array of data objects like:
-      // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
-      const arcData = d3.pie()
-        .value((arcDatum) => arcDatum[1])(decimalsAsArray)
+      const arcData = defineArcData(d.node)
 
       donutWrapper.selectAll('.donut-segment')
         .data(arcData)
@@ -178,7 +168,8 @@ class Bubbles extends SvgContentGroup {
     } = this.ui.settings
 
     if (this.typeDonutsMap) {
-      for (const [d, donutWrapper] of this.typeDonutsMap) {
+      for (const [id, donutWrapper] of this.typeDonutsMap) {
+        const d = this.ui.layout.layoutNodes.get(id)
         const donutRadius = this.getRadius(d) - strokePadding
 
         const arcMaker = d3.arc()
@@ -202,20 +193,21 @@ class Bubbles extends SvgContentGroup {
       let inboundDegrees = 90
       let useLongerLabel = !this.isBelowLabelThreshold(d)
       let useMicroLabel = false
+      let hasLongInboundLine = false
+
       if (d.parent) {
         const connection = this.getInboundConnection(d)
         const length = connection.getVisibleLineLength()
-        const hasLongInboundLine = this.hasLongInboundLine(length)
+        hasLongInboundLine = this.hasLongInboundLine(length)
         useLongerLabel = useLongerLabel || hasLongInboundLine
         useMicroLabel = !useLongerLabel && this.hasShortInboundLine(length)
-        d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
         inboundDegrees = this.getInboundLine(d).degrees
       }
       const labelPointsOnwards = !useLongerLabel && !d.children.length && (inboundDegrees < 45 || inboundDegrees > 135)
       const backwardsOffset = labelPointsOnwards ? labelMinimumSpace / 2 + lineWidth : 0
 
+      d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
       d3BubbleWrapper.attr('transform', this.getTransformPosition(d, backwardsOffset))
-
       d3OuterCircle.attr('r', this.getRadius(d))
       d3InnerCircle.attr('r', this.isBelowStrokeThreshold(d) ? labelMinimumSpace : this.getRadius(d) - strokePadding)
 
@@ -223,16 +215,18 @@ class Bubbles extends SvgContentGroup {
       const withinTimeMs = withinTime + (this.getRadius(d) < labelMinimumSpace ? '' : '\u2009ms')
       d3TimeLabel.text(withinTimeMs)
 
+      let smallerLabel = false
       if (d.node.name === 'miscellaneous' && !d.parent) {
         d3NameLabel.text('Starts here')
       } else if (useLongerLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 4, 21))
       } else if (useMicroLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 6))
-        d3NameLabel.classed('smaller-label', true)
+        smallerLabel = true
       } else {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 9))
       }
+      d3NameLabel.classed('smaller-label', smallerLabel)
 
       const negateIfOnwardsLabel = labelPointsOnwards ? -1 : 1
       const position = this.getNodePosition(d)
@@ -247,13 +241,15 @@ class Bubbles extends SvgContentGroup {
       let degrees = lineToLabel.degrees
       let xOffset
       let yOffset
+      let pointingLeft = false
+      let pointingRight = false
 
       if (labelPointsOnwards) {
         // Draw label after bubble, continuing incoming line
         if (inboundDegrees > 90 || inboundDegrees < -90) {
-          d3NameLabel.classed('pointing-left', true)
+          pointingLeft = true
         } else {
-          d3NameLabel.classed('pointing-right', true)
+          pointingRight = true
           degrees = LineCoordinates.enforceDegreesRange(degrees + 180)
         }
       } else {
@@ -264,14 +260,28 @@ class Bubbles extends SvgContentGroup {
           degrees -= 180
           flipDegreesLabel = true
         }
-        d3NameLabel.classed('flipped-label', flipDegreesLabel)
       }
+      d3NameLabel.classed('pointing-right', pointingRight)
+      d3NameLabel.classed('pointing-left', pointingLeft)
+      d3NameLabel.classed('flipped-label', flipDegreesLabel)
 
       xOffset = lineToLabel.x2 - position.x
       yOffset = lineToLabel.y2 - position.y
       d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
     })
   }
+}
+
+function defineArcData (dataNode) {
+  const decimalsAsArray = []
+  for (const label of dataNode.decimals.typeCategory.within.keys()) {
+    const decimal = dataNode.getDecimal('typeCategory', 'within', label)
+    decimalsAsArray.push([label, decimal])
+  }
+
+  // Creates array of data objects like:
+  // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
+  return d3.pie().value((arcDatum) => arcDatum[1])(decimalsAsArray)
 }
 
 module.exports = Bubbles
