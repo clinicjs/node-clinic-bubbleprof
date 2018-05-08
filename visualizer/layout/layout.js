@@ -11,12 +11,13 @@ const { validateNumber } = require('../validation.js')
 class Layout {
   constructor ({ dataNodes, connection }, settings) {
     const defaultSettings = {
-      svgWidth: 1000,
-      svgHeight: 1000,
+      collapseNodes: false,
       svgDistanceFromEdge: 30,
-      // lineWidth and labelMinimumSpace will usually be passed in from UI settings
-      lineWidth: 2,
-      labelMinimumSpace: 14
+      lineWidth: 1.5,
+      labelMinimumSpace: 12,
+      svgWidth: 750,
+      svgHeight: 750,
+      allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)
 
@@ -112,10 +113,12 @@ class Layout {
     }
   }
 
-  processHierarchy ({ collapseNodes = false } = {}) {
-    this.processBetweenData(!collapseNodes)
+  processHierarchy (settingsOverride) {
+    const settings = settingsOverride || this.settings
+
+    this.processBetweenData(!settings.collapseNodes)
     this.scale.calculateScaleFactor()
-    if (collapseNodes) {
+    if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
       this.scale.calculateScaleFactor()
@@ -123,8 +126,8 @@ class Layout {
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate (settings) {
-    this.processHierarchy(settings)
+  generate (settingsOverride) {
+    this.processHierarchy(settingsOverride)
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
   }

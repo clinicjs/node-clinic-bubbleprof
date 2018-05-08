@@ -30,10 +30,14 @@ html {
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
-
   --close-x: "×";
 
+  /* Define text sizes */
   --main-text-size: 10pt;
+
+  /* Define element sizes used in calculations by other elements */
+  --banner-height: 65px;
+  --footer-height: 65px;
 }
 
 /* Main layout */
@@ -86,7 +90,7 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
 #banner {
   display: flex;
   align-items: center;
-  height: 65px;
+  height: var(--banner-height);
   background: var(--banner-bg-color);
   position: relative;
 }
@@ -212,7 +216,7 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   background: var(--cyan);
   overflow: hidden;
   cursor: pointer;
-  height: 65px;
+  height: var(--footer-height);
   width: 100%;
   cursor: pointer;
 }
@@ -364,6 +368,15 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   display: block;
 }
 
+/* View modes: 'maximised', 'fit', 'scroll'; */
+
+body[data-view-mode='fit'] #node-link {
+  position: sticky;
+  top: 52px; /* TODO: add responsive breakpoints and make this relative to them */
+  max-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
+  min-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
+}
+
 /* Node-link diagram and container */
 
 #node-link {
@@ -377,49 +390,49 @@ svg.bubbleprof text.text-label {
 }
 
 svg.bubbleprof .bubble-wrapper .time-label {
-  alignment-baseline: middle;
+  dominant-baseline: middle;
 }
 
 svg.bubbleprof .bubble-wrapper .name-label {
-  alignment-baseline: after-edge;
+  dominant-baseline: text-after-edge;
 }
 
 svg.bubbleprof .bubble-wrapper .name-label.flipped-label {
-  alignment-baseline: before-edge;
+  dominant-baseline: text-before-edge;
 }
 
 svg.bubbleprof .name-label {
   font-weight: bold;
-  font-size: 12pt;
+  font-size: 11pt;
 }
 
 svg.bubbleprof .bubble-wrapper text.name-label.pointing-right {
   text-anchor: start;
-  alignment-baseline: middle;
+  dominant-baseline: middle;
 }
 
 svg.bubbleprof .bubble-wrapper text.name-label.pointing-left {
   text-anchor: end;
-  alignment-baseline: middle;
+  dominant-baseline: middle;
 }
 
 svg.bubbleprof .below-threshold-1 .name-label {
-  font-size: 11pt;
+  font-size: 10pt;
   opacity: 0.9;
 }
 
 svg.bubbleprof .below-threshold-2 .name-label {
-  font-size: 10pt;
+  font-size: 9pt;
   opacity: 0.8;
 }
 
 svg.bubbleprof .below-threshold-3 .name-label {
-  font-size: 9pt;
+  font-size: 8pt;
   opacity: 0.7;
 }
 
 svg.bubbleprof .time-label {
-  font-size: 9pt;
+  font-size: 8pt;
   font-weight: bold;
   paint-order: stroke fill;
   stroke: var(--main-bg-color);
@@ -428,7 +441,7 @@ svg.bubbleprof .time-label {
 }
 
 svg.bubbleprof .link-wrapper .time-label {
-  alignment-baseline: before-edge;
+  dominant-baseline: hanging;
 }
 
 svg.bubbleprof .below-threshold-1.bubble-wrapper .time-label {
@@ -466,7 +479,7 @@ svg.bubbleprof .link-outer {
   margin-bottom: 65px;
 }
 
-#sublayout:after {
+#node-link .sublayout:after {
   display: block;
   top: 8px;
   right: 8px;
@@ -482,7 +495,7 @@ svg.bubbleprof .link-outer {
 }
 
 /* Temporary fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
-section#sublayout:not(:last-child),
+section.sublayout:not(:last-child),
 svg#node-link-svg:not(:nth-last-child(2)) {
   display: none;
 }

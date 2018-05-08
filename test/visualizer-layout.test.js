@@ -10,6 +10,14 @@ function toLink (layoutNode) {
   return layoutNode.id + ' => ' + layoutNode.children.join(';')
 }
 
+const settings = {
+  svgWidth: 1000,
+  svgHeight: 1000,
+  labelMinimumSpace: 0,
+  lineWidth: 0,
+  svgDistanceFromEdge: 30
+}
+
 // T=Tiny, L=Long, C=Collapsed
 
 // T->T->T->L gives T->C->L
@@ -20,7 +28,7 @@ test('Visualizer layout - collapse - collapses children and parents linearly (ex
   const dataSet = loadData(mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -45,7 +53,7 @@ test('Visualizer layout - collapse - collapses children and parents linearly wit
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   dataSet.clusterNodes.get(4).stats.async.between = 50 // make 4 long
-  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -74,7 +82,7 @@ test('Visualizer layout - collapse - collapses branches at stem', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(2).stats.async.between = 25 // make 2 long
-  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -103,7 +111,7 @@ test('Visualizer layout - collapse - collapses both siblings and parents (except
   const dataSet = loadData(mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -133,7 +141,7 @@ test('Visualizer layout - collapse - collapses children and parents while ignori
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   dataSet.clusterNodes.get(5).stats.async.between = 50 // make 5 long
-  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -162,7 +170,7 @@ test('Visualizer layout - collapse - collapses subset with missing root (except 
   const dataSet = loadData(mockTopology(topology))
   dataSet.clusterNodes.get(8).stats.async.within = 50 // make 8 long
   const subset = [2, 3, 4, 5, 6, 7, 8, 9].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: subset }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -193,7 +201,7 @@ test('Visualizer layout - collapse - collapses subset with missing leaves (excep
   dataSet.clusterNodes.get(7).stats.async.within = 75 // make 7 wide
   dataSet.clusterNodes.get(7).stats.async.between = 75 // make 7 long
   const subset = [1, 2, 3, 4, 6, 7].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: subset }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
@@ -236,7 +244,7 @@ test('Visualizer layout - collapse - complex example', function (t) {
   dataSet.clusterNodes.get(2).stats.async.within = 75 // make 2 long
   dataSet.clusterNodes.get(3).stats.async.within = 75 // make 3 long
   dataSet.clusterNodes.get(10).stats.async.within = 75 // make 10 long
-  const layout = new Layout({ dataNodes }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
