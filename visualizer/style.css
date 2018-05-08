@@ -500,6 +500,10 @@ svg.bubbleprof .link-outer {
   z-index: 11;
 }
 
+#node-link.redraw {
+  z-index: 1;
+}
+
 #node-link .sublayout:after {
   display: block;
   top: 8px;
