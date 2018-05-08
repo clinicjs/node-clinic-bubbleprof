@@ -48,8 +48,8 @@ test('Visualizer - layer - layout is healthy on init', function (t) {
   dataSet.processData()
 
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
-  // TODO: discuss why we even need this?
-  // t.deepEqual(layout.settings, layoutSettings)
+  // Ensure custom settings get applied over defaults as expected
+   t.deepEqual(layout.settings, Object.assign({}, layout.settings, layoutSettings))
 
   t.equal(layout.layoutNodes.get('A').parent, undefined)
   t.deepEqual(layout.layoutNodes.get('A').children, ['B', 'C'])
