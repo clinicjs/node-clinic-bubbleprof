@@ -11,7 +11,7 @@ class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
     super()
 
-    let defaultSettings = {
+    const defaultSettings = {
       numberFormatter: d3.format(',.0f'),
       strokePadding: 3,
       nodeLinkId: 'node-link',
@@ -19,7 +19,7 @@ class BubbleprofUI extends EventEmitter {
       viewMode: 'fit'
     }
 
-    this.settings = Object.assign(defaultSettings, settings)
+    this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
 
     function getOriginalUI (parentUI) {
