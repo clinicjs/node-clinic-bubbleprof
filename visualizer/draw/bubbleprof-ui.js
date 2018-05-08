@@ -160,7 +160,7 @@ class BubbleprofUI extends EventEmitter {
     this.emit(`collapse-${eventName}`)
   }
 
-  redrawLayout() {
+  redrawLayout () {
     const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
     newLayout.generate()
     this.setData(newLayout)
