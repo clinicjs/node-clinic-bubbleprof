@@ -207,9 +207,13 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
   position: fixed;
   width: 100%;
   bottom: 0;
-  z-index: 2;
+  z-index: 12;
   display: flex;
   flex-direction: row-reverse;
+}
+
+#footer.collapsed {
+  z-index: 2;
 }
 
 #footer .bar {
@@ -484,7 +488,6 @@ svg.bubbleprof .link-outer {
   position: absolute;
   background: var(--main-bg-color);
   top: 0;
-  margin-bottom: 65px;
 }
 
 #node-link {
@@ -845,7 +848,7 @@ body:not(.initialized):after,
 }
 
 body:not(.initialized):before {
-  top: 65px;
+  top: var(--banner-height);
 }
 body:not(.initialized):after {
   content: "Preparing file";
@@ -868,7 +871,7 @@ body:not(.initialized):after {
     max-height: 56px;
     overflow-y: auto;
     display: block;
-    margin: 4px;
+    margin: 0;
   }
   #header .panel {
     display: inline;
@@ -908,6 +911,11 @@ body:not(.initialized):after {
     display: none;
   }
 
+  #header {
+    margin: 0;
+    max-height: 52px;
+  }
+
   #side-bar,
   #node-link {
     width: 100%;
@@ -923,9 +931,13 @@ body:not(.initialized):after {
     bottom: 0;
     margin: 0;
     left: 0;
-    z-index: 2;
+    z-index: 12;
     padding: 0;
     border: none;
+  }
+
+  #side-bar.portrait-collapsed {
+    z-index: 2;
   }
 
   #footer {
@@ -944,7 +956,7 @@ body:not(.initialized):after {
   }
 
   #side-bar .bar {
-    height: 65px;
+    height: var(--footer-height);
     display: flex;
     flex-direction: row-reverse;
     background: var(--cyan);
