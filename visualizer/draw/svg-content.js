@@ -12,14 +12,20 @@ class SvgContentGroup {
     }
     this.contentProperties = Object.assign(defaultProperties, contentProperties)
 
+    this.ui.on('initializeFromData', () => {
+      this.initializeFromData()
+    })
+
+    this.ui.on('setData', () => {
+      this.setData()
+    })
+
     this.ui.on('svgDraw', () => {
       this.draw()
     })
   }
 
-  // Unlike the HtmlContent it's most efficient to setData and initializeElements at same time
-  initializeFromData (dataArray) {
-    this.dataArray = dataArray
+  initializeElements () {
     this.d3Container = this.svgContainer.d3Element
 
     const {
@@ -35,11 +41,13 @@ class SvgContentGroup {
       .classed(classNames, true)
       .classed(nodeTypeClass, true)
 
-    this.d3Enter = this.d3Element.selectAll('.bubble-wrapper')
+    if (id) this.d3Element.attr('id', id)
+  }
+
+  setData (dataArray, identifier) {
+    this.d3Enter = this.d3Element.selectAll(identifier)
       .data(dataArray)
       .enter()
-
-    if (id) this.d3Element.attr('id', id)
   }
 }
 

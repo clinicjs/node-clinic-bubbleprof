@@ -2,6 +2,7 @@
 
 const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
+const debounce = require('lodash/debounce')
 const EventEmitter = require('events')
 const Layout = require('../layout/layout.js')
 const SvgContainer = require('./svg-container.js')
@@ -90,20 +91,20 @@ class BubbleprofUI extends EventEmitter {
         classNames: 'sublayout'
       }, nodeLinkSection, this)
       const sublayout = newUI.sections.get(nodeLinkId)
-
       sublayout.addCollapseControl()
+
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
+      sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
+      sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
 
-      sublayout.initializeElements()
+      newUI.initializeElements()
       sublayout.d3Element.on('click', () => {
         newUI.deselectNode()
         window.layout = newUI.parentUI.layout
       })
 
-      sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
-      sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
-      newUI.setData(this.dataSet, newLayout)
+      newUI.setData(newLayout)
     }
   }
 
@@ -159,6 +160,12 @@ class BubbleprofUI extends EventEmitter {
     this.emit(`collapse-${eventName}`)
   }
 
+  redrawLayout () {
+    const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
+    newLayout.generate()
+    this.setData(newLayout)
+  }
+
   truncateLabel (labelString, maxWords, maxChars) {
     const labelWords = labelString.split(' ')
     let truncatedLabel = labelString
@@ -201,19 +208,41 @@ class BubbleprofUI extends EventEmitter {
     this.on('highlightParty', (className) => {
       d3Body.attr('data-highlight-party', className || null)
     })
+
+    const debounceTime = 300
+    const nodeLinkSection = this.getNodeLinkSection()
+
+    const onWindowResizeBegin = debounce(() => {
+      nodeLinkSection.d3Element.classed('redraw', true)
+
+      // Use a shorter time period than the trailing debounce to prevent getting stuck
+    }, debounceTime * 0.9, { leading: true })
+
+    const onWindowResizeEnd = debounce(() => {
+      this.redrawLayout()
+      nodeLinkSection.d3Element.classed('redraw', false)
+    }, debounceTime)
+
+    window.addEventListener('resize', () => {
+      onWindowResizeBegin()
+      onWindowResizeEnd()
+    })
   }
 
-  setData (dataSet, layout) {
-    const redraw = dataSet !== this.dataSet || layout !== this.layout
-    this.dataSet = dataSet
+  setData (layout) {
+    if (layout === this.layout) return
+    const initialize = !this.layout
+
     this.layout = layout
-
-    // Copy layout settings like lineWidth
-    Object.assign(this.settings, layout.settings)
-
     window.layout = layout
     this.emit('setData')
-    if (redraw) this.draw()
+
+    if (initialize) {
+      // Copy layout settings like lineWidth
+      Object.assign(this.settings, layout.settings)
+      this.emit('initializeFromData')
+    }
+    this.emit('svgDraw')
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
