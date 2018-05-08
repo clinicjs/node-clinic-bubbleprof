@@ -26,18 +26,20 @@ class Scale {
 
     const {
       svgWidth,
-      svgDistanceFromEdge
+      svgDistanceFromEdge,
+      allowStretch
     } = this.layout.settings
 
-    // TODO: remove this when fit to screen is fully implemented. Reduces scrolling on tiny sublayouts.
-    const svgHeightAdjustment = nodesCount < 4 ? 0.2 * (nodesCount + 1) : 1
+    // Reduces scrolling on tiny sublayouts. Only needed on scroll view mode
+    const svgHeightAdjustment = nodesCount < 4 && allowStretch ? 0.2 * (nodesCount + 1) : 1
     const svgHeight = this.layout.settings.svgHeight * svgHeightAdjustment
 
     const availableHeight = svgHeight - (svgDistanceFromEdge * 2)
     const availableWidth = (svgWidth / 2) - svgDistanceFromEdge
+    const availableShortest = Math.min(availableWidth, svgHeight * 0.71 - svgDistanceFromEdge)
 
-    // Only stretch if it's a complex profile with many nodes that needs more space
-    const stretchedHeight = svgHeight * (nodesCount > 6 ? 1.5 : 1)
+    // Only stretch if we're in scroll mode and it's a complex profile with many nodes that needs more space
+    const stretchedHeight = svgHeight * (nodesCount > 6 && allowStretch ? 1.5 : 1)
     const availableStretchedHeight = stretchedHeight - (svgDistanceFromEdge * 2)
 
     const longestStretched = new ScaleWeight('longest', leavesByShortest[leavesByShortest.length - 1], availableStretchedHeight, longest.scalable, longest.absolute)
@@ -48,7 +50,7 @@ class Scale {
       // Shortest should be no more (and ideally no less) than half width
       new ScaleWeight('shortest', leavesByShortest[0], availableWidth, shortest.scalable, shortest.absolute),
       // q50 is usually angled like the hypotenuse in a 1-1-sqrt(2) triangle, which indicates 1/sqrt(2)=~71% of line length in width is ideal
-      new ScaleWeight('q50 1-1-sqrt(2) triangle', leavesByShortest[Math.floor(leavesByShortest.length / 2)], availableWidth, q50.scalable * 0.71, q50.absolute),
+      new ScaleWeight('q50 1-1-sqrt(2) triangle', leavesByShortest[Math.floor(leavesByShortest.length / 2)], availableShortest, q50.scalable * 0.71, q50.absolute),
       // q25 is usually angled like the hypotenuse in a 4-3-5 triangle, which indicates 80% of line length in width is ideal
       new ScaleWeight('q25 4-3-5 triangle', leavesByShortest[Math.floor(leavesByShortest.length / 4)], availableWidth, q25.scalable * 0.8, q25.absolute),
       // q75 is usually angled like the hypotenuse in a 3-4-5 triangle, which indicates 60% of line length in width is ideal
