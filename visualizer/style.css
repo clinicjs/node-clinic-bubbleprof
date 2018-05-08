@@ -393,11 +393,6 @@ body[data-view-mode='fit'] #node-link {
 
 /* Node-link diagram and container */
 
-#node-link {
-  position: relative;
-  width: 75%;
-}
-
 svg.bubbleprof text.text-label {
   text-anchor: middle;
 }
@@ -490,6 +485,16 @@ svg.bubbleprof .link-outer {
   background: var(--main-bg-color);
   top: 0;
   margin-bottom: 65px;
+}
+
+#node-link {
+  position: relative;
+  width: 75%;
+  z-index: 10;
+}
+
+#node-link .sublayout {
+  z-index: 11;
 }
 
 #node-link .sublayout:after {
