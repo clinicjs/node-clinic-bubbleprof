@@ -862,7 +862,7 @@ body:not(.initialized):after {
 #node-link .loading-indicator {
   background: var(--main-bg-translucent);
   width: 100%;
-  height: 100%;
+  height: calc(100% + 52px);
   top: 0;
   left: 0;
   position: absolute;
