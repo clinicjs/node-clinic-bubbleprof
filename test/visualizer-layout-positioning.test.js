@@ -169,16 +169,17 @@ test('Visualizer layout - positioning - debugInspect', function (t) {
   ]
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0, svgDistanceFromEdge: 0 })
 
   const positioning = layout.positioning
+  t.equal(layout.scale.scaleFactor, 3)
   t.deepEqual(positioning.debugInspect(), [
     '',
-    '1.9                  ---------- 50',
-    '1.2.3.4.12           ------------------------------ 150',
-    '1.2.3.5.11.13.14.15  -------------------------------------------------- 250',
-    '1.2.6.7.10           ---------------------------------------- 200',
-    '1.8                  -------------------- 100'
+    '1.9                  ---------- 150',
+    '1.2.3.4.12           ------------------------------ 450',
+    '1.2.3.5.11.13.14.15  -------------------------------------------------- 750',
+    '1.2.6.7.10           ---------------------------------------- 600',
+    '1.8                  -------------------- 300'
   ].join('\n'))
 
   t.end()

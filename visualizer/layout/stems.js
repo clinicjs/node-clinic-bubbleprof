@@ -61,12 +61,12 @@ class Stem {
     leaves [${this.leaves.ids.join(', ')}], length ${this.leaves.ids.length};
     `
   }
+  pickMostAccurateTotal () {
+    const { rawTotal, prescaledTotal, scaledTotal } = this.lengths
+    return scaledTotal || prescaledTotal || rawTotal
+  }
   static pickLeavesByLongest (layoutNodes) {
-    const pickMostAccurateTotal = leaf => {
-      const { rawTotal, prescaledTotal, scaledTotal } = leaf.stem.lengths
-      return scaledTotal || prescaledTotal || rawTotal
-    }
-    const byLongest = (leafA, leafB) => pickMostAccurateTotal(leafB) - pickMostAccurateTotal(leafA)
+    const byLongest = (leafA, leafB) => leafB.stem.pickMostAccurateTotal() - leafA.stem.pickMostAccurateTotal()
     const byLeafOnly = layoutNode => !layoutNode.children.length
     return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }
