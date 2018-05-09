@@ -43,12 +43,16 @@ class Stem {
         rawTotal: absolute + scalable
       }
     }
+    if (this.layout.scale.prescaleFactor) {
+      this.lengths.prescaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.prescaleFactor)
+    }
     if (this.layout.scale.scaleFactor) {
       const { settings, scale } = this.layout
       this.scaled = {
         ownBetween: (settings.labelMinimumSpace * 2) + settings.lineWidth + scale.getLineLength(this.raw.ownBetween),
         ownDiameter: scale.getLineLength(this.raw.ownDiameter)
       }
+      this.lengths.scaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.scaleFactor)
     }
   }
   getValidationMessage () {
@@ -58,7 +62,11 @@ class Stem {
     `
   }
   static pickLeavesByLongest (layoutNodes) {
-    const byLongest = (leafA, leafB) => leafB.stem.lengths.rawTotal - leafA.stem.lengths.rawTotal
+    const pickMostAccurateTotal = leaf => {
+      const { rawTotal, prescaledTotal, scaledTotal } = leaf.stem.lengths
+      return scaledTotal || prescaledTotal || rawTotal
+    }
+    const byLongest = (leafA, leafB) => pickMostAccurateTotal(leafB) - pickMostAccurateTotal(leafA)
     const byLeafOnly = layoutNode => !layoutNode.children.length
     return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }

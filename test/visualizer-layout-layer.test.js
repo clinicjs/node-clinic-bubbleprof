@@ -240,8 +240,7 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
-  layout.scale.calculateScaleFactor()
-  layout.updateStems()
+  layout.updateScale()
 
   // TODO: validate that this change in scale factor makes sense
   // const expectedScaleFactor = 30.1336
@@ -281,8 +280,11 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
-  layout.scale.calculateScaleFactor()
-  layout.updateStems()
+  layout.updateScale()
+
+  const APlusC = (24.5 / Math.PI) + 8.5 + (2.5 / Math.PI)
+  t.equal(layout.scale.prescaleFactor, layout.settings.svgHeight / APlusC)
+  t.ok(layout.scale.prescaleFactor < 59 && layout.scale.prescaleFactor > 58)
 
   const lineExtras = (2.5 + 14 + 14)
   // TODO: validate that this change in scale factor makes sense
@@ -316,8 +318,7 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
-  layout.scale.calculateScaleFactor()
-  layout.updateStems()
+  layout.updateScale()
 
   // TODO: validate that this change in scale factor makes sense
   // const expectedScaleFactor = 30.1336
@@ -344,8 +345,7 @@ test('Visualizer - layer - layout positioning is healthy on formClumpPyramid', f
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
   layout.processBetweenData()
-  layout.scale.calculateScaleFactor()
-  layout.updateStems()
+  layout.updateScale()
   layout.positioning.formClumpPyramid()
 
   t.equal(layout.layoutNodes.get('C').stem.lengths.rawTotal.toFixed(2), '47.59')

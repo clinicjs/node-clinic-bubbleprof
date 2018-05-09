@@ -9,8 +9,14 @@ class Scale {
     this.layout = layout
     this.layoutNodes = null // set later
   }
-  calculateScaleFactor () {
+  // This simplified computation is necessary to ensure correct leaves order
+  // when calculating the final scale factor
+  calculatePreScaleFactor () {
     this.layoutNodes = this.layout.layoutNodes
+    const longest = [...this.layoutNodes.values()].reduce((longest, layoutNode) => layoutNode.stem.lengths.scalable, 0)
+    this.prescaleFactor = this.layout.settings.svgHeight / longest
+  }
+  calculateScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
     const leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
