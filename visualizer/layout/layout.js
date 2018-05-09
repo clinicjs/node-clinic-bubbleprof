@@ -121,11 +121,24 @@ class Layout {
     const settings = settingsOverride || this.settings
 
     this.processBetweenData(!settings.collapseNodes)
-    this.scale.calculateScaleFactor()
+    this.updateScale()
     if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
-      this.scale.calculateScaleFactor()
+      this.updateScale()
+    }
+  }
+
+  updateScale () {
+    this.scale.calculatePreScaleFactor()
+    this.updateStems()
+    this.scale.calculateScaleFactor()
+    this.updateStems()
+  }
+
+  updateStems () {
+    for (const layoutNode of this.layoutNodes.values()) {
+      layoutNode.stem.update()
     }
   }
 

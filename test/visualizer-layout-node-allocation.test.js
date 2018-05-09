@@ -163,7 +163,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
   const distanceById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
@@ -240,7 +240,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
 
   const distanceById = {}
@@ -296,7 +296,7 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
 
   const distanceById = {}
@@ -351,7 +351,7 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
 
   const distanceById = {}

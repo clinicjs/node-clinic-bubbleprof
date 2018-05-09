@@ -9,18 +9,25 @@ class Scale {
     this.layout = layout
     this.layoutNodes = null // set later
   }
-  calculateScaleFactor () {
+  // This simplified computation is necessary to ensure correct leaves order
+  // when calculating the final scale factor
+  calculatePreScaleFactor () {
     this.layoutNodes = this.layout.layoutNodes
+    const toLongest = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.scalable)
+    const longest = [...this.layoutNodes.values()].reduce(toLongest, 0)
+    this.prescaleFactor = this.layout.settings.svgHeight / longest
+  }
+  calculateScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
     const leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
 
-    const longest = leavesByShortest[leavesByShortest.length - 1].stem.getTotalStemLength(this)
-    const shortest = leavesByShortest[0].stem.getTotalStemLength(this)
+    const longest = leavesByShortest[leavesByShortest.length - 1].stem.lengths
+    const shortest = leavesByShortest[0].stem.lengths
     // TODO: Consider using in-between computed values for quantiles, like d3 does
-    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.getTotalStemLength(this)
-    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.getTotalStemLength(this)
-    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.getTotalStemLength(this)
+    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.lengths
+    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.lengths
+    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.lengths
 
     const nodesCount = this.layoutNodes.size
 
@@ -57,9 +64,9 @@ class Scale {
       new ScaleWeight('q75 3-4-5 triangle', leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)], availableWidth, q75.scalable * 0.6, q75.absolute)
     ]
     const smallestSide = availableWidth < availableHeight ? availableWidth : availableHeight
-    const largestDiameterNode = [...this.layoutNodes.values()].sort((a, b) => b.stem.ownDiameter - a.stem.ownDiameter)[0]
+    const largestDiameterNode = [...this.layoutNodes.values()].sort((a, b) => b.stem.raw.ownDiameter - a.stem.raw.ownDiameter)[0]
     // For diagram clarity, largest circle should be no more (and ideally no less) than quater of the viewport
-    const diameterClamp = new ScaleWeight('diameter clamp', largestDiameterNode, smallestSide / 2, largestDiameterNode.stem.ownDiameter, 0)
+    const diameterClamp = new ScaleWeight('diameter clamp', largestDiameterNode, smallestSide / 2, largestDiameterNode.stem.raw.ownDiameter, 0)
     const longestConstrained = new ScaleWeight('longest constrained', leavesByShortest[leavesByShortest.length - 1], availableHeight, longest.scalable, longest.absolute)
 
     const accountedScales = [longestConstrained, ...scalesBySignificance.slice(0, leavesByShortest.length), diameterClamp]

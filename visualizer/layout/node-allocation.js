@@ -40,7 +40,7 @@ class NodeAllocation {
   static threeSided (layout, roots) {
     const { svgWidth, svgDistanceFromEdge } = layout.settings
     const { finalSvgHeight } = layout.scale
-    const toLargestDiameter = (largest, rootLayoutNode) => Math.max(largest, rootLayoutNode.stem.getScaled(layout.scale).ownDiameter)
+    const toLargestDiameter = (largest, rootLayoutNode) => Math.max(largest, rootLayoutNode.stem.scaled.ownDiameter)
     const largestRootDiameter = [...roots.values()].reduce(toLargestDiameter, 0)
     const topOffset = svgDistanceFromEdge + Math.max(finalSvgHeight * 0.2, largestRootDiameter)
     const borders = {
@@ -83,7 +83,7 @@ class NodeAllocation {
       const leaf = leafLayoutNode
       const stem = leafLayoutNode.stem
 
-      const leafTotalStemLength = stem.getTotalStemLength(this.layout.scale).combined
+      const leafTotalStemLength = stem.lengths.rawTotal
       // Include ancestor Clumps
       const ancestors = stem.ancestors.ids.length ? stem.ancestors.ids : [leaf.parentId]
       for (let depth in ancestors) {
@@ -177,13 +177,13 @@ class NodeAllocation {
       const stem = layoutNode.stem
 
       const parentStem = layoutNode.parent && layoutNode.parent.stem
-      const parentDiameter = parentStem ? parentStem.getScaled(this.layout.scale).ownDiameter : 0
+      const parentDiameter = parentStem ? parentStem.scaled.ownDiameter : 0
       const position = layoutNode.position
       const parentPosition = layoutNode.parent ? layoutNode.parent.position : this.getRootPosition(parentDiameter)
       const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: position.x, y2: position.y })
       const parentRadius = parentDiameter / 2
-      const thisRadius = stem.getScaled(this.layout.scale).ownDiameter / 2
-      const lineLength = stem.getScaled(this.layout.scale).ownBetween
+      const thisRadius = stem.scaled.ownDiameter / 2
+      const lineLength = stem.scaled.ownBetween
       const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
 
       position.x = leaf.validateStat(x)
@@ -198,7 +198,7 @@ class NodeAllocation {
 
       if (!layoutNode.parent) {
         // TODO: spread out x's to declutter multiple top-level nodes, preferably using this.layout.positioning.order
-        const rootPosition = this.getRootPosition(stem.getScaled(this.layout.scale).ownDiameter)
+        const rootPosition = this.getRootPosition(stem.scaled.ownDiameter)
         position.x = midPoint.validateStat(rootPosition.x)
         position.y = midPoint.validateStat(rootPosition.y)
         continue
@@ -224,9 +224,9 @@ class NodeAllocation {
         case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
 
-          const parentRadius = parentNode.validateStat(parentStem.getScaled(this.layout.scale).ownDiameter / 2)
-          const thisRadius = midPoint.validateStat(stem.getScaled(this.layout.scale).ownDiameter / 2)
-          const lineLength = midPoint.validateStat(stem.getScaled(this.layout.scale).ownBetween)
+          const parentRadius = parentNode.validateStat(parentStem.scaled.ownDiameter / 2)
+          const thisRadius = midPoint.validateStat(stem.scaled.ownDiameter / 2)
+          const lineLength = midPoint.validateStat(stem.scaled.ownBetween)
 
           const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
           position.x = midPoint.validateStat(x)
