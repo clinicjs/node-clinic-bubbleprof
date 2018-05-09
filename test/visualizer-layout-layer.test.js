@@ -282,9 +282,9 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
   layout.processBetweenData()
   layout.updateScale()
 
-  const APlusC = (24.5 / Math.PI) + 8.5 + (2.5 / Math.PI)
-  t.equal(layout.scale.prescaleFactor, layout.settings.svgHeight / APlusC)
-  t.ok(layout.scale.prescaleFactor < 59 && layout.scale.prescaleFactor > 58)
+  const APlusBPlusD = (24.5 / Math.PI) + 6 + (10.5 / Math.PI) + 0.1 + (0.7 / Math.PI)
+  t.equal(layout.scale.prescaleFactor, layout.settings.svgHeight / APlusBPlusD)
+  t.ok(layout.scale.prescaleFactor < 58 && layout.scale.prescaleFactor > 57)
 
   const lineExtras = (2.5 + 14 + 14)
   // TODO: validate that this change in scale factor makes sense

@@ -13,7 +13,8 @@ class Scale {
   // when calculating the final scale factor
   calculatePreScaleFactor () {
     this.layoutNodes = this.layout.layoutNodes
-    const longest = [...this.layoutNodes.values()].reduce((longest, layoutNode) => layoutNode.stem.lengths.scalable, 0)
+    const toLongest = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.scalable)
+    const longest = [...this.layoutNodes.values()].reduce(toLongest, 0)
     this.prescaleFactor = this.layout.settings.svgHeight / longest
   }
   calculateScaleFactor () {
