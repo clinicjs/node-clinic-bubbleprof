@@ -241,6 +241,7 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
 
   // TODO: validate that this change in scale factor makes sense
   // const expectedScaleFactor = 30.1336
@@ -281,29 +282,30 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
 
   const lineExtras = (2.5 + 14 + 14)
   // TODO: validate that this change in scale factor makes sense
   // const expectedScaleFactor = 30.1336
   const expectedScaleFactor = 25.7102
 
-  t.equal(layout.layoutNodes.get('A').stem.getScaled(layout.scale).ownBetween, lineExtras)
-  t.equal(layout.layoutNodes.get('A').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((24.5 / Math.PI) * expectedScaleFactor).toFixed(2))
+  t.equal(layout.layoutNodes.get('A').stem.scaled.ownBetween, lineExtras)
+  t.equal(layout.layoutNodes.get('A').stem.scaled.ownDiameter.toFixed(2), ((24.5 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('B').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (6 * expectedScaleFactor)).toFixed(2))
-  t.equal(layout.layoutNodes.get('B').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((10.5 / Math.PI) * expectedScaleFactor).toFixed(2))
+  t.equal(layout.layoutNodes.get('B').stem.scaled.ownBetween.toFixed(2), (lineExtras + (6 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('B').stem.scaled.ownDiameter.toFixed(2), ((10.5 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('C').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (8.5 * expectedScaleFactor)).toFixed(2))
-  t.equal(layout.layoutNodes.get('C').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((2.5 / Math.PI) * expectedScaleFactor).toFixed(2))
+  t.equal(layout.layoutNodes.get('C').stem.scaled.ownBetween.toFixed(2), (lineExtras + (8.5 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('C').stem.scaled.ownDiameter.toFixed(2), ((2.5 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('D').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
-  t.equal(layout.layoutNodes.get('D').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.7 / Math.PI) * expectedScaleFactor).toFixed(2))
+  t.equal(layout.layoutNodes.get('D').stem.scaled.ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('D').stem.scaled.ownDiameter.toFixed(2), ((0.7 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('E').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
-  t.equal(layout.layoutNodes.get('E').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.1 / Math.PI) * expectedScaleFactor).toFixed(2))
+  t.equal(layout.layoutNodes.get('E').stem.scaled.ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('E').stem.scaled.ownDiameter.toFixed(2), ((0.1 / Math.PI) * expectedScaleFactor).toFixed(2))
 
-  t.equal(layout.layoutNodes.get('F').stem.getScaled(layout.scale).ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
-  t.equal(layout.layoutNodes.get('F').stem.getScaled(layout.scale).ownDiameter.toFixed(2), ((0.1 / Math.PI) * expectedScaleFactor).toFixed(2))
+  t.equal(layout.layoutNodes.get('F').stem.scaled.ownBetween.toFixed(2), (lineExtras + (0.1 * expectedScaleFactor)).toFixed(2))
+  t.equal(layout.layoutNodes.get('F').stem.scaled.ownDiameter.toFixed(2), ((0.1 / Math.PI) * expectedScaleFactor).toFixed(2))
 
   t.end()
 })
@@ -315,6 +317,7 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
 
   // TODO: validate that this change in scale factor makes sense
   // const expectedScaleFactor = 30.1336
@@ -342,6 +345,7 @@ test('Visualizer - layer - layout positioning is healthy on formClumpPyramid', f
 
   layout.processBetweenData()
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   layout.positioning.formClumpPyramid()
 
   t.equal(layout.layoutNodes.get('C').stem.lengths.rawTotal.toFixed(2), '47.59')

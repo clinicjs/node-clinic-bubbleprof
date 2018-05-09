@@ -27,6 +27,7 @@ test('Visualizer layout - scale - calculates scalable line length', function (t)
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.ok(isNumber(layout.scale.scaleFactor))
   t.equal(layout.scale.getLineLength(3), 3 * layout.scale.scaleFactor)
   t.equal(layout.scale.getLineLength(5), 5 * layout.scale.scaleFactor)
@@ -41,6 +42,7 @@ test('Visualizer layout - scale - calculates scalable circle radius based on len
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.ok(isNumber(layout.scale.scaleFactor))
   t.equal(layout.scale.getCircleRadius(3), (3 * layout.scale.scaleFactor) / (2 * Math.PI))
   t.equal(layout.scale.getCircleRadius(5), (5 * layout.scale.scaleFactor) / (2 * Math.PI))
@@ -56,6 +58,7 @@ test('Visualizer layout - scale - demagnifies large shortest', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
   t.ok(layout.scale.scaleFactor < 0.4 && layout.scale.scaleFactor > 0.3)
 
@@ -69,6 +72,7 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
   t.equal(layout.scale.finalSvgHeight, svgHeight * 1.5)
   t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
@@ -84,6 +88,7 @@ test('Visualizer layout - scale - constrained longest superseeds other weights (
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
 
   t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
   // TODO: Check the significance of stretched longest superseeding here,
@@ -102,6 +107,7 @@ test('Visualizer layout - scale - demagnifies large diameter (width)', function 
   const layout = generateLayout(dataSet, settings)
   layout.layoutNodes.get(2).stem.ownDiameter = svgWidth
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.ok(layout.scale.scaleFactor < 0.25 && layout.scale.scaleFactor > 0.2)
 
@@ -117,6 +123,7 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
   const layout = generateLayout(dataSet, Object.assign({}, settings, { svgHeight: inputHeight }))
   layout.layoutNodes.get(2).stem.ownDiameter = 500
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.equal(layout.scale.finalSvgHeight, inputHeight * 1.5)
   t.ok(layout.scale.scaleFactor < 0.2 && layout.scale.scaleFactor > 0.1)
@@ -132,6 +139,7 @@ test('Visualizer layout - scale - demagnifies large q50', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'q50 1-1-sqrt(2) triangle')
   t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
 
@@ -148,6 +156,7 @@ test('Visualizer layout - scale - demagnifies large q25', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'q25 4-3-5 triangle')
   t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
 
@@ -165,6 +174,7 @@ test('Visualizer layout - scale - demagnifies large q75', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'q75 3-4-5 triangle')
   t.ok(layout.scale.scaleFactor < 0.5 && layout.scale.scaleFactor > 0.4)
 
@@ -178,6 +188,7 @@ test('Visualizer layout - scale - magnifies tiny longest', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
   t.ok(layout.scale.scaleFactor < 2 && layout.scale.scaleFactor > 1.8)
 
@@ -210,6 +221,7 @@ test('Visualizer layout - scale - demagnifies when absolutes exceed available sp
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, { svgWidth: 100, svgHeight: 100, svgDistanceFromEdge: 5, labelMinimumSpace: 20, lineWidth: 30, collapseNodes: false })
   layout.scale.calculateScaleFactor()
+  layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
   t.equal(layout.scale.decisiveWeight.absoluteToContain, ((2 * 20) + 30) * 10)
   t.ok(layout.scale.scaleFactor < 0.201 && layout.scale.scaleFactor > 0.199)

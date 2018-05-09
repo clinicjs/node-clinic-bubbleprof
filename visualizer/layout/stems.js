@@ -29,23 +29,24 @@ class Stem {
         ancestorStem.leaves.ids.push(layoutNode.id)
       }
     }
-    this.updateLengths()
+    this.update()
   }
-  getScaled (scale) {
-    const ownBetween = (this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth + scale.getLineLength(this.ownBetween)
-    const ownDiameter = scale.getLineLength(this.ownDiameter)
-    return {
-      ownBetween: validateNumber(ownBetween, this.getValidationMessage()),
-      ownDiameter: validateNumber(ownDiameter, this.getValidationMessage())
+  update () {
+    if (!this.lengths) {
+      const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
+      const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
+      this.lengths = {
+        absolute: validateNumber(absolute, this.getValidationMessage()),
+        scalable: validateNumber(scalable, this.getValidationMessage()),
+        rawTotal: absolute + scalable
+      }
     }
-  }
-  updateLengths () {
-    const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
-    const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
-    this.lengths = {
-      absolute: validateNumber(absolute, this.getValidationMessage()),
-      scalable: validateNumber(scalable, this.getValidationMessage()),
-      rawTotal: absolute + scalable
+    if (this.layout.scale.scaleFactor) {
+      const { settings, scale } = this.layout
+      this.scaled = {
+        ownBetween: (settings.labelMinimumSpace * 2) + settings.lineWidth + scale.getLineLength(this.ownBetween),
+        ownDiameter: scale.getLineLength(this.ownDiameter)
+      }
     }
   }
   getValidationMessage () {

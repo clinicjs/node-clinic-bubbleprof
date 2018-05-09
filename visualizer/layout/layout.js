@@ -122,10 +122,18 @@ class Layout {
 
     this.processBetweenData(!settings.collapseNodes)
     this.scale.calculateScaleFactor()
+    this.updateStems()
     if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
       this.scale.calculateScaleFactor()
+      this.updateStems()
+    }
+  }
+
+  updateStems () {
+    for (const layoutNode of this.layoutNodes.values()) {
+      layoutNode.stem.update()
     }
   }
 
