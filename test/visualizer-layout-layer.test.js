@@ -92,8 +92,8 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.A.scalable = expected.A.ancestorsBetween + expected.A.ancestorsDiameter + expected.A.ownBetween + expected.A.ownDiameter
   expected.A.absolute = lineExtras * expected.A.ancestors.length
   expected.A.rawTotal = expected.A.scalable + expected.A.absolute
-  t.equal(layout.layoutNodes.get('A').stem.ownBetween.toFixed(2), expected.A.ownBetween.toFixed(2))
-  t.equal(layout.layoutNodes.get('A').stem.ownDiameter.toFixed(2), expected.A.ownDiameter.toFixed(2))
+  t.equal(layout.layoutNodes.get('A').stem.raw.ownBetween.toFixed(2), expected.A.ownBetween.toFixed(2))
+  t.equal(layout.layoutNodes.get('A').stem.raw.ownDiameter.toFixed(2), expected.A.ownDiameter.toFixed(2))
   t.deepEqual(layout.layoutNodes.get('A').stem.ancestors.ids, expected.A.ancestors)
   t.equal(layout.layoutNodes.get('A').stem.ancestors.totalBetween.toFixed(2), expected.A.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('A').stem.ancestors.totalDiameter.toFixed(2), expected.A.ancestorsDiameter.toFixed(2))
@@ -109,8 +109,8 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.B.scalable = expected.B.ancestorsBetween + expected.B.ancestorsDiameter + expected.B.ownBetween + expected.B.ownDiameter
   expected.B.absolute = lineExtras * expected.B.ancestors.length
   expected.B.rawTotal = expected.B.scalable + expected.B.absolute
-  t.equal(layout.layoutNodes.get('B').stem.ownBetween.toFixed(2), expected.B.ownBetween.toFixed(2))
-  t.equal(layout.layoutNodes.get('B').stem.ownDiameter.toFixed(2), expected.B.ownDiameter.toFixed(2))
+  t.equal(layout.layoutNodes.get('B').stem.raw.ownBetween.toFixed(2), expected.B.ownBetween.toFixed(2))
+  t.equal(layout.layoutNodes.get('B').stem.raw.ownDiameter.toFixed(2), expected.B.ownDiameter.toFixed(2))
   t.deepEqual(layout.layoutNodes.get('B').stem.ancestors.ids, expected.B.ancestors)
   t.equal(layout.layoutNodes.get('B').stem.ancestors.totalBetween.toFixed(2), expected.B.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('B').stem.ancestors.totalDiameter.toFixed(2), expected.B.ancestorsDiameter.toFixed(2))
@@ -126,8 +126,8 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.C.scalable = expected.C.ancestorsBetween + expected.C.ancestorsDiameter + expected.C.ownBetween + expected.C.ownDiameter
   expected.C.absolute = lineExtras * expected.C.ancestors.length
   expected.C.rawTotal = expected.C.scalable + expected.C.absolute
-  t.equal(layout.layoutNodes.get('C').stem.ownBetween.toFixed(2), expected.C.ownBetween.toFixed(2))
-  t.equal(layout.layoutNodes.get('C').stem.ownDiameter.toFixed(2), expected.C.ownDiameter.toFixed(2))
+  t.equal(layout.layoutNodes.get('C').stem.raw.ownBetween.toFixed(2), expected.C.ownBetween.toFixed(2))
+  t.equal(layout.layoutNodes.get('C').stem.raw.ownDiameter.toFixed(2), expected.C.ownDiameter.toFixed(2))
   t.deepEqual(layout.layoutNodes.get('C').stem.ancestors.ids, expected.C.ancestors)
   t.equal(layout.layoutNodes.get('C').stem.ancestors.totalBetween.toFixed(2), expected.C.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('C').stem.ancestors.totalDiameter.toFixed(2), expected.C.ancestorsDiameter.toFixed(2))
@@ -143,8 +143,8 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.D.scalable = expected.D.ancestorsBetween + expected.D.ancestorsDiameter + expected.D.ownBetween + expected.D.ownDiameter
   expected.D.absolute = lineExtras * expected.D.ancestors.length
   expected.D.rawTotal = expected.D.scalable + expected.D.absolute
-  t.equal(layout.layoutNodes.get('D').stem.ownBetween.toFixed(2), expected.D.ownBetween.toFixed(2))
-  t.equal(layout.layoutNodes.get('D').stem.ownDiameter.toFixed(2), expected.D.ownDiameter.toFixed(2))
+  t.equal(layout.layoutNodes.get('D').stem.raw.ownBetween.toFixed(2), expected.D.ownBetween.toFixed(2))
+  t.equal(layout.layoutNodes.get('D').stem.raw.ownDiameter.toFixed(2), expected.D.ownDiameter.toFixed(2))
   t.deepEqual(layout.layoutNodes.get('D').stem.ancestors.ids, expected.D.ancestors)
   t.equal(layout.layoutNodes.get('D').stem.ancestors.totalBetween.toFixed(2), expected.D.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('D').stem.ancestors.totalDiameter.toFixed(2), expected.D.ancestorsDiameter.toFixed(2))
@@ -160,8 +160,8 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.E.scalable = expected.E.ancestorsBetween + expected.E.ancestorsDiameter + expected.E.ownBetween + expected.E.ownDiameter
   expected.E.absolute = lineExtras * expected.E.ancestors.length
   expected.E.rawTotal = expected.E.scalable + expected.E.absolute
-  t.equal(layout.layoutNodes.get('E').stem.ownBetween.toFixed(2), expected.E.ownBetween.toFixed(2))
-  t.equal(layout.layoutNodes.get('E').stem.ownDiameter.toFixed(2), expected.E.ownDiameter.toFixed(2))
+  t.equal(layout.layoutNodes.get('E').stem.raw.ownBetween.toFixed(2), expected.E.ownBetween.toFixed(2))
+  t.equal(layout.layoutNodes.get('E').stem.raw.ownDiameter.toFixed(2), expected.E.ownDiameter.toFixed(2))
   t.deepEqual(layout.layoutNodes.get('E').stem.ancestors.ids, expected.E.ancestors)
   t.equal(layout.layoutNodes.get('E').stem.ancestors.totalBetween.toFixed(2), expected.E.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('E').stem.ancestors.totalDiameter.toFixed(2), expected.E.ancestorsDiameter.toFixed(2))
@@ -177,8 +177,8 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.F.scalable = expected.F.ancestorsBetween + expected.F.ancestorsDiameter + expected.F.ownBetween + expected.F.ownDiameter
   expected.F.absolute = lineExtras * expected.F.ancestors.length
   expected.F.rawTotal = expected.F.scalable + expected.F.absolute
-  t.equal(layout.layoutNodes.get('F').stem.ownBetween.toFixed(2), expected.F.ownBetween.toFixed(2))
-  t.equal(layout.layoutNodes.get('F').stem.ownDiameter.toFixed(2), expected.F.ownDiameter.toFixed(2))
+  t.equal(layout.layoutNodes.get('F').stem.raw.ownBetween.toFixed(2), expected.F.ownBetween.toFixed(2))
+  t.equal(layout.layoutNodes.get('F').stem.raw.ownDiameter.toFixed(2), expected.F.ownDiameter.toFixed(2))
   t.deepEqual(layout.layoutNodes.get('F').stem.ancestors.ids, expected.F.ancestors)
   t.equal(layout.layoutNodes.get('F').stem.ancestors.totalBetween.toFixed(2), expected.F.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('F').stem.ancestors.totalDiameter.toFixed(2), expected.F.ancestorsDiameter.toFixed(2))

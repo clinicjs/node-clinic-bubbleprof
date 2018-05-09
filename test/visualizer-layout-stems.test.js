@@ -13,8 +13,8 @@ test('Visualizer layout - stems - calculates between and diameter based on stats
 
   const layoutNode = layout.layoutNodes.get(16)
   const stem = layoutNode.stem
-  t.equal(stem.ownBetween, layoutNode.node.getBetweenTime())
-  t.equal(stem.ownDiameter, layoutNode.node.getWithinTime() / Math.PI)
+  t.equal(stem.raw.ownBetween, layoutNode.node.getBetweenTime())
+  t.equal(stem.raw.ownDiameter, layoutNode.node.getWithinTime() / Math.PI)
 
   t.end()
 })
@@ -32,12 +32,12 @@ test('Visualizer layout - stems - calculates length based on ancestors and scale
 
   const toOwnLength = id => {
     const ancestorStem = layout.layoutNodes.get(id).stem
-    return ancestorStem.ownBetween + ancestorStem.ownDiameter
+    return ancestorStem.raw.ownBetween + ancestorStem.raw.ownDiameter
   }
   const sum = (a, b) => a + b
   const totalAncestorsLength = stem.ancestors.ids.map(toOwnLength).reduce(sum, 0)
   // Floating point precision acting up here, hence `.toFixed()` both sides
-  t.equal((totalStemLength.scalable - totalAncestorsLength).toFixed(8), (stem.ownBetween + stem.ownDiameter).toFixed(8))
+  t.equal((totalStemLength.scalable - totalAncestorsLength).toFixed(8), (stem.raw.ownBetween + stem.raw.ownDiameter).toFixed(8))
 
   t.end()
 })

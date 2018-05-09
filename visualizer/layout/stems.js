@@ -18,13 +18,15 @@ class Stem {
     this.leaves = {
       ids: []
     }
-    this.ownBetween = layoutNode.getBetweenTime()
-    this.ownDiameter = radiusFromCircumference(layoutNode.getWithinTime()) * 2
+    this.raw = {
+      ownBetween: layoutNode.getBetweenTime(),
+      ownDiameter: radiusFromCircumference(layoutNode.getWithinTime()) * 2
+    }
 
     for (const ancestorId of this.ancestors.ids) {
       const ancestorStem = layout.layoutNodes.get(ancestorId).stem
-      this.ancestors.totalBetween += ancestorStem.ownBetween
-      this.ancestors.totalDiameter += ancestorStem.ownDiameter
+      this.ancestors.totalBetween += ancestorStem.raw.ownBetween
+      this.ancestors.totalDiameter += ancestorStem.raw.ownDiameter
       if (!layoutNode.children.length) {
         ancestorStem.leaves.ids.push(layoutNode.id)
       }
@@ -34,7 +36,7 @@ class Stem {
   update () {
     if (!this.lengths) {
       const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
-      const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
+      const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.raw.ownBetween + this.raw.ownDiameter
       this.lengths = {
         absolute: validateNumber(absolute, this.getValidationMessage()),
         scalable: validateNumber(scalable, this.getValidationMessage()),
@@ -44,8 +46,8 @@ class Stem {
     if (this.layout.scale.scaleFactor) {
       const { settings, scale } = this.layout
       this.scaled = {
-        ownBetween: (settings.labelMinimumSpace * 2) + settings.lineWidth + scale.getLineLength(this.ownBetween),
-        ownDiameter: scale.getLineLength(this.ownDiameter)
+        ownBetween: (settings.labelMinimumSpace * 2) + settings.lineWidth + scale.getLineLength(this.raw.ownBetween),
+        ownDiameter: scale.getLineLength(this.raw.ownDiameter)
       }
     }
   }

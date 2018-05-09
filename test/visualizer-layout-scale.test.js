@@ -105,7 +105,7 @@ test('Visualizer layout - scale - demagnifies large diameter (width)', function 
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
-  layout.layoutNodes.get(2).stem.ownDiameter = svgWidth
+  layout.layoutNodes.get(2).stem.raw.ownDiameter = svgWidth
   layout.scale.calculateScaleFactor()
   layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
@@ -121,7 +121,7 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
   const dataSet = loadData(mockTopology(topology))
   const inputHeight = (250 + 30 + 30) * (1 / 1.5)
   const layout = generateLayout(dataSet, Object.assign({}, settings, { svgHeight: inputHeight }))
-  layout.layoutNodes.get(2).stem.ownDiameter = 500
+  layout.layoutNodes.get(2).stem.raw.ownDiameter = 500
   layout.scale.calculateScaleFactor()
   layout.updateStems()
   t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
