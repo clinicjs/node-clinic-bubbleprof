@@ -15,12 +15,12 @@ class Scale {
     // using the spacing/width settings and radiusFromCircumference()
     const leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
 
-    const longest = leavesByShortest[leavesByShortest.length - 1].stem.getTotalStemLength(this)
-    const shortest = leavesByShortest[0].stem.getTotalStemLength(this)
+    const longest = leavesByShortest[leavesByShortest.length - 1].stem.lengths
+    const shortest = leavesByShortest[0].stem.lengths
     // TODO: Consider using in-between computed values for quantiles, like d3 does
-    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.getTotalStemLength(this)
-    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.getTotalStemLength(this)
-    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.getTotalStemLength(this)
+    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.lengths
+    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.lengths
+    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.lengths
 
     const nodesCount = this.layoutNodes.size
 

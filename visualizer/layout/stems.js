@@ -29,6 +29,7 @@ class Stem {
         ancestorStem.leaves.ids.push(layoutNode.id)
       }
     }
+    this.updateLengths()
   }
   getScaled (scale) {
     const ownBetween = (this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth + scale.getLineLength(this.ownBetween)
@@ -38,10 +39,10 @@ class Stem {
       ownDiameter: validateNumber(ownDiameter, this.getValidationMessage())
     }
   }
-  getTotalStemLength () {
+  updateLengths () {
     const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
     const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
-    return {
+    this.lengths = {
       absolute: validateNumber(absolute, this.getValidationMessage()),
       scalable: validateNumber(scalable, this.getValidationMessage()),
       rawTotal: absolute + scalable
@@ -54,7 +55,7 @@ class Stem {
     `
   }
   static pickLeavesByLongest (layoutNodes) {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().rawTotal - leafA.stem.getTotalStemLength().rawTotal
+    const byLongest = (leafA, leafB) => leafB.stem.lengths.rawTotal - leafA.stem.lengths.rawTotal
     const byLeafOnly = layoutNode => !layoutNode.children.length
     return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }
