@@ -28,7 +28,7 @@ test('Visualizer layout - stems - calculates length based on ancestors and scale
   t.deepEqual(stem.ancestors.ids, [ 1, 5, 7, 8, 10 ])
   t.equal(totalStemLength.scalable.toFixed(8), '21897.14445863')
   t.equal(totalStemLength.absolute, (2 * 2 * 5) + (3 * 5))
-  t.equal(totalStemLength.combined, totalStemLength.scalable + totalStemLength.absolute)
+  t.equal(totalStemLength.rawTotal, totalStemLength.scalable + totalStemLength.absolute)
 
   const toOwnLength = id => {
     const ancestorStem = layout.layoutNodes.get(id).stem

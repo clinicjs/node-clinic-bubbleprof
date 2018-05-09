@@ -25,11 +25,11 @@ class Positioning {
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
     const leavesByLongest = pickLeavesByLongest(this.layoutNodes, this.layout)
-    const longestStemLength = leavesByLongest[0].stem.getTotalStemLength().combined
+    const longestStemLength = leavesByLongest[0].stem.getTotalStemLength().rawTotal
     const arrangedLeaves = leavesByLongest.sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
-      const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
+      const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).rawTotal
       const units = parseInt((magnitude / longestStemLength) * 50)
       const lengthAsDashes = new Array(units).fill('-').join('')
       const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')

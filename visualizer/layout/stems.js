@@ -44,7 +44,7 @@ class Stem {
     return {
       absolute: validateNumber(absolute, this.getValidationMessage()),
       scalable: validateNumber(scalable, this.getValidationMessage()),
-      combined: absolute + scalable
+      rawTotal: absolute + scalable
     }
   }
   getValidationMessage () {
@@ -54,7 +54,7 @@ class Stem {
     `
   }
   static pickLeavesByLongest (layoutNodes) {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().combined - leafA.stem.getTotalStemLength().combined
+    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().rawTotal - leafA.stem.getTotalStemLength().rawTotal
     const byLeafOnly = layoutNode => !layoutNode.children.length
     return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }
