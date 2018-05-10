@@ -8,6 +8,19 @@ class Lookup extends HtmlContent {
     super(d3Container, contentProperties)
     this.defaultText = contentProperties.defaultText
     this.lastInput = ''
+
+    this.ui.on('setTopmostLayout', (layout) => {
+      let previousNodeIds = this.topmostLayout ? [...this.topmostLayout.layoutNodes.keys()].join() : ''
+      this.topmostLayout = layout
+
+      const newNodeIds = [...this.topmostLayout.layoutNodes.keys()].join()
+
+      if (previousNodeIds && previousNodeIds !== newNodeIds) {
+        // Re-do any current search against new layout
+        this.lastInput = ''
+        this.onInput()
+      }
+    })
   }
 
   initializeElements () {
