@@ -731,6 +731,45 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   margin-bottom: -9px;
 }
 
+/* Lookup box for text-based searches */
+
+.lookup .collapsible-content-wrapper {
+  position: relative;
+}
+
+.lookup .lookup-input {
+  width: 100%;
+  padding: 8px;
+  margin: 12px 0 0 0;
+  border: none;
+  border-bottom: 2px solid var(--cyan);
+}
+
+.lookup .lookup-input.default-text {
+  color: var(--nearform-grey);
+}
+
+.lookup .lookup-suggestions {
+  margin: 0;
+  padding: 0;
+}
+
+.lookup .lookup-suggestions .suggestion {
+  margin: 1px 0;
+  padding: 4px;
+  background: var(--pure-black);
+  color: var(--cyan);
+  list-style: none;
+}
+
+.lookup .loading-indicator {
+  margin: -24px 0 0 -62px;
+}
+
+.lookup.loading .loading-indicator {
+  display: block;
+}
+
 /* Global classes linking styles to data properties */
 
 .party-user .party-icon,
