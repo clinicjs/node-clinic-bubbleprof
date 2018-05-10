@@ -752,14 +752,27 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
 .lookup .lookup-suggestions {
   margin: 0;
   padding: 0;
+  width: calc(100% + 32px);
+  margin-left: -16px;
+}
+
+.lookup .results-count {
+  background: var(--overlay-bg-color);
+  color: var(--pure-white);
+  padding: 8px 24px;
+  list-style: none;
+  font-size: var(--main-text-size);
 }
 
 .lookup .lookup-suggestions .suggestion {
   margin: 1px 0;
-  padding: 4px;
+  padding: 8px 4px;
   background: var(--pure-black);
   color: var(--cyan);
   list-style: none;
+  font-size: 8pt;
+  font-family: monospace;
+  white-space: pre-wrap;
 }
 
 .lookup .loading-indicator {

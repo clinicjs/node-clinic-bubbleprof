@@ -111,15 +111,146 @@ class Lookup extends HtmlContent {
       // Clear again in case an earlier lookup resolved while this one was still processing
       this.d3Suggestions.selectAll('li').remove()
 
-      this.addSuggestion(`Look up <em>${inputText}</em>`)
+      const searchResults = this.deepFramesSearch(inputText)
+      const matches = searchResults.length
+      const pluralizer = matches === 1 ? '' : 'es'
+      const resultsMessage = `Found ${matches || 'no'} match${pluralizer}${matches ? ':' : '.'}`
+
+      this.d3Suggestions.append('li')
+        .classed('results-count', true)
+        .text(resultsMessage)
+
+      for (const result of searchResults) {
+        this.addSuggestion(result)
+      }
+
       this.d3Element.classed('loading', false)
-    }, 600) // <-- delete this 600 after adding real data lookup: is for testing loading message only
+    })
   }
 
-  addSuggestion (descriptionHTML) {
+  addSuggestion (result) {
+    const textString = result.frame.formatted
+      // Add zero-width spaces after slashes to allow long paths to break across lines
+      .replace(/\//g, '/&#8203;')
+      .replace(/\\/g, '\\&#8203;')
+      // Use non-breaking hyphens so file or folder names don't break across lines
+      .replace(/-/g, '&#8209;')
+
     this.d3Suggestions.append('li')
       .classed('suggestion', true)
-      .html(descriptionHTML)
+      .html(textString)
+      .on('mouseover', () => {
+        this.ui.highlightNode(result.layoutNode)
+      })
+      .on('mouseout', () => {
+        this.ui.highlightNode(null)
+      })
+  }
+
+  deepFramesSearch (inputText) {
+    // Do nothing if user manages to enter input before layout has loaded
+    if (!this.topmostLayout) return
+
+    const inputStr = inputText.toLowerCase()
+
+    // Enables results to be sorted by quality of match and interestingness of target
+    const resultTypesByPriority = [
+      [['functionName', 'exact'], []],
+      [['fileName', 'exact', 'file'], []],
+      [['typeName', 'exact'], []],
+      [['functionName', 'start'], []],
+      [['fileName', 'start', 'file'], []],
+      [['fileName', 'exact', 'folder'], []],
+      [['functionName', 'exact', null, 'split'], []],
+      [['fileName', 'exact', 'file', 'split'], []],
+      [['functionName', 'start', null, 'split'], []],
+      [['fileName', 'start', 'file', 'split'], []],
+      [['typeName', 'start'], []],
+      [['fileName', 'exact', 'folder', 'split'], []],
+      [['functionName', 'anywhere'], []],
+      [['fileName', 'anywhere', 'file'], []],
+      [['fileName', 'start', 'folder', 'split'], []],
+      [['typeName', 'anywhere'], []],
+      [['fileName', 'anywhere', 'folder'], []]
+    ]
+
+    const compare = (testStr, test, uriItem = null, split = null) => {
+      if (uriItem) {
+        const splitUri = testStr.replace(/\\/g, '/').split('/')
+        const fileName = splitUri.pop()
+
+        if (uriItem === 'file') {
+          return compare(fileName, test, null, split)
+        } else {
+          return splitUri.some((folderName) => compare(folderName, test, null, split))
+        }
+      }
+
+      if (split) {
+        const camelFreeStr = testStr.replace(/([a-z])([A-Z])/g, '$1-$2')
+        const split = camelFreeStr.replace(/_/g, '-').split('-')
+        return split.some((subString) => compare(subString, test, uriItem, null))
+      }
+
+      testStr = testStr.toLowerCase()
+      switch (test) {
+        case 'exact':
+          return testStr === inputStr
+        case 'start':
+          return testStr.match(new RegExp(`^${inputStr}.*`, 'i'))
+        case 'anywhere':
+          return testStr.match(new RegExp(`.*${inputStr}.*`, 'i'))
+      }
+    }
+
+    const searchInFrame = (frame, dataNode, layoutNode) => {
+      for (const [testConditions, resultsArray] of resultTypesByPriority) {
+        const [
+          dataType,
+          test,
+          uriItem,
+          split
+        ] = testConditions
+        const testStr = frame.data[dataType]
+
+        if (testStr && compare(testStr, test, uriItem, split)) {
+          resultsArray.push({
+            frame,
+            dataNode,
+            layoutNode
+          })
+          return
+        }
+      }
+    }
+
+    const searchInNode = (dataNode, layoutNode) => {
+      switch (dataNode.constructor.name) {
+        case 'AggregateNode':
+          for (const frame of dataNode.frames) {
+            searchInFrame(frame, dataNode, layoutNode)
+          }
+          break
+        case 'ShortcutNode':
+          break
+        case 'ArtificialNode':
+          for (const collapsedLayoutNode of layoutNode.collapsedNodes) {
+            // Don't pass the collapsedLayoutNode down because it's not visible at this level
+            searchInNode(collapsedLayoutNode.node, layoutNode)
+          }
+          break
+        case 'ClusterNode':
+          for (const aggregateNode of dataNode.nodes.values()) {
+            searchInNode(aggregateNode, layoutNode)
+          }
+          break
+      }
+    }
+
+    for (const layoutNode of this.topmostLayout.layoutNodes.values()) {
+      searchInNode(layoutNode.node, layoutNode)
+    }
+    return resultTypesByPriority.reduce((acc, item) => acc.concat(item[1]), [])
   }
 }
 
