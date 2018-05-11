@@ -12,13 +12,14 @@ class HtmlContent {
     const defaultProperties = {
       id: null,
       name: null,
+      hidden: false,
       htmlElementType: 'div',
       htmlContent: '',
       classNames: ''
     }
     this.contentProperties = Object.assign(defaultProperties, contentProperties)
 
-    this.isHidden = false
+    this.isHidden = this.contentProperties.hidden
 
     this.collapseControl = null
     this.loadingAnimation = null

@@ -16,10 +16,10 @@ class HoverBox extends HtmlContent {
     this.d3Element.classed('hover-box', true)
     this.d3Element.classed('hidden', true)
 
-    this.d3VerticalArrow = this.d3Element.append('div')
+    this.d3VerticalArrow = this.d3ContentWrapper.append('div')
       .classed('vertical-arrow', true)
 
-    this.d3TitleBlock = this.d3Element.append('div')
+    this.d3TitleBlock = this.d3ContentWrapper.append('div')
       .classed('block', true)
       .classed('title-block', true)
 
@@ -27,7 +27,7 @@ class HoverBox extends HtmlContent {
     this.d3ClickMessage = this.d3TitleBlock.append('a')
       .classed('click-message', true)
 
-    this.d3TimeBlock = this.d3Element.append('div')
+    this.d3TimeBlock = this.d3ContentWrapper.append('div')
       .classed('block', true)
       .classed('time-block', true)
 

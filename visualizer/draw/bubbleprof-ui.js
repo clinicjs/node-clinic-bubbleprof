@@ -100,8 +100,7 @@ class BubbleprofUI extends EventEmitter {
 
       newUI.initializeElements()
       sublayout.d3Element.on('click', () => {
-        newUI.deselectNode()
-        window.layout = newUI.parentUI.layout
+        newUI.clearSublayout()
       })
 
       newUI.setData(newLayout)
@@ -119,7 +118,7 @@ class BubbleprofUI extends EventEmitter {
       case 'ShortcutNode':
         const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.shortcutTo.id)
         // TODO: replace with something better designed e.g. a back button for within sublayouts
-        this.deselectNode()
+        this.clearSublayout()
         this.parentUI.createSubLayout(targetLayoutNode)
         break
 
@@ -141,8 +140,12 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
-  deselectNode () {
+  clearSublayout () {
+    // TODO: check that this frees up this and its layout for GC
     this.getNodeLinkSection().d3Element.remove()
+    this.setTopmostLayout(this.parentUI.layout)
+
+    // Close the frames panel if it's open
     this.originalUI.emit('outputFrames', null)
   }
 
@@ -234,7 +237,7 @@ class BubbleprofUI extends EventEmitter {
     const initialize = !this.layout
 
     this.layout = layout
-    window.layout = layout
+    this.setTopmostLayout(layout)
     this.emit('setData')
 
     if (initialize) {
@@ -243,6 +246,14 @@ class BubbleprofUI extends EventEmitter {
       this.emit('initializeFromData')
     }
     this.emit('svgDraw')
+  }
+
+  setTopmostLayout (layout) {
+    // Allow user to inspect layout object
+    window.layout = layout
+
+    // Allow UI components to interact with whichever layout is in focus
+    this.originalUI.emit('setTopmostLayout', layout)
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
