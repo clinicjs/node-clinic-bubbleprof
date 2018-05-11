@@ -65,7 +65,7 @@ class BubbleprofUI extends EventEmitter {
     }
 
     if (this.layout) {
-      settings.collapseNodes = this.layout.settings.collapseNode
+      settings.collapseNodes = this.layout.settings.collapseNodes
     }
     return settings
   }
