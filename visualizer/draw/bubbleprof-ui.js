@@ -65,7 +65,7 @@ class BubbleprofUI extends EventEmitter {
     }
 
     if (this.layout) {
-      settings.collapseNodes = this.layout.settings.collapseNodes
+      settings.collapseNodes = this.layout.settings.collapseNode
     }
     return settings
   }
@@ -79,7 +79,7 @@ class BubbleprofUI extends EventEmitter {
 
       const newLayout = new Layout({
         dataNodes: nodesArray,
-        connection: connection || { targetNode: layoutNode.node }
+        connection: connection || { targetNode: layoutNode.node, layout: layoutNode.layout }
       }, this.getSettingsForLayout())
       newLayout.generate()
 

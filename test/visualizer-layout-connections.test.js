@@ -23,7 +23,7 @@ test('Visualizer layout - scale - calculates visible circle radius based on with
   const parentLayoutNode = layout.layoutNodes.get(1)
   const childLayoutNode = layout.layoutNodes.get(3)
 
-  const connection = new Connection(parentLayoutNode, childLayoutNode, fakeScale)
+  const connection = new Connection(parentLayoutNode, childLayoutNode, { scale: fakeScale })
 
   t.ok(isNumber(parentLayoutNode.getWithinTime()))
   const expectedParentRadius = fakeScale.getCircleRadius(parentLayoutNode.getWithinTime())
@@ -43,7 +43,7 @@ test('Visualizer layout - scale - calculates visible line length based on betwee
   const parentLayoutNode = layout.layoutNodes.get(1)
   const childLayoutNode = layout.layoutNodes.get(3)
 
-  const connection = new Connection(parentLayoutNode, childLayoutNode, fakeScale)
+  const connection = new Connection(parentLayoutNode, childLayoutNode, { scale: fakeScale })
   t.ok(isNumber(childLayoutNode.getBetweenTime()))
   const expectedVisibleLength = fakeScale.getLineLength(childLayoutNode.getBetweenTime())
   t.equal(connection.getVisibleLineLength(), expectedVisibleLength)
@@ -58,7 +58,7 @@ test('Visualizer layout - scale - calculates distance between centers', function
   const parentLayoutNode = layout.layoutNodes.get(1)
   const childLayoutNode = layout.layoutNodes.get(3)
 
-  const connection = new Connection(parentLayoutNode, childLayoutNode, fakeScale)
+  const connection = new Connection(parentLayoutNode, childLayoutNode, { scale: fakeScale })
 
   const expectedParentRadius = fakeScale.getCircleRadius(parentLayoutNode.getWithinTime())
   const expectedChildRadius = fakeScale.getCircleRadius(childLayoutNode.getWithinTime())
