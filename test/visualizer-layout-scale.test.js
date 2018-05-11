@@ -220,21 +220,24 @@ test('Visualizer layout - scale - magnifies tiny longest', function (t) {
   t.end()
 })
 
-test('Visualizer layout - scale - scales based on selected subset of nodes', function (t) {
+test('Visualizer layout - scale - can handle subsets', function (t) {
   const topology = [
-    ['1.2', 1]
+    ['1.2.3.4.5.6', svgHeight * 3],
+    ['1.2.3.7.8.9', svgWidth * 0.4],
+    ['1.2.10.11.12.13', svgWidth * 0.39],
+    ['1.2.3.4.5.14', svgWidth * 0.38],
+    ['1.2.3.7.8.15', svgWidth * 0.37],
+    ['1.2.10.11.12.16', svgWidth * 0.36],
+    ['1.2.3.7.8.17', svgWidth * 0.35],
+    ['1.2.3.4.5.18', svgWidth * 0.34],
   ]
-  const dataSet = loadData(mockTopology(topology))
-  const aggregateNode = dataSet.aggregateNodes.get(2)
 
-  const layout = new Layout({ dataNodes: [aggregateNode] }, settings)
+  const dataSet = loadData(mockTopology(topology))
+  const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
+  const layout = new Layout({ dataNodes: subset })
   layout.generate()
 
-  // TODO: re-evaluate and re-activate the logic of these tests against new scale logic
-  // t.equal(layout.scale.decisiveWeight.category, 'longest')
-  // const totalStemLength = layout.layoutNodes.get(aggregateNode.id).stem.lengths
-  // const expectedScaleFactor = ((svgHeight * 1.5) - totalStemLength.absolute) / totalStemLength.scalable
-  // t.ok(layout.scale.scaleFactor < expectedScaleFactor * 1.1 && layout.scale.scaleFactor > expectedScaleFactor * 0.9)
+  t.ok(layout.scale.scaleFactor < 0.33 && layout.scale.scaleFactor > 0.32)
 
   t.end()
 })
