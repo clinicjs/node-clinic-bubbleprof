@@ -10,7 +10,7 @@ class Lookup extends HtmlContent {
     this.lastInput = ''
 
     this.ui.on('setTopmostLayout', (layout) => {
-      let previousNodeIds = this.topmostLayout ? [...this.topmostLayout.layoutNodes.keys()].join() : ''
+      const previousNodeIds = this.topmostLayout ? [...this.topmostLayout.layoutNodes.keys()].join() : ''
       this.topmostLayout = layout
 
       const newNodeIds = [...this.topmostLayout.layoutNodes.keys()].join()
@@ -36,22 +36,21 @@ class Lookup extends HtmlContent {
       .classed('lookup-suggestions', true)
       .classed('hidden', true)
 
+    // Look up autocomplete suggestions when user has stopped typing
+    const debouncedChange = debounce(() => {
+      // Arrow functions around methods required to preserve `this` context
+      this.onInput()
+    }, 200)
+
+    // Use keyup so isn't fired while, for example, user holds down delete
+    this.d3LookupInput.on('keyup', debouncedChange)
+
     this.d3LookupInput.on('focus', () => {
       this.onFocus()
     })
 
     this.d3LookupInput.on('blur', () => {
       this.onBlur()
-    })
-
-    // Look up autocomplete suggestions when user has stopped typing
-    const debouncedChange = debounce(() => {
-      this.onInput()
-    }, 200)
-
-    // Use keyup so isn't fired while, for example, user holds down delete
-    this.d3LookupInput.on('keyup', () => {
-      debouncedChange()
     })
 
     this.d3Element.on('mouseout', () => {
@@ -75,6 +74,7 @@ class Lookup extends HtmlContent {
     }
     // Try to clear after current event stack resolves (e.g. click on a suggestion)
     setTimeout(() => {
+      // Arrow function to preserve `this` context
       this.clearLookup()
     })
   }

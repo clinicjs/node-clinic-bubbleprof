@@ -752,8 +752,7 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
 .lookup .lookup-suggestions {
   margin: 0;
   padding: 0;
-  width: calc(100% + 32px);
-  margin-left: -16px;
+  width: calc(100%);
 }
 
 .lookup .results-count {
