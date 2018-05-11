@@ -90,6 +90,19 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   t.end()
 })
 
+test('Visualizer layout - scale - folds small layouts', function (t) {
+  const topology = [
+    ['1.2', 1]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, settings)
+  layout.updateScale()
+  const nodesCount = 2
+  t.equal(layout.scale.finalSvgHeight, svgHeight * (0.2 * (nodesCount + 1)))
+
+  t.end()
+})
+
 test('Visualizer layout - scale - constrained longest superseeds other weights', function (t) {
   const topology = [
     ['1.2.3.4', svgHeight * 3],
@@ -229,7 +242,7 @@ test('Visualizer layout - scale - can handle subsets', function (t) {
     ['1.2.3.7.8.15', svgWidth * 0.37],
     ['1.2.10.11.12.16', svgWidth * 0.36],
     ['1.2.3.7.8.17', svgWidth * 0.35],
-    ['1.2.3.4.5.18', svgWidth * 0.34],
+    ['1.2.3.4.5.18', svgWidth * 0.34]
   ]
 
   const dataSet = loadData(mockTopology(topology))
