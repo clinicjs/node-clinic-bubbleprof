@@ -1,7 +1,7 @@
 'use strict'
 
 class Connection {
-  constructor (sourceLayoutNode, targetLayoutNode, scale) {
+  constructor (sourceLayoutNode, targetLayoutNode, layout) {
     // TODO: rename sourceNode everywhere to avoid confusion with DataNode->SourceNode class
     this.sourceId = sourceLayoutNode.id
     this.sourceLayoutNode = sourceLayoutNode
@@ -11,7 +11,7 @@ class Connection {
     this.targetLayoutNode = targetLayoutNode
     this.targetNode = targetLayoutNode.node
 
-    this.scale = scale
+    this.layout = layout
 
     // TODO: remove this completely once all branches are merged and released
     // this.targetNode.connectionFromParent = this
@@ -19,16 +19,16 @@ class Connection {
 
   // Avoid duplication of values so stats can be swtiched/recalculated with settings
   // If recalculating these proves to be a performance problem, consider caching values
-  getSourceRadius () { return this.scale.getCircleRadius(this.sourceLayoutNode.getWithinTime()) }
-  getTargetRadius () { return this.scale.getCircleRadius(this.targetLayoutNode.getWithinTime()) }
-  getVisibleLineLength () { return this.scale.getLineLength(this.targetLayoutNode.getBetweenTime()) }
+  getSourceRadius () { return this.layout.scale.getCircleRadius(this.sourceLayoutNode.getWithinTime()) }
+  getTargetRadius () { return this.layout.scale.getCircleRadius(this.targetLayoutNode.getWithinTime()) }
+  getVisibleLineLength () { return this.layout.scale.getLineLength(this.targetLayoutNode.getBetweenTime()) }
   getDistanceBetweenCenters () {
     return this.getSourceRadius() +
       this.getVisibleLineLength() +
       this.getTargetRadius() +
       // Leave a gap at both ends so any text labels are readable
       // Only one lineWidth because it increases distance by half a line width at each end
-      this.scale.settings.labelMinimumSpace * 2 + this.scale.settings.lineWidth
+      this.layout.scale.settings.labelMinimumSpace * 2 + this.layout.scale.settings.lineWidth
   }
 }
 

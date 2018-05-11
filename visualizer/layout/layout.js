@@ -47,7 +47,7 @@ class Layout {
       const dataNode = dataNodeById.get(nodeId)
       if (!dataNode || this.layoutNodes.has(dataNode.id)) return
 
-      const layoutNode = new LayoutNode(dataNode, parentLayoutNode)
+      const layoutNode = new LayoutNode(dataNode, parentLayoutNode, this)
       this.layoutNodes.set(dataNode.id, layoutNode)
 
       if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
@@ -71,7 +71,7 @@ class Layout {
       id: connection.sourceNode.id,
       isRoot: true,
       children: []
-    }, connection.sourceNode)
+    }, connection.sourceNode, connection.sourceLayoutNode)
 
     if (shortcutToSource) {
       dataNodes.unshift(shortcutToSource)
@@ -89,13 +89,15 @@ class Layout {
         if (!dataNodes.some(dataNode => dataNode.id === childId)) {
           const childNode = dataNode.getSameType(childId)
 
+          const nodeToCopy = childNode.clusterId ? childNode : childNode.clusterNode
+          const matchingLayoutNode = connection.layout.layoutNodes.get(nodeToCopy.id) || connection.layout.clumpByNodeId.get(nodeToCopy.id)
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const shortcutNode = new ShortcutNode({
             id: childId,
             children: [],
             parentId: dataNode.id
           // Use the name, mark etc of the clusterNode the target node is inside
-          }, childNode.clusterId ? childNode : childNode.clusterNode)
+          }, nodeToCopy, matchingLayoutNode)
 
           dataNodes.push(shortcutNode)
         }
@@ -109,7 +111,7 @@ class Layout {
       layoutNode.stem = new Stem(this, layoutNode)
 
       if (generateConnections && layoutNode.parent) {
-        const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
+        const connection = new Connection(layoutNode.parent, layoutNode, this)
         this.connectionsByTargetId.set(layoutNode.id, connection)
         this.connections.push(connection)
         layoutNode.inboundConnection = connection
@@ -150,7 +152,8 @@ class Layout {
   }
 
   collapseNodes () {
-    const { layoutNodes, scale } = this
+    this.clumpByNodeId = new Map()
+    const { layoutNodes, scale, clumpByNodeId } = this
     // TODO: stop relying on coincidental Map.keys() order
     const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
 
@@ -212,13 +215,13 @@ class Layout {
       const selfTopNode = topLayoutNodes.includes(layoutNode)
       if (selfBelowThreshold && collapsibleChildren.length && !selfTopNode) {
         // Combine children and self
-        combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
+        combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)), this)
 
         // Count squashed children at this level, from the level above has been counted already when recursing up the tree
         squashedCounter += childrenBelowThreshold.length
       } else if (collapsibleChildren.length >= 2) {
         // Combine children only
-        combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
+        combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren, this)
         layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
 
         // Minus one because collapse doesn't contain this node and adds collapsedLayoutNode to layout
@@ -264,6 +267,7 @@ class Layout {
       for (const layoutNode of collapsedLayoutNode.collapsedNodes) {
         layoutNode.parent = null
         layoutNode.children = []
+        clumpByNodeId.set(layoutNode.id, collapsedLayoutNode)
       }
     }
 
@@ -274,7 +278,8 @@ class Layout {
 }
 
 class LayoutNode {
-  constructor (node, parent) {
+  constructor (node, parent, layout) {
+    this.layout = layout
     this.id = node.id
     this.node = node
     this.stem = null
@@ -298,7 +303,8 @@ class LayoutNode {
 }
 
 class CollapsedLayoutNode {
-  constructor (layoutNodes, parent, children) {
+  constructor (layoutNodes, parent, children, layout) {
+    this.layout = layout
     this.id = 'clump:' + layoutNodes.map(layoutNode => layoutNode.id).join(',')
     this.collapsedNodes = layoutNodes
     this.parent = parent
@@ -380,9 +386,9 @@ class ArtificialNode extends ClusterNode {
 }
 
 class ShortcutNode extends ArtificialNode {
-  constructor (rawNode, nodeToCopy) {
+  constructor (rawNode, nodeToCopy, layoutNode) {
     super(rawNode, nodeToCopy)
-    this.shortcutTo = nodeToCopy
+    this.shortcutTo = layoutNode
   }
 }
 

@@ -79,7 +79,7 @@ class BubbleprofUI extends EventEmitter {
 
       const newLayout = new Layout({
         dataNodes: nodesArray,
-        connection: connection || { targetNode: layoutNode.node }
+        connection: connection || { targetNode: layoutNode.node, layout: layoutNode.layout }
       }, this.getSettingsForLayout())
       newLayout.generate()
 
