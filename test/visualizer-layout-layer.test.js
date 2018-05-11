@@ -242,35 +242,29 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
   layout.processBetweenData()
   layout.updateScale()
 
-  // TODO: validate that this change in scale factor makes sense
-  // const expectedScaleFactor = 30.1336
-  // const expectedScaleFactor = 25.7102
+  const lineExtras = (2.5 + 14 + 14)
+  const expectedScaleFactor = 25.7102
 
-  /* TODO: recalculate expectations based on new logic
   t.deepEqual(layout.scale.scalesBySmallest.map(weight => [weight.category, weight.weight.toFixed(4)]), [
-    ['diameter clamp', expectedScaleFactor + ''],
-    ['q25 4-3-5 triangle', '32.1378'],
-    ['q50 1-1-sqrt(2) triangle', '33.3507'],
-    ['q75 3-4-5 triangle', '39.0334'],
-    ['shortest', '60.2673'],
-    ['longest', '77.4799']
+    ['shortest', expectedScaleFactor + ''],
+    ['diameter clamp', '30.1336'],
+    ['q50 1-1-sqrt(2) triangle', '32.9860'],
+    ['longest constrained', '48.7517'],
+    ['longest', '48.7517']
   ])
-  */
 
   t.equal(layout.scale.decisiveWeight.category, 'shortest')
-  // TODO: validate that this change makes sense given the change in logic
-  // t.equal(layout.scale.decisiveWeight.category, 'diameter clamp')
   t.equal(layout.scale.decisiveWeight.node.constructor.name, 'LayoutNode')
-  // TODO: validate that this change makes sense given the change in logic
-  // t.equal(layout.scale.decisiveWeight.node.id, 'A')
   t.equal(layout.scale.decisiveWeight.node.id, 'C')
-  /* TODO: recalculate expectations based on new logic
-  t.equal(layout.scale.decisiveWeight.available, ((1000 / 2) - 30) / 2)
-  t.equal(layout.scale.decisiveWeight.absoluteToContain, 0)
-  t.equal(layout.scale.decisiveWeight.scalableToContain, (24.5 / Math.PI))
-  t.equal(layout.scale.decisiveWeight.weight.toFixed(2), (235 / 7.8).toFixed(2))
+
+  const APlusC = (24.5 / Math.PI) + 8.5 + (2.5 / Math.PI)
+
+  t.equal(layout.scale.decisiveWeight.available, (1000 / 2) - 30)
+  t.equal(layout.scale.decisiveWeight.absoluteToContain, lineExtras)
+  t.equal(layout.scale.decisiveWeight.scalableToContain, APlusC)
+  t.equal(layout.scale.decisiveWeight.weight.toFixed(2), ((470 - lineExtras) / APlusC).toFixed(2))
   t.equal(layout.scale.scaleFactor.toFixed(4), expectedScaleFactor + '')
-  */
+
   t.end()
 })
 
@@ -287,8 +281,6 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
   t.ok(layout.scale.prescaleFactor < 58 && layout.scale.prescaleFactor > 57)
 
   const lineExtras = (2.5 + 14 + 14)
-  // TODO: validate that this change in scale factor makes sense
-  // const expectedScaleFactor = 30.1336
   const expectedScaleFactor = 25.7102
 
   t.equal(layout.layoutNodes.get('A').stem.scaled.ownBetween, lineExtras)
@@ -320,8 +312,6 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
   layout.processBetweenData()
   layout.updateScale()
 
-  // TODO: validate that this change in scale factor makes sense
-  // const expectedScaleFactor = 30.1336
   const expectedScaleFactor = 25.7102
 
   t.equal(layout.connections[0].getSourceRadius().toFixed(2), (((24.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // A
