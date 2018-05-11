@@ -90,19 +90,41 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   t.end()
 })
 
-test('Visualizer layout - scale - constrained longest superseeds other weights (except stretched longest)', function (t) {
+test('Visualizer layout - scale - constrained longest superseeds other weights', function (t) {
   const topology = [
     ['1.2.3.4', svgHeight * 3],
-    ['1.3', svgWidth * 1.4]
+    ['1.5', svgWidth * 1.51],
+    ['1.6', svgWidth * 1.51],
+    ['1.7', svgWidth * 1.5]
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
 
   t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
-  // TODO: Check the significance of stretched longest superseeding here,
-  // confirm testing scalesBySmallest[>1] isn't necessary
+  t.notEqual(layout.scale.scalesBySmallest[1].category, 'longest')
+  t.equal(layout.scale.decisiveWeight.category, 'longest constrained')
   t.equal(layout.scale.finalSvgHeight, svgHeight)
+  t.ok(layout.scale.scaleFactor < 0.35 && layout.scale.scaleFactor > 0.3)
+
+  t.end()
+})
+
+test('Visualizer layout - scale - constrained longest superseeds other weights (except stretched longest)', function (t) {
+  const topology = [
+    ['1.2.3.4', (svgHeight * 1.5) * 3],
+    ['1.5', svgWidth * 0.5],
+    ['1.6', svgWidth * 0.5],
+    ['1.7', svgWidth * 0.5]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, settings)
+  layout.updateScale()
+
+  t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
+  t.equal(layout.scale.scalesBySmallest[1].category, 'longest')
+  t.equal(layout.scale.decisiveWeight.category, 'longest')
+  t.equal(layout.scale.finalSvgHeight, svgHeight * 1.5)
   t.ok(layout.scale.scaleFactor < 0.35 && layout.scale.scaleFactor > 0.3)
 
   t.end()
