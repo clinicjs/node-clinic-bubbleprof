@@ -196,7 +196,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
     ['1.2.3.7.8.15', 250],
     ['1.2.3.7.8.17', 150]
   ]
-
+  const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
@@ -207,9 +207,8 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   const positioning = layout.positioning
   positioning.formClumpPyramid()
 
-  // TODO: Figure out why this changed
-  // const expectedOrder = [16, 13, 18, 6, 14, 9, 15, 17]
-  // t.deepEqual(positioning.order, expectedOrder)
+  const expectedOrder = topologyToOrderedLeaves(expectedTopology)
+  t.deepEqual(positioning.order, expectedOrder)
 
   t.end()
 })

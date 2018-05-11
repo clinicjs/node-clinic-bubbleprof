@@ -65,13 +65,13 @@ test('Visualizer layout - scale - calculates scalable circle radius based on len
 test('Visualizer layout - scale - demagnifies large shortest', function (t) {
   const topology = [
     ['1.2', svgWidth],
-    ['1.3', svgWidth * 2.01]
+    ['1.3', svgWidth * 0.9]
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
-  t.equal(layout.scale.decisiveWeight.category, 'longest')
-  t.ok(layout.scale.scaleFactor < 0.4 && layout.scale.scaleFactor > 0.3)
+  t.equal(layout.scale.decisiveWeight.category, 'shortest')
+  t.ok(layout.scale.scaleFactor < 0.6 && layout.scale.scaleFactor > 0.5)
 
   t.end()
 })
@@ -90,19 +90,54 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   t.end()
 })
 
-test('Visualizer layout - scale - constrained longest superseeds other weights (except stretched longest)', function (t) {
+test('Visualizer layout - scale - folds small layouts', function (t) {
+  const topology = [
+    ['1.2', 1]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, settings)
+  layout.updateScale()
+  const nodesCount = 2
+  t.equal(layout.scale.finalSvgHeight, svgHeight * (0.2 * (nodesCount + 1)))
+
+  t.end()
+})
+
+test('Visualizer layout - scale - constrained longest superseeds other weights', function (t) {
   const topology = [
     ['1.2.3.4', svgHeight * 3],
-    ['1.3', svgWidth * 1.4]
+    ['1.5', svgWidth * 1.51],
+    ['1.6', svgWidth * 1.51],
+    ['1.7', svgWidth * 1.5]
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
 
   t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
-  // TODO: Check the significance of stretched longest superseeding here,
-  // confirm testing scalesBySmallest[>1] isn't necessary
+  t.notEqual(layout.scale.scalesBySmallest[1].category, 'longest')
+  t.equal(layout.scale.decisiveWeight.category, 'longest constrained')
   t.equal(layout.scale.finalSvgHeight, svgHeight)
+  t.ok(layout.scale.scaleFactor < 0.35 && layout.scale.scaleFactor > 0.3)
+
+  t.end()
+})
+
+test('Visualizer layout - scale - constrained longest superseeds other weights (except stretched longest)', function (t) {
+  const topology = [
+    ['1.2.3.4', (svgHeight * 1.5) * 3],
+    ['1.5', svgWidth * 0.5],
+    ['1.6', svgWidth * 0.5],
+    ['1.7', svgWidth * 0.5]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const layout = generateLayout(dataSet, settings)
+  layout.updateScale()
+
+  t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
+  t.equal(layout.scale.scalesBySmallest[1].category, 'longest')
+  t.equal(layout.scale.decisiveWeight.category, 'longest')
+  t.equal(layout.scale.finalSvgHeight, svgHeight * 1.5)
   t.ok(layout.scale.scaleFactor < 0.35 && layout.scale.scaleFactor > 0.3)
 
   t.end()
@@ -198,21 +233,24 @@ test('Visualizer layout - scale - magnifies tiny longest', function (t) {
   t.end()
 })
 
-test('Visualizer layout - scale - scales based on selected subset of nodes', function (t) {
+test('Visualizer layout - scale - can handle subsets', function (t) {
   const topology = [
-    ['1.2', 1]
+    ['1.2.3.4.5.6', svgHeight * 3],
+    ['1.2.3.7.8.9', svgWidth * 0.4],
+    ['1.2.10.11.12.13', svgWidth * 0.39],
+    ['1.2.3.4.5.14', svgWidth * 0.38],
+    ['1.2.3.7.8.15', svgWidth * 0.37],
+    ['1.2.10.11.12.16', svgWidth * 0.36],
+    ['1.2.3.7.8.17', svgWidth * 0.35],
+    ['1.2.3.4.5.18', svgWidth * 0.34]
   ]
-  const dataSet = loadData(mockTopology(topology))
-  const aggregateNode = dataSet.aggregateNodes.get(2)
 
-  const layout = new Layout({ dataNodes: [aggregateNode] }, settings)
+  const dataSet = loadData(mockTopology(topology))
+  const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
+  const layout = new Layout({ dataNodes: subset })
   layout.generate()
 
-  // TODO: re-evaluate and re-activate the logic of these tests against new scale logic
-  // t.equal(layout.scale.decisiveWeight.category, 'longest')
-  // const totalStemLength = layout.layoutNodes.get(aggregateNode.id).stem.lengths
-  // const expectedScaleFactor = ((svgHeight * 1.5) - totalStemLength.absolute) / totalStemLength.scalable
-  // t.ok(layout.scale.scaleFactor < expectedScaleFactor * 1.1 && layout.scale.scaleFactor > expectedScaleFactor * 0.9)
+  t.ok(layout.scale.scaleFactor < 0.33 && layout.scale.scaleFactor > 0.32)
 
   t.end()
 })
