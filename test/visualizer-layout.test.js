@@ -65,6 +65,7 @@ test('Visualizer layout - collapse - collapses children and parents linearly wit
   t.end()
 })
 
+// TODO: Simplify collapse logic then fix this test
 // L->T->T->T->T gives L->C->T
 // test('Visualizer layout - collapse - collapses children and parents linearly until minimum count threshold is hit', function (t) {
 //   const topology = [
