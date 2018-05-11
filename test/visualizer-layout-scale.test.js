@@ -65,13 +65,13 @@ test('Visualizer layout - scale - calculates scalable circle radius based on len
 test('Visualizer layout - scale - demagnifies large shortest', function (t) {
   const topology = [
     ['1.2', svgWidth],
-    ['1.3', svgWidth * 2.01]
+    ['1.3', svgWidth * 0.9]
   ]
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
-  t.equal(layout.scale.decisiveWeight.category, 'longest')
-  t.ok(layout.scale.scaleFactor < 0.4 && layout.scale.scaleFactor > 0.3)
+  t.equal(layout.scale.decisiveWeight.category, 'shortest')
+  t.ok(layout.scale.scaleFactor < 0.6 && layout.scale.scaleFactor > 0.5)
 
   t.end()
 })
