@@ -768,6 +768,7 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
   margin: 0;
   padding: 0;
   width: calc(100%);
+  cursor: pointer;
 }
 
 .lookup .results-count {

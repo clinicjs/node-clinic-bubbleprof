@@ -30,7 +30,7 @@ class BubbleprofUI extends EventEmitter {
     this.originalUI = parentUI ? getOriginalUI(parentUI) : this
 
     this.highlightedNode = null
-    this.selectedNode = null
+    this.selectedDataNode = null
 
     // Main divisions of the page
     this.sections = new Map()
@@ -114,51 +114,55 @@ class BubbleprofUI extends EventEmitter {
   }
 
   selectNode (layoutNode) {
-    this.selectedNode = layoutNode
     const dataNode = layoutNode.node
+    const sameNode = this.selectedDataNode === dataNode
+
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
         // TODO: replace with something better designed e.g. a back button for within sublayouts
         this.clearSublayout()
+        this.selectedDataNode = dataNode.shortcutTo
         return this.originalUI.jumpToNode(dataNode.shortcutTo)
 
       case 'AggregateNode':
-        this.outputFrames(dataNode)
+        this.selectedDataNode = dataNode
+        this.outputFrames(dataNode, layoutNode)
         return this
 
       case 'ClusterNode':
         if (dataNode.nodes.size === 1) {
-          this.outputFrames(dataNode.nodes.values().next().value)
+          // If there's only one aggregateNode, just select it
+          this.selectedDataNode = dataNode.nodes.values().next().value
+          this.outputFrames(this.selectedDataNode, layoutNode)
           return this
         } else {
-          return this.createSubLayout(layoutNode)
+          this.selectedDataNode = dataNode
+          return sameNode ? this : this.createSubLayout(layoutNode)
         }
 
       case 'ArtificialNode':
-        this.deselectNode()
-        return this.createSubLayout(layoutNode)
+        this.selectedDataNode = dataNode
+        return sameNode ? this : this.createSubLayout(layoutNode)
     }
   }
 
   clearSublayout () {
+    this.selectedDataNode = null
+
     // TODO: check that this frees up this and its layout for GC
-    this.getNodeLinkSection().d3Element.remove()
-    this.setTopmostLayout(this.parentUI.layout)
+    if (this.parentUI) {
+      this.parentUI.selectedDataNode = null
+      this.getNodeLinkSection().d3Element.remove()
+      this.setTopmostLayout(this.parentUI.layout)
+    }
 
     // Close the frames panel if it's open
-    this.originalUI.emit('outputFrames', null)
+    this.clearFrames()
   }
 
   highlightNode (layoutNode = null) {
     this.highlightedNode = layoutNode
     this.emit('hover', layoutNode)
-  }
-
-  deselectNode () {
-    if (this.sections.has('sublayout')) {
-      this.sections.get('sublayout').d3Element.remove()
-    }
-    this.originalUI.emit('outputFrames', null)
   }
 
   // Selects a node that may or may not be collapsed
@@ -167,7 +171,7 @@ class BubbleprofUI extends EventEmitter {
     if (this.layout.layoutNodes.has(nodeId)) {
       return this.selectNode(this.layout.layoutNodes.get(nodeId))
     } else {
-      const collapsedLayoutNode = this.findCollapsedNode(nodeId)
+      const collapsedLayoutNode = this.findCollapsedNode(dataNode)
       const newUI = this.selectNode(collapsedLayoutNode)
       return newUI.jumpToNode(dataNode)
     }
@@ -175,48 +179,46 @@ class BubbleprofUI extends EventEmitter {
 
   jumpToAggregateNode (aggregateNode) {
     const nodeId = aggregateNode.id
-    if (this.layout.layoutNodes.has(nodeId)) {
+    const layoutNodes = this.layout.layoutNodes
+    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node.constructor.name === 'AggregateNode') {
       return this.selectNode(this.layout.layoutNodes.get(nodeId))
     }
-    this.deselectNode()
-    if (this.parentUI) this.parentUI.deselectNode()
+
+    this.clearSublayout()
 
     const newUI = this.originalUI.jumpToNode(aggregateNode.clusterNode)
+    // If that cluserNode contains only this aggregateNode, it will have been automatically selected already
+    if (newUI.selectedDataNode === aggregateNode) return
 
     if (newUI.layout.layoutNodes.has(nodeId)) {
       return newUI.selectNode(newUI.layout.layoutNodes.get(nodeId))
     } else {
-      const collapsedLayoutNode = newUI.findCollapsedNode(nodeId)
+      const collapsedLayoutNode = newUI.findCollapsedNode(aggregateNode)
       const newerUI = newUI.selectNode(collapsedLayoutNode)
-      newerUI.jumpToNode(aggregateNode)
+      return newerUI.jumpToNode(aggregateNode)
     }
   }
 
-  findCollapsedNode (nodeId) {
+  findCollapsedNode (dataNode) {
+    const nodeId = dataNode.id
     for (const layoutNode of this.layout.layoutNodes.values()) {
-      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((item) => item.id === nodeId)) {
+      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.id === nodeId)) {
         return layoutNode
       }
     }
     throw new Error(`Couldn't find id ${nodeId} in ids [${[...this.layout.layoutNodes.keys()].join(', ')}] or their contents`)
   }
 
-  clearSublayout () {
-    // TODO: check that this frees up this and its layout for GC
-    this.getNodeLinkSection().d3Element.remove()
-    this.setTopmostLayout(this.parentUI.layout)
-
-    // Close the frames panel if it's open
-    this.originalUI.emit('outputFrames', null)
-  }
-
-  highlightNode (layoutNode = null) {
-    this.highlightedNode = layoutNode
-    this.emit('hover', layoutNode)
-  }
-
-  outputFrames (aggregateNode) {
+  outputFrames (aggregateNode, layoutNode = null) {
+    if (layoutNode) {
+      this.highlightNode(layoutNode)
+    }
     this.originalUI.emit('outputFrames', aggregateNode)
+  }
+
+  clearFrames () {
+    this.activeFramesSource = null
+    this.originalUI.emit('outputFrames', null)
   }
 
   collapseEvent (eventName) {

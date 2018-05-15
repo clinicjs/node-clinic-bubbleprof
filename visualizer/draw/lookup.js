@@ -120,16 +120,16 @@ class Lookup extends HtmlContent {
         .classed('results-count', true)
         .text(resultsMessage)
 
-      for (const result of searchResults) {
-        this.addSuggestion(result)
+      for (const { frame, dataNode, layoutNode } of searchResults) {
+        this.addSuggestion(frame, dataNode, layoutNode)
       }
 
       this.d3Element.classed('loading', false)
     })
   }
 
-  addSuggestion (result) {
-    const textString = result.frame.formatted
+  addSuggestion (frame, dataNode, layoutNode) {
+    const textString = frame.formatted
       // Add zero-width spaces after slashes to allow long paths to break across lines
       .replace(/\//g, '/&#8203;')
       .replace(/\\/g, '\\&#8203;')
@@ -140,10 +140,13 @@ class Lookup extends HtmlContent {
       .classed('suggestion', true)
       .html(textString)
       .on('mouseover', () => {
-        this.ui.highlightNode(result.layoutNode)
+        this.ui.highlightNode(layoutNode)
       })
       .on('mouseout', () => {
         this.ui.highlightNode(null)
+      })
+      .on('click', () => {
+        const newUI = this.ui.jumpToAggregateNode(dataNode)
       })
   }
 
