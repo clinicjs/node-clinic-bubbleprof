@@ -5,19 +5,25 @@ const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
+const arrayFlatten = require('array-flatten')
 const { validateNumber } = require('../validation.js')
 
 class Layout {
   constructor ({ dataNodes, connection }, settings) {
     const defaultSettings = {
-      svgWidth: 1000,
-      svgHeight: 1000,
+      collapseNodes: false,
       svgDistanceFromEdge: 30,
-      // lineWidth and labelMinimumSpace will usually be passed in from UI settings
-      lineWidth: 2,
-      labelMinimumSpace: 14
+      lineWidth: 1.5,
+      labelMinimumSpace: 12,
+      svgWidth: 750,
+      svgHeight: 750,
+      allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)
+    this.initialInput = {
+      dataNodes,
+      connection
+    }
 
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
@@ -61,37 +67,37 @@ class Layout {
 
     const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
 
-    const linkToSource = !connection.sourceNode ? null : new ArtificialNode({
+    const shortcutToSource = !connection.sourceNode ? null : new ShortcutNode({
       id: connection.sourceNode.id,
       isRoot: true,
       children: []
     }, connection.sourceNode)
 
-    if (linkToSource) {
-      dataNodes.unshift(linkToSource)
+    if (shortcutToSource) {
+      dataNodes.unshift(shortcutToSource)
     }
 
     // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
     for (const dataNode of dataNodes) {
       // if (!nodeType) nodeType = node.constructor.name
 
-      if (linkToSource && !includedIds.has(dataNode.parentId)) {
-        linkToSource.children.push(dataNode.id)
+      if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
+        shortcutToSource.children.push(dataNode.id)
       }
       for (const childId of dataNode.children) {
-        // If this child is in another cluster, add a dummy leaf node -> clickable link to that cluster
+        // If this child is in another cluster, add a dummy leaf node -> clickable link/shortcut to that cluster
         if (!dataNodes.some(dataNode => dataNode.id === childId)) {
           const childNode = dataNode.getSameType(childId)
 
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
-          const linkOnwards = new ArtificialNode({
+          const shortcutNode = new ShortcutNode({
             id: childId,
             children: [],
             parentId: dataNode.id
           // Use the name, mark etc of the clusterNode the target node is inside
           }, childNode.clusterId ? childNode : childNode.clusterNode)
 
-          dataNodes.push(linkOnwards)
+          dataNodes.push(shortcutNode)
         }
       }
     }
@@ -111,40 +117,54 @@ class Layout {
     }
   }
 
-  processHierarchy ({ collapseNodes = false } = {}) {
-    this.processBetweenData(!collapseNodes)
-    this.scale.calculateScaleFactor()
-    if (collapseNodes) {
+  processHierarchy (settingsOverride) {
+    const settings = settingsOverride || this.settings
+
+    this.processBetweenData(!settings.collapseNodes)
+    this.updateScale()
+    if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
-      this.scale.calculateScaleFactor()
+      this.updateScale()
+    }
+  }
+
+  updateScale () {
+    this.scale.calculatePreScaleFactor()
+    this.updateStems()
+    this.scale.calculateScaleFactor()
+    this.updateStems()
+  }
+
+  updateStems () {
+    for (const layoutNode of this.layoutNodes.values()) {
+      layoutNode.stem.update()
     }
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
-  generate (settings) {
-    this.processHierarchy(settings)
+  generate (settingsOverride) {
+    this.processHierarchy(settingsOverride)
     this.positioning.formClumpPyramid()
     this.positioning.placeNodes()
   }
 
   collapseNodes () {
     const { layoutNodes, scale } = this
-    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
     // TODO: stop relying on coincidental Map.keys() order
+    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
+
+    // Set an upper limit so not too much gets squashed
+    // Else it's possible for everything to be squashed, making drilling down impossible/infinite
+    const squashingLimit = layoutNodes.size - 3
+    if (squashingLimit <= 1) return
+
+    let squashedCounter = 0
     const hierarchyOrder = []
-    for (const layoutNode of topLayoutNodes) {
-      squash(layoutNode)
-    }
-    const newLayoutNodes = new Map()
-    for (const id of hierarchyOrder) {
-      newLayoutNodes.set(id, layoutNodes.get(id))
-    }
-    this.layoutNodes = newLayoutNodes
 
     // TODO: optimize
-    function squash (layoutNode, parent) {
-      // Skip ArtificialNodes
+    const squash = (layoutNode, parent) => {
+      // Skip ArtificialNodes (including ShortcutNodes)
       if (layoutNode instanceof ArtificialNode) return layoutNode
 
       // Squash children first
@@ -153,11 +173,27 @@ class Layout {
       const collapsedChildren = []
       for (const childId of layoutNode.children) {
         const child = layoutNodes.get(childId)
-        const squashed = squash(child, layoutNode)
-        if (isBelowThreshold(child.node)) {
+
+        // Recurse, potentially squashing descendents, unless we've already hit the limit
+        const squashed = squashedCounter <= squashingLimit ? squash(child, layoutNode) : null
+
+        if (isBelowThreshold(child)) {
           squashed ? collapsedChildren.push(squashed) : childrenBelowThreshold.push(child)
         } else {
           childrenAboveThreshold.push(child)
+
+          // Children squashed from above will add a collapsed node to the layout
+          if (squashed) squashedCounter--
+        }
+      }
+
+      if (squashedCounter + childrenBelowThreshold.length > squashingLimit) {
+        // We've squashed too many, unsquash the largest first
+        childrenBelowThreshold.sort((a, b) => a.getTotalTime() - b.getTotalTime())
+
+        while (childrenBelowThreshold.length && squashedCounter + childrenBelowThreshold.length > squashingLimit) {
+          const largestSquashedHere = childrenBelowThreshold.pop()
+          childrenAboveThreshold.push(largestSquashedHere)
         }
       }
 
@@ -168,19 +204,25 @@ class Layout {
           childToCollapse.set(layoutNode.id, collapsedChild)
         }
       }
-      const collapsibleChildren = childrenBelowThreshold.concat(flatMapDeep(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
-      const grandChildren = flatMapDeep(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
+      const collapsibleChildren = childrenBelowThreshold.concat(arrayFlatten(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
+      const grandChildren = arrayFlatten(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
       let combinedSelfCollapse
       let combinedChildrenCollapse
-      const selfBelowThreshold = isBelowThreshold(layoutNode.node)
+      const selfBelowThreshold = isBelowThreshold(layoutNode)
       const selfTopNode = topLayoutNodes.includes(layoutNode)
       if (selfBelowThreshold && collapsibleChildren.length && !selfTopNode) {
         // Combine children and self
         combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
+
+        // Count squashed children at this level, from the level above has been counted already when recursing up the tree
+        squashedCounter += childrenBelowThreshold.length
       } else if (collapsibleChildren.length >= 2) {
         // Combine children only
         combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
         layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
+
+        // Minus one because collapse doesn't contain this node and adds collapsedLayoutNode to layout
+        squashedCounter += childrenBelowThreshold.length
       }
 
       let nodesToIndex
@@ -203,7 +245,17 @@ class Layout {
       }
 
       return combinedSelfCollapse || null
+    } // End of squash()
+
+    for (const layoutNode of topLayoutNodes) {
+      squash(layoutNode)
     }
+    const newLayoutNodes = new Map()
+    for (const id of hierarchyOrder) {
+      newLayoutNodes.set(id, layoutNodes.get(id))
+    }
+    this.layoutNodes = newLayoutNodes
+
     function indexLayoutNode (collapsedLayoutNode) {
       layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
       for (const childId of collapsedLayoutNode.children) {
@@ -215,13 +267,8 @@ class Layout {
       }
     }
 
-    function isBelowThreshold (dataNode) {
-      return (dataNode.getWithinTime() + dataNode.getBetweenTime()) * scale.scaleFactor < 10
-    }
-
-    // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
-    function flatMapDeep (value) {
-      return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
+    function isBelowThreshold (layoutNode) {
+      return layoutNode.getTotalTime() * scale.sizeIndependentScale < 10
     }
   }
 }
@@ -241,6 +288,9 @@ class LayoutNode {
   }
   getWithinTime () {
     return this.node.getWithinTime()
+  }
+  getTotalTime () {
+    return this.getBetweenTime() + this.getWithinTime()
   }
   validateStat (...args) {
     return this.node.validateStat(...args)
@@ -295,14 +345,10 @@ class ArtificialNode extends ClusterNode {
     super(nodeProperties, nodeToCopy.dataSet)
 
     const defaultProperties = {
-      replacesIds: [this.id],
       nodeType: 'AggregateNode'
     }
     const node = Object.assign(defaultProperties, rawNode)
 
-    this.linkTo = nodeToCopy
-
-    this.replacesIds = this.replacesIds
     this.nodeType = node.nodeType
   }
   getSameType (nodeId) {
@@ -330,6 +376,13 @@ class ArtificialNode extends ClusterNode {
         this.setDecimal(value, classification, position, label)
       }
     }
+  }
+}
+
+class ShortcutNode extends ArtificialNode {
+  constructor (rawNode, nodeToCopy) {
+    super(rawNode, nodeToCopy)
+    this.shortcutTo = nodeToCopy
   }
 }
 

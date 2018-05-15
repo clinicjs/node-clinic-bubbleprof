@@ -18,33 +18,41 @@ class Stem {
     this.leaves = {
       ids: []
     }
-    this.ownBetween = layoutNode.getBetweenTime()
-    this.ownDiameter = radiusFromCircumference(layoutNode.getWithinTime()) * 2
+    this.raw = {
+      ownBetween: layoutNode.getBetweenTime(),
+      ownDiameter: radiusFromCircumference(layoutNode.getWithinTime()) * 2
+    }
 
     for (const ancestorId of this.ancestors.ids) {
       const ancestorStem = layout.layoutNodes.get(ancestorId).stem
-      this.ancestors.totalBetween += ancestorStem.ownBetween
-      this.ancestors.totalDiameter += ancestorStem.ownDiameter
+      this.ancestors.totalBetween += ancestorStem.raw.ownBetween
+      this.ancestors.totalDiameter += ancestorStem.raw.ownDiameter
       if (!layoutNode.children.length) {
         ancestorStem.leaves.ids.push(layoutNode.id)
       }
     }
+    this.update()
   }
-  getScaled (scale) {
-    const ownBetween = (this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth + scale.getLineLength(this.ownBetween)
-    const ownDiameter = scale.getLineLength(this.ownDiameter)
-    return {
-      ownBetween: validateNumber(ownBetween, this.getValidationMessage()),
-      ownDiameter: validateNumber(ownDiameter, this.getValidationMessage())
+  update () {
+    if (!this.lengths) {
+      const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
+      const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.raw.ownBetween + this.raw.ownDiameter
+      this.lengths = {
+        absolute: validateNumber(absolute, this.getValidationMessage()),
+        scalable: validateNumber(scalable, this.getValidationMessage()),
+        rawTotal: absolute + scalable
+      }
     }
-  }
-  getTotalStemLength () {
-    const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
-    const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.ownBetween + this.ownDiameter
-    return {
-      absolute: validateNumber(absolute, this.getValidationMessage()),
-      scalable: validateNumber(scalable, this.getValidationMessage()),
-      combined: absolute + scalable
+    if (this.layout.scale.prescaleFactor) {
+      this.lengths.prescaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.prescaleFactor)
+    }
+    if (this.layout.scale.scaleFactor) {
+      const { settings, scale } = this.layout
+      this.scaled = {
+        ownBetween: (settings.labelMinimumSpace * 2) + settings.lineWidth + scale.getLineLength(this.raw.ownBetween),
+        ownDiameter: scale.getLineLength(this.raw.ownDiameter)
+      }
+      this.lengths.scaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.scaleFactor)
     }
   }
   getValidationMessage () {
@@ -53,8 +61,12 @@ class Stem {
     leaves [${this.leaves.ids.join(', ')}], length ${this.leaves.ids.length};
     `
   }
+  pickMostAccurateTotal () {
+    const { rawTotal, prescaledTotal, scaledTotal } = this.lengths
+    return scaledTotal || prescaledTotal || rawTotal
+  }
   static pickLeavesByLongest (layoutNodes) {
-    const byLongest = (leafA, leafB) => leafB.stem.getTotalStemLength().combined - leafA.stem.getTotalStemLength().combined
+    const byLongest = (leafA, leafB) => leafB.stem.pickMostAccurateTotal() - leafA.stem.pickMostAccurateTotal()
     const byLeafOnly = layoutNode => !layoutNode.children.length
     return [...layoutNodes.values()].filter(byLeafOnly).sort(byLongest)
   }

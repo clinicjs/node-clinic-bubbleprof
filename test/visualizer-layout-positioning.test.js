@@ -26,23 +26,23 @@ test('Visualizer layout - positioning - mock topology', function (t) {
   t.ok(layout)
 
   t.deepEqual(dataSet.clusterNodes.get(1).children, [2, 9])
-  t.equal(layout.layoutNodes.get(1).stem.getTotalStemLength(layout.scale).scalable, 1)
+  t.equal(layout.layoutNodes.get(1).stem.lengths.scalable, 1)
   t.deepEqual(dataSet.clusterNodes.get(2).children, [8, 6, 3])
-  t.equal(layout.layoutNodes.get(2).stem.getTotalStemLength(layout.scale).scalable, 1 + 1)
+  t.equal(layout.layoutNodes.get(2).stem.lengths.scalable, 1 + 1)
   t.deepEqual(dataSet.clusterNodes.get(8).children, [])
-  t.equal(layout.layoutNodes.get(8).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 100)
+  t.equal(layout.layoutNodes.get(8).stem.lengths.scalable, 1 + 1 + 100)
   t.deepEqual(dataSet.clusterNodes.get(6).children, [7])
-  t.equal(layout.layoutNodes.get(6).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1)
+  t.equal(layout.layoutNodes.get(6).stem.lengths.scalable, 1 + 1 + 1)
   t.deepEqual(dataSet.clusterNodes.get(7).children, [])
-  t.equal(layout.layoutNodes.get(7).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 200)
+  t.equal(layout.layoutNodes.get(7).stem.lengths.scalable, 1 + 1 + 1 + 200)
   t.deepEqual(dataSet.clusterNodes.get(3).children, [5, 4])
-  t.equal(layout.layoutNodes.get(3).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1)
+  t.equal(layout.layoutNodes.get(3).stem.lengths.scalable, 1 + 1 + 1)
   t.deepEqual(dataSet.clusterNodes.get(5).children, [])
-  t.equal(layout.layoutNodes.get(5).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 250)
+  t.equal(layout.layoutNodes.get(5).stem.lengths.scalable, 1 + 1 + 1 + 250)
   t.deepEqual(dataSet.clusterNodes.get(4).children, [])
-  t.equal(layout.layoutNodes.get(4).stem.getTotalStemLength(layout.scale).scalable, 1 + 1 + 1 + 150)
+  t.equal(layout.layoutNodes.get(4).stem.lengths.scalable, 1 + 1 + 1 + 150)
   t.deepEqual(dataSet.clusterNodes.get(9).children, [])
-  t.equal(layout.layoutNodes.get(9).stem.getTotalStemLength(layout.scale).scalable, 1 + 50)
+  t.equal(layout.layoutNodes.get(9).stem.lengths.scalable, 1 + 50)
 
   t.end()
 })
@@ -169,16 +169,17 @@ test('Visualizer layout - positioning - debugInspect', function (t) {
   ]
 
   const dataSet = loadData(mockTopology(topology))
-  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0, svgDistanceFromEdge: 0 })
 
   const positioning = layout.positioning
+  t.equal(layout.scale.scaleFactor, 3)
   t.deepEqual(positioning.debugInspect(), [
     '',
-    '1.9                  ---------- 50',
-    '1.2.3.4.12           ------------------------------ 150',
-    '1.2.3.5.11.13.14.15  -------------------------------------------------- 250',
-    '1.2.6.7.10           ---------------------------------------- 200',
-    '1.8                  -------------------- 100'
+    '1.9                  ---------- 150',
+    '1.2.3.4.12           ------------------------------ 450',
+    '1.2.3.5.11.13.14.15  -------------------------------------------------- 750',
+    '1.2.6.7.10           ---------------------------------------- 600',
+    '1.8                  -------------------- 300'
   ].join('\n'))
 
   t.end()
@@ -195,7 +196,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
     ['1.2.3.7.8.15', 250],
     ['1.2.3.7.8.17', 150]
   ]
-
+  const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
   const dataSet = loadData(mockTopology(topology))
@@ -206,9 +207,8 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   const positioning = layout.positioning
   positioning.formClumpPyramid()
 
-  // TODO: Figure out why this changed
-  // const expectedOrder = [16, 13, 18, 6, 14, 9, 15, 17]
-  // t.deepEqual(positioning.order, expectedOrder)
+  const expectedOrder = topologyToOrderedLeaves(expectedTopology)
+  t.deepEqual(positioning.order, expectedOrder)
 
   t.end()
 })

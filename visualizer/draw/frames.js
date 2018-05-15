@@ -2,6 +2,10 @@
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
+const arrayFlatten = require('array-flatten')
+
+// Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
+// TODO: this duplicates a function in layout/positioning.js, use shared helper functions
 
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
 // TODO: this duplicates a function in layout/positioning.js, use shared helper functions
@@ -23,7 +27,7 @@ class Frames extends HtmlContent {
     this.d3Element.append('span')
       .classed('close', true)
       .on('click', () => {
-        this.ui.collapseFooter(true)
+        this.parentContent.collapseClose()
       })
 
     this.d3Heading = this.d3ContentWrapper.append('div')
@@ -41,7 +45,7 @@ class Frames extends HtmlContent {
   reset () {
     this.node = null
     this.framesByNode = []
-    this.ui.collapseFooter(true)
+    this.parentContent.collapseClose()
   }
 
   setData (aggregateNode) {
@@ -50,7 +54,7 @@ class Frames extends HtmlContent {
 
     this.framesByNode = []
     groupFrames(this.node, this.framesByNode)
-    this.ui.collapseFooter(false)
+    this.parentContent.collapseOpen()
   }
 
   draw () {
@@ -60,7 +64,7 @@ class Frames extends HtmlContent {
 
     if (this.node) {
       this.drawFrames(this.framesByNode, this.d3ContentWrapper)
-      this.d3Heading.text(`Showing async stack trace from async_hook "${this.node.name}"`)
+      this.d3Heading.text(`Showing async stack trace from async operation "${this.node.name}"`)
     } else {
       this.d3Heading.text(`
         Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
@@ -92,7 +96,7 @@ class Frames extends HtmlContent {
       if (frames.dataNode && frames.dataNode.isRoot) {
         d3EmptyFrameItem.text('This is the root node, representing the starting point of your application. No stack frames are available.')
       } else {
-        d3EmptyFrameItem.text('No frames are available for this async_hook. It could be from a native module, or something not integrated with the async_hooks API.')
+        d3EmptyFrameItem.text('No frames are available for this async operation. It could be from a native module, or something not integrated with the Async Hooks API.')
       }
     }
     for (const frame of frames) {
@@ -121,18 +125,16 @@ class Frames extends HtmlContent {
               })
           }
 
-          header += `${flatMapDeep(frame).length} frames from `
-          header += `${isThisNode ? 'this async_hook' : `previous async_hook "${frame.dataNode.name}"`}`
+          header += `${arrayFlatten(frame).length} frames from `
+          header += `${isThisNode ? 'this async operation' : `previous async operation "${frame.dataNode.name}"`}`
           header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
         } else if (frame.party) {
           d3Group.classed(frame.party[0], true)
             .classed('collapsed', frame.party[0] !== 'user')
           header += `${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame.party[1]}`
-          d3SubCollapseControl.html(header)
         }
 
-        d3SubCollapseControl
-          .html(header)
+        d3SubCollapseControl.html(header)
           .on('click', () => {
             d3Group.classed('collapsed', !d3Group.classed('collapsed'))
           })

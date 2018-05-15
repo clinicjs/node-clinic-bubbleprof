@@ -50,3 +50,13 @@ test('basis server aggregates HTTPPARSER', function (t) {
     t.end()
   })
 })
+
+test('latency server has http.connection.end cluster', function (t) {
+  runServer('latency', function (err, nodes) {
+    if (err) return t.ifError(err)
+
+    const endName = nodes.some(c => c.name === 'http.connection.end')
+    t.ok(endName, 'has http.connection.end name')
+    t.end()
+  })
+})

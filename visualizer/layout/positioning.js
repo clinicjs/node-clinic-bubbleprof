@@ -2,11 +2,9 @@
 
 const { pickLeavesByLongest } = require('./stems.js')
 const NodeAllocation = require('./node-allocation.js')
+const arrayFlatten = require('array-flatten')
 
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
-function flatMapDeep (value) {
-  return Array.isArray(value) ? [].concat(...value.map(x => flatMapDeep(x))) : value
-}
 
 class Positioning {
   constructor (layout) {
@@ -27,11 +25,11 @@ class Positioning {
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
     const leavesByLongest = pickLeavesByLongest(this.layoutNodes, this.layout)
-    const longestStemLength = leavesByLongest[0].stem.getTotalStemLength().combined
+    const longestStemLength = leavesByLongest[0].stem.pickMostAccurateTotal()
     const arrangedLeaves = leavesByLongest.sort(intoOrder)
 
     const rows = arrangedLeaves.map(leaf => {
-      const magnitude = leaf.stem.getTotalStemLength(this.layout.scale).combined
+      const magnitude = leaf.stem.pickMostAccurateTotal()
       const units = parseInt((magnitude / longestStemLength) * 50)
       const lengthAsDashes = new Array(units).fill('-').join('')
       const nodeGenealogy = [...leaf.stem.ancestors.ids, leaf.id].join('.')
@@ -172,7 +170,7 @@ class ClumpPyramid {
       this.leavesOnSide[updateSide]++
     }
 
-    this.order = flatMapDeep(roots.map(rootId => flatMapDeep(this.clumpById[rootId])))
+    this.order = arrayFlatten(roots.map(rootId => arrayFlatten(this.clumpById[rootId])))
   }
 }
 

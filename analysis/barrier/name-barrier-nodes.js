@@ -33,7 +33,7 @@ class NameBarrierNodes extends stream.Transform {
   _getTypes (aggregateNode) {
     let types = this._types.get(aggregateNode)
     if (types) return types
-    types = groupType(aggregateNode)
+    types = groupType(aggregateNode, this.systemInfo)
     this._types.set(aggregateNode, types)
     return types
   }
@@ -176,7 +176,21 @@ function isExternal (frames, sysInfo) {
   return frames.every(frame => frame.isExternal(sysInfo))
 }
 
-function groupType (node) {
+function inferType (node, sysInfo) {
+  for (let i = 0; i < node.frames.length; i++) {
+    const f = node.frames.get(i)
+    if (!f.isNodecore(sysInfo)) return null
+    if (f.typeName === 'ServerResponse' && f.functionName === 'write') {
+      return ['connection', 'write']
+    }
+    if (f.typeName === 'ServerResponse' && f.functionName === 'end') {
+      return ['connection', 'end']
+    }
+  }
+  return null
+}
+
+function groupType (node, sysInfo) {
   if (!node || !node.type) return ['root']
   switch (node.type) {
     case 'PROMISE':
@@ -188,11 +202,11 @@ function groupType (node) {
     case 'WRITEWRAP':
       return ['connection', 'write']
     case 'TickObject':
-      return ['nextTick']
+      return inferType(node, sysInfo) || ['nextTick']
     case 'Immediate':
       return ['setImmediate']
     case 'Timeout':
-      return ['timeout']
+      return inferType(node, sysInfo) || ['timeout']
     case 'TCPWRAP':
     case 'PIPEWRAP':
       return ['connection', 'create']

@@ -8,6 +8,14 @@ const LineCoordinates = require('../visualizer/layout/line-coordinates.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
+const settings = {
+  svgWidth: 1000,
+  svgHeight: 1000,
+  labelMinimumSpace: 0,
+  lineWidth: 0,
+  svgDistanceFromEdge: 30
+}
+
 test('Visualizer layout - node allocation - all assigned leaf units are proportional to parent and add up to 1', function (t) {
   const topology = [
     ['1.2', 100 - 1],
@@ -17,7 +25,7 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.generate()
 
@@ -52,7 +60,7 @@ test('Visualizer layout - node allocation - three-sided space segments depend on
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.generate()
 
@@ -79,7 +87,7 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.generate()
 
@@ -114,7 +122,7 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.generate()
 
@@ -143,7 +151,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.generate()
 
@@ -155,7 +163,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
   const distanceById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
@@ -220,7 +228,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
   const subset = [6, 7, 8].map(nodeId => dataSet.clusterNodes.get(nodeId))
-  const layout = new Layout({ dataNodes: subset }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: subset }, settings)
   t.ok(layout)
   layout.generate()
 
@@ -232,7 +240,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
 
   const distanceById = {}
@@ -275,7 +283,7 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
@@ -288,7 +296,7 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
 
   const distanceById = {}
@@ -330,7 +338,7 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   ]
   const dataSet = loadData(mockTopology(topology))
   t.ok(dataSet)
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, { labelMinimumSpace: 0, lineWidth: 0 })
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
@@ -343,7 +351,7 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   const scaledStemById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     positionById[layoutNode.id] = layoutNode.position
-    scaledStemById[layoutNode.id] = layoutNode.stem.getScaled(layout.scale)
+    scaledStemById[layoutNode.id] = layoutNode.stem.scaled
   }
 
   const distanceById = {}

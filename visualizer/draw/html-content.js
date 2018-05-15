@@ -12,13 +12,14 @@ class HtmlContent {
     const defaultProperties = {
       id: null,
       name: null,
+      hidden: false,
       htmlElementType: 'div',
       htmlContent: '',
       classNames: ''
     }
     this.contentProperties = Object.assign(defaultProperties, contentProperties)
 
-    this.isHidden = false
+    this.isHidden = this.contentProperties.hidden
 
     this.collapseControl = null
     this.loadingAnimation = null
@@ -39,6 +40,30 @@ class HtmlContent {
   addCollapseControl (collapsedByDefault = false, contentProperties = {}) {
     this.collapseControl = new CollapseControl(this, contentProperties, collapsedByDefault)
     return this.collapseControl
+  }
+
+  collapseOpen () {
+    this.collapseChange(false)
+  }
+
+  collapseClose () {
+    this.collapseChange(true)
+  }
+
+  collapseToggle () {
+    this.collapseChange()
+  }
+
+  collapseChange (closeBool) {
+    if (!this.collapseControl) return
+    if (typeof closeBool === 'undefined') closeBool = !this.collapseControl.isCollapsed
+
+    // If this is opening and has a collapseEvent, close everything else with same event
+    const collapseEvent = this.collapseControl.collapseEvent
+    if (!closeBool && collapseEvent) this.ui.collapseEvent(collapseEvent)
+
+    this.collapseControl.isCollapsed = closeBool
+    this.draw()
   }
 
   addLoadingAnimation (contentProperties = {}) {
@@ -64,6 +89,16 @@ class HtmlContent {
       this.collapseControl.initializeElements()
       this.d3ContentWrapper = this.d3Element.append('div')
         .classed('collapsible-content-wrapper', true)
+
+      if (id) this.d3ContentWrapper.attr('id', `${id}-inner`)
+
+      if (this.collapseControl.closeIcon) {
+        this.d3ContentWrapper.insert('span', ':first-child')
+          .html(this.collapseControl.closeIcon)
+          .classed('close', true)
+          .classed('portrait-only', this.collapseControl.portraitOnly)
+          .on('click', () => this.collapseClose())
+      }
     }
 
     if (this.loadingAnimation) this.loadingAnimation.initializeElements()
@@ -95,24 +130,33 @@ class CollapseControl extends HtmlContent {
   constructor (parentContent, contentProperties, isCollapsed) {
     super(parentContent, contentProperties)
     this.isCollapsed = isCollapsed
+    this.closeIcon = contentProperties.closeIcon || null
+    this.collapseEvent = contentProperties.collapseEvent || null
+
+    this.portraitOnly = contentProperties.portraitOnly || false
+    this.collapseClassName = this.portraitOnly ? 'portrait-collapsed' : 'collapsed'
   }
   initializeElements () {
     super.initializeElements()
 
     this.d3Element.classed('collapse-control', true)
-    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
+    this.parentContent.d3Element.classed(this.collapseClassName, this.isCollapsed)
+
+    if (this.portraitOnly) this.d3Element.classed('portrait-only', true)
+
+    if (this.collapseEvent) {
+      this.ui.on(`collapse-${this.collapseEvent}`, (closeBool) => {
+        this.parentContent.collapseClose()
+      })
+    }
 
     this.d3Element.on('click', () => {
-      this.toggleCollapse()
-      this.draw()
+      this.parentContent.collapseToggle()
     })
-  }
-  toggleCollapse () {
-    this.isCollapsed = !this.isCollapsed
   }
   draw () {
     super.draw()
-    this.parentContent.d3Element.classed('collapsed', this.isCollapsed)
+    this.parentContent.d3Element.classed(this.collapseClassName, this.isCollapsed)
   }
 }
 

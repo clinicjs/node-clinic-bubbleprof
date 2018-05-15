@@ -15,12 +15,12 @@ setTimeout(() => {
   window.data = dataSet
   console.log('data is exposed on window.data')
 
-  const layout = generateLayout(dataSet, Object.assign({ collapseNodes: true }, ui.settings))
+  const layout = generateLayout(dataSet, Object.assign({ collapseNodes: true }, ui.getSettingsForLayout()))
   window.layout = layout
   console.log('layout is exposed on window.layout')
 
   /* istanbul ignore next */
-  ui.setData(dataSet, layout)
+  ui.setData(layout)
   /* istanbul ignore next */
   ui.emit('complete')
 })

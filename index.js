@@ -147,6 +147,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     const outputFile = streamTemplate`
       <!DOCTYPE html>
       <meta charset="utf8">
+      <meta name="viewport" content="width=device-width">
       <title>Clinic Bubbleprof</title>
       <link rel="shortcut icon" type="image/png" href="${nearFormFaviconBase64}">
       <style>${styleFile}</style>

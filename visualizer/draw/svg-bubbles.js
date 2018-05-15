@@ -5,14 +5,6 @@ const SvgContentGroup = require('./svg-content.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 
 class Bubbles extends SvgContentGroup {
-  constructor (svgContainer, contentProperties) {
-    super(svgContainer, contentProperties)
-
-    this.ui.on('setData', () => {
-      this.initializeFromData([...this.ui.layout.layoutNodes.values()])
-    })
-  }
-
   isBelowLabelThreshold (d) {
     return this.getRadius(d) < this.ui.settings.labelMinimumSpace
   }
@@ -29,9 +21,20 @@ class Bubbles extends SvgContentGroup {
     return length < this.ui.settings.labelMinimumSpace
   }
 
-  initializeFromData (dataArray) {
-    super.initializeFromData(dataArray)
+  setData () {
+    const dataArray = [...this.ui.layout.layoutNodes.values()]
+    const identfier = '.bubbles-group .bubble-wrapper'
+    super.setData(dataArray, identfier)
 
+    if (this.typeDonutsMap) {
+      for (const [nodeId, donutWrapper] of this.typeDonutsMap) {
+        const arcData = defineArcData(this.ui.layout.layoutNodes.get(nodeId).node)
+        donutWrapper.selectAll('.donut-segment').data(arcData)
+      }
+    }
+  }
+
+  initializeFromData () {
     this.d3Element.classed('bubbles-group', true)
 
     this.d3OuterCircles = null
@@ -41,27 +44,23 @@ class Bubbles extends SvgContentGroup {
     this.typeDonutsMap = null
 
     this.d3Bubbles = this.d3Enter.append('g')
-      // In rare cases, there is an unavoidable overlap of bubbles. There's no svg z-index
-      // so we sort the appending such that smallest bubbles stack above larger bubbles
-      .sort((a, b) => this.getRadius(b) - this.getRadius(a))
-
       .attr('id', d => `${d.node.constructor.name}-${d.id}`)
       .attr('class', d => `party-${d.node.mark.get('party')}`)
       .classed('bubble-wrapper', true)
       .classed('below-threshold-1', (d) => this.isBelowLabelThreshold(d))
       .classed('below-threshold-2', (d) => this.isBelowStrokeThreshold(d))
       .classed('below-threshold-3', (d) => this.isBelowVisibilityThreshold(d))
-      .on('mouseover', d => this.ui.emit('hover', d))
-      .on('mouseout', () => this.ui.emit('hover', null))
+      .on('mouseover', d => this.ui.highlightNode(d))
+      .on('mouseout', () => this.ui.highlightNode(null))
       .on('click', (d, e) => {
         d3.event.stopPropagation()
         this.ui.selectNode(d)
       })
 
     this.addCircles()
-    this.addLabels()
-
     if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
+
+    this.addLabels()
   }
 
   getNodePosition (layoutNode) {
@@ -88,25 +87,27 @@ class Bubbles extends SvgContentGroup {
     })
   }
 
-  getTransformPosition (d, xOffset = 0, yOffset = 0) {
+  getTransformPosition (d, backwardsOffset = 0) {
     const position = this.getNodePosition(d)
     let { x, y } = position
     const connection = this.getInboundConnection(d)
 
-    if (this.isBelowVisibilityThreshold(d) && connection && this.ui.layout.layoutNodes.has(connection.sourceNode.id)) {
+    const isBelowBackwardsThreshold = d.children.length ? this.isBelowVisibilityThreshold(d) : this.isBelowLabelThreshold(d)
+
+    if (isBelowBackwardsThreshold && connection && this.ui.layout.layoutNodes.has(connection.sourceNode.id)) {
       // Move it back to the mid point of the gap
       const inboundLine = this.getInboundLine(d)
       const backwardsLine = new LineCoordinates({
         x1: x,
         y1: y,
-        length: this.ui.settings.labelMinimumSpace / 2,
+        length: this.ui.settings.labelMinimumSpace / 2 + backwardsOffset,
         degrees: LineCoordinates.enforceDegreesRange(inboundLine.degrees - 180)
       })
       x = backwardsLine.x2
       y = backwardsLine.y2
     }
 
-    return `translate(${x + xOffset},${y + yOffset})`
+    return `translate(${x},${y})`
   }
 
   addCircles () {
@@ -144,18 +145,9 @@ class Bubbles extends SvgContentGroup {
       const donutWrapper = bubble.append('g')
         .classed('bubble-donut', true)
 
-      this.typeDonutsMap.set(d, donutWrapper)
+      this.typeDonutsMap.set(d.id, donutWrapper)
 
-      const decimalsAsArray = []
-      for (const label of d.node.decimals.typeCategory.within.keys()) {
-        const decimal = d.node.getDecimal('typeCategory', 'within', label)
-        decimalsAsArray.push([label, decimal])
-      }
-
-      // Creates array of data objects like:
-      // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
-      const arcData = d3.pie()
-        .value((arcDatum) => arcDatum[1])(decimalsAsArray)
+      const arcData = defineArcData(d.node)
 
       donutWrapper.selectAll('.donut-segment')
         .data(arcData)
@@ -169,16 +161,16 @@ class Bubbles extends SvgContentGroup {
     })
   }
   draw () {
-    this.d3OuterCircles.attr('r', d => this.getRadius(d))
-
-    this.d3InnerCircles.attr('r', d => {
-      // If below threshold, this will be an invisible mouseover target
-      return this.isBelowStrokeThreshold(d) ? this.ui.settings.labelMinimumSpace : this.getRadius(d) - this.ui.settings.strokePadding
-    })
+    const {
+      labelMinimumSpace,
+      strokePadding,
+      lineWidth
+    } = this.ui.settings
 
     if (this.typeDonutsMap) {
-      for (const [d, donutWrapper] of this.typeDonutsMap) {
-        const donutRadius = this.getRadius(d) - this.ui.settings.strokePadding
+      for (const [id, donutWrapper] of this.typeDonutsMap) {
+        const d = this.ui.layout.layoutNodes.get(id)
+        const donutRadius = this.getRadius(d) - strokePadding
 
         const arcMaker = d3.arc()
           .innerRadius(donutRadius)
@@ -188,66 +180,108 @@ class Bubbles extends SvgContentGroup {
           .attr('d', arcDatum => arcMaker(arcDatum))
       }
     }
-    this.d3Bubbles.attr('transform', d => this.getTransformPosition(d))
 
-    this.d3TimeLabels.text(d => {
-      const withinTime = this.ui.formatNumber(d.node.getWithinTime())
-      const withMs = withinTime + (this.getRadius(d) < this.ui.settings.labelMinimumSpace ? '' : '\u2009ms')
-      return withMs
-    })
+    this.d3Bubbles.each((d, i, nodes) => {
+      const d3BubbleWrapper = d3.select(nodes[i])
 
-    this.d3NameLabels.each((d, i, nodes) => {
-      const d3NameLabel = d3.select(nodes[i])
+      const d3OuterCircle = d3BubbleWrapper.select('.bubble-outer')
+      const d3InnerCircle = d3BubbleWrapper.select('.bubble-inner')
+      const d3NameLabel = d3BubbleWrapper.select('.name-label')
+      const d3TimeLabel = d3BubbleWrapper.select('.time-label')
+
+      // Establish relative size and inbound angle for this bubble
       let inboundDegrees = 90
-      let useLongerLabel = true
+      let useLongerLabel = !this.isBelowLabelThreshold(d)
       let useMicroLabel = false
+      let hasLongInboundLine = false
 
       if (d.parent) {
         const connection = this.getInboundConnection(d)
         const length = connection.getVisibleLineLength()
-        const hasLongInboundLine = this.hasLongInboundLine(length)
-
-        useLongerLabel = !this.isBelowLabelThreshold(d) || hasLongInboundLine
+        hasLongInboundLine = this.hasLongInboundLine(length)
+        useLongerLabel = useLongerLabel || hasLongInboundLine
         useMicroLabel = !useLongerLabel && this.hasShortInboundLine(length)
-
-        d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
         inboundDegrees = this.getInboundLine(d).degrees
       }
+      const labelPointsOnwards = !useLongerLabel && !d.children.length && (inboundDegrees < 45 || inboundDegrees > 135)
+      const backwardsOffset = labelPointsOnwards ? labelMinimumSpace / 2 + lineWidth : 0
 
-      if (d.name === 'miscellaneous' && !d.parent) {
+      d3NameLabel.classed('above-inbound-line-threshold', hasLongInboundLine)
+      d3BubbleWrapper.attr('transform', this.getTransformPosition(d, backwardsOffset))
+      d3OuterCircle.attr('r', this.getRadius(d))
+      d3InnerCircle.attr('r', this.isBelowStrokeThreshold(d) ? labelMinimumSpace : this.getRadius(d) - strokePadding)
+
+      const withinTime = this.ui.formatNumber(d.node.getWithinTime())
+      const withinTimeMs = withinTime + (this.getRadius(d) < labelMinimumSpace ? '' : '\u2009ms')
+      d3TimeLabel.text(withinTimeMs)
+
+      let smallerLabel = false
+      if (d.node.name === 'miscellaneous' && !d.parent) {
         d3NameLabel.text('Starts here')
       } else if (useLongerLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 4, 21))
       } else if (useMicroLabel) {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 6))
-        d3NameLabel.classed('smaller-label', true)
+        smallerLabel = true
       } else {
         d3NameLabel.text(this.ui.truncateLabel(d.node.name, 1, 9))
       }
+      d3NameLabel.classed('smaller-label', smallerLabel)
 
+      const negateIfOnwardsLabel = labelPointsOnwards ? -1 : 1
       const position = this.getNodePosition(d)
       const lineToLabel = new LineCoordinates({
         x1: position.x,
         y1: position.y,
-        length: this.getRadius(d) + this.ui.settings.lineWidth,
+        length: this.getRadius(d) * negateIfOnwardsLabel + lineWidth - backwardsOffset,
         degrees: LineCoordinates.enforceDegreesRange(inboundDegrees - 180)
       })
 
-      let degrees = lineToLabel.degrees + 90
       let flipDegreesLabel = false
+      let degrees = lineToLabel.degrees
+      let xOffset
+      let yOffset
+      let pointingLeft = false
+      let pointingRight = false
 
-      if (degrees > 90 || degrees < -90) {
-        degrees -= 180
-        flipDegreesLabel = true
+      if (labelPointsOnwards) {
+        // Draw label after bubble, continuing incoming line
+        if (inboundDegrees > 90 || inboundDegrees < -90) {
+          pointingLeft = true
+        } else {
+          pointingRight = true
+          degrees = LineCoordinates.enforceDegreesRange(degrees + 180)
+        }
+      } else {
+        // Draw label above bubble, perpendicular to incoming line
+        degrees += 90
+
+        if (degrees > 90 || degrees < -90) {
+          degrees -= 180
+          flipDegreesLabel = true
+        }
       }
+      d3NameLabel.classed('pointing-right', pointingRight)
+      d3NameLabel.classed('pointing-left', pointingLeft)
       d3NameLabel.classed('flipped-label', flipDegreesLabel)
 
-      const xOffset = lineToLabel.x2 - position.x
-      const yOffset = lineToLabel.y2 - position.y
-
+      xOffset = lineToLabel.x2 - position.x
+      yOffset = lineToLabel.y2 - position.y
       d3NameLabel.attr('transform', `translate(${xOffset}, ${yOffset}) rotate(${degrees})`)
     })
   }
+}
+
+function defineArcData (dataNode) {
+  const decimalsAsArray = []
+  for (const label of dataNode.decimals.typeCategory.within.keys()) {
+    const decimal = dataNode.getDecimal('typeCategory', 'within', label)
+    decimalsAsArray.push([label, decimal])
+  }
+
+  // Creates array of data objects like:
+  // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
+  return d3.pie().value((arcDatum) => arcDatum[1])(decimalsAsArray)
 }
 
 module.exports = Bubbles

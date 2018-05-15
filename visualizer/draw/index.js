@@ -6,6 +6,7 @@ const InteractiveKey = require('./interactive-key.js')
 const SvgContainer = require('./svg-container.js')
 const staticKeyHtml = require('./static-key.js')
 const Frames = require('./frames.js')
+const Lookup = require('./lookup.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -74,26 +75,39 @@ function drawOuterUI () {
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
+  sideBar.addCollapseControl(true, {
+    htmlContent: '<div class="text">Details</div><div class="arrow"></div>',
+    classNames: 'bar',
+    closeIcon: '×',
+    collapseEvent: 'main-overlay',
+    portraitOnly: true
+  })
 
   sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
     htmlContent: staticKeyHtml
   }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
-  /* TODO: Add these back when features are implemented
-  sideBar.addContent(undefined, { classNames: 'side-bar-item' })
-    .addCollapseControl(true, { htmlContent: 'Locate a function or file name <span class="arrow"></span>' })
+  const lookup = sideBar.addContent(Lookup, {
+    classNames: 'side-bar-item',
+    defaultText: 'Enter a file or function name'
+  })
+  lookup.addCollapseControl(true, { htmlContent: 'Locate a stack frame <span class="arrow"></span>' })
+  lookup.addLoadingAnimation({ hidden: true })
 
+  /* TODO: Add this when feature is implemented
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
     .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
   */
 
   // Footer
-  const footerCollapseHTML = '<div class="text">Stack frames to investigate</div><div class="arrow"></div>'
+  const footerCollapseHTML = '<div class="text">Stack frames</div><div class="arrow"></div>'
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
-    classNames: 'bar'
+    classNames: 'bar',
+    collapseEvent: 'main-overlay',
+    closeIcon: '×'
   })
   footer.addContent(Frames, { id: 'frames-panel', classNames: 'side-bar-item' })
 
