@@ -8,14 +8,15 @@ class Lookup extends HtmlContent {
     super(d3Container, contentProperties)
     this.defaultText = contentProperties.defaultText
     this.lastInput = ''
+    this.topmostUI = null
 
-    this.ui.on('setTopmostLayout', (layout) => {
-      const previousNodeIds = this.topmostLayout ? [...this.topmostLayout.layoutNodes.keys()].join() : ''
-      this.topmostLayout = layout
+    this.ui.on('setTopmostUI', (topmostUI) => {
+      const stringifiedKeys = () => [...this.topmostUI.layout.layoutNodes.keys()].join()
 
-      const newNodeIds = [...this.topmostLayout.layoutNodes.keys()].join()
+      const previousNodeIds = this.topmostUI ? stringifiedKeys() : null
+      this.topmostUI = topmostUI
 
-      if (previousNodeIds && previousNodeIds !== newNodeIds) {
+      if (previousNodeIds && previousNodeIds !== stringifiedKeys()) {
         // Re-do any current search against new layout
         this.lastInput = ''
         this.onInput()
@@ -140,19 +141,19 @@ class Lookup extends HtmlContent {
       .classed('suggestion', true)
       .html(textString)
       .on('mouseover', () => {
-        this.ui.highlightNode(layoutNode)
+        this.topmostUI.highlightNode(layoutNode)
       })
       .on('mouseout', () => {
-        this.ui.highlightNode(null)
+        this.topmostUI.highlightNode(null)
       })
       .on('click', () => {
-        const newUI = this.ui.jumpToAggregateNode(dataNode)
+        this.ui.jumpToAggregateNode(dataNode)
       })
   }
 
   deepFramesSearch (inputText) {
     // Do nothing if user manages to enter input before layout has loaded
-    if (!this.topmostLayout) return
+    if (!this.topmostUI || !this.topmostUI.layout) return
 
     const inputStr = inputText.toLowerCase()
 
@@ -250,7 +251,7 @@ class Lookup extends HtmlContent {
       }
     }
 
-    for (const layoutNode of this.topmostLayout.layoutNodes.values()) {
+    for (const layoutNode of this.topmostUI.layout.layoutNodes.values()) {
       searchInNode(layoutNode.node, layoutNode)
     }
     return resultTypesByPriority.reduce((acc, item) => acc.concat(item[1]), [])

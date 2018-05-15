@@ -151,9 +151,9 @@ class BubbleprofUI extends EventEmitter {
 
     // TODO: check that this frees up this and its layout for GC
     if (this.parentUI) {
-      this.parentUI.selectedDataNode = null
       this.getNodeLinkSection().d3Element.remove()
-      this.setTopmostLayout(this.parentUI.layout)
+      this.parentUI.selectedDataNode = null
+      this.parentUI.setAsTopmostUI()
     }
 
     // Close the frames panel if it's open
@@ -167,17 +167,19 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node that may or may not be collapsed
   jumpToNode (dataNode) {
-    const nodeId = dataNode.id
-    if (this.layout.layoutNodes.has(nodeId)) {
-      return this.selectNode(this.layout.layoutNodes.get(nodeId))
+    this.highlightNode(null)
+    const layoutNode = this.findDataNodeInLayout(dataNode)
+    if (layoutNode.node === dataNode) {
+      return this.selectNode(layoutNode)
     } else {
-      const collapsedLayoutNode = this.findCollapsedNode(dataNode)
-      const newUI = this.selectNode(collapsedLayoutNode)
+      // dataNode is inside one or more levels of collapsedNode - recurse
+      const newUI = this.selectNode(layoutNode)
       return newUI.jumpToNode(dataNode)
     }
   }
 
   jumpToAggregateNode (aggregateNode) {
+    this.highlightNode(null)
     const nodeId = aggregateNode.id
     const layoutNodes = this.layout.layoutNodes
     if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node.constructor.name === 'AggregateNode') {
@@ -187,26 +189,36 @@ class BubbleprofUI extends EventEmitter {
     this.clearSublayout()
 
     const newUI = this.originalUI.jumpToNode(aggregateNode.clusterNode)
+
     // If that cluserNode contains only this aggregateNode, it will have been automatically selected already
     if (newUI.selectedDataNode === aggregateNode) return
 
     if (newUI.layout.layoutNodes.has(nodeId)) {
       return newUI.selectNode(newUI.layout.layoutNodes.get(nodeId))
     } else {
-      const collapsedLayoutNode = newUI.findCollapsedNode(aggregateNode)
+      const collapsedLayoutNode = newUI.findCollapsedNodeInLayout(aggregateNode)
       const newerUI = newUI.selectNode(collapsedLayoutNode)
       return newerUI.jumpToNode(aggregateNode)
     }
   }
 
-  findCollapsedNode (dataNode) {
+  findDataNodeInLayout (dataNode) {
     const nodeId = dataNode.id
+    const layoutNodes = this.layout.layoutNodes
+    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
+      return this.layout.layoutNodes.get(nodeId)
+    } else {
+      return this.findCollapsedNodeInLayout(dataNode)
+    }
+  }
+
+  findCollapsedNodeInLayout (dataNode) {
     for (const layoutNode of this.layout.layoutNodes.values()) {
-      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.id === nodeId)) {
+      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node === dataNode)) {
         return layoutNode
       }
     }
-    throw new Error(`Couldn't find id ${nodeId} in ids [${[...this.layout.layoutNodes.keys()].join(', ')}] or their contents`)
+    return false
   }
 
   outputFrames (aggregateNode, layoutNode = null) {
@@ -300,7 +312,7 @@ class BubbleprofUI extends EventEmitter {
     const initialize = !this.layout
 
     this.layout = layout
-    this.setTopmostLayout(layout)
+    this.setAsTopmostUI()
     this.emit('setData')
 
     if (initialize) {
@@ -311,12 +323,12 @@ class BubbleprofUI extends EventEmitter {
     this.emit('svgDraw')
   }
 
-  setTopmostLayout (layout) {
+  setAsTopmostUI () {
     // Allow user to inspect layout object
-    window.layout = layout
+    window.layout = this.layout
 
-    // Allow UI components to interact with whichever layout is in focus
-    this.originalUI.emit('setTopmostLayout', layout)
+    // Allow UI components to interact with whichever ui and layout is in focus
+    this.originalUI.emit('setTopmostUI', this)
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
