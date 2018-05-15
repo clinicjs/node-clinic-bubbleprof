@@ -104,7 +104,9 @@ class BubbleprofUI extends EventEmitter {
       })
 
       newUI.setData(newLayout)
+      return newUI
     }
+    return this
   }
 
   formatNumber (num) {
@@ -116,27 +118,25 @@ class BubbleprofUI extends EventEmitter {
     const dataNode = layoutNode.node
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
-        const targetLayoutNode = this.parentUI.layout.layoutNodes.get(dataNode.shortcutTo.id)
         // TODO: replace with something better designed e.g. a back button for within sublayouts
         this.clearSublayout()
-        this.parentUI.createSubLayout(targetLayoutNode)
-        break
+        return this.originalUI.jumpToNode(dataNode.shortcutTo)
 
       case 'AggregateNode':
         this.outputFrames(dataNode)
-        break
+        return this
 
       case 'ClusterNode':
         if (dataNode.nodes.size === 1) {
           this.outputFrames(dataNode.nodes.values().next().value)
+          return this
         } else {
-          this.createSubLayout(layoutNode)
+          return this.createSubLayout(layoutNode)
         }
-        break
 
-      default:
-        this.createSubLayout(layoutNode)
-        break
+      case 'ArtificialNode':
+        this.deselectNode()
+        return this.createSubLayout(layoutNode)
     }
   }
 
@@ -169,7 +169,7 @@ class BubbleprofUI extends EventEmitter {
     } else {
       const collapsedLayoutNode = this.findCollapsedNode(nodeId)
       const newUI = this.selectNode(collapsedLayoutNode)
-      newUI.jumpToNode(dataNode)
+      return newUI.jumpToNode(dataNode)
     }
   }
 
@@ -198,7 +198,21 @@ class BubbleprofUI extends EventEmitter {
         return layoutNode
       }
     }
-    throw new Error(`Couldn't find id ${nodeId} in ${this.layout}`)
+    throw new Error(`Couldn't find id ${nodeId} in ids [${[...this.layout.layoutNodes.keys()].join(', ')}] or their contents`)
+  }
+
+  clearSublayout () {
+    // TODO: check that this frees up this and its layout for GC
+    this.getNodeLinkSection().d3Element.remove()
+    this.setTopmostLayout(this.parentUI.layout)
+
+    // Close the frames panel if it's open
+    this.originalUI.emit('outputFrames', null)
+  }
+
+  highlightNode (layoutNode = null) {
+    this.highlightedNode = layoutNode
+    this.emit('hover', layoutNode)
   }
 
   outputFrames (aggregateNode) {
