@@ -197,7 +197,7 @@ class BubbleprofUI extends EventEmitter {
 
     const uiWithinClusterNode = this.jumpToNode(aggregateNode.clusterNode)
 
-    // If that cluserNode contains only this aggregateNode, it will have been automatically selected already
+    // If that clusterNode contains only this aggregateNode, it will have been automatically selected already
     if (uiWithinClusterNode.selectedDataNode === aggregateNode) return
 
     if (uiWithinClusterNode.layout.layoutNodes.has(nodeId)) {
