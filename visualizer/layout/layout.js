@@ -368,17 +368,16 @@ class ArtificialNode extends ClusterNode {
     this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
   }
   aggregateDecimals (dataNode, classification, position) {
-    if (dataNode.constructor.name === 'AggregateNode') {
-      /* TODO: fix this
-      const label = otherNode[classification]
-      const newDecimal = otherNode.decimals[classification][position].get(label)
-      this.setDecimal(newDecimal, classification, position, label)
-      */
-    } else {
+    if (dataNode.decimals) {
       const byLabel = dataNode.decimals[classification][position]
       for (const [label, value] of byLabel) {
         this.setDecimal(value, classification, position, label)
       }
+    } else {
+      const label = dataNode[classification]
+      const rawTotals = dataNode.stats.rawTotals
+      const value = rawTotals.async[position] + (position === 'within' ? rawTotals.sync : 0)
+      this.setDecimal(value, classification, position, label)
     }
   }
 }
