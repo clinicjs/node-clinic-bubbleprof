@@ -314,10 +314,9 @@ class CollapsedLayoutNode {
         this.node = new ArtificialNode({
           nodeType: node.constructor.name
         }, node)
-      } else {
-        this.node.aggregateStats(node)
-        this.applyDecimals(node)
       }
+      this.node.aggregateStats(node)
+      this.applyDecimals(node)
     }
   }
   getBetweenTime () {
