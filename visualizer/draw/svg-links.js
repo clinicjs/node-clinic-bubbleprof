@@ -84,8 +84,6 @@ class Links extends SvgContentGroup {
 
       const decimalsArray = getDecimalsArray(targetNode)
 
-      console.log(i, link, nodes[i], decimalsArray, targetNode)
-
       link.append('g')
         .classed('link-segments', true)
         .selectAll('line.link-segment')
