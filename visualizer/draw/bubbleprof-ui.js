@@ -122,7 +122,7 @@ class BubbleprofUI extends EventEmitter {
         // TODO: replace with something better designed e.g. a back button for within sublayouts
         this.clearSublayout()
         this.selectedDataNode = dataNode.shortcutTo
-        return this.originalUI.jumpToNode(dataNode.shortcutTo)
+        return this.jumpToNode(dataNode.shortcutTo)
 
       case 'AggregateNode':
         this.selectedDataNode = dataNode
@@ -169,6 +169,13 @@ class BubbleprofUI extends EventEmitter {
   jumpToNode (dataNode) {
     this.highlightNode(null)
     const layoutNode = this.findDataNodeInLayout(dataNode)
+
+    // If we can't find the node in this sublayout, step up one level and try again
+    if (!layoutNode) {
+      this.clearSublayout()
+      return this.parentUI.jumpToNode(dataNode)
+    }
+
     if (layoutNode.node === dataNode) {
       return this.selectNode(layoutNode)
     } else {
@@ -188,7 +195,7 @@ class BubbleprofUI extends EventEmitter {
 
     this.clearSublayout()
 
-    const newUI = this.originalUI.jumpToNode(aggregateNode.clusterNode)
+    const newUI = this.jumpToNode(aggregateNode.clusterNode)
 
     // If that cluserNode contains only this aggregateNode, it will have been automatically selected already
     if (newUI.selectedDataNode === aggregateNode) return
