@@ -86,11 +86,11 @@ class BubbleprofUI extends EventEmitter {
       const nodeLinkSection = this.originalUI.getNodeLinkSection()
 
       const nodeLinkId = 'node-link-' + layoutNode.id
-      const newUI = new BubbleprofUI([nodeLinkId], {
+      const uiWithinSublayout = new BubbleprofUI([nodeLinkId], {
         nodeLinkId,
         classNames: 'sublayout'
       }, nodeLinkSection, this)
-      const sublayout = newUI.sections.get(nodeLinkId)
+      const sublayout = uiWithinSublayout.sections.get(nodeLinkId)
       sublayout.addCollapseControl()
 
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
@@ -98,13 +98,13 @@ class BubbleprofUI extends EventEmitter {
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
 
-      newUI.initializeElements()
+      uiWithinSublayout.initializeElements()
       sublayout.d3Element.on('click', () => {
-        newUI.clearSublayout()
+        uiWithinSublayout.clearSublayout()
       })
 
-      newUI.setData(newLayout)
-      return newUI
+      uiWithinSublayout.setData(newLayout)
+      return uiWithinSublayout
     }
     return this
   }
@@ -180,8 +180,8 @@ class BubbleprofUI extends EventEmitter {
       return this.selectNode(layoutNode)
     } else {
       // dataNode is inside one or more levels of collapsedNode - recurse
-      const newUI = this.selectNode(layoutNode)
-      return newUI.jumpToNode(dataNode)
+      const uiWithinCollapsedNode = this.selectNode(layoutNode)
+      return uiWithinCollapsedNode.jumpToNode(dataNode)
     }
   }
 
@@ -195,20 +195,22 @@ class BubbleprofUI extends EventEmitter {
 
     this.clearSublayout()
 
-    const newUI = this.jumpToNode(aggregateNode.clusterNode)
+    const uiWithinClusterNode = this.jumpToNode(aggregateNode.clusterNode)
 
     // If that cluserNode contains only this aggregateNode, it will have been automatically selected already
-    if (newUI.selectedDataNode === aggregateNode) return
+    if (uiWithinClusterNode.selectedDataNode === aggregateNode) return
 
-    if (newUI.layout.layoutNodes.has(nodeId)) {
-      return newUI.selectNode(newUI.layout.layoutNodes.get(nodeId))
+    if (uiWithinClusterNode.layout.layoutNodes.has(nodeId)) {
+      const layoutNode = uiWithinClusterNode.layout.layoutNodes.get(nodeId)
+      return uiWithinClusterNode.selectNode(layoutNode)
     } else {
-      const collapsedLayoutNode = newUI.findCollapsedNodeInLayout(aggregateNode)
-      const newerUI = newUI.selectNode(collapsedLayoutNode)
-      return newerUI.jumpToNode(aggregateNode)
+      const collapsedLayoutNode = uiWithinClusterNode.findCollapsedNodeInLayout(aggregateNode)
+      const uiWithinCollapsedNode = uiWithinClusterNode.selectNode(collapsedLayoutNode)
+      return uiWithinCollapsedNode.jumpToNode(aggregateNode)
     }
   }
 
+  // Returns a containing layoutNode, or false if it can't be found at this level
   findDataNodeInLayout (dataNode) {
     const nodeId = dataNode.id
     const layoutNodes = this.layout.layoutNodes
