@@ -58,7 +58,7 @@ class Bubbles extends SvgContentGroup {
       })
 
     this.addCircles()
-    if (this.nodeType === 'ClusterNode') this.addTypeDonuts()
+    this.addTypeDonuts()
 
     this.addLabels()
   }
@@ -273,15 +273,22 @@ class Bubbles extends SvgContentGroup {
 }
 
 function defineArcData (dataNode) {
-  const decimalsAsArray = []
-  for (const label of dataNode.decimals.typeCategory.within.keys()) {
-    const decimal = dataNode.getDecimal('typeCategory', 'within', label)
-    decimalsAsArray.push([label, decimal])
+  const decimalsArray = []
+
+  if (dataNode.decimals) {
+    for (const label of dataNode.decimals.typeCategory.within.keys()) {
+      const decimal = dataNode.getDecimal('typeCategory', 'within', label)
+      decimalsArray.push([label, decimal])
+    }
+  } else {
+    // Is an aggregateNode with only one type category
+    const label = dataNode.typeCategory
+    decimalsArray.push([label, 1])
   }
 
   // Creates array of data objects like:
   // { data: ['name', 0.123], index: n, value: 0.123, startAngle: x.yz, endAngle: x.yz, padAngle: 0 }
-  return d3.pie().value((arcDatum) => arcDatum[1])(decimalsAsArray)
+  return d3.pie().value((arcDatum) => arcDatum[1])(decimalsArray)
 }
 
 module.exports = Bubbles

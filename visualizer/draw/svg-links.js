@@ -49,7 +49,7 @@ class Links extends SvgContentGroup {
       })
 
     this.addLines()
-    if (this.nodeType === 'ClusterNode') { this.addLineSegments() }
+    this.addLineSegments()
 
     this.addLabels()
   }
@@ -82,12 +82,12 @@ class Links extends SvgContentGroup {
       const link = d3.select(nodes[i])
       const targetNode = connection.targetNode
 
-      const decimalsAsArray = getDecimalsArray(targetNode)
+      const decimalsArray = getDecimalsArray(targetNode)
 
       link.append('g')
         .classed('link-segments', true)
         .selectAll('line.link-segment')
-        .data(decimalsAsArray)
+        .data(decimalsArray)
         .enter()
         .append('line')
         .attr('class', decimal => `type-${decimal[0]}`)
@@ -232,10 +232,18 @@ class Links extends SvgContentGroup {
 
 function getDecimalsArray (targetNode) {
   const decimalsArray = []
-  for (const label of targetNode.decimals.typeCategory.between.keys()) {
-    const decimal = targetNode.getDecimal('typeCategory', 'between', label)
-    decimalsArray.push([label, decimal])
+
+  if (targetNode.decimals) {
+    for (const label of targetNode.decimals.typeCategory.between.keys()) {
+      const decimal = targetNode.getDecimal('typeCategory', 'between', label)
+      decimalsArray.push([label, decimal])
+    }
+  } else {
+    // Is an aggregateNode with only one type category
+    const label = targetNode.typeCategory
+    decimalsArray.push([label, 1])
   }
+
   return decimalsArray
 }
 
