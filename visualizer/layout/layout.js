@@ -31,6 +31,8 @@ class Layout {
     this.connections = []
     this.connectionsByTargetId = new Map()
 
+    this.rootLayoutNode = null
+
     if (connection) {
       this.prepareSublayoutNodes(dataNodes, connection)
     } else {
@@ -49,6 +51,8 @@ class Layout {
 
       const layoutNode = new LayoutNode(dataNode, parentLayoutNode)
       this.layoutNodes.set(dataNode.id, layoutNode)
+
+      if (dataNode.isRoot) this.rootLayoutNode = this.layoutNodes.get(dataNode.id)
 
       if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
       for (const childNodeId of dataNode.children) {

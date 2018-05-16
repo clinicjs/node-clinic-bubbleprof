@@ -4,13 +4,15 @@
 const HtmlContent = require('./html-content.js')
 const arrayFlatten = require('array-flatten')
 
-// Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
-// TODO: this duplicates a function in layout/positioning.js, use shared helper functions
-
 class Frames extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
     super(d3Container, contentProperties)
     this.framesByNode = []
+    this.topmostUI = null
+
+    this.ui.on('setTopmostUI', (topmostUI) => {
+      this.topmostUI = topmostUI
+    })
   }
 
   initializeElements () {
@@ -58,11 +60,20 @@ class Frames extends HtmlContent {
 
     if (this.node) {
       this.drawFrames(this.framesByNode, this.d3ContentWrapper)
-      this.d3Heading.text(`Showing async stack trace from async operation "${this.node.name}"`)
+      this.d3Heading.html(`Showing async stack trace from async operation "<strong>${this.node.name}</strong>"`)
+        .on('mouseover', () => {
+          const layoutNode = this.topmostUI.findDataNodeInLayout(this.node)
+          this.topmostUI.highlightNode(layoutNode)
+        })
+        .on('mouseout', () => {
+          this.topmostUI.highlightNode(null)
+        })
     } else {
-      this.d3Heading.text(`
+      this.d3Heading.html(`
         Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
       `)
+      this.d3Heading.on('mouseover', null)
+      this.d3Heading.on('mouseout', null)
     }
   }
 
@@ -110,6 +121,22 @@ class Frames extends HtmlContent {
             .classed('collapsed', !isThisNode)
             .classed('this-node', isThisNode)
 
+          if (!isThisNode) {
+            d3Group.insert('a', ':first-child')
+              .classed('jump-to-node', true)
+              .text('Select on diagram')
+              .on('mouseover', () => {
+                const layoutNode = this.topmostUI.findDataNodeInLayout(frame.dataNode) || this.topmostUI.layout.rootLayoutNode
+                this.topmostUI.highlightNode(layoutNode)
+              })
+              .on('mouseout', () => {
+                this.topmostUI.highlightNode(null)
+              })
+              .on('click', () => {
+                this.ui.jumpToAggregateNode(frame.dataNode)
+              })
+          }
+
           header += `${arrayFlatten(frame).length} frames from `
           header += `${isThisNode ? 'this async operation' : `previous async operation "${frame.dataNode.name}"`}`
           header += `<div class="delays">${this.getDelaysText(frame.dataNode)}</span>`
@@ -118,6 +145,7 @@ class Frames extends HtmlContent {
             .classed('collapsed', frame.party[0] !== 'user')
           header += `${frame.length} frame${frame.length === 1 ? '' : 's'} from ${frame.party[1]}`
         }
+
         d3SubCollapseControl.html(header)
           .on('click', () => {
             d3Group.classed('collapsed', !d3Group.classed('collapsed'))
