@@ -122,7 +122,11 @@ class BubbleprofUI extends EventEmitter {
         // TODO: replace with something better designed e.g. a back button for within sublayouts
         this.clearSublayout()
         this.selectedDataNode = dataNode.shortcutTo
-        return this.jumpToNode(dataNode.shortcutTo)
+        const uiWithinShortcutTarget = this.jumpToNode(dataNode.shortcutTo)
+
+        // If shortcutTarget is an aggregateNode, this will open its frames
+        uiWithinShortcutTarget.clearFrames()
+        return uiWithinShortcutTarget
 
       case 'AggregateNode':
         this.selectedDataNode = dataNode
@@ -238,7 +242,7 @@ class BubbleprofUI extends EventEmitter {
   }
 
   clearFrames () {
-    this.activeFramesSource = null
+    this.selectedDataNode = null
     this.originalUI.emit('outputFrames', null)
   }
 
