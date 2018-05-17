@@ -296,7 +296,7 @@ class SourceNode extends DataNode {
 
     source.before.forEach((value, callKey) => {
       const callbackEvent = new CallbackEvent(callKey, this)
-      this.dataSet.callbackEvents.array.push(callbackEvent)
+      this.dataSet.callbackEvents.add(callbackEvent)
     })
 
     this.dataSet.sourceNodes.set(this.asyncId, this)
