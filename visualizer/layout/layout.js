@@ -5,8 +5,12 @@ const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 const { ClusterNode } = require('../data/data-node.js')
-const arrayFlatten = require('array-flatten')
 const { validateNumber } = require('../validation.js')
+
+const _ = {
+  difference: require('lodash/difference'),
+  intersection: require('lodash/intersection')
+}
 
 class Layout {
   constructor ({ dataNodes, connection }, settings) {
@@ -155,120 +159,116 @@ class Layout {
 
   collapseNodes () {
     const { layoutNodes, scale } = this
-    // TODO: stop relying on coincidental Map.keys() order
-    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
+    // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
+    const topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
 
-    // Set an upper limit so not too much gets squashed
-    // Else it's possible for everything to be squashed, making drilling down impossible/infinite
-    const squashingLimit = layoutNodes.size - 3
-    if (squashingLimit <= 1) return
+    const minimumNodes = 3
 
-    let squashedCounter = 0
-    const hierarchyOrder = []
-
-    // TODO: optimize
-    const squash = (layoutNode, parent) => {
-      // Skip ArtificialNodes (including ShortcutNodes)
-      if (layoutNode instanceof ArtificialNode) return layoutNode
-
-      // Squash children first
-      const childrenAboveThreshold = []
-      const childrenBelowThreshold = []
-      const collapsedChildren = []
-      for (const childId of layoutNode.children) {
-        const child = layoutNodes.get(childId)
-
-        // Recurse, potentially squashing descendents, unless we've already hit the limit
-        const squashed = squashedCounter <= squashingLimit ? squash(child, layoutNode) : null
-
-        if (isBelowThreshold(child)) {
-          squashed ? collapsedChildren.push(squashed) : childrenBelowThreshold.push(child)
-        } else {
-          childrenAboveThreshold.push(child)
-
-          // Children squashed from above will add a collapsed node to the layout
-          if (squashed) squashedCounter--
-        }
-      }
-
-      if (squashedCounter + childrenBelowThreshold.length > squashingLimit) {
-        // We've squashed too many, unsquash the largest first
-        childrenBelowThreshold.sort((a, b) => a.getTotalTime() - b.getTotalTime())
-
-        while (childrenBelowThreshold.length && squashedCounter + childrenBelowThreshold.length > squashingLimit) {
-          const largestSquashedHere = childrenBelowThreshold.pop()
-          childrenAboveThreshold.push(largestSquashedHere)
-        }
-      }
-
-      // For detecting children-grandchildren collision
-      const childToCollapse = new Map()
-      for (const collapsedChild of collapsedChildren) {
-        for (const layoutNode of collapsedChild.collapsedNodes) {
-          childToCollapse.set(layoutNode.id, collapsedChild)
-        }
-      }
-      const collapsibleChildren = childrenBelowThreshold.concat(arrayFlatten(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
-      const grandChildren = arrayFlatten(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
-      let combinedSelfCollapse
-      let combinedChildrenCollapse
-      const selfBelowThreshold = isBelowThreshold(layoutNode)
-      const selfTopNode = topLayoutNodes.includes(layoutNode)
-      if (selfBelowThreshold && collapsibleChildren.length && !selfTopNode) {
-        // Combine children and self
-        combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
-
-        // Count squashed children at this level, from the level above has been counted already when recursing up the tree
-        squashedCounter += childrenBelowThreshold.length
-      } else if (collapsibleChildren.length >= 2) {
-        // Combine children only
-        combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
-        layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
-
-        // Minus one because collapse doesn't contain this node and adds collapsedLayoutNode to layout
-        squashedCounter += childrenBelowThreshold.length
-      }
-
-      let nodesToIndex
-      if (selfBelowThreshold && !selfTopNode) {
-        // If self collapsible, index only childrenAboveThreshold
-        nodesToIndex = childrenAboveThreshold
-      } else {
-        // If self not collapsible, index all children
-        nodesToIndex = childrenAboveThreshold.concat(combinedChildrenCollapse || childrenBelowThreshold.concat(collapsedChildren))
-      }
-      // If no parent index self
-      if (!parent) {
-        nodesToIndex.push(combinedSelfCollapse || layoutNode)
-      }
-      for (const layoutNode of nodesToIndex) {
-        if (layoutNode instanceof CollapsedLayoutNode) {
-          indexLayoutNode(layoutNode)
-        }
-        hierarchyOrder.unshift(layoutNode.id)
-      }
-
-      return combinedSelfCollapse || null
-    } // End of squash()
-
-    for (const layoutNode of topLayoutNodes) {
-      squash(layoutNode)
+    for (const topNode of topLayoutNodes.values()) {
+      collapseHorizontally(topNode)
     }
     const newLayoutNodes = new Map()
-    for (const id of hierarchyOrder) {
-      newLayoutNodes.set(id, layoutNodes.get(id))
+    // Isolating vertical collapsing from horizontal collapsing
+    // Mainly for aesthetic reasons, but also reduces complexity (easier to debug)
+    for (const topNode of topLayoutNodes.values()) {
+      collapseVertically(topNode)
+      indexNode(topNode)
     }
     this.layoutNodes = newLayoutNodes
 
-    function indexLayoutNode (collapsedLayoutNode) {
-      layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
-      for (const childId of collapsedLayoutNode.children) {
-        layoutNodes.get(childId).parent = collapsedLayoutNode
+    function indexNode (layoutNode) {
+      newLayoutNodes.set(layoutNode.id, layoutNode)
+      for (const childId of layoutNode.children) {
+        indexNode(layoutNodes.get(childId))
       }
-      for (const layoutNode of collapsedLayoutNode.collapsedNodes) {
+    }
+
+    function collapseHorizontally (layoutNode) {
+      let combined
+      let prevTiny
+      const children = layoutNode.children.map(childId => layoutNodes.get(childId))
+      for (const child of children) {
+        const belowThreshold = isBelowThreshold(child)
+        collapseHorizontally(child)
+        if (layoutNodes.size === minimumNodes) {
+          break
+        }
+        if (belowThreshold) {
+          if ((combined || prevTiny)) {
+            combined = combineLayoutNodes(combined || prevTiny, child)
+          }
+          prevTiny = child
+        }
+      }
+    }
+
+    function collapseVertically (layoutNode) {
+      const children = layoutNode.children.map(childId => layoutNodes.get(childId))
+      let combined
+      for (const child of children) {
+        const belowThreshold = child.collapsedNodes || isBelowThreshold(child)
+        const collapsedChild = collapseVertically(child)
+        if (layoutNodes.size === minimumNodes) {
+          break
+        }
+        if (belowThreshold && !topLayoutNodes.has(layoutNode)) {
+          const hostNode = combined || layoutNode
+          const squashNode = collapsedChild || child
+          combined = combineLayoutNodes(hostNode, squashNode)
+        }
+      }
+      return combined
+    }
+
+    function combineLayoutNodes (hostNode, squashNode) {
+      const nodeTypes = [hostNode.constructor.name, squashNode.constructor.name]
+      const forbiddenTypes = ['ArtificialNode', 'ShortcutNode']
+      if (_.intersection(nodeTypes, forbiddenTypes).length) {
+        return
+      }
+
+      if (!hostNode || !squashNode) {
+        return
+      }
+      const isCollapsible = layoutNode => layoutNode.collapsedNodes || isBelowThreshold(layoutNode)
+      if (!isCollapsible(hostNode) || !isCollapsible(squashNode)) {
+        return
+      }
+      // TODO: also check minimumNodes here?
+      // TODO: check long child?
+
+      const parent = hostNode.parent
+      if (hostNode.parent !== squashNode.parent && squashNode.parent !== hostNode) {
+        const toContext = layoutNode => ((layoutNode.parent && toContext(layoutNode.parent) + '=>') || '') + layoutNode.id
+        const context = toContext(hostNode) + ' + ' + toContext(squashNode)
+        throw new Error('Cannot combine nodes - clump/stem mismatch: ' + context)
+      }
+      const children = _.difference(hostNode.children.concat(squashNode.children), [squashNode.id])
+
+      const hostNodes = hostNode.collapsedNodes ? [...hostNode.collapsedNodes] : [hostNode]
+      const squashNodes = squashNode.collapsedNodes ? [...squashNode.collapsedNodes] : [squashNode]
+      const collapsed = new CollapsedLayoutNode(hostNodes.concat(squashNodes), parent, children)
+
+      // Update refs
+      for (const layoutNode of [hostNode, squashNode]) {
         layoutNode.parent = null
         layoutNode.children = []
+        // TODO: optimize .children and .collapsedNodes using Set?
+        // (faster at lookup and removal, but slower at addition and iteration - https://stackoverflow.com/a/39010462)
+        const index = parent.children.indexOf(layoutNode.id)
+        if (index !== -1) parent.children.splice(index, 1)
       }
+      parent.children.unshift(collapsed.id)
+      for (const childId of children) {
+        const child = layoutNodes.get(childId)
+        child.parent = collapsed
+      }
+      // Update indices
+      layoutNodes.set(collapsed.id, collapsed)
+      layoutNodes.delete(hostNode.id)
+      layoutNodes.delete(squashNode.id)
+
+      return collapsed
     }
 
     function isBelowThreshold (layoutNode) {

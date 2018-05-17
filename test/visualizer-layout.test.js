@@ -65,53 +65,56 @@ test('Visualizer layout - collapse - collapses children and parents linearly wit
   t.end()
 })
 
-// TODO: Simplify collapse logic then fix this test
 // L->T->T->T->T gives L->C->T
-// test('Visualizer layout - collapse - collapses children and parents linearly until minimum count threshold is hit', function (t) {
-//   const topology = [
-//     ['1.2.3.4.5', 1],
-//     ['1.2.3.4.6', 1]
-//   ]
-//   const dataSet = loadData(mockTopology(topology))
-//   const dataNodes = [...dataSet.clusterNodes.values()]
-//   dataSet.clusterNodes.get(1).stats.async.within = 1000 // make root long
-//   const layout = new Layout({ dataNodes }, settings)
-//   layout.processBetweenData()
-//   layout.updateScale()
-//   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-//   t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5;6', '5 => ', '6 => '])
-//   layout.collapseNodes()
-//   layout.processBetweenData()
-//   layout.updateScale()
-//   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-//   t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,4,5,6', 'clump:3,4,5,6 => '])
-
-//   t.end()
-// })
-
-// T->L->T->L
-//     \>T->L
-// gives
-// T->L->C->L
-//        \>L
-test('Visualizer layout - collapse - collapses branches at stem', function (t) {
+test('Visualizer layout - collapse - collapses children and parents linearly until minimum count threshold is hit', function (t) {
   const topology = [
-    ['1.2.3.4', 100],
-    ['1.2.5.6', 100]
+    ['1.2.3.4.5', 1],
+    ['1.2.3.4.6', 1]
   ]
   const dataSet = loadData(mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
-  dataSet.clusterNodes.get(2).stats.async.between = 100 // make 2 long
+  dataSet.clusterNodes.get(1).stats.async.within = 1000 // make root long
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2', '2 => 3;5', '3 => 4', '4 => ', '5 => 6', '6 => '])
+  t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5;6', '5 => ', '6 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,5', 'clump:3,5 => 4;6', '6 => ', '4 => '])
+  t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,4,5,6', 'clump:3,4,5,6 => '])
+
+  t.end()
+})
+
+// T->L->T->L
+//     \>L->L
+//     \>T->L
+// gives
+// T->L->C->L
+//    |   \>L
+//     \>L->L
+test('Visualizer layout - collapse - collapses branches at stem', function (t) {
+  const topology = [
+    ['1.2.3.4', 100],
+    ['1.2.5.6', 100],
+    ['1.2.7.8', 100]
+  ]
+  const dataSet = loadData(mockTopology(topology))
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  dataSet.clusterNodes.get(2).stats.async.between = 100 // make 2 long
+  dataSet.clusterNodes.get(5).stats.async.between = 100 // make 5 long
+  const layout = new Layout({ dataNodes }, settings)
+  layout.processBetweenData()
+  layout.updateScale()
+  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  t.deepEqual(actualBefore, ['1 => 2', '2 => 3;5;7', '3 => 4', '4 => ', '5 => 6', '6 => ', '7 => 8', '8 => '])
+  layout.collapseNodes()
+  layout.processBetweenData()
+  layout.updateScale()
+  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,7;5', 'clump:3,7 => 4;8', '4 => ', '8 => ', '5 => 6', '6 => '])
 
   t.end()
 })
@@ -138,7 +141,7 @@ test('Visualizer layout - collapse - collapses both siblings and parents (except
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3,5', 'clump:2,3,5 => 4;6', '6 => ', '4 => '])
+  t.deepEqual(actualAfter, ['1 => clump:2,3,5', 'clump:2,3,5 => 4;6', '4 => ', '6 => '])
 
   t.end()
 })
@@ -193,7 +196,7 @@ test('Visualizer layout - collapse - collapses subset with missing root (except 
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['6 => 7', '7 => 8', '8 => 9', '9 => ', '2 => clump:3,4', 'clump:3,4 => 5', '5 => '])
+  t.deepEqual(actualAfter, ['2 => clump:3,4', 'clump:3,4 => 5', '5 => ', '6 => 7', '7 => 8', '8 => 9', '9 => '])
 
   t.end()
 })
@@ -222,7 +225,7 @@ test('Visualizer layout - collapse - collapses subset with missing leaves (excep
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,6,3,4', 'clump:2,6,3,4 => 7', '7 => '])
+  t.deepEqual(actualAfter, ['1 => clump:2,3,6,4', 'clump:2,3,6,4 => 7', '7 => '])
 
   t.end()
 })
@@ -263,7 +266,7 @@ test('Visualizer layout - collapse - complex example', function (t) {
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => 2;3', '3 => clump:4,5,6,7,8,9;10', '2 => ', 'clump:4,5,6,7,8,9 => ', '10 => clump:11,12,13', 'clump:11,12,13 => '])
+  t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => clump:4,5,7,6,8,9;10', 'clump:4,5,7,6,8,9 => ', '10 => clump:11,12,13', 'clump:11,12,13 => '])
 
   t.end()
 })
