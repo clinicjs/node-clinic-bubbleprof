@@ -59,13 +59,15 @@ class Layout {
       if (dataNode.isRoot) this.rootLayoutNode = this.layoutNodes.get(dataNode.id)
 
       if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
-      for (const childNodeId of dataNode.children) {
+      for (let i = 0; i < dataNode.children.length; ++i) {
+        const childNodeId = dataNode.children[i]
         createLayoutNode(childNodeId, layoutNode)
       }
     }
     const topDataNodes = dataNodes.filter(dataNode => !dataNode.parent)
-    for (const dataNode of topDataNodes) {
-      createLayoutNode(dataNode.id)
+    for (let i = 0; i < topDataNodes.length; ++i) {
+      const topDataNode = topDataNodes[i]
+      createLayoutNode(topDataNode.id)
     }
   }
 
@@ -86,13 +88,15 @@ class Layout {
     }
 
     // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
-    for (const dataNode of dataNodes) {
+    for (let i = 0; i < dataNodes.length; ++i) {
+      const dataNode = dataNodes[i]
       // if (!nodeType) nodeType = node.constructor.name
 
       if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
         shortcutToSource.children.push(dataNode.id)
       }
-      for (const childId of dataNode.children) {
+    for (let i = 0; i < dataNode.children.length; ++i) {
+      const childId = dataNode.children[i]
         // If this child is in another cluster, add a dummy leaf node -> clickable link/shortcut to that cluster
         if (!dataNodes.some(dataNode => dataNode.id === childId)) {
           const childNode = dataNode.getSameType(childId)
@@ -113,7 +117,9 @@ class Layout {
   }
 
   processBetweenData (generateConnections = true) {
-    for (const layoutNode of this.layoutNodes.values()) {
+    const layoutNodesIterator = this.layoutNodes.values()
+    for (let i = 0; i < this.layoutNodes.size; ++i) {
+      const layoutNode = layoutNodesIterator.next().value
       layoutNode.stem = new Stem(this, layoutNode)
 
       if (generateConnections && layoutNode.parent) {
@@ -145,7 +151,9 @@ class Layout {
   }
 
   updateStems () {
-    for (const layoutNode of this.layoutNodes.values()) {
+    const layoutNodesIterator = this.layoutNodes.values()
+    for (let i = 0; i < this.layoutNodes.size; ++i) {
+      const layoutNode = layoutNodesIterator.next().value
       layoutNode.stem.update()
     }
   }
@@ -164,13 +172,17 @@ class Layout {
 
     const minimumNodes = 3
 
-    for (const topNode of topLayoutNodes.values()) {
+    let topNodesIterator = topLayoutNodes.values()
+    for (let i = 0; i < topLayoutNodes.size; ++i) {
+      const topNode = topNodesIterator.next().value
       collapseHorizontally(topNode)
     }
     const newLayoutNodes = new Map()
     // Isolating vertical collapsing from horizontal collapsing
     // Mainly for aesthetic reasons, but also reduces complexity (easier to debug)
-    for (const topNode of topLayoutNodes.values()) {
+    topNodesIterator = topLayoutNodes.values()
+    for (let i = 0; i < topLayoutNodes.size; ++i) {
+      const topNode = topNodesIterator.next().value
       collapseVertically(topNode)
       indexNode(topNode)
     }
@@ -178,7 +190,8 @@ class Layout {
 
     function indexNode (layoutNode) {
       newLayoutNodes.set(layoutNode.id, layoutNode)
-      for (const childId of layoutNode.children) {
+      for (let i = 0; i < layoutNode.children.length; ++i) {
+        const childId = layoutNode.children[i]
         indexNode(layoutNodes.get(childId))
       }
     }
@@ -187,7 +200,8 @@ class Layout {
       let combined
       let prevTiny
       const children = layoutNode.children.map(childId => layoutNodes.get(childId))
-      for (const child of children) {
+      for (let i = 0; i < children.length; ++i) {
+        const child = children[i]
         const belowThreshold = isBelowThreshold(child)
         collapseHorizontally(child)
         if (layoutNodes.size === minimumNodes) {
@@ -205,7 +219,8 @@ class Layout {
     function collapseVertically (layoutNode) {
       const children = layoutNode.children.map(childId => layoutNodes.get(childId))
       let combined
-      for (const child of children) {
+      for (let i = 0; i < children.length; ++i) {
+        const child = children[i]
         const belowThreshold = child.collapsedNodes || isBelowThreshold(child)
         const collapsedChild = collapseVertically(child)
         if (layoutNodes.size === minimumNodes) {
@@ -250,7 +265,9 @@ class Layout {
       const collapsed = new CollapsedLayoutNode(hostNodes.concat(squashNodes), parent, children)
 
       // Update refs
-      for (const layoutNode of [hostNode, squashNode]) {
+      const inputNodes = [hostNode, squashNode]
+      for (let i = 0; i < inputNodes.length; ++i) {
+        const layoutNode = inputNodes[i]
         layoutNode.parent = null
         layoutNode.children = []
         // TODO: optimize .children and .collapsedNodes using Set?
@@ -259,8 +276,8 @@ class Layout {
         if (index !== -1) parent.children.splice(index, 1)
       }
       parent.children.unshift(collapsed.id)
-      for (const childId of children) {
-        const child = layoutNodes.get(childId)
+      for (let i = 0; i < children.length; ++i) {
+        const child = layoutNodes.get(children[i])
         child.parent = collapsed
       }
       // Update indices
@@ -308,7 +325,8 @@ class CollapsedLayoutNode {
     this.parent = parent
     this.children = children || []
 
-    for (const layoutNode of layoutNodes) {
+    for (let i = 0; i < layoutNodes.length; ++i) {
+      const layoutNode = layoutNodes[i]
       const node = layoutNode.node
       if (!this.node) {
         this.node = new ArtificialNode({
