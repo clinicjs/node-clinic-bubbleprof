@@ -114,9 +114,9 @@ class CollapsedLayout {
     const collapsed = new CollapsedLayoutNode(hostNodes.concat(squashNodes), parent, children)
 
     // Update refs
-    this.ejectLayoutNode(parent, hostNode)
-    this.ejectLayoutNode(parent, squashNode)
-    this.insertLayoutNode(parent, collapsed)
+    ejectLayoutNode(parent, hostNode)
+    ejectLayoutNode(parent, squashNode)
+    insertLayoutNode(this.layoutNodes, parent, collapsed)
     // Update indices
     this.layoutNodes.set(collapsed.id, collapsed)
     this.layoutNodes.delete(hostNode.id)
@@ -124,23 +124,25 @@ class CollapsedLayout {
 
     return collapsed
   }
-  ejectLayoutNode (parent, layoutNode) {
-    layoutNode.parent = null
-    layoutNode.children = []
-    // TODO: optimize .children and .collapsedNodes using Set?
-    // (faster at lookup and removal, but slower at addition and iteration - https://stackoverflow.com/a/39010462)
-    const index = parent.children.indexOf(layoutNode.id)
-    if (index !== -1) parent.children.splice(index, 1)
-  }
-  insertLayoutNode (parent, layoutNode) {
-    parent.children.unshift(layoutNode.id)
-    for (let i = 0; i < layoutNode.children.length; ++i) {
-      const child = this.layoutNodes.get(layoutNode.children[i])
-      child.parent = layoutNode
-    }
-  }
   isBelowThreshold (layoutNode) {
     return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < 10
+  }
+}
+
+function ejectLayoutNode (parent, layoutNode) {
+  layoutNode.parent = null
+  layoutNode.children = []
+  // TODO: optimize .children and .collapsedNodes using Set?
+  // (faster at lookup and removal, but slower at addition and iteration - https://stackoverflow.com/a/39010462)
+  const index = parent.children.indexOf(layoutNode.id)
+  if (index !== -1) parent.children.splice(index, 1)
+}
+
+function insertLayoutNode (layoutNodes, parent, layoutNode) {
+  parent.children.unshift(layoutNode.id)
+  for (let i = 0; i < layoutNode.children.length; ++i) {
+    const child = layoutNodes.get(layoutNode.children[i])
+    child.parent = layoutNode
   }
 }
 
