@@ -68,6 +68,7 @@ class CollapsedLayout {
     for (let i = 0; i < children.length; ++i) {
       const child = children[i]
       const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
+      // TODO: do not vertically-collapse children which have at least one long grandchild
       const collapsedChild = this.collapseVertically(child)
       if (this.layoutNodes.size === this.minimumNodes) {
         break
@@ -81,11 +82,15 @@ class CollapsedLayout {
     return combined
   }
   combinelayoutNodes (hostNode, squashNode) {
-    const nodeTypes = [hostNode.constructor.name, squashNode.constructor.name]
-    const forbiddenTypes = ['ArtificialNode', 'ShortcutNode']
-    if (_.intersection(nodeTypes, forbiddenTypes).length) {
-      return
-    }
+    // TODO: support uncollapsible shortcut nodes
+    // i.e. currently some views get really messy when we render them all
+    // we need to come up with some ux improvements on how to display them without making much noise
+    //
+    // const nodeTypes = [hostNode.node.constructor.name, squashNode.node.constructor.name]
+    // const forbiddenTypes = ['ShortcutNode']
+    // if (_.intersection(nodeTypes, forbiddenTypes).length) {
+    //   return
+    // }
 
     if (!hostNode || !squashNode) {
       return
@@ -95,7 +100,6 @@ class CollapsedLayout {
       return
     }
     // TODO: also check this.minimumNodes here?
-    // TODO: check long child?
 
     const parent = hostNode.parent
     if (hostNode.parent !== squashNode.parent && squashNode.parent !== hostNode) {
