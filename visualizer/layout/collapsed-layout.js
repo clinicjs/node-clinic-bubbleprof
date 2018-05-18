@@ -19,17 +19,13 @@ class CollapsedLayout {
     // e.g. we could attach .topNodes or some iterator to Layout instances
     this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
 
-    let topNodesIterator = this.topLayoutNodes.values()
-    for (let i = 0; i < this.topLayoutNodes.size; ++i) {
-      const topNode = topNodesIterator.next().value
+    for (const topNode of this.topLayoutNodes) {
       this.collapseHorizontally(topNode)
     }
     const newLayoutNodes = new Map()
     // Isolating vertical collapsing from horizontal collapsing
     // Mainly for aesthetic reasons, but also reduces complexity (easier to debug)
-    topNodesIterator = this.topLayoutNodes.values()
-    for (let i = 0; i < this.topLayoutNodes.size; ++i) {
-      const topNode = topNodesIterator.next().value
+    for (const topNode of this.topLayoutNodes) {
       this.collapseVertically(topNode)
       this.indexLayoutNode(newLayoutNodes, topNode)
     }
@@ -37,8 +33,7 @@ class CollapsedLayout {
   }
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
-    for (let i = 0; i < layoutNode.children.length; ++i) {
-      const childId = layoutNode.children[i]
+    for (const childId of layoutNode.children) {
       this.indexLayoutNode(nodesMap, this.layoutNodes.get(childId))
     }
   }
@@ -46,8 +41,7 @@ class CollapsedLayout {
     let combined
     let prevTiny
     const children = layoutNode.children.map(childId => this.layoutNodes.get(childId))
-    for (let i = 0; i < children.length; ++i) {
-      const child = children[i]
+    for (const child of children) {
       const belowThreshold = this.isBelowThreshold(child)
       this.collapseHorizontally(child)
       if (this.layoutNodes.size === this.minimumNodes) {
@@ -64,8 +58,7 @@ class CollapsedLayout {
   collapseVertically (layoutNode) {
     const children = layoutNode.children.map(childId => this.layoutNodes.get(childId))
     let combined
-    for (let i = 0; i < children.length; ++i) {
-      const child = children[i]
+    for (const child of children) {
       const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
       // TODO: do not vertically-collapse children which have at least one long grandchild
       const collapsedChild = this.collapseVertically(child)
@@ -134,8 +127,8 @@ class CollapsedLayout {
   }
   insertLayoutNode (parent, layoutNode) {
     parent.children.unshift(layoutNode.id)
-    for (let i = 0; i < layoutNode.children.length; ++i) {
-      const child = this.layoutNodes.get(layoutNode.children[i])
+    for (const childId of layoutNode.children) {
+      const child = this.layoutNodes.get(childId)
       child.parent = layoutNode
     }
   }
@@ -151,8 +144,7 @@ class CollapsedLayoutNode {
     this.parent = parent
     this.children = children || []
 
-    for (let i = 0; i < layoutNodes.length; ++i) {
-      const layoutNode = layoutNodes[i]
+    for (const layoutNode of layoutNodes) {
       const node = layoutNode.node
       if (!this.node) {
         this.node = new ArtificialNode({

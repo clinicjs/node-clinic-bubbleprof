@@ -54,15 +54,13 @@ class Layout {
       if (dataNode.isRoot) this.rootLayoutNode = this.layoutNodes.get(dataNode.id)
 
       if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
-      for (let i = 0; i < dataNode.children.length; ++i) {
-        const childNodeId = dataNode.children[i]
+      for (const childNodeId of dataNode.children) {
         createLayoutNode(childNodeId, layoutNode)
       }
     }
     const topDataNodes = dataNodes.filter(dataNode => !dataNode.parent)
-    for (let i = 0; i < topDataNodes.length; ++i) {
-      const topDataNode = topDataNodes[i]
-      createLayoutNode(topDataNode.id)
+    for (const dataNode of topDataNodes) {
+      createLayoutNode(dataNode.id)
     }
   }
 
@@ -82,14 +80,11 @@ class Layout {
       dataNodes.unshift(shortcutToSource)
     }
 
-    for (let i = 0; i < dataNodes.length; ++i) {
-      const dataNode = dataNodes[i]
-
+    for (const dataNode of dataNodes) {
       if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
         shortcutToSource.children.push(dataNode.id)
       }
-      for (let i = 0; i < dataNode.children.length; ++i) {
-        const childId = dataNode.children[i]
+      for (const childId of dataNode.children) {
         // If this child is in another cluster, add a dummy leaf node -> clickable link/shortcut to that cluster
         if (!dataNodes.some(dataNode => dataNode.id === childId)) {
           const childNode = dataNode.getSameType(childId)
@@ -110,9 +105,7 @@ class Layout {
   }
 
   processBetweenData (generateConnections = true) {
-    const layoutNodesIterator = this.layoutNodes.values()
-    for (let i = 0; i < this.layoutNodes.size; ++i) {
-      const layoutNode = layoutNodesIterator.next().value
+    for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
 
       if (generateConnections && layoutNode.parent) {
@@ -144,9 +137,7 @@ class Layout {
   }
 
   updateStems () {
-    const layoutNodesIterator = this.layoutNodes.values()
-    for (let i = 0; i < this.layoutNodes.size; ++i) {
-      const layoutNode = layoutNodesIterator.next().value
+    for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem.update()
     }
   }
