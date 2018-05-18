@@ -9,7 +9,7 @@ const arrayFlatten = require('array-flatten')
 const { validateNumber } = require('../validation.js')
 
 class Layout {
-  constructor ({ dataNodes, connection }, settings) {
+  constructor ({ dataNodes, connection, parentLayout }, settings) {
     const defaultSettings = {
       collapseNodes: false,
       svgDistanceFromEdge: 30,
@@ -22,8 +22,11 @@ class Layout {
     this.settings = Object.assign(defaultSettings, settings)
     this.initialInput = {
       dataNodes,
-      connection
+      connection,
+      parentLayout
     }
+
+    this.parentLayout = parentLayout || null
 
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
@@ -81,7 +84,6 @@ class Layout {
       dataNodes.unshift(shortcutToSource)
     }
 
-    // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
     for (const dataNode of dataNodes) {
       // if (!nodeType) nodeType = node.constructor.name
 
@@ -109,7 +111,7 @@ class Layout {
   }
 
   // Returns a containing layoutNode, or false if it can't be found at this level
-  findDataNode (dataNode) {
+  findDataNode (dataNode, recursive = false) {
     const nodeId = dataNode.id
     const layoutNodes = this.layoutNodes
     if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
@@ -119,13 +121,13 @@ class Layout {
     }
   }
 
-  findCollapsedNode (dataNode) {
+  findCollapsedNode (dataNode, recursive = false) {
     for (const layoutNode of this.layoutNodes.values()) {
       if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node === dataNode)) {
         return layoutNode
       }
     }
-    return false
+    return recursive && this.parentLayout ? this.parentLayout.findDataNode(dataNode, recursive) : false
   }
 
   processBetweenData (generateConnections = true) {
