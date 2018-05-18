@@ -1,6 +1,7 @@
 'use strict'
 
 function mockClusterNode ({ id, parentId, children, stemLength }) {
+  children.sort((a, b) => a - b)
   const clusterNode = {
     // ClusterNode
     clusterId: id,
@@ -50,6 +51,7 @@ function mockTopology (topology) {
       if (parentCluster) {
         if (!parentCluster.children.includes(id)) {
           parentCluster.children.push(id)
+          parentCluster.children.sort((a, b) => a - b)
         }
       }
       const fillerValue = parentId === 0 ? Math.PI : 1 // Root's value is within, not between
