@@ -108,6 +108,26 @@ class Layout {
     this.prepareLayoutNodes(dataNodes)
   }
 
+  // Returns a containing layoutNode, or false if it can't be found at this level
+  findDataNode (dataNode) {
+    const nodeId = dataNode.id
+    const layoutNodes = this.layoutNodes
+    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
+      return this.layoutNodes.get(nodeId)
+    } else {
+      return this.findCollapsedNode(dataNode, recursive)
+    }
+  }
+
+  findCollapsedNode (dataNode) {
+    for (const layoutNode of this.layoutNodes.values()) {
+      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node === dataNode)) {
+        return layoutNode
+      }
+    }
+    return false
+  }
+
   processBetweenData (generateConnections = true) {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
