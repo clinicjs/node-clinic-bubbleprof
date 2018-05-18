@@ -1,7 +1,6 @@
 'use strict'
 
 const _ = {
-  clone: require('lodash/clone'),
   difference: require('lodash/difference'),
   intersection: require('lodash/intersection')
 }
@@ -12,7 +11,7 @@ const { validateNumber } = require('../validation.js')
 class CollapsedLayout {
   constructor (layoutNodes, scale) {
     // Shallow clone before modifying
-    this.layoutNodes = new Map(_.clone([...layoutNodes.entries()]))
+    this.layoutNodes = new Map([...layoutNodes.entries()])
     this.scale = scale
     this.minimumNodes = 3
 
