@@ -54,7 +54,7 @@ test('Visualizer layout - stems - identifies leaves', function (t) {
   const dataSet = loadData(mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
-  t.deepEqual(layout.layoutNodes.get(1).stem.leaves.ids, [9, 4, 5, 7, 8])
+  t.deepEqual(layout.layoutNodes.get(1).stem.leaves.ids, [4, 5, 7, 8, 9])
   t.deepEqual(layout.layoutNodes.get(9).stem.leaves.ids, [])
   t.deepEqual(layout.layoutNodes.get(2).stem.leaves.ids, [4, 5, 7, 8])
   t.deepEqual(layout.layoutNodes.get(3).stem.leaves.ids, [4, 5])
