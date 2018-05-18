@@ -82,10 +82,8 @@ class Layout {
       dataNodes.unshift(shortcutToSource)
     }
 
-    // let nodeType // TODO: see if this is necessary when clusters-of-clusters are implemented
     for (let i = 0; i < dataNodes.length; ++i) {
       const dataNode = dataNodes[i]
-      // if (!nodeType) nodeType = node.constructor.name
 
       if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
         shortcutToSource.children.push(dataNode.id)
