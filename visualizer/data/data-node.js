@@ -306,7 +306,59 @@ class SourceNode extends DataNode {
   }
 }
 
+class ArtificialNode extends ClusterNode {
+  constructor (rawNode, nodeToCopy) {
+    const nodeProperties = Object.assign({}, nodeToCopy, rawNode, {
+      clusterId: rawNode.id || nodeToCopy.id,
+      parentClusterId: rawNode.parentId || nodeToCopy.parentId,
+      nodes: []
+    })
+    super(nodeProperties, nodeToCopy.dataSet)
+
+    const defaultProperties = {
+      nodeType: 'AggregateNode'
+    }
+    const node = Object.assign(defaultProperties, rawNode)
+
+    this.nodeType = node.nodeType
+  }
+  getSameType (nodeId) {
+    return this.dataSet.getByNodeType(this.nodeType, nodeId)
+  }
+  aggregateStats (dataNode) {
+    this.stats.setSync(this.stats.sync + dataNode.stats.sync)
+    this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
+    this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
+
+    this.stats.rawTotals.sync += dataNode.stats.rawTotals.sync
+    this.stats.rawTotals.async.between += dataNode.stats.rawTotals.async.between
+    this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
+  }
+  aggregateDecimals (dataNode, classification, position) {
+    if (dataNode.decimals) {
+      const byLabel = dataNode.decimals[classification][position]
+      for (const [label, value] of byLabel) {
+        this.setDecimal(value, classification, position, label)
+      }
+    } else {
+      const label = dataNode[classification]
+      const rawTotals = dataNode.stats.rawTotals
+      const value = rawTotals.async[position] + (position === 'within' ? rawTotals.sync : 0)
+      this.setDecimal(value, classification, position, label)
+    }
+  }
+}
+
+class ShortcutNode extends ArtificialNode {
+  constructor (rawNode, nodeToCopy) {
+    super(rawNode, nodeToCopy)
+    this.shortcutTo = nodeToCopy
+  }
+}
+
 module.exports = {
+  ShortcutNode,
+  ArtificialNode,
   ClusterNode,
   AggregateNode,
   SourceNode,

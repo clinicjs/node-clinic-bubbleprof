@@ -13,7 +13,7 @@ class Positioning {
   }
   formClumpPyramid () {
     this.layoutNodes = this.layout.layoutNodes
-    const leavesByLongest = pickLeavesByLongest(this.layoutNodes, this.layout.scale)
+    const leavesByLongest = pickLeavesByLongest(this.layoutNodes)
     const clumpPyramid = new ClumpPyramid(this.layout)
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
@@ -24,7 +24,7 @@ class Positioning {
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
-    const leavesByLongest = pickLeavesByLongest(this.layoutNodes, this.layout)
+    const leavesByLongest = pickLeavesByLongest(this.layoutNodes)
     const longestStemLength = leavesByLongest[0].stem.pickMostAccurateTotal()
     const arrangedLeaves = leavesByLongest.sort(intoOrder)
 

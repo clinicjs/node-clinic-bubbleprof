@@ -27,7 +27,7 @@ test('Visualizer layout - positioning - mock topology', function (t) {
 
   t.deepEqual(dataSet.clusterNodes.get(1).children, [2, 9])
   t.equal(layout.layoutNodes.get(1).stem.lengths.scalable, 1)
-  t.deepEqual(dataSet.clusterNodes.get(2).children, [8, 6, 3])
+  t.deepEqual(dataSet.clusterNodes.get(2).children, [3, 6, 8])
   t.equal(layout.layoutNodes.get(2).stem.lengths.scalable, 1 + 1)
   t.deepEqual(dataSet.clusterNodes.get(8).children, [])
   t.equal(layout.layoutNodes.get(8).stem.lengths.scalable, 1 + 1 + 100)
@@ -35,7 +35,7 @@ test('Visualizer layout - positioning - mock topology', function (t) {
   t.equal(layout.layoutNodes.get(6).stem.lengths.scalable, 1 + 1 + 1)
   t.deepEqual(dataSet.clusterNodes.get(7).children, [])
   t.equal(layout.layoutNodes.get(7).stem.lengths.scalable, 1 + 1 + 1 + 200)
-  t.deepEqual(dataSet.clusterNodes.get(3).children, [5, 4])
+  t.deepEqual(dataSet.clusterNodes.get(3).children, [4, 5])
   t.equal(layout.layoutNodes.get(3).stem.lengths.scalable, 1 + 1 + 1)
   t.deepEqual(dataSet.clusterNodes.get(5).children, [])
   t.equal(layout.layoutNodes.get(5).stem.lengths.scalable, 1 + 1 + 1 + 250)
