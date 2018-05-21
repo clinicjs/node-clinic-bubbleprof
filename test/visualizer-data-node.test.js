@@ -49,7 +49,6 @@ function validateData (dataSet) {
   }
   result += validateClusterNode(dataSet.getByNodeType('ClusterNode', 1))
   result += validateAggregateNode(dataSet.getByNodeType('AggregateNode', 1))
-  result += validateSourceNode(dataSet.getByNodeType('SourceNode', 1))
 
   return result || 'Pass'
 }

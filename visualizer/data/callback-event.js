@@ -16,11 +16,7 @@ class CallbackEvent {
     // Timestamp when this callback call completes
     this.after = source.after[callKey]
 
-    this.sourceNode = source
     this.aggregateNode = source.aggregateNode
-    this.clusterNode = source.aggregateNode.clusterNode
-
-    this.isBetweenClusters = this.aggregateNode.isBetweenClusters
   }
 }
 
@@ -172,9 +168,9 @@ function setToWallTimeSegment (callbackEvent, segmentData) {
 }
 
 function processCallbackEvent (callbackEvent, clusterStats, aggregateStats) {
-  const { delayStart, before, after, isBetweenClusters, aggregateNode, clusterNode } = callbackEvent
+  const { delayStart, before, after, aggregateNode } = callbackEvent
+  const { aggregateId, isBetweenClusters, clusterNode } = aggregateNode
 
-  const aggregateId = aggregateNode.id
   if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
   const aggregateStatsItem = aggregateStats.get(aggregateId)
 

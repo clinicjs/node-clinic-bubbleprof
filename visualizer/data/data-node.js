@@ -101,6 +101,7 @@ class ClusterNode extends DataNode {
 
     let firstNode = null
 
+    // This loop runs typically dozens of times, double digits. Not a priority to optimize
     for (const subNode of node.nodes) {
       this.nodeIds.add(subNode.aggregateId)
       if (subNode.dataSet) {
@@ -186,7 +187,12 @@ class AggregateNode extends DataNode {
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
-    this.sources = node.sources.map((source) => new SourceNode(source, this))
+    this.sources = []
+    // This loop runs thousands+ times, unbounded and scales with size of profile. Optimize for browsers
+    const sourcesLength = node.sources.length
+    for (var i = 0; i < sourcesLength; i++) {
+      this.dataSet.sourceNodes.push(new SourceNode(node.sources[i], this))
+    }
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
@@ -267,9 +273,9 @@ class AggregateNode extends DataNode {
   }
 }
 
-class SourceNode extends DataNode {
+class SourceNode {
   constructor (rawSource, aggregateNode) {
-    super(aggregateNode.dataSet)
+    this.dataSet = aggregateNode.dataSet
 
     const defaultProperties = {
       asyncId: 0,
@@ -294,12 +300,11 @@ class SourceNode extends DataNode {
 
     this.aggregateNode = aggregateNode
 
-    source.before.forEach((value, callKey) => {
-      const callbackEvent = new CallbackEvent(callKey, this)
-      this.dataSet.callbackEvents.add(callbackEvent)
-    })
-
-    this.dataSet.sourceNodes.set(this.asyncId, this)
+    // This loop runs thousands+++ of times, unbounded and scales with size of profile. Optimize for browsers
+    const callbackEventCount = source.before.length
+    for (var i = 0; i < callbackEventCount; i++) {
+      this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
+    }
   }
   get id () {
     return this.asyncId

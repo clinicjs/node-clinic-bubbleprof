@@ -9,7 +9,7 @@ test('Visualizer dataset - fake json', function (t) {
 
   t.equals(dataSet.clusterNodes.size, 2)
   t.equals(dataSet.aggregateNodes.size, 2)
-  t.equals(dataSet.sourceNodes.size, 2)
+  t.equals(dataSet.sourceNodes.length, 2)
 
   t.end()
 })
