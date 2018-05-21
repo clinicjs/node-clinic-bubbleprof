@@ -306,6 +306,7 @@ class SourceNode extends DataNode {
   }
 }
 
+// ArticificalNodes are created in /layout/ for layout-specific combinations or modified versions of nodes
 class ArtificialNode extends ClusterNode {
   constructor (rawNode, nodeToCopy) {
     const nodeProperties = Object.assign({}, nodeToCopy, rawNode, {
@@ -336,11 +337,13 @@ class ArtificialNode extends ClusterNode {
   }
   aggregateDecimals (dataNode, classification, position) {
     if (dataNode.decimals) {
+      // e.g. combining clusterNodes
       const byLabel = dataNode.decimals[classification][position]
       for (const [label, value] of byLabel) {
         this.setDecimal(value, classification, position, label)
       }
     } else {
+      // e.g. combining aggregateNodes
       const label = dataNode[classification]
       const rawTotals = dataNode.stats.rawTotals
       const value = rawTotals.async[position] + (position === 'within' ? rawTotals.sync : 0)

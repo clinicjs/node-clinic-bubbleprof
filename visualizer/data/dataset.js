@@ -43,7 +43,7 @@ class DataSet {
         // Don't allow seemingly valid non-failing output from logically invalid input
         if (startTime < profileStart) throw new Error(`Wall time segment start time (${startTime}) preceeds profile start time (${profileStart})`)
         if (endTime > profileEnd) throw new Error(`Wall time segment end time (${endTime}) exceeds profile end time (${profileEnd})`)
-        if (startTime > endTime) throw new Error(`Wall time segment start time (${startTime}) doesn't preceed segment end time (${endTime})`)
+        if (startTime > endTime) throw new Error(`Wall time segment start time (${startTime}) doesn’t preceed segment end time (${endTime})`)
 
         const startIndex = Math.floor((startTime - profileStart) / msPerPercent)
         const endIndex = Math.ceil((endTime - profileStart) / msPerPercent)
