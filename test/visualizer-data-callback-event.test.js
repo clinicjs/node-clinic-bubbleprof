@@ -46,7 +46,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
   return `Error: ${dataNode.constructor.name} ${dataNode.id} ${resultKeysString} is ${actualValue}, expected ${expectedValue}. \n`
 }
 
-test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {
+test('Visualizer data - CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
 
   for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
@@ -69,7 +69,7 @@ test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', functi
   t.end()
 })
 
-test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', function (t) {
+test('Visualizer data - CallbackEvents - AggregateNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
   for (const [aggregateId, aggregateNode] of dataSet.aggregateNodes) {
     const expected = expectedAggregateResults.get(aggregateId)
@@ -91,7 +91,7 @@ test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', func
   t.end()
 })
 
-test('Visualizer CallbackEvents - Invalid data item', function (t) {
+test('Visualizer data - CallbackEvents - Invalid data item', function (t) {
   t.throws(() => {
     dataSet.clusterNodes.values().next().value.stats.setSync('14%')
   }, new Error('For ClusterNode A stats.sync: Got string 14%, must be a number'))
@@ -103,7 +103,7 @@ test('Visualizer CallbackEvents - Invalid data item', function (t) {
   t.end()
 })
 
-test('Visualizer CallbackEvents - Wall time slices', function (t) {
+test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
   const {
     profileStart,
     profileEnd,
@@ -112,6 +112,7 @@ test('Visualizer CallbackEvents - Wall time slices', function (t) {
     getSegments
   } = dataSet.wallTime
 
+  // Ensure essential stats from fake data set are calculated correctly from callback events
   t.equals(profileStart, 3)
   t.equals(profileEnd, 29.5)
   t.equals(profileDuration, 26.5)
