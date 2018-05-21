@@ -37,6 +37,24 @@ class AllCallbackEvents {
     if (!this.wallTime.profileEnd || callbackEvent.after > this.wallTime.profileEnd) this.wallTime.profileEnd = callbackEvent.after
   }
 
+  applyWallTimes (callbackEvent) {
+    const { delayStart, before, after } = callbackEvent
+
+    const asyncSegments = this.wallTime.getSegments(delayStart, before)
+    const syncSegments = this.wallTime.getSegments(before, after)
+
+    // Browserified short-ish (<100) loops, within very long loop. Order isn't important.
+    // For efficiency, use for (var), only check length once, no variables in block, send to ordinary function
+    var i
+    for (i = asyncSegments.length - 1; i >= 0; i--) {
+      setToWallTimeSegment(callbackEvent, asyncSegments[i].asyncPending)
+    }
+
+    for (i = syncSegments.length - 1; i >= 0; i--) {
+      setToWallTimeSegment(callbackEvent, syncSegments[i].syncActive)
+    }
+  }
+
   processAll () {
     this.wallTime.profileDuration = this.wallTime.profileEnd - this.wallTime.profileStart
     this.wallTime.msPerPercent = this.wallTime.profileDuration / 100
@@ -53,6 +71,8 @@ class AllCallbackEvents {
         // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
         continue
       }
+
+      this.applyWallTimes(callbackEvent)
 
       const aggregateId = aggregateNode.id
       if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
@@ -162,6 +182,12 @@ class Interval {
     clusterStatsItem.intervals.sync.pushAndFlatten(this)
     aggregateStatsItem.intervals.sync.pushAndFlatten(this)
   }
+}
+
+function setToWallTimeSegment (callbackEvent, segmentData) {
+  segmentData.asyncIds.add(callbackEvent.sourceNode.asyncId)
+  segmentData.callbackCount++
+  segmentData.aggregateNodes.add(callbackEvent.aggregateNode.aggregateId)
 }
 
 module.exports = {
