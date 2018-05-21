@@ -32,9 +32,18 @@ class AllCallbackEvents {
   }
 
   add (callbackEvent) {
+    // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
+    const {
+      delayStart,
+      before,
+      after
+    } = callbackEvent
+
+    if (!areNumbers([delayStart, before, after])) return
+
     this.array.push(callbackEvent)
-    if (!this.wallTime.profileStart || callbackEvent.delayStart < this.wallTime.profileStart) this.wallTime.profileStart = callbackEvent.delayStart
-    if (!this.wallTime.profileEnd || callbackEvent.after > this.wallTime.profileEnd) this.wallTime.profileEnd = callbackEvent.after
+    if (!this.wallTime.profileStart || delayStart < this.wallTime.profileStart) this.wallTime.profileStart = delayStart
+    if (!this.wallTime.profileEnd || after > this.wallTime.profileEnd) this.wallTime.profileEnd = after
   }
 
   applyWallTimes (callbackEvent) {
@@ -65,6 +74,7 @@ class AllCallbackEvents {
     this.array.sort((a, b) => b.before - a.before)
 
     for (var i = this.array.length - 1; i >= 0; i--) {
+      this.applyWallTimes(this.array[i])
       processCallbackEvent(this.array[i], clusterStats, aggregateStats)
     }
 
@@ -164,16 +174,14 @@ class Interval {
 }
 
 function setToWallTimeSegment (callbackEvent, segmentData) {
-  segmentData.asyncIds.add(callbackEvent.sourceNode.asyncId)
+  // Number of callbackEvents at a point in time will be the same as the number of asyncIds
+  // because by definition there can't be two callbackEvents of the same asyncId at the same time
   segmentData.callbackCount++
   segmentData.aggregateNodes.add(callbackEvent.aggregateNode.aggregateId)
 }
 
 function processCallbackEvent (callbackEvent, clusterStats, aggregateStats) {
   const { delayStart, before, after, isBetweenClusters, aggregateNode, clusterNode } = callbackEvent
-
-  // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
-  if (!areNumbers([delayStart, before, after])) return
 
   const aggregateId = aggregateNode.id
   if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))

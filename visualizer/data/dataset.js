@@ -90,12 +90,10 @@ function getWallTimeSegment () {
   // Refers to 1% of the time the profile was running for
   return {
     syncActive: {
-      asyncIds: new Set(),
       callbackCount: 0,
       aggregateNodes: new Set()
     },
     asyncPending: {
-      asyncIds: new Set(),
       callbackCount: 0,
       aggregateNodes: new Set()
     }
