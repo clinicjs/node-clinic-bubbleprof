@@ -62,31 +62,10 @@ class AllCallbackEvents {
     const clusterStats = new Map()
     const aggregateStats = new Map()
 
-    this.array.sort((a, b) => a.before - b.before)
+    this.array.sort((a, b) => b.before - a.before)
 
-    for (const callbackEvent of this.array) {
-      const { delayStart, before, after, isBetweenClusters, aggregateNode, clusterNode } = callbackEvent
-
-      if (!areNumbers([delayStart, before, after])) {
-        // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
-        continue
-      }
-
-      this.applyWallTimes(callbackEvent)
-
-      const aggregateId = aggregateNode.id
-      if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
-      const aggregateStatsItem = aggregateStats.get(aggregateId)
-
-      const clusterId = clusterNode.id
-      if (!clusterStats.has(clusterId)) clusterStats.set(clusterId, new TemporaryStatsItem(clusterNode))
-      const clusterStatsItem = clusterStats.get(clusterId)
-
-      const asyncInterval = new Interval(delayStart, before, isBetweenClusters)
-      asyncInterval.applyAsync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
-
-      const syncInterval = new Interval(before, after, isBetweenClusters)
-      syncInterval.applySync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
+    for (var i = this.array.length - 1; i >= 0; i--) {
+      processCallbackEvent(this.array[i], clusterStats, aggregateStats)
     }
 
     clusterStats.forEach(item => item.applyIntervalsTotals())
@@ -188,6 +167,27 @@ function setToWallTimeSegment (callbackEvent, segmentData) {
   segmentData.asyncIds.add(callbackEvent.sourceNode.asyncId)
   segmentData.callbackCount++
   segmentData.aggregateNodes.add(callbackEvent.aggregateNode.aggregateId)
+}
+
+function processCallbackEvent (callbackEvent, clusterStats, aggregateStats) {
+  const { delayStart, before, after, isBetweenClusters, aggregateNode, clusterNode } = callbackEvent
+
+  // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
+  if (!areNumbers([delayStart, before, after])) return
+
+  const aggregateId = aggregateNode.id
+  if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
+  const aggregateStatsItem = aggregateStats.get(aggregateId)
+
+  const clusterId = clusterNode.id
+  if (!clusterStats.has(clusterId)) clusterStats.set(clusterId, new TemporaryStatsItem(clusterNode))
+  const clusterStatsItem = clusterStats.get(clusterId)
+
+  const asyncInterval = new Interval(delayStart, before, isBetweenClusters)
+  asyncInterval.applyAsync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
+
+  const syncInterval = new Interval(before, after, isBetweenClusters)
+  syncInterval.applySync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
 }
 
 module.exports = {
