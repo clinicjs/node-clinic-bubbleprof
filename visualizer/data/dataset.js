@@ -30,7 +30,29 @@ class DataSet {
 
       // Set in callback-event.js AllCallbackEvents.processAll()
       profileDuration: null, // Number of miliseconds from profileStart to profileEnd
-      msPerPercent: null // profileDuration / 100, number of miliseconds spanned by each item in percentages array
+      msPerPercent: null, // profileDuration / 100, number of miliseconds spanned by each item in percentages array
+
+      getSegments: (startTime, endTime, discardFirst = false) => {
+        const {
+          profileStart,
+          profileEnd,
+          msPerPercent,
+          percentSlices
+        } = this.wallTime
+
+        // Don't allow seemingly valid non-failing output from logically invalid input
+        if (startTime < profileStart) throw new Error(`Wall time segment start time (${startTime}) preceeds profile start time (${profileStart})`)
+        if (endTime > profileEnd) throw new Error(`Wall time segment end time (${endTime}) exceeds profile end time (${profileEnd})`)
+        if (startTime > endTime) throw new Error(`Wall time segment start time (${startTime}) doesn't preceed segment end time (${endTime})`)
+
+        const startIndex = Math.floor((startTime - profileStart) / msPerPercent)
+        const endIndex = Math.ceil((endTime - profileStart) / msPerPercent)
+        const segments = percentSlices.slice(startIndex, endIndex)
+
+        // The last item in getSegments(x, y) is always the same as the first in getSegments(y, z)
+        // so use discardFirst when needed to avoid duplication in adjacent segments
+        return discardFirst ? segments.slice(1) : segments
+      }
     }
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
