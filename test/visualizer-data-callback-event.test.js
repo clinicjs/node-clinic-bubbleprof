@@ -123,10 +123,6 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
   t.equals(sliceA.length, 5)
 
   const expected = {
-    // ** Keeping a set of asyncIds has been removed to boost performance
-    // If it becomes necessary as a feature, correct results are commented out below
-    // asyncAsyncIds: new Set([1, 4]),
-
     asyncAggregateIds: new Set(['a']),
     syncIds: new Set()
   }
@@ -140,11 +136,9 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
 
     t.equals(syncActive.callbackCount, 0)
     t.strictSame(syncActive.aggregateNodes, expected.syncIds)
-    // t.strictSame(syncActive.asyncIds, expected.syncIds)
 
     t.equals(asyncPending.callbackCount, 2)
     t.strictSame(asyncPending.aggregateNodes, expected.asyncAggregateIds)
-    // t.strictSame(asyncPending.asyncIds, expected.asyncAsyncIds)
   }
 
   // More complex slice
@@ -166,89 +160,72 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
 
         t.equals(syncActive.callbackCount, 1)
         t.strictSame(syncActive.aggregateNodes, new Set(['d']))
-        // t.strictSame(syncActive.asyncIds, new Set([9]))
-        // ** See above comment under `const expected = {` for why asyncIds values are commented out
 
         t.equals(asyncPending.callbackCount, 2)
         t.strictSame(asyncPending.aggregateNodes, new Set(['e', 'f']))
-        // t.strictSame(asyncPending.asyncIds, new Set([10, 12]))
         break
       case 4: // 23.32 - 23.585
         getSegments(23.4, 23.585, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 1)
         t.strictSame(syncActive.aggregateNodes, new Set(['d']))
-        // t.strictSame(syncActive.asyncIds, new Set([9]))
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 10, 11, 12]))
         break
       case 5: // 23.585 - 23.85
         getSegments(23.585, 23.85, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 0)
         t.strictSame(syncActive.aggregateNodes, new Set())
-        // t.strictSame(syncActive.asyncIds, new Set())
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 10, 11, 12]))
         break
       case 6: // 23.85 - 24.115
         getSegments(23.85, 24.115, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 2)
         t.strictSame(syncActive.aggregateNodes, new Set(['e']))
-        // t.strictSame(syncActive.asyncIds, new Set([10, 11]))
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 10, 11, 12]))
         break
       case 7: // 24.115 - 24.38
         getSegments(24.115, 24.38, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 2)
         t.strictSame(syncActive.aggregateNodes, new Set(['e']))
-        // t.strictSame(syncActive.asyncIds, new Set([10, 11]))
 
         t.equals(asyncPending.callbackCount, 2)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'f']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 12]))
         break
       case 8: // 24.38 - 24.645
         getSegments(24.38, 24.645, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 2)
         t.strictSame(syncActive.aggregateNodes, new Set(['e']))
-        // t.strictSame(syncActive.asyncIds, new Set([10, 11]))
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 11, 12, 14]))
         break
       case 9: // 24.645 - 24.91
         getSegments(24.645, 24.91, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 1)
         t.strictSame(syncActive.aggregateNodes, new Set(['e']))
-        // t.strictSame(syncActive.asyncIds, new Set([10]))
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 11, 12, 14]))
         break
       case 10: // 24.91 - 25.175
         getSegments(24.91, 25.175, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 3)
         t.strictSame(syncActive.aggregateNodes, new Set(['d', 'e']))
-        // t.strictSame(syncActive.asyncIds, new Set([9, 10, 11]))
 
         t.equals(asyncPending.callbackCount, 5)
         t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g', 'h']))
-        // t.strictSame(asyncPending.asyncIds, new Set([9, 11, 12, 14, 15]))
         break
     }
   }
