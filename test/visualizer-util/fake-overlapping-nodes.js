@@ -14,10 +14,10 @@ const dummyCallbackEvents = [
   { i: 9, delayStart: 20, before: 24, after: 25.5, aggregateId: 'e', clusterId: 'C' }, // is sources[1] on aggregateId e
   { i: 10, delayStart: 23.5, before: 24, after: 24.5, aggregateId: 'e', clusterId: 'C' }, // is sources[2] on aggregateId e
 
-  // Attaches to .before and .after arrays of sources[0] on aggregateId d, instead of adding new entry to .sources[]
+  // Attaches to .before and .after arrays of sources[0] on aggregateId d, instead of adding new asyncId to .sources[]
   { i: 11, /* gets delayStart of 24 */ before: 25, after: 25.5, aggregateId: 'd', clusterId: 'B', sourceKey: 0 },
 
-  // Attaches to .before and .after arrays of sources[2] on aggregateId e, instead of adding new entry to .sources[]
+  // Attaches to .before and .after arrays of sources[2] on aggregateId e, instead of adding new asyncId to .sources[]
   { i: 12, /* gets delayStart of 24.5 */ before: 25, after: 25.5, aggregateId: 'e', clusterId: 'C', sourceKey: 2 },
 
   { i: 13, delayStart: 21, before: 27, after: 28, aggregateId: 'f', clusterId: 'B' },
@@ -47,6 +47,10 @@ const dummyAggregateNodes = {
 /**
  * Diagrams showing how the above events and nodes interrelate:
  *
+ **********************************************************************************
+ * NODE CONNECTIONS:
+ **********************************************************************************
+ *
  *                    -----------------
  *                   |*** CLUSTER A ***|
  *                   |    [ag root]    |
@@ -65,33 +69,40 @@ const dummyAggregateNodes = {
  *          |  [ag g]       |     |    [ag h]     |
  *           ---------------       ---------------
  *
- *        letter = async delay (.delayStart -> .before)
- *             ▓ = sync processing (.before -> .after)
  *
- *  Each character below represents 0.5 units of time
+ **********************************************************************************
+ * NODES OVER TIME:
+ **********************************************************************************
+ * Each character below represents 0.5 units of time
+ * letter = async delay (.delayStart -> .before)
+ *      ▓ = sync processing (.before -> .after)
+ * For example, ddd▓ = 1.5 async delay & 0.5 sync delay, in one callbackEvent, on aggregateNode d
  *
- *  i=   | Time -------->      ⒑                  ⒛
- *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9  Totals:
+ * Test slices defined in 'Visualizer CallbackEvents - Wall time slices' test:
+ *                     sliceA: __ (10 - 11)     sliceB: _______ (22.5 - 25)
  *  -----|-------------------------------------------------------------
- * [16]Cb|                                                   hhhhhhhh▓  raw:  4
- * [15]Bw|                                                  gggggggg▓   raw:  4
- * [14]Aw|                                                        a▓    raw:  0.5
- * [13]Bw|                                           ffffffffffff▓▓     raw:  6
- * [12]Cb|                                                  e▓          raw:  0.5
- * [11]Bb|                                                ddd▓          raw:  1.5
- * [10]Cb|                                                e▓            raw:  0.5
- *  [9]Cb|                                         eeeeeeee▓▓▓          raw:  4
- *  [8]Bb|                                 dddddddddddd▓▓▓              raw:  6
- *  [7]Aw|                                         aa▓▓                 raw:  1
- *  [6]Aw|                                      ccc▓▓▓                  raw:  2.0
- *  [5]Aw|                                     ccc▓▓▓▓▓                 raw:  1.5
- *  [4]Aw|                                      c▓                      raw:  0.5
- *  [3]Aw|       aaaaaaaaaaaaaaaaaaaaaaaaaaaaa▓▓▓                       raw: 14.5
- *  [2]Cw|                                  e▓                          raw:  0.5
- *  [1]Aw|                           bbbb▓                              raw:  2
- *  [0]Aw|                   aaaaaaaaaa▓▓▓                              raw:  5
- *  -----|------------------------------------------------------------
- *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
+ *  i=   | Time -------->      ⒑                  ⒛
+ *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9  Totals:     asyncIds:
+ *  -----|-------------------------------------------------------------
+ * [16]Cb|                                                   hhhhhhhh▓  raw:  4     asyncId: 15
+ * [15]Bw|                                                  gggggggg▓   raw:  4     asyncId: 14
+ * [14]Aw|                                                        a▓    raw:  0.5   asyncId: 13
+ * [13]Bw|                                           ffffffffffff▓▓     raw:  6     asyncId: 12
+ * [12]Cb|                                                  e▓          raw:  0.5   asyncId: 11 *
+ * [11]Bb|                                                ddd▓          raw:  1.5   asyncId:  9 *
+ * [10]Cb|                                                e▓            raw:  0.5   asyncId: 11
+ *  [9]Cb|                                         eeeeeeee▓▓▓          raw:  4     asyncId: 10
+ *  [8]Bb|                                 dddddddddddd▓▓▓              raw:  6     asyncId:  9
+ *  [7]Aw|                                         aa▓▓                 raw:  1     asyncId:  8
+ *  [6]Aw|                                      ccc▓▓▓                  raw:  2.0   asyncId:  7
+ *  [5]Aw|                                     ccc▓▓▓▓▓                 raw:  1.5   asyncId:  6
+ *  [4]Aw|                                      c▓                      raw:  0.5   asyncId:  5
+ *  [3]Aw|       aaaaaaaaaaaaaaaaaaaaaaaaaaaaa▓▓▓                       raw: 14.5   asyncId:  4
+ *  [2]Cw|                                  e▓                          raw:  0.5   asyncId:  3
+ *  [1]Aw|                           bbbb▓                              raw:  2     asyncId:  2
+ *  [0]Aw|                   aaaaaaaaaa▓▓▓                              raw:  5     asyncId:  1
+ *  -----|------------------------------------------------------------            * See comments in
+ *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9      dummyCallbackEvents def
  *
  *  Flattened times (times when any event is busy) based on the above:  Expected
  *  -----|------------------------------------------------------------  results (ms):

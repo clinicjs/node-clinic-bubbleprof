@@ -5,7 +5,6 @@ const loadData = require('../visualizer/data/index.js')
 const DataSet = require('../visualizer/data/dataset.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
-const fakeJson = require('./visualizer-util/fakedata.json')
 const { AggregateNode } = require('../visualizer/data/data-node.js')
 const {
   fakeNodes,
@@ -55,7 +54,7 @@ function validateData (dataSet) {
   return result || 'Pass'
 }
 
-test('Visualizer data - examples/slow-io sample json', function (t) {
+test('Visualizer data - data nodes - examples/slow-io sample json', function (t) {
   const dataSet = loadData(slowioJson)
 
   t.equals(dataSet.settings.averaging, 'mean')
@@ -66,7 +65,7 @@ test('Visualizer data - examples/slow-io sample json', function (t) {
   t.end()
 })
 
-test('Visualizer data - acmeair sample json', function (t) {
+test('Visualizer data - data nodes - acmeair sample json', function (t) {
   const dataSet = loadData(acmeairJson, { averaging: 'median' })
 
   t.equals(dataSet.settings.averaging, 'median')
@@ -77,39 +76,7 @@ test('Visualizer data - acmeair sample json', function (t) {
   t.end()
 })
 
-test('Visualizer data - fake json', function (t) {
-  const dataSet = loadData(fakeJson)
-
-  t.equals(dataSet.clusterNodes.size, 2)
-
-  t.end()
-})
-
-test('Visualizer data - empty data file', function (t) {
-  t.throws(() => {
-    loadData()
-  }, new Error('No valid data found, data.json is typeof string'))
-
-  t.end()
-})
-
-test('Visualizer data - invalid settings', function (t) {
-  t.throws(() => {
-    loadData({ map: () => {} }, { averaging: 'mode' })
-  }, new Error('Invalid key "mode" passed, valid types are: mean, median, sum'))
-
-  t.end()
-})
-
-test('Visualizer data - access invalid node id', function (t) {
-  const dataSet = loadData(slowioJson)
-
-  t.equal(dataSet.getByNodeType('ClusterNode', 'foo'), undefined)
-
-  t.end()
-})
-
-test('Visualizer data - less common, preset type categories', function (t) {
+test('Visualizer data - data nodes - less common, preset type categories', function (t) {
   const dataSet = new DataSet(fakeNodes)
   dataSet.processData()
   let result = ''
@@ -145,7 +112,7 @@ test('Visualizer data - less common, preset type categories', function (t) {
   t.end()
 })
 
-test('Visualizer data - decimals by type, category and party', function (t) {
+test('Visualizer data - data nodes - decimals by type, category and party', function (t) {
   function roundTo5Places (num) { return Number(num.toFixed(5)) }
 
   const dataSet = new DataSet(fakeNodes)

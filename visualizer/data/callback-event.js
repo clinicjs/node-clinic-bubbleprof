@@ -26,10 +26,39 @@ class CallbackEvent {
 
 // These temporary arrays of all CallbackEvents in a DataSet are to be used to calculate stats, then deleted / garbage collected
 class AllCallbackEvents {
-  constructor () {
+  constructor (wallTime) {
     this.array = []
+    this.wallTime = wallTime // Reference to DataSet.wallTime object
   }
+
+  add (callbackEvent) {
+    this.array.push(callbackEvent)
+    if (!this.wallTime.profileStart || callbackEvent.delayStart < this.wallTime.profileStart) this.wallTime.profileStart = callbackEvent.delayStart
+    if (!this.wallTime.profileEnd || callbackEvent.after > this.wallTime.profileEnd) this.wallTime.profileEnd = callbackEvent.after
+  }
+
+  applyWallTimes (callbackEvent) {
+    const { delayStart, before, after } = callbackEvent
+
+    const asyncSegments = this.wallTime.getSegments(delayStart, before)
+    const syncSegments = this.wallTime.getSegments(before, after)
+
+    // Browserified short-ish (<100) loops, within very long loop. Order isn't important.
+    // For efficiency, use for (var), only check length once, no variables in block, send to ordinary function
+    var i
+    for (i = asyncSegments.length - 1; i >= 0; i--) {
+      setToWallTimeSegment(callbackEvent, asyncSegments[i].asyncPending)
+    }
+
+    for (i = syncSegments.length - 1; i >= 0; i--) {
+      setToWallTimeSegment(callbackEvent, syncSegments[i].syncActive)
+    }
+  }
+
   processAll () {
+    this.wallTime.profileDuration = this.wallTime.profileEnd - this.wallTime.profileStart
+    this.wallTime.msPerPercent = this.wallTime.profileDuration / 100
+
     const clusterStats = new Map()
     const aggregateStats = new Map()
 
@@ -42,6 +71,8 @@ class AllCallbackEvents {
         // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
         continue
       }
+
+      this.applyWallTimes(callbackEvent)
 
       const aggregateId = aggregateNode.id
       if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
@@ -98,10 +129,11 @@ class FlattenedIntervals {
   pushAndFlatten (interval) {
     // Clone interval data to mutate it without cross-referencing between cluster and aggregate
     const newInterval = new Interval(interval.start, interval.end, interval.isBetween)
+    let i = this.array.length - 1
 
     // If we've already found intervals for this node, walk backwards through them,
     // flattening against this new one as we go, until we hit a gap
-    for (var i = this.array.length - 1; i >= 0; i--) {
+    for (; i >= 0; i--) {
       const earlierInterval = this.array[i]
 
       if (newInterval.start < earlierInterval.end) {
@@ -150,6 +182,12 @@ class Interval {
     clusterStatsItem.intervals.sync.pushAndFlatten(this)
     aggregateStatsItem.intervals.sync.pushAndFlatten(this)
   }
+}
+
+function setToWallTimeSegment (callbackEvent, segmentData) {
+  segmentData.asyncIds.add(callbackEvent.sourceNode.asyncId)
+  segmentData.callbackCount++
+  segmentData.aggregateNodes.add(callbackEvent.aggregateNode.aggregateId)
 }
 
 module.exports = {

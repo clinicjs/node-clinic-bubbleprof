@@ -41,6 +41,8 @@ for (const [clusterId, clusterNode] of clusterNodes) {
   fakeNodes.push(clusterNodes.get(clusterId))
 }
 
+let asyncId = 0 // Give root node asyncId 0 so first 'real' node gets 1
+
 for (const dummyEvent of dummyCallbackEvents) {
   const aggregateNode = aggregateNodes.get(dummyEvent.aggregateId)
   if (typeof dummyEvent.sourceKey !== 'undefined') {
@@ -51,6 +53,7 @@ for (const dummyEvent of dummyCallbackEvents) {
   } else {
     // Create a new source
     aggregateNode.sources.push({
+      asyncId,
       init: dummyEvent.delayStart,
       before: [dummyEvent.before],
       after: [dummyEvent.after],
@@ -58,6 +61,7 @@ for (const dummyEvent of dummyCallbackEvents) {
       // if it's undefined give it a valid random value for completeness
       destroy: dummyEvent.destroy || dummyEvent.after + Math.random()
     })
+    asyncId++
   }
 }
 
