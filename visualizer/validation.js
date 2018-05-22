@@ -6,9 +6,11 @@ function isNumber (num) {
   return typeof num === 'number' && !Number.isNaN(num)
 }
 function areNumbers (arr) {
-  let result = !!arr.length
-  arr.forEach((num) => { if (!isNumber(num)) result = false })
-  return result
+  if (!arr.length) return false
+  for (var i = arr.length - 1; i >= 0; i--) {
+    if (!isNumber(arr[i])) return false
+  }
+  return true
 }
 function validateKey (key, validOptions) {
   if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {

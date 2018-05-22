@@ -58,7 +58,7 @@ class DataSet {
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents(this.wallTime) // CallbackEvents are created and pushed within SourceNode constructor
     // Source, Aggregate and Cluster Node maps persist in memory throughout
-    this.sourceNodes = new Map() // SourceNodes are created from AggregateNode constructor and set in their own constructor
+    this.sourceNodes = [] // SourceNodes are created from and pushed to this array in AggregateNode constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
     this.clusterNodes = new Map(
       data.map((node) => [node.clusterId, new ClusterNode(node, this)])
@@ -70,7 +70,6 @@ class DataSet {
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
-      SourceNode: 'sourceNodes',
       AggregateNode: 'aggregateNodes',
       ClusterNode: 'clusterNodes'
     }
@@ -90,12 +89,10 @@ function getWallTimeSegment () {
   // Refers to 1% of the time the profile was running for
   return {
     syncActive: {
-      asyncIds: new Set(),
       callbackCount: 0,
       aggregateNodes: new Set()
     },
     asyncPending: {
-      asyncIds: new Set(),
       callbackCount: 0,
       aggregateNodes: new Set()
     }
