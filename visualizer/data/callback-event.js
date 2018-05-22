@@ -16,11 +16,7 @@ class CallbackEvent {
     // Timestamp when this callback call completes
     this.after = source.after[callKey]
 
-    this.sourceNode = source
     this.aggregateNode = source.aggregateNode
-    this.clusterNode = source.aggregateNode.clusterNode
-
-    this.isBetweenClusters = this.aggregateNode.isBetweenClusters
   }
 }
 
@@ -32,9 +28,18 @@ class AllCallbackEvents {
   }
 
   add (callbackEvent) {
+    // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
+    const {
+      delayStart,
+      before,
+      after
+    } = callbackEvent
+
+    if (!areNumbers([delayStart, before, after])) return
+
     this.array.push(callbackEvent)
-    if (!this.wallTime.profileStart || callbackEvent.delayStart < this.wallTime.profileStart) this.wallTime.profileStart = callbackEvent.delayStart
-    if (!this.wallTime.profileEnd || callbackEvent.after > this.wallTime.profileEnd) this.wallTime.profileEnd = callbackEvent.after
+    if (!this.wallTime.profileStart || delayStart < this.wallTime.profileStart) this.wallTime.profileStart = delayStart
+    if (!this.wallTime.profileEnd || after > this.wallTime.profileEnd) this.wallTime.profileEnd = after
   }
 
   applyWallTimes (callbackEvent) {
@@ -62,31 +67,12 @@ class AllCallbackEvents {
     const clusterStats = new Map()
     const aggregateStats = new Map()
 
-    this.array.sort((a, b) => a.before - b.before)
+    this.array.sort((a, b) => b.before - a.before)
 
-    for (const callbackEvent of this.array) {
-      const { delayStart, before, after, isBetweenClusters, aggregateNode, clusterNode } = callbackEvent
-
-      if (!areNumbers([delayStart, before, after])) {
-        // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
-        continue
-      }
-
-      this.applyWallTimes(callbackEvent)
-
-      const aggregateId = aggregateNode.id
-      if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
-      const aggregateStatsItem = aggregateStats.get(aggregateId)
-
-      const clusterId = clusterNode.id
-      if (!clusterStats.has(clusterId)) clusterStats.set(clusterId, new TemporaryStatsItem(clusterNode))
-      const clusterStatsItem = clusterStats.get(clusterId)
-
-      const asyncInterval = new Interval(delayStart, before, isBetweenClusters)
-      asyncInterval.applyAsync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
-
-      const syncInterval = new Interval(before, after, isBetweenClusters)
-      syncInterval.applySync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
+    // Optimised for browsers because it runs once for every callback event in the profile
+    for (var i = this.array.length - 1; i >= 0; i--) {
+      this.applyWallTimes(this.array[i])
+      processCallbackEvent(this.array[i], clusterStats, aggregateStats)
     }
 
     clusterStats.forEach(item => item.applyIntervalsTotals())
@@ -129,28 +115,18 @@ class FlattenedIntervals {
   pushAndFlatten (interval) {
     // Clone interval data to mutate it without cross-referencing between cluster and aggregate
     const newInterval = new Interval(interval.start, interval.end, interval.isBetween)
-    let i = this.array.length - 1
 
-    // If we've already found intervals for this node, walk backwards through them,
-    // flattening against this new one as we go, until we hit a gap
-    for (; i >= 0; i--) {
-      const earlierInterval = this.array[i]
-
-      if (newInterval.start < earlierInterval.end) {
-        this.array.pop()
-        newInterval.start = Math.min(earlierInterval.start, newInterval.start)
-        newInterval.end = Math.max(earlierInterval.end, newInterval.end)
-      } else {
-        // Can't be any more before this point
-        break
-      }
+    // If we've already found intervals for this node, walk backwards through them...
+    for (var i = this.array.length - 1; i >= 0; i--) {
+      // ...flattening against this new one as we go, until we hit a gap
+      if (!flattenInterval(this.array, i, newInterval)) break
     }
     this.array.push(newInterval)
   }
   getFlattenedTotal () {
     let total = 0
-    for (const interval of this.array) {
-      total += interval.getDuration()
+    for (var i = this.array.length - 1; i >= 0; i--) {
+      total += this.array[i].getDuration()
     }
     return total
   }
@@ -185,9 +161,41 @@ class Interval {
 }
 
 function setToWallTimeSegment (callbackEvent, segmentData) {
-  segmentData.asyncIds.add(callbackEvent.sourceNode.asyncId)
+  // Number of callbackEvents at a point in time will be the same as the number of asyncIds
+  // because by definition there can't be two callbackEvents of the same asyncId at the same time
   segmentData.callbackCount++
   segmentData.aggregateNodes.add(callbackEvent.aggregateNode.aggregateId)
+}
+
+function processCallbackEvent (callbackEvent, clusterStats, aggregateStats) {
+  const { delayStart, before, after, aggregateNode } = callbackEvent
+  const { aggregateId, isBetweenClusters, clusterNode } = aggregateNode
+
+  if (!aggregateStats.has(aggregateId)) aggregateStats.set(aggregateId, new TemporaryStatsItem(aggregateNode))
+  const aggregateStatsItem = aggregateStats.get(aggregateId)
+
+  const clusterId = clusterNode.id
+  if (!clusterStats.has(clusterId)) clusterStats.set(clusterId, new TemporaryStatsItem(clusterNode))
+  const clusterStatsItem = clusterStats.get(clusterId)
+
+  const asyncInterval = new Interval(delayStart, before, isBetweenClusters)
+  asyncInterval.applyAsync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
+
+  const syncInterval = new Interval(before, after, isBetweenClusters)
+  syncInterval.applySync(clusterStatsItem, aggregateStatsItem, isBetweenClusters)
+}
+
+function flattenInterval (intervalsArray, i, newInterval) {
+  const earlierInterval = intervalsArray[i]
+
+  if (newInterval.start < earlierInterval.end) {
+    intervalsArray.pop()
+    newInterval.start = Math.min(earlierInterval.start, newInterval.start)
+    newInterval.end = Math.max(earlierInterval.end, newInterval.end)
+    return true
+  }
+  // Can't be any more after this point, so break the for loop
+  return false
 }
 
 module.exports = {
