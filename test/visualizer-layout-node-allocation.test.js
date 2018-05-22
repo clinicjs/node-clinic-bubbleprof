@@ -23,7 +23,7 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -58,7 +58,7 @@ test('Visualizer layout - node allocation - three-sided space segments depend on
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -85,7 +85,7 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -120,7 +120,7 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -149,7 +149,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -225,7 +225,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const subset = [6, 7, 8].map(nodeId => dataSet.clusterNodes.get(nodeId))
   const layout = new Layout({ dataNodes: subset }, settings)
@@ -281,7 +281,7 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 501 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -336,7 +336,7 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 501 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)

@@ -8,7 +8,7 @@ const generateLayout = require('../visualizer/layout/index.js')
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
 test('Visualizer layout - stems - calculates between and diameter based on stats', function (t) {
-  const dataSet = loadData(slowioJson)
+  const dataSet = loadData({ debugMode: true }, slowioJson)
   const layout = generateLayout(dataSet)
 
   const layoutNode = layout.layoutNodes.get(16)
@@ -20,7 +20,7 @@ test('Visualizer layout - stems - calculates between and diameter based on stats
 })
 
 test('Visualizer layout - stems - calculates length based on ancestors and scale', function (t) {
-  const dataSet = loadData(slowioJson)
+  const dataSet = loadData({ debugMode: true }, slowioJson)
   const layout = generateLayout(dataSet, { labelMinimumSpace: 2, lineWidth: 3 })
 
   const stem = layout.layoutNodes.get(16).stem
@@ -51,7 +51,7 @@ test('Visualizer layout - stems - identifies leaves', function (t) {
     ['1.2.8', 1]
   ]
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   t.deepEqual(layout.layoutNodes.get(1).stem.leaves.ids, [4, 5, 7, 8, 9])
