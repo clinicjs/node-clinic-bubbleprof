@@ -10,6 +10,7 @@ const analysis = require('./analysis/index.js')
 const Stringify = require('streaming-json-stringify')
 const browserify = require('browserify')
 const streamTemplate = require('stream-template')
+const joinTrace = require('node-trace-log-join')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
@@ -86,8 +87,8 @@ class ClinicBubbleprof extends events.EventEmitter {
       }
 
       // create directory and move files to that directory
-      fs.rename(
-        'node_trace.1.log', paths['/traceevent'],
+      joinTrace(
+        'node_trace.*.log', paths['/traceevent'],
         function (err) {
           /* istanbul ignore if: the node_trace file should always exists */
           if (err) return callback(err, paths['/'])
