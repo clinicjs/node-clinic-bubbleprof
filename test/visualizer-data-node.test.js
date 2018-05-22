@@ -36,17 +36,18 @@ function validateSourceNode (sourceNode) {
 function validateData (dataSet) {
   let result = ''
 
-  for (const [, clusterNode] of dataSet.clusterNodes) {
+  for (const clusterNode of dataSet.clusterNodes.values()) {
     result += validateClusterNode(clusterNode)
 
-    for (const [, aggregateNode] of clusterNode.nodes) {
+    for (const aggregateNode of clusterNode.nodes.values()) {
       result += validateAggregateNode(aggregateNode)
-
-      for (const sourceNode of aggregateNode.sources) {
-        result += validateSourceNode(sourceNode)
-      }
     }
   }
+
+  for (const sourceNode of dataSet.sourceNodes) {
+    result += validateSourceNode(sourceNode)
+  }
+
   result += validateClusterNode(dataSet.getByNodeType('ClusterNode', 1))
   result += validateAggregateNode(dataSet.getByNodeType('AggregateNode', 1))
 

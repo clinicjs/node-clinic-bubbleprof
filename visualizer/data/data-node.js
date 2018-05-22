@@ -187,7 +187,6 @@ class AggregateNode extends DataNode {
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
-    this.sources = []
     // This loop runs thousands+ times, unbounded and scales with size of profile. Optimize for browsers
     const sourcesLength = node.sources.length
     for (var i = 0; i < sourcesLength; i++) {
