@@ -5,7 +5,7 @@ const DataSet = require('../visualizer/data/dataset.js')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 
 test('Visualizer dataset - fake json', function (t) {
-  const dataSet = loadData(fakeJson)
+  const dataSet = loadData({ debugMode: true }, fakeJson)
 
   t.equals(dataSet.clusterNodes.size, 2)
   t.equals(dataSet.aggregateNodes.size, 2)
@@ -24,14 +24,14 @@ test('Visualizer data - DataSet - empty data file', function (t) {
 
 test('Visualizer data - DataSet - invalid settings', function (t) {
   t.throws(() => {
-    loadData({ map: () => {} }, { averaging: 'mode' })
+    loadData({ averaging: 'mode' }, { map: () => {} })
   }, new Error('Invalid key "mode" passed, valid types are: mean, median, sum'))
 
   t.end()
 })
 
 test('Visualizer data - DataSet - access invalid node id', function (t) {
-  const dataSet = loadData(fakeJson)
+  const dataSet = loadData({ debugMode: true }, fakeJson)
 
   t.equal(dataSet.getByNodeType('ClusterNode', 'foo'), undefined)
 
@@ -52,7 +52,7 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
 })
 
 test('Visualizer data - invalid calls to dataSet.wallTime.getSegments', function (t) {
-  const { wallTime } = loadData(acmeairJson)
+  const { wallTime } = loadData({ debugMode: true }, acmeairJson)
 
   t.throws(() => {
     wallTime.getSegments(6782000, 6786000)

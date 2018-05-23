@@ -17,7 +17,7 @@ const fakeScale = {
 }
 
 test('Visualizer layout - scale - calculates visible circle radius based on within of the node and the scale', function (t) {
-  const dataSet = loadData(slowioJson)
+  const dataSet = loadData({ debugMode: true }, slowioJson)
   const layout = generateLayout(dataSet)
 
   const parentLayoutNode = layout.layoutNodes.get(1)
@@ -37,7 +37,7 @@ test('Visualizer layout - scale - calculates visible circle radius based on with
 })
 
 test('Visualizer layout - scale - calculates visible line length based on between of the child node and the scale', function (t) {
-  const dataSet = loadData(slowioJson)
+  const dataSet = loadData({ debugMode: true }, slowioJson)
   const layout = generateLayout(dataSet)
 
   const parentLayoutNode = layout.layoutNodes.get(1)
@@ -52,7 +52,7 @@ test('Visualizer layout - scale - calculates visible line length based on betwee
 })
 
 test('Visualizer layout - scale - calculates distance between centers', function (t) {
-  const dataSet = loadData(slowioJson)
+  const dataSet = loadData({ debugMode: true }, slowioJson)
   const layout = generateLayout(dataSet)
 
   const parentLayoutNode = layout.layoutNodes.get(1)

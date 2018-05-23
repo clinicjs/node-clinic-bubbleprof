@@ -55,7 +55,7 @@ function validateData (dataSet) {
 }
 
 test('Visualizer data - data nodes - examples/slow-io sample json', function (t) {
-  const dataSet = loadData(slowioJson)
+  const dataSet = loadData({ debugMode: true }, slowioJson)
 
   t.equals(dataSet.settings.averaging, 'mean')
 
@@ -66,7 +66,7 @@ test('Visualizer data - data nodes - examples/slow-io sample json', function (t)
 })
 
 test('Visualizer data - data nodes - acmeair sample json', function (t) {
-  const dataSet = loadData(acmeairJson, { averaging: 'median' })
+  const dataSet = loadData({ debugMode: true, averaging: 'median' }, acmeairJson)
 
   t.equals(dataSet.settings.averaging, 'median')
 
