@@ -4,8 +4,7 @@ const Frame = require('./frame.js')
 const { CallbackEvent } = require('./callback-event.js')
 const {
   validateNumber,
-  isNumber,
-  areNumbers
+  isNumber
 } = require('../validation.js')
 
 class DataNode {
@@ -304,10 +303,9 @@ class SourceNode {
 
     // This loop runs thousands+++ of times, unbounded and scales with size of profile. Optimize for browsers
     const callbackEventCount = this.before.length
-    const callbackEvents = this.dataSet.callbackEvents
     for (var i = 0; i < callbackEventCount; i++) {
-      // Skip items with missing data, e.g. bad application exits leaving a .before with no corresponding .after
-      if (areNumbers([this.before[i], this.after[i]])) callbackEvents.add(new CallbackEvent(i, this))
+      // Skip incomplete items, e.g. bad application exits leaving a .before with no corresponding .after
+      if (isNumber(this.after[i])) this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
     }
     return this
   }

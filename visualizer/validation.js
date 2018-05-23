@@ -5,13 +5,6 @@
 function isNumber (num) {
   return typeof num === 'number' && !Number.isNaN(num)
 }
-function areNumbers (arr) {
-  if (!arr.length) return false
-  for (var i = arr.length - 1; i >= 0; i--) {
-    if (!isNumber(arr[i])) return false
-  }
-  return true
-}
 function validateKey (key, validOptions) {
   if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {
     throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
@@ -52,7 +45,6 @@ function uniqueMapKey (key, map) {
 
 module.exports = {
   isNumber,
-  areNumbers,
   validateKey,
   validateNumber,
   uniqueMapKey
