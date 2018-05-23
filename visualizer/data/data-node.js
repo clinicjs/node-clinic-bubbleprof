@@ -50,9 +50,9 @@ class DataNode {
     return this.dataSet.getByNodeType(this.constructor.name, nodeId)
   }
 
-  validateStat (num, statType = '', aboveZero = false) {
+  validateStat (num, statType = '', conditions) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
-    return validateNumber(num, targetDescription, aboveZero)
+    return validateNumber(num, targetDescription, conditions)
   }
 
   static markFromArray (markArray) {
