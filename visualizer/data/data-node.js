@@ -107,6 +107,7 @@ class ClusterNode extends DataNode {
   generateAggregateNodes (nodes) {
     for (var i = nodes.length - 1; i >= 0; i--) {
       const aggregateNode = new AggregateNode(nodes[i], this)
+      aggregateNode.generateSourceNodes(nodes[i].sources)
       this.nodes.set(aggregateNode.aggregateId, aggregateNode)
     }
   }
@@ -178,20 +179,22 @@ class AggregateNode extends DataNode {
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
+    this.dataSet.aggregateNodes.set(this.aggregateId, this)
+  }
+  generateSourceNodes (sources) {
     const debugMode = this.dataSet.settings.debugMode
 
     // This loop runs thousands+ times, unbounded and scales with size of profile. Optimize for browsers
-    const sourcesLength = node.sources.length
+    const sourcesLength = sources.length
+    // Only store sourceNodes in debugMode, otherwise extract their callbackEvents and discard
     if (debugMode) this.sources = new Array(sourcesLength)
 
     for (var i = 0; i < sourcesLength; i++) {
-      const sourceNode = new SourceNode(node.sources[i], this)
+      const sourceNode = new SourceNode(sources[i], this)
       sourceNode.generateCallbackEvents()
       if (debugMode) this.sources[i] = sourceNode
     }
     if (debugMode) this.dataSet.sourceNodes = this.dataSet.sourceNodes.concat(this.sources)
-
-    this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
   applyDecimalsToCluster () {
     const apply = (time, betweenOrWithin) => {
