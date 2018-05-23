@@ -96,28 +96,16 @@ class ClusterNode extends DataNode {
       party: {between: new Map(), within: new Map()} // From .mark - 'user', 'module' or 'nodecore'
     }
 
-    this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
     this.nodes = new Map()
 
-    let firstNode = null
-
-    // This loop runs typically dozens of times, double digits. Not a priority to optimize
-    for (const subNode of node.nodes) {
-      this.nodeIds.add(subNode.aggregateId)
-      if (subNode.dataSet) {
-        // this is a node instance already
-        this.nodes.set(subNode.id, subNode)
-        if (!firstNode) firstNode = subNode
-      } else {
-        // these are the properties from which an aggregate node should be created
-        const aggregateNode = new AggregateNode(subNode, this)
-        this.nodes.set(subNode.aggregateId, aggregateNode)
-        if (!firstNode) firstNode = aggregateNode
-      }
+    const mark = node.mark || (node.nodes.length ? node.nodes[0].mark : null)
+    this.mark = mark ? DataNode.markFromArray(mark) : null
+  }
+  generateAggregateNodes (nodes) {
+    for (var i = nodes.length - 1; i >= 0; i--) {
+      const aggregateNode = new AggregateNode(nodes[i], this)
+      this.nodes.set(aggregateNode.aggregateId, aggregateNode)
     }
-
-    // All aggregateNodes within a clusterNode are by definition from the same party
-    this.mark = node.mark ? DataNode.markFromArray(node.mark) : firstNode.mark
   }
   setDecimal (num, classification, position, label) {
     const decimalsMap = this.decimals[classification][position]
@@ -167,7 +155,7 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
-    this.isBetweenClusters = node.parentAggregateId && !clusterNode.nodeIds.has(node.parentAggregateId)
+    this.isBetweenClusters = clusterNode.parentClusterId && clusterNode.getParentNode().nodes.has(node.parentAggregateId)
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
@@ -333,6 +321,17 @@ class ArtificialNode extends ClusterNode {
     const node = Object.assign(defaultProperties, rawNode)
 
     this.nodeType = node.nodeType
+  }
+  applyAggregateNodes (nodes) {
+    if (!nodes.size) return
+
+    for (const [aggregateId, aggregateNode] of nodes) {
+      this.nodes.set(aggregateId, aggregateNode)
+      if (!this.mark) this.mark = aggregateNode.mark
+    }
+  }
+  applyMark (mark) {
+    if (!this.mark) this.mark = mark
   }
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)

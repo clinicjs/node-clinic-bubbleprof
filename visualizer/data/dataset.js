@@ -61,9 +61,13 @@ class DataSet {
     // Source, Aggregate and Cluster Node maps persist in memory throughout
     if (this.settings.debugMode) this.sourceNodes = [] // SourceNodes are created from and pushed to this array in AggregateNode constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
-    this.clusterNodes = new Map(
-      data.map((node) => [node.clusterId, new ClusterNode(node, this)])
-    )
+    this.clusterNodes = new Map()
+
+    for (const node of data) {
+      const clusterNode = new ClusterNode(node, this)
+      this.clusterNodes.set(node.clusterId, clusterNode)
+      clusterNode.generateAggregateNodes(node.nodes)
+    }
   }
   processData () {
     this.calculateFlattenedStats()
