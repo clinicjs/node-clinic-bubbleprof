@@ -57,8 +57,6 @@ function validateData (dataSet) {
 test('Visualizer data - data nodes - examples/slow-io sample json', function (t) {
   const dataSet = loadData({ debugMode: true }, slowioJson)
 
-  t.equals(dataSet.settings.averaging, 'mean')
-
   t.equals(dataSet.clusterNodes.size, 33)
   t.equals(validateData(dataSet), 'Pass')
 

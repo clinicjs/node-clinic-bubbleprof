@@ -11,14 +11,10 @@ class DataSet {
     }
 
     const defaultSettings = {
-      averaging: 'mean', // to be applied to callbackEvents within a sourceNode
-      quantileRange: 99, // set null to keep all outliers
-      idleOnly: false, // if true, discounts async delays while sync process blocks event loop
       debugMode: false // if true, keeps sourceNodes in memory and exposes dataSet and Layout to window
     }
 
     settings = Object.assign(defaultSettings, settings)
-    validateKey(settings.averaging, ['mean', 'median', 'sum'])
     this.settings = settings
 
     this.wallTime = {
