@@ -13,7 +13,8 @@ class DataSet {
     const defaultSettings = {
       averaging: 'mean', // to be applied to callbackEvents within a sourceNode
       quantileRange: 99, // set null to keep all outliers
-      idleOnly: false // if true, discounts async delays while sync process blocks event loop
+      idleOnly: false, // if true, discounts async delays while sync process blocks event loop
+      debugMode: false // if true, keeps sourceNodes in memory and exposes dataSet and Layout to window
     }
 
     settings = Object.assign(defaultSettings, settings)
@@ -58,7 +59,7 @@ class DataSet {
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents(this.wallTime) // CallbackEvents are created and pushed within SourceNode constructor
     // Source, Aggregate and Cluster Node maps persist in memory throughout
-    this.sourceNodes = [] // SourceNodes are created from and pushed to this array in AggregateNode constructor
+    if (this.settings.debugMode) this.sourceNodes = [] // SourceNodes are created from and pushed to this array in AggregateNode constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
     this.clusterNodes = new Map(
       data.map((node) => [node.clusterId, new ClusterNode(node, this)])

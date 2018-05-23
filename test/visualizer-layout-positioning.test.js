@@ -19,7 +19,7 @@ test('Visualizer layout - positioning - mock topology', function (t) {
     ['1.2.3.4', 150],
     ['1.9', 50]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
 
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
@@ -58,7 +58,7 @@ test('Visualizer layout - positioning - pyramid - simple', function (t) {
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
@@ -80,7 +80,7 @@ test('Visualizer layout - positioning - pyramid - gaps', function (t) {
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
@@ -108,7 +108,7 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
@@ -148,7 +148,7 @@ test('Visualizer layout - positioning - pyramid - example in docs', function (t)
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0 })
 
   const positioning = layout.positioning
@@ -168,7 +168,7 @@ test('Visualizer layout - positioning - debugInspect', function (t) {
     ['1.8', 100 - 1]
   ]
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = generateLayout(dataSet, { labelMinimumSpace: 0, lineWidth: 0, svgDistanceFromEdge: 0 })
 
   const positioning = layout.positioning
@@ -199,7 +199,7 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
   const layout = new Layout({ dataNodes: subset })
   layout.generate()
@@ -224,7 +224,7 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
@@ -249,7 +249,7 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   ]
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here

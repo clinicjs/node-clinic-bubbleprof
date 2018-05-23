@@ -187,11 +187,18 @@ class AggregateNode extends DataNode {
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
+    const debugMode = this.dataSet.settings.debugMode
+
     // This loop runs thousands+ times, unbounded and scales with size of profile. Optimize for browsers
     const sourcesLength = node.sources.length
+    if (debugMode) this.sources = new Array(sourcesLength)
+
     for (var i = 0; i < sourcesLength; i++) {
-      this.dataSet.sourceNodes.push(new SourceNode(node.sources[i], this))
+      const sourceNode = new SourceNode(node.sources[i], this)
+
+      if (debugMode) this.sources[i] = sourceNode
     }
+    if (debugMode) this.dataSet.sourceNodes = this.dataSet.sourceNodes.concat(this.sources)
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }

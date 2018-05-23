@@ -11,13 +11,17 @@ setTimeout(() => {
   const loadData = require('./data/index.js')
   const generateLayout = require('./layout/index.js')
 
-  const dataSet = loadData()
-  window.data = dataSet
-  console.log('data is exposed on window.data')
+  const dataSet = loadData({ debugMode: false })
+  if (dataSet.settings.debugMode) {
+    window.data = dataSet
+    console.log('data is exposed on window.data')
+  }
 
   const layout = generateLayout(dataSet, Object.assign({ collapseNodes: true }, ui.getSettingsForLayout()))
-  window.layout = layout
-  console.log('layout is exposed on window.layout')
+  if (dataSet.settings.debugMode) {
+    window.layout = layout
+    console.log('layout is exposed on window.layout')
+  }
 
   /* istanbul ignore next */
   ui.setData(layout)
