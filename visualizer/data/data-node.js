@@ -2,7 +2,11 @@
 
 const Frame = require('./frame.js')
 const { CallbackEvent } = require('./callback-event.js')
-const { validateNumber } = require('../validation.js')
+const {
+  validateNumber,
+  isNumber,
+  areNumbers
+} = require('../validation.js')
 
 class DataNode {
   constructor (dataSet) {
@@ -183,7 +187,7 @@ class AggregateNode extends DataNode {
 
     for (var i = 0; i < sourcesLength; i++) {
       const sourceNode = new SourceNode(node.sources[i], this)
-
+      sourceNode.generateCallbackEvents()
       if (debugMode) this.sources[i] = sourceNode
     }
     if (debugMode) this.dataSet.sourceNodes = this.dataSet.sourceNodes.concat(this.sources)
@@ -293,12 +297,19 @@ class SourceNode {
     this.destroy = source.destroy // numeric timestamp
 
     this.aggregateNode = aggregateNode
+  }
+  generateCallbackEvents () {
+    // Skip unusual cases of a broken asyncId with no init time (e.g. some root nodes)
+    if (!isNumber(this.init)) return this
 
     // This loop runs thousands+++ of times, unbounded and scales with size of profile. Optimize for browsers
-    const callbackEventCount = source.before.length
+    const callbackEventCount = this.before.length
+    const callbackEvents = this.dataSet.callbackEvents
     for (var i = 0; i < callbackEventCount; i++) {
-      this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
+      // Skip items with missing data, e.g. bad application exits leaving a .before with no corresponding .after
+      if (areNumbers([this.before[i], this.after[i]])) callbackEvents.add(new CallbackEvent(i, this))
     }
+    return this
   }
   get id () {
     return this.asyncId
