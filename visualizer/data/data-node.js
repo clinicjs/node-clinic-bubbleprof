@@ -105,7 +105,10 @@ class ClusterNode extends DataNode {
     this.mark = mark ? DataNode.markFromArray(mark) : null
   }
   generateAggregateNodes (nodes) {
-    for (var i = nodes.length - 1; i >= 0; i--) {
+    // TODO: if this is done out of sequence, it causes a 1d segment not found error in layout/node-allocation
+    // on opening some nodes (usually root node). Should ideally not rely on map order: investigate
+    const nodesLength = nodes.length
+    for (var i = 0; i < nodesLength; i++) {
       const aggregateNode = new AggregateNode(nodes[i], this)
       aggregateNode.generateSourceNodes(nodes[i].sources)
       this.nodes.set(aggregateNode.aggregateId, aggregateNode)
