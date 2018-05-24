@@ -268,3 +268,42 @@ test('Visualizer layout - scale - demagnifies when absolutes exceed available sp
 
   t.end()
 })
+
+test('Visualizer layout - scale - can handle zero-sized nodes', function (t) {
+  const topology = [
+    ['1.2', 0],
+    ['1.3', 10 - 1],
+    ['1.4', 1]
+  ]
+
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const layout = generateLayout(dataSet, settings)
+  layout.layoutNodes.get(1).stem.raw.ownDiameter = 0
+  layout.layoutNodes.get(2).stem.lengths.scalable = 0
+  layout.updateScale()
+  t.equal(layout.scale.decisiveWeight.category, 'longest')
+  t.equal(layout.scale.decisiveWeight.weight, (svgHeight - (settings.svgDistanceFromEdge * 2)) / 10)
+
+  t.end()
+})
+
+test('Visualizer layout - scale - can handle zero-sized views', function (t) {
+  const topology = [
+    ['1.2', 0],
+    ['1.3', 0],
+    ['1.4', 0]
+  ]
+
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const layout = generateLayout(dataSet, settings)
+  layout.layoutNodes.get(1).stem.raw.ownDiameter = 0
+  layout.layoutNodes.get(2).stem.lengths.scalable = 0
+  layout.layoutNodes.get(3).stem.lengths.scalable = 0
+  layout.layoutNodes.get(4).stem.lengths.scalable = 0
+  layout.updateScale()
+  t.equal(layout.scale.decisiveWeight.category, 'zero-sized view')
+  const availableShortest = (svgWidth / 2) - settings.svgDistanceFromEdge
+  t.equal(layout.scale.decisiveWeight.weight, availableShortest)
+
+  t.end()
+})

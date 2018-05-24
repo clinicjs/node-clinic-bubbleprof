@@ -83,7 +83,7 @@ class NodeAllocation {
       const leaf = leafLayoutNode
       const stem = leafLayoutNode.stem
 
-      const leafTotalStemLength = stem.lengths.rawTotal
+      const leafTotalStemLength = stem.lengths.prescaledTotal
       // Include ancestor Clumps
       const ancestors = stem.ancestors.ids.length ? stem.ancestors.ids : [leaf.parentId]
       for (let depth in ancestors) {

@@ -30,21 +30,23 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
   layout.generate()
 
   const unitsById = {}
+  const fixedUnitsById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     unitsById[layoutNode.id] = layoutNode.position.units
+    fixedUnitsById[layoutNode.id] = layoutNode.position.units.toFixed(8)
   }
 
   t.equal(unitsById[1], 1)
 
-  t.equal(unitsById[2], 100 / 1000)
-  t.equal(unitsById[3], 900 / 1000)
+  t.equal(fixedUnitsById[2], (100 / 1000).toFixed(8))
+  t.equal(fixedUnitsById[3], (900 / 1000).toFixed(8))
 
-  t.equal(unitsById[4], unitsById[3] * 500 / 1400)
-  t.equal(unitsById[6], unitsById[3] * 900 / 1400)
+  t.equal(fixedUnitsById[4], (unitsById[3] * 500 / 1400).toFixed(8))
+  t.equal(fixedUnitsById[6], (unitsById[3] * 900 / 1400).toFixed(8))
 
-  t.equal(unitsById[5], unitsById[4])
-  t.equal((unitsById[7]).toFixed(8), (unitsById[6] * 900 / 1400).toFixed(8))
-  t.equal(unitsById[8], unitsById[6] * 500 / 1400)
+  t.equal(fixedUnitsById[5], fixedUnitsById[4])
+  t.equal(fixedUnitsById[7], (unitsById[6] * 900 / 1400).toFixed(8))
+  t.equal(fixedUnitsById[8], (unitsById[6] * 500 / 1400).toFixed(8))
 
   t.equal((unitsById[2] + unitsById[5] + unitsById[7] + unitsById[8]).toFixed(0), 1 + '')
 
