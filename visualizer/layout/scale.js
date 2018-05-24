@@ -15,7 +15,7 @@ class Scale {
     this.layoutNodes = this.layout.layoutNodes
     const toLongest = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.scalable)
     const longest = [...this.layoutNodes.values()].reduce(toLongest, 0)
-    this.prescaleFactor = this.layout.settings.svgHeight / longest
+    this.prescaleFactor = this.layout.settings.svgHeight / (longest || 1)
   }
   calculateScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
