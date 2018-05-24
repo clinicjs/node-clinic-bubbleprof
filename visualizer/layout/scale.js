@@ -20,14 +20,16 @@ class Scale {
   calculateScaleFactor () {
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
-    const leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
+    let leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
+    // Zero-sized nodes do not affect the shape and therefore should not be accounted
+    leavesByShortest = leavesByShortest.filter(leaf => leaf.stem.lengths.scalable > 0)
 
-    const longest = leavesByShortest[leavesByShortest.length - 1].stem.lengths
-    const shortest = leavesByShortest[0].stem.lengths
+    const longest = leavesByShortest.length && leavesByShortest[leavesByShortest.length - 1].stem.lengths
+    const shortest = leavesByShortest.length && leavesByShortest[0].stem.lengths
     // TODO: Consider using in-between computed values for quantiles, like d3 does
-    const q50 = leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.lengths
-    const q25 = leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.lengths
-    const q75 = leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.lengths
+    const q50 = leavesByShortest.length && leavesByShortest[Math.floor(leavesByShortest.length / 2)].stem.lengths
+    const q25 = leavesByShortest.length && leavesByShortest[Math.floor(leavesByShortest.length / 4)].stem.lengths
+    const q75 = leavesByShortest.length && leavesByShortest[Math.floor(3 * leavesByShortest.length / 4)].stem.lengths
 
     const nodesCount = this.layoutNodes.size
 
@@ -70,11 +72,15 @@ class Scale {
     const longestConstrained = new ScaleWeight('longest constrained', leavesByShortest[leavesByShortest.length - 1], availableHeight, longest.scalable, longest.absolute)
 
     const accountedScales = [longestConstrained, ...scalesBySignificance.slice(0, leavesByShortest.length), diameterClamp]
-    this.scalesBySmallest = accountedScales.sort((a, b) => a.weight - b.weight)
-
-    this.decisiveWeight = this.scalesBySmallest[0]
-    if (this.scalesBySmallest[0] === longestConstrained && this.scalesBySmallest[1] === longestStretched) {
-      this.decisiveWeight = longestStretched
+    if (leavesByShortest.length) {
+      this.scalesBySmallest = accountedScales.sort((a, b) => a.weight - b.weight)
+      this.decisiveWeight = this.scalesBySmallest[0]
+      if (this.scalesBySmallest[0] === longestConstrained && this.scalesBySmallest[1] === longestStretched) {
+        this.decisiveWeight = longestStretched
+      }
+    } else {
+      this.decisiveWeight = new ScaleWeight('zero-sized view', null, availableShortest, 0, 0, 0)
+      this.scalesBySmallest = [this.decisiveWeight]
     }
     this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
