@@ -57,7 +57,7 @@ test('Visualizer data - invalid calls to dataSet.wallTime.getSegments', function
 
   t.throws(() => {
     wallTime.getSegments(6782000, 6786000)
-  }, new Error('Wall time segment start time (6782000) preceeds profile start time (6783474.641)'))
+  }, new Error('Wall time segment start time (6782000) precedes profile start time (6783474.641)'))
 
   t.throws(() => {
     wallTime.getSegments(6786000, 6789000)
@@ -65,7 +65,7 @@ test('Visualizer data - invalid calls to dataSet.wallTime.getSegments', function
 
   t.throws(() => {
     wallTime.getSegments(6787000, 6786000)
-  }, new Error('Wall time segment start time (6787000) doesn’t preceed segment end time (6786000)'))
+  }, new Error('Wall time segment start time (6787000) doesn’t precede segment end time (6786000)'))
 
   t.end()
 })

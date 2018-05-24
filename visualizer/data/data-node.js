@@ -297,9 +297,16 @@ class SourceNode {
     this.executionAsyncId = source.parentAsyncId
 
     this.init = source.init // numeric timestamp
-    this.before = source.before // array of numeric timestamps
-    this.after = source.after // array of numeric timestamps
+
+    // In rare cases, possibly due to a bug in streams or event tracing, arrays of .before and .after
+    // times are out of sequence. If this happens, sort them, warn the user, and provide debug data
+    const scrambledOrder = source.before.some((value, index) => index && value < source.before[index - 1])
+
+    this.before = scrambledOrder ? source.before.sort() : source.before // array of numeric timestamps
+    this.after = scrambledOrder ? source.after.sort() : source.after // array of numeric timestamps
     this.destroy = source.destroy // numeric timestamp
+
+    if (scrambledOrder) console.warn('The following async ID source data contained out-of-sequence .before and .after timestamps:', source)
 
     this.aggregateNode = aggregateNode
   }
