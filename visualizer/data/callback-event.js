@@ -6,15 +6,24 @@
 class CallbackEvent {
   constructor (callKey, source) {
     // Timestamp when this became the next call to this callback
-    this.delayStart = callKey === 0 ? source.init : source.after[callKey - 1]
+    this.delayStart = callKey === 0 ? source.init : Math.max(source.before[callKey - 1], source.after[callKey - 1])
+
+    // In rare cases, possibly due to a bug in streams or event tracing, .before timestamps may be greater
+    // than .after timestamps. If this happens, sort them, warn the user, and provide debug data
+    this.inverted = source.before[callKey] > source.after[callKey] ? { beforeAfterKey: callKey, sourceNode: source } : false
 
     // Timestamp when this callback call begins
-    this.before = source.before[callKey]
+    this.before = source[this.inverted ? 'after' : 'before'][callKey]
 
     // Timestamp when this callback call completes
-    this.after = source.after[callKey]
+    this.after = source[this.inverted ? 'before' : 'after'][callKey]
 
     this.aggregateNode = source.aggregateNode
+
+    if (source.dataSet.settings.debugMode) {
+      this.callKey = callKey
+      this.sourceNode = source
+    }
   }
 }
 
@@ -23,12 +32,15 @@ class AllCallbackEvents {
   constructor (wallTime) {
     this.array = []
     this.wallTime = wallTime // Reference to DataSet.wallTime object
+    this.inversionCases = []
   }
 
   add (callbackEvent) {
     this.array.push(callbackEvent)
     if (!this.wallTime.profileStart || callbackEvent.delayStart < this.wallTime.profileStart) this.wallTime.profileStart = callbackEvent.delayStart
     if (!this.wallTime.profileEnd || callbackEvent.after > this.wallTime.profileEnd) this.wallTime.profileEnd = callbackEvent.after
+
+    if (callbackEvent.inverted) this.inversionCases.push(callbackEvent.inverted)
   }
 
   applyWallTimes (callbackEvent) {
@@ -50,6 +62,8 @@ class AllCallbackEvents {
   }
 
   processAll () {
+    if (this.inversionCases.length) console.warn('Profile contains callbackEvents with .before timestamp(s) greater than the corresponding .after timestamp:', this.inversionCases)
+
     this.wallTime.profileDuration = this.wallTime.profileEnd - this.wallTime.profileStart
     this.wallTime.msPerPercent = this.wallTime.profileDuration / 100
 
