@@ -111,9 +111,9 @@ class ScaleWeight {
     if (this.weight < 0 && absoluteToContain > 0) {
       this.weight = available / absoluteToContain
     }
-    // If there's only one node and it has zero size, weight will be Infinity
-    // Default to 1 because there's nothing to scale
-    if (!Number.isFinite(this.weight)) this.weight = 1
+    // If node has zero size, weight will be Infinity
+    // Default to stretching to available (or absolute if it's more than available)
+    if (!Number.isFinite(this.weight)) this.weight = available > absoluteToContain ? available - absoluteToContain : absoluteToContain
   }
 }
 
