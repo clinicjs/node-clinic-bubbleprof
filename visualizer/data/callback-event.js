@@ -1,7 +1,5 @@
 'use strict'
 
-const { areNumbers } = require('../validation.js')
-
 // The callback functions represented by a sourceNode's unique async_id
 // may be called any number of times. To calculate delays and busy time
 // we need to look at each call to these callbacks, relative to its source
@@ -28,18 +26,9 @@ class AllCallbackEvents {
   }
 
   add (callbackEvent) {
-    // Skip items with missing data, e.g. root or bad application exits leaving .before but no .after
-    const {
-      delayStart,
-      before,
-      after
-    } = callbackEvent
-
-    if (!areNumbers([delayStart, before, after])) return
-
     this.array.push(callbackEvent)
-    if (!this.wallTime.profileStart || delayStart < this.wallTime.profileStart) this.wallTime.profileStart = delayStart
-    if (!this.wallTime.profileEnd || after > this.wallTime.profileEnd) this.wallTime.profileEnd = after
+    if (!this.wallTime.profileStart || callbackEvent.delayStart < this.wallTime.profileStart) this.wallTime.profileStart = callbackEvent.delayStart
+    if (!this.wallTime.profileEnd || callbackEvent.after > this.wallTime.profileEnd) this.wallTime.profileEnd = callbackEvent.after
   }
 
   applyWallTimes (callbackEvent) {

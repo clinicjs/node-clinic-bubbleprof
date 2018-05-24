@@ -161,6 +161,8 @@ class CollapsedLayoutNode {
           nodeType: node.constructor.name
         }, node)
       }
+      if (node.nodes) this.node.applyAggregateNodes(node.nodes)
+      this.node.applyMark(node.mark)
       this.node.aggregateStats(node)
       this.applyDecimals(node)
     }

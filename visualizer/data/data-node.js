@@ -2,7 +2,10 @@
 
 const Frame = require('./frame.js')
 const { CallbackEvent } = require('./callback-event.js')
-const { validateNumber } = require('../validation.js')
+const {
+  validateNumber,
+  isNumber
+} = require('../validation.js')
 
 class DataNode {
   constructor (dataSet) {
@@ -47,9 +50,9 @@ class DataNode {
     return this.dataSet.getByNodeType(this.constructor.name, nodeId)
   }
 
-  validateStat (num, statType = '', aboveZero = false) {
+  validateStat (num, statType = '', conditions) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
-    return validateNumber(num, targetDescription, aboveZero)
+    return validateNumber(num, targetDescription, conditions)
   }
 
   static markFromArray (markArray) {
@@ -96,28 +99,20 @@ class ClusterNode extends DataNode {
       party: {between: new Map(), within: new Map()} // From .mark - 'user', 'module' or 'nodecore'
     }
 
-    this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
     this.nodes = new Map()
 
-    let firstNode = null
-
-    // This loop runs typically dozens of times, double digits. Not a priority to optimize
-    for (const subNode of node.nodes) {
-      this.nodeIds.add(subNode.aggregateId)
-      if (subNode.dataSet) {
-        // this is a node instance already
-        this.nodes.set(subNode.id, subNode)
-        if (!firstNode) firstNode = subNode
-      } else {
-        // these are the properties from which an aggregate node should be created
-        const aggregateNode = new AggregateNode(subNode, this)
-        this.nodes.set(subNode.aggregateId, aggregateNode)
-        if (!firstNode) firstNode = aggregateNode
-      }
+    const mark = node.mark || (node.nodes.length ? node.nodes[0].mark : null)
+    this.mark = mark ? DataNode.markFromArray(mark) : null
+  }
+  generateAggregateNodes (nodes) {
+    // TODO: if this is done out of sequence, it causes a 1d segment not found error in layout/node-allocation
+    // on opening some nodes (usually root node). Should ideally not rely on map order: investigate
+    const nodesLength = nodes.length
+    for (var i = 0; i < nodesLength; i++) {
+      const aggregateNode = new AggregateNode(nodes[i], this)
+      aggregateNode.generateSourceNodes(nodes[i].sources)
+      this.nodes.set(aggregateNode.aggregateId, aggregateNode)
     }
-
-    // All aggregateNodes within a clusterNode are by definition from the same party
-    this.mark = node.mark ? DataNode.markFromArray(node.mark) : firstNode.mark
   }
   setDecimal (num, classification, position, label) {
     const decimalsMap = this.decimals[classification][position]
@@ -167,7 +162,7 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
-    this.isBetweenClusters = node.parentAggregateId && !clusterNode.nodeIds.has(node.parentAggregateId)
+    this.isBetweenClusters = clusterNode.parentClusterId && clusterNode.getParentNode().nodes.has(node.parentAggregateId)
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
@@ -187,20 +182,22 @@ class AggregateNode extends DataNode {
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
+    this.dataSet.aggregateNodes.set(this.aggregateId, this)
+  }
+  generateSourceNodes (sources) {
     const debugMode = this.dataSet.settings.debugMode
 
     // This loop runs thousands+ times, unbounded and scales with size of profile. Optimize for browsers
-    const sourcesLength = node.sources.length
+    const sourcesLength = sources.length
+    // Only store sourceNodes in debugMode, otherwise extract their callbackEvents and discard
     if (debugMode) this.sources = new Array(sourcesLength)
 
     for (var i = 0; i < sourcesLength; i++) {
-      const sourceNode = new SourceNode(node.sources[i], this)
-
+      const sourceNode = new SourceNode(sources[i], this)
+      sourceNode.generateCallbackEvents()
       if (debugMode) this.sources[i] = sourceNode
     }
     if (debugMode) this.dataSet.sourceNodes = this.dataSet.sourceNodes.concat(this.sources)
-
-    this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
   applyDecimalsToCluster () {
     const apply = (time, betweenOrWithin) => {
@@ -305,12 +302,18 @@ class SourceNode {
     this.destroy = source.destroy // numeric timestamp
 
     this.aggregateNode = aggregateNode
+  }
+  generateCallbackEvents () {
+    // Skip unusual cases of a broken asyncId with no init time (e.g. some root nodes)
+    if (!isNumber(this.init)) return this
 
     // This loop runs thousands+++ of times, unbounded and scales with size of profile. Optimize for browsers
-    const callbackEventCount = source.before.length
+    const callbackEventCount = this.before.length
     for (var i = 0; i < callbackEventCount; i++) {
-      this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
+      // Skip incomplete items, e.g. bad application exits leaving a .before with no corresponding .after
+      if (isNumber(this.after[i])) this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
     }
+    return this
   }
   get id () {
     return this.asyncId
@@ -333,6 +336,17 @@ class ArtificialNode extends ClusterNode {
     const node = Object.assign(defaultProperties, rawNode)
 
     this.nodeType = node.nodeType
+  }
+  applyAggregateNodes (nodes) {
+    if (!nodes.size) return
+
+    for (const [aggregateId, aggregateNode] of nodes) {
+      this.nodes.set(aggregateId, aggregateNode)
+      if (!this.mark) this.mark = aggregateNode.mark
+    }
+  }
+  applyMark (mark) {
+    if (!this.mark) this.mark = mark
   }
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
