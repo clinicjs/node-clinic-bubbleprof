@@ -22,10 +22,11 @@ test('Visualizer data - DataSet - empty data file', function (t) {
   t.end()
 })
 
-test('Visualizer data - DataSet - invalid settings', function (t) {
+test('Visualizer data - DataSet - invalid getByNodeType', function (t) {
   t.throws(() => {
-    loadData({ averaging: 'mode' }, { map: () => {} })
-  }, new Error('Invalid key "mode" passed, valid types are: mean, median, sum'))
+    const dataSet = loadData({ debugMode: true }, fakeJson)
+    dataSet.getByNodeType('InvalidNode', 0)
+  }, new Error('Invalid key "InvalidNode" passed, valid types are: AggregateNode, ClusterNode'))
 
   t.end()
 })

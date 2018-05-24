@@ -57,8 +57,6 @@ function validateData (dataSet) {
 test('Visualizer data - data nodes - examples/slow-io sample json', function (t) {
   const dataSet = loadData({ debugMode: true }, slowioJson)
 
-  t.equals(dataSet.settings.averaging, 'mean')
-
   t.equals(dataSet.clusterNodes.size, 33)
   t.equals(validateData(dataSet), 'Pass')
 
@@ -141,5 +139,24 @@ test('Visualizer data - data nodes - decimals by type, category and party', func
     }
   }
   t.equal(result, '')
+  t.end()
+})
+
+test('Visualizer data - data nodes - set invalid stat', function (t) {
+  const dataSet = new DataSet(fakeNodes)
+  dataSet.processData()
+  const clusterNode = dataSet.clusterNodes.get('A')
+
+  t.throws(() => {
+    clusterNode.validateStat(0, '', { aboveZero: true })
+  }, new Error('For ClusterNode A: Got 0, must be > 0'))
+
+  t.throws(() => {
+    clusterNode.validateStat(Infinity, '')
+  }, new Error('For ClusterNode A: Got Infinity, must be finite'))
+
+  t.equals(clusterNode.validateStat(0, ''), 0)
+  t.equals(clusterNode.validateStat(Infinity, '', { isFinite: false }), Infinity)
+
   t.end()
 })
