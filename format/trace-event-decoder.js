@@ -3,11 +3,6 @@
 const stream = require('stream')
 const JSONStream = require('JSONStream')
 
-const subscribedPhases = {
-  b: true,
-  e: true
-}
-
 class TraceEvent {
   constructor (data) {
     this.error = null
@@ -48,10 +43,12 @@ class TraceEventDecoder extends stream.Transform {
     // backpresure
     this.parser = JSONStream.parse('traceEvents.*')
     this.parser.on('data', (data) => {
-      if (subscribedPhases[data.ph]) {
-        const traceEvent = new TraceEvent(data)
-        if (traceEvent.error) this.emit('error', traceEvent.error)
-        else this.push(traceEvent)
+      switch (data.ph) {
+        case 'b':
+        case 'e':
+          const traceEvent = new TraceEvent(data)
+          if (traceEvent.error) this.emit('error', traceEvent.error)
+          else this.push(traceEvent)
       }
     })
   }
