@@ -11,8 +11,13 @@ class NodeAllocation {
     this.midPoints = new Map()
     this.roots = new Map()
     for (const layoutNode of layoutNodes.values()) {
-      // Edge offset does not apply to midpoints - only leaves - hence init value is null
-      const position = { units: 0, offset: null, x: 0, y: 0, segment: null }
+      const position = {
+        units: 0,
+        offset: null, // Leaves only (null for midpoints)
+        x: 0,
+        y: 0,
+        segment: null // Leaves only, used for debugging
+      }
       layoutNode.position = position
       const category = layoutNode.stem.leaves.ids.length ? 'midPoints' : 'leaves'
       this[category].set(layoutNode.id, layoutNode)
