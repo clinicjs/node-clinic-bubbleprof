@@ -3,6 +3,11 @@
 const stream = require('stream')
 const JSONStream = require('JSONStream')
 
+const subscribedPhases = {
+  b: true,
+  e: true
+}
+
 class TraceEvent {
   constructor (data) {
     this.error = null
@@ -16,8 +21,6 @@ class TraceEvent {
       this.event = 'before'
     } else if (data.ph === 'e' && isCallback) {
       this.event = 'after'
-    } else {
-      this.error = new Error('invalid trace-event phase: ' + data.ph)
     }
 
     this.type = isCallback ? data.name.slice(0, -'_CALLBACK'.length) : data.name
@@ -45,9 +48,11 @@ class TraceEventDecoder extends stream.Transform {
     // backpresure
     this.parser = JSONStream.parse('traceEvents.*')
     this.parser.on('data', (data) => {
-      const traceEvent = new TraceEvent(data)
-      if (traceEvent.error) this.emit('error', traceEvent.error)
-      else this.push(traceEvent)
+      if (subscribedPhases[data.ph]) {
+        const traceEvent = new TraceEvent(data)
+        if (traceEvent.error) this.emit('error', traceEvent.error)
+        else this.push(traceEvent)
+      }
     })
   }
 
