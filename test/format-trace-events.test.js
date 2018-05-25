@@ -60,7 +60,6 @@ test('format - trace event - decoder', function (t) {
     const traceEvent = data.map((v) => Object.assign({}, v))
 
     t.strictDeepEqual(traceEvent, [{
-      error: null,
       event: 'init',
       type: 'TYPENAME',
       asyncId: 2,
@@ -68,7 +67,6 @@ test('format - trace event - decoder', function (t) {
       executionAsyncId: 0,
       timestamp: 1
     }, {
-      error: null,
       event: 'before',
       type: 'TYPENAME',
       asyncId: 2,
@@ -76,7 +74,6 @@ test('format - trace event - decoder', function (t) {
       executionAsyncId: null,
       timestamp: 2
     }, {
-      error: null,
       event: 'after',
       type: 'TYPENAME',
       asyncId: 2,
@@ -84,7 +81,6 @@ test('format - trace event - decoder', function (t) {
       executionAsyncId: null,
       timestamp: 3
     }, {
-      error: null,
       event: 'destroy',
       type: 'TYPENAME',
       asyncId: 2,
@@ -94,31 +90,5 @@ test('format - trace event - decoder', function (t) {
     }])
 
     t.end()
-  }))
-})
-
-test('format - trace event - wrong phase', function (t) {
-  const init = {
-    'pid': process.pid,
-    'ts': 1000,
-    'ph': 'w',
-    'cat': 'node.async_hooks',
-    'name': 'WRONGPHASE',
-    'id': '0x2',
-    'args': {}
-  }
-
-  const decoder = new TraceEventDecoder()
-
-  decoder.pipe(endpoint({ objectMode: true }, function (err, data) {
-    t.strictDeepEqual(
-      err,
-      new Error('invalid trace-event phase: w')
-    )
-    t.end()
-  }))
-
-  decoder.end(JSON.stringify({
-    traceEvents: [init]
   }))
 })
