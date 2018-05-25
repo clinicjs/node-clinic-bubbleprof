@@ -215,11 +215,11 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
 
 test('Visualizer layout - positioning - pyramid - can handle collapsets', function (t) {
   const topology = [
-    ['1.9', 50],
-    ['1.2.3.4', 150],
-    ['1.2.3.5', 250],
-    ['1.2.6.7', 200],
-    ['1.2.8', 100]
+    ['1.12', 50],
+    ['1.2.3.4.5', 150],
+    ['1.2.3.6.7', 250],
+    ['1.2.8.9.10', 200],
+    ['1.2.11', 100]
   ]
   const expectedTopology = Object.assign([], topology)
   shuffle(topology) // Pyramid result should be consistent independent of initial order
@@ -228,7 +228,7 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 6].every(c => ('' + key).includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 8].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   const positioning = layout.positioning
   positioning.formClumpPyramid()
@@ -241,11 +241,11 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
 
 test('Visualizer layout - positioning - pyramid - can handle collapsets with clumpy leaves', function (t) {
   const topology = [
-    ['1.9', 1],
-    ['1.2.3.4', 150],
-    ['1.2.3.5', 250],
-    ['1.2.6.7', 200],
-    ['1.2.8', 100]
+    ['1.12', 1],
+    ['1.2.3.4.5', 150],
+    ['1.2.3.6.7', 250],
+    ['1.2.8.9.10', 200],
+    ['1.2.11', 100]
   ]
   shuffle(topology) // Pyramid result should be consistent independent of initial order
 
@@ -253,12 +253,12 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 6, 9].every(c => ('' + key).includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 8, 12].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   const positioning = layout.positioning
   positioning.formClumpPyramid()
 
-  t.deepEqual(positioning.order, [4, 5, 7, 8])
+  t.deepEqual(positioning.order, [5, 7, 10, 11])
 
   t.end()
 })

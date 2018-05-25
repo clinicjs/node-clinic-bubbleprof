@@ -67,7 +67,6 @@ class CollapsedLayout {
     for (let i = 0; i < children.length; ++i) {
       const child = children[i]
       const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
-      // TODO: do not vertically-collapse children which have at least one long grandchild
       const collapsedChild = this.collapseVertically(child)
       if (this.layoutNodes.size === this.minimumNodes) {
         break
@@ -75,6 +74,11 @@ class CollapsedLayout {
       if (belowThreshold && !this.topLayoutNodes.has(layoutNode)) {
         const hostNode = combined || layoutNode
         const squashNode = collapsedChild || child
+        // Do not vertically-collapse children which have at least one long grandchild
+        const longGrandChild = squashNode.children.map(childId => this.layoutNodes.get(childId)).find(child => !this.isCollapsible(child))
+        if (longGrandChild) {
+          continue
+        }
         combined = this.combinelayoutNodes(hostNode, squashNode)
       }
     }
@@ -94,10 +98,10 @@ class CollapsedLayout {
     if (!hostNode || !squashNode) {
       return
     }
-    const isCollapsible = layoutNode => layoutNode.collapsedNodes || this.isBelowThreshold(layoutNode)
-    if (!isCollapsible(hostNode) || !isCollapsible(squashNode)) {
+    if (!this.isCollapsible(hostNode) || !this.isCollapsible(squashNode)) {
       return
     }
+
     // TODO: also check this.minimumNodes here?
 
     // hostNode is expected to be either direct parent or direct sibling of squashNode
@@ -126,6 +130,9 @@ class CollapsedLayout {
   }
   isBelowThreshold (layoutNode) {
     return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < 10
+  }
+  isCollapsible (layoutNode) {
+    return layoutNode.collapsedNodes || this.isBelowThreshold(layoutNode)
   }
 }
 
