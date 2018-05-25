@@ -13,7 +13,8 @@ const settings = {
   svgHeight: 1000,
   labelMinimumSpace: 0,
   lineWidth: 0,
-  svgDistanceFromEdge: 30
+  svgDistanceFromEdge: 30,
+  debugMode: true
 }
 
 test('Visualizer layout - node allocation - all assigned leaf units are proportional to parent and add up to 1', function (t) {
@@ -184,6 +185,10 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
   }
 
   t.deepEqual(layout.positioning.order, [8, 7, 5, 2])
+  t.equal(positionById[8].segment, 'LHS')
+  t.equal(positionById[7].segment, 'BOT')
+  t.equal(positionById[5].segment, 'RHS')
+  t.equal(positionById[2].segment, 'RHS')
 
   t.equal(positionById[1].x, layout.settings.svgWidth / 2)
   t.equal(positionById[1].y, layout.settings.svgDistanceFromEdge + (scaledStemById[1].ownDiameter / 2))
