@@ -5,7 +5,6 @@ const JSONStream = require('JSONStream')
 
 class TraceEvent {
   constructor (data) {
-    this.error = null
     const isCallback = data.name.slice(-'_CALLBACK'.length) === '_CALLBACK'
 
     if (data.ph === 'b' && !isCallback) {
@@ -46,9 +45,10 @@ class TraceEventDecoder extends stream.Transform {
       switch (data.ph) {
         case 'b':
         case 'e':
-          const traceEvent = new TraceEvent(data)
-          if (traceEvent.error) this.emit('error', traceEvent.error)
-          else this.push(traceEvent)
+          this.push(new TraceEvent(data))
+          break
+        default:
+          // Fall-through
       }
     })
   }
