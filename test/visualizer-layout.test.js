@@ -42,10 +42,10 @@ test('Visualizer layout - builds sublayout from connection', function (t) {
   t.end()
 })
 
-// T=Tiny, L=Long, C=Collapsed
+// R=Root / Top Node, T=Tiny, L=Long, C=Collapsed, P=Tiny Parent Of Long
 
-// T->T->T->T->L gives T->C->L
-test('Visualizer layout - collapse - collapses children and parents linearly (except root)', function (t) {
+// R->T->T->P->L gives R->C->P->L
+test('Visualizer layout - collapse - collapses vertically (except root and Ps)', function (t) {
   const topology = [
     ['1.2.3.4.5', 100]
   ]
@@ -61,36 +61,36 @@ test('Visualizer layout - collapse - collapses children and parents linearly (ex
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3,4', 'clump:2,3,4 => 5', '5 => '])
+  t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => 5', '5 => '])
 
   t.end()
 })
 
-// T->T->T->L->T->T->L gives T->C->L->C-L
-test('Visualizer layout - collapse - collapses children and parents linearly with break (except root)', function (t) {
+// R->T->T->P->L->T->T->P->L gives R->C->P->L->C->P->L
+test('Visualizer layout - collapse - collapses vertically with break (except root and Ps)', function (t) {
   const topology = [
-    ['1.2.3.4.5.6.7', 100]
+    ['1.2.3.4.5.6.7.8.9', 100]
   ]
   const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  dataSet.clusterNodes.get(4).stats.async.between = 100 // make 4 long
+  dataSet.clusterNodes.get(5).stats.async.between = 100 // make 5 long
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => 7', '7 => '])
+  t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => 7', '7 => 8', '8 => 9', '9 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => clump:5,6', 'clump:5,6 => 7', '7 => '])
+  t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => 5', '5 => clump:6,7', 'clump:6,7 => 8', '8 => 9', '9 => '])
 
   t.end()
 })
 
-// L->T->T->T->T gives L->C->T
-test('Visualizer layout - collapse - collapses children and parents linearly until minimum count threshold is hit', function (t) {
+// LR->T->T->T->T gives LR->C->T
+test('Visualizer layout - collapse - collapses vertically until minimum count threshold is hit', function (t) {
   const topology = [
     ['1.2.3.4.5', 1],
     ['1.2.3.4.6', 1]
@@ -112,14 +112,14 @@ test('Visualizer layout - collapse - collapses children and parents linearly unt
   t.end()
 })
 
-// T->L->T->L
+// R->L->P->L
 //     \>L->L
-//     \>T->L
+//     \>P->L
 // gives
-// T->L->C->L
+// R->L->C->L
 //    |   \>L
 //     \>L->L
-test('Visualizer layout - collapse - collapses branches at stem', function (t) {
+test('Visualizer layout - collapse - collapses horizontally', function (t) {
   const topology = [
     ['1.2.3.4', 100],
     ['1.2.5.6', 100],
@@ -143,101 +143,72 @@ test('Visualizer layout - collapse - collapses branches at stem', function (t) {
   t.end()
 })
 
-// T->T->T->L
-//     \>T->L
+// R->T->T->P->L
+//     \>T->P->L
 // gives
-// T->C->L
-//     \>L
-test('Visualizer layout - collapse - collapses both siblings and parents (except root)', function (t) {
-  const topology = [
-    ['1.2.3.4', 100],
-    ['1.2.5.6', 100]
-  ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
-  const dataNodes = [...dataSet.clusterNodes.values()]
-  dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  const layout = new Layout({ dataNodes }, settings)
-  layout.processBetweenData()
-  layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2', '2 => 3;5', '3 => 4', '4 => ', '5 => 6', '6 => '])
-  layout.collapseNodes()
-  layout.processBetweenData()
-  layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3,5', 'clump:2,3,5 => 4;6', '4 => ', '6 => '])
-
-  t.end()
-})
-
-// T->T->T->L
-//     \>L->L
-// gives
-// T->C->L
-//     \>L->L
-test('Visualizer layout - collapse - collapses children and parents while ignoring some children (except root)', function (t) {
-  const topology = [
-    ['1.2.3.4', 100],
-    ['1.2.5.6', 100]
-  ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
-  const dataNodes = [...dataSet.clusterNodes.values()]
-  dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  dataSet.clusterNodes.get(5).stats.async.between = 100 // make 5 long
-  const layout = new Layout({ dataNodes }, settings)
-  layout.processBetweenData()
-  layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['1 => 2', '2 => 3;5', '3 => 4', '4 => ', '5 => 6', '6 => '])
-  layout.collapseNodes()
-  layout.processBetweenData()
-  layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 5;4', '5 => 6', '6 => ', '4 => '])
-
-  t.end()
-})
-
-// ?->T->T->T->L
-// ?\>T->T->L->L
-// gives
-// ?->T->C->L
-// ?\>T->T->L->L
-test('Visualizer layout - collapse - collapses subset with missing root (except top nodes)', function (t) {
+// R->C->P->L
+//     \>P->L
+// TODO: support horizontal collapsing between children of collapsed nodes, i.e. merge the Ps in this scenario
+test('Visualizer layout - collapse - collapses both horizontally and vertically (except root and Ps)', function (t) {
   const topology = [
     ['1.2.3.4.5', 100],
-    ['1.6.7.8.9', 100]
+    ['1.2.6.7.8', 100]
   ]
   const dataSet = loadData({ debugMode: true }, mockTopology(topology))
-  dataSet.clusterNodes.get(8).stats.async.within = 100 // make 8 long
-  const subset = [2, 3, 4, 5, 6, 7, 8, 9].map(nodeId => dataSet.clusterNodes.get(nodeId))
+  const dataNodes = [...dataSet.clusterNodes.values()]
+  dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
+  const layout = new Layout({ dataNodes }, settings)
+  layout.processBetweenData()
+  layout.updateScale()
+  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  t.deepEqual(actualBefore, ['1 => 2', '2 => 3;6', '3 => 4', '4 => 5', '5 => ', '6 => 7', '7 => 8', '8 => '])
+  layout.collapseNodes()
+  layout.processBetweenData()
+  layout.updateScale()
+  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  t.deepEqual(actualAfter, ['1 => clump:2,3,6', 'clump:2,3,6 => 4;7', '4 => 5', '5 => ', '7 => 8', '8 => '])
+
+  t.end()
+})
+
+// ?->R->T->T->P->L
+// ?\>R->P->L->L
+// gives
+// ?->R->C->P->L
+// ?\>R->P->L->L
+test('Visualizer layout - collapse - vertically collapses subset with missing root (except top nodes and Ps)', function (t) {
+  const topology = [
+    ['1.2.3.4.5.6', 100],
+    ['1.7.8.9.10', 100]
+  ]
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  dataSet.clusterNodes.get(9).stats.async.within = 100 // make 9 long
+  const subset = [2, 3, 4, 5, 6, 7, 8, 9, 10].map(nodeId => dataSet.clusterNodes.get(nodeId))
   const layout = new Layout({ dataNodes: subset }, settings)
   layout.processBetweenData()
   layout.updateScale()
   const actualBefore = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualBefore, ['2 => 3', '3 => 4', '4 => 5', '5 => ', '6 => 7', '7 => 8', '8 => 9', '9 => '])
+  t.deepEqual(actualBefore, ['2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['2 => clump:3,4', 'clump:3,4 => 5', '5 => ', '6 => 7', '7 => 8', '8 => 9', '9 => '])
+  t.deepEqual(actualAfter, ['2 => clump:3,4', 'clump:3,4 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
 
   t.end()
 })
 
-// T->T->T->T->?
-//     \>T->L->?
+// R->T->T->T->?
+//     \>P->L->?
 // gives
-// T->C
-//     \>L
-test('Visualizer layout - collapse - collapses subset with missing leaves (except root)', function (t) {
+// R->T->C->L
+test('Visualizer layout - collapse - collapses subset both vertically and horizontally with missing leaves (except root and Ps)', function (t) {
   const topology = [
     ['1.2.3.4.5', 100],
     ['1.2.6.7.8', 100]
   ]
   const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
-  dataSet.clusterNodes.get(7).stats.async.within = 100 // make 7 wide
   dataSet.clusterNodes.get(7).stats.async.between = 100 // make 7 long
   const subset = [1, 2, 3, 4, 6, 7].map(nodeId => dataSet.clusterNodes.get(nodeId))
   const layout = new Layout({ dataNodes: subset }, settings)
@@ -249,7 +220,7 @@ test('Visualizer layout - collapse - collapses subset with missing leaves (excep
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
-  t.deepEqual(actualAfter, ['1 => clump:2,3,6,4', 'clump:2,3,6,4 => 7', '7 => '])
+  t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,6,4', 'clump:3,6,4 => 7', '7 => '])
 
   t.end()
 })

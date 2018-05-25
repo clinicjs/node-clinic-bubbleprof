@@ -12,7 +12,7 @@ class NodeAllocation {
     this.roots = new Map()
     for (const layoutNode of layoutNodes.values()) {
       // Edge offset does not apply to midpoints - only leaves - hence init value is null
-      const position = { units: 0, offset: null, x: 0, y: 0 }
+      const position = { units: 0, offset: null, x: 0, y: 0, segment: null }
       layoutNode.position = position
       const category = layoutNode.stem.leaves.ids.length ? 'midPoints' : 'leaves'
       this[category].set(layoutNode.id, layoutNode)
@@ -157,6 +157,7 @@ class NodeAllocation {
       position.offset = currentBlock.center
       currentSegment = this.segments.find(segment => segment.contains1DPoint(currentBlock.center))
       currentSegment.blocks.push(currentBlock)
+      currentBlock.layoutNode.position.segment = currentSegment.label
     }
   }
   calculate2DLeafCoordinates () {
