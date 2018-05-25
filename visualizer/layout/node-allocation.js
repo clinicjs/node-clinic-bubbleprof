@@ -157,7 +157,7 @@ class NodeAllocation {
       position.offset = currentBlock.center
       currentSegment = this.segments.find(segment => segment.contains1DPoint(currentBlock.center))
       currentSegment.blocks.push(currentBlock)
-      if (this.layout.settings.debugMode) currentBlock.layoutNode.position.segment = currentSegment.label
+      currentBlock.layoutNode.position.segment = currentSegment.label
     }
   }
   calculate2DLeafCoordinates () {

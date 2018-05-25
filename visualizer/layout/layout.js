@@ -16,8 +16,7 @@ class Layout {
       labelMinimumSpace: 12,
       svgWidth: 750,
       svgHeight: 750,
-      allowStretch: true,
-      debugMode: false
+      allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)
     this.initialInput = {
