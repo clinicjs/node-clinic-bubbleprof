@@ -35,6 +35,7 @@ class DataSet {
   processData () {
     this.calculateFlattenedStats()
     this.calculateDecimals()
+    this.wallTime.processPercentSlices()
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
@@ -65,6 +66,10 @@ class WallTime {
     // Set in callback-event.js AllCallbackEvents.processAll()
     this.profileDuration = null // Number of miliseconds from profileStart to profileEnd
     this.msPerPercent = null // profileDuration / 100, number of miliseconds spanned by each item in percentages array
+
+    this.maxAsyncPending = 0
+    this.maxSyncActive = 0
+    this.categoriesOrdered = []
   }
 
   getSegments (startTime, endTime, discardFirst = false) {
@@ -89,6 +94,25 @@ class WallTime {
     // The last item in getSegments(x, y) is always the same as the first in getSegments(y, z)
     // so use discardFirst when needed to avoid duplication in adjacent segments
     return discardFirst ? segments.slice(1) : segments
+  }
+
+  processPercentSlices () {
+    const maxAsyncByCategory = {}
+
+    for (var i = 0; i < 100; i++) {
+      const percentSlice = this.percentSlices[i]
+      if (percentSlice.syncActive.callbackCount > this.maxSyncActive) this.maxSyncActive = percentSlice.syncActive.callbackCount
+      if (percentSlice.asyncPending.callbackCount > this.maxAsyncPending) this.maxAsyncPending = percentSlice.asyncPending.callbackCount
+
+      for (const [typeCategory, value] of Object.entries(percentSlice.asyncPending.byTypeCategory)) {
+        if (value > (maxAsyncByCategory[typeCategory] || 0)) maxAsyncByCategory[typeCategory] = value
+      }
+    }
+
+    // Sort so the category with the tallest spike of pending events is first
+    this.categoriesOrdered = Object.keys(maxAsyncByCategory).sort((a, b) => {
+      return maxAsyncByCategory[b] - maxAsyncByCategory[a]
+    })
   }
 }
 

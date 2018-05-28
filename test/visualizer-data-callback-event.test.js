@@ -112,6 +112,10 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
   t.equals(wallTime.profileDuration, 26.5)
   t.equals(wallTime.msPerPercent, 0.265)
 
+  t.equals(wallTime.maxAsyncPending, 5)
+  t.equals(wallTime.maxSyncActive, 3)
+  t.strictSame(wallTime.categoriesOrdered, ['other', 'networks', 'files-streams'])
+
   // Simple slice containing two instances of one aggregate node
   const sliceA = wallTime.getSegments(10, 11)
   t.equals(sliceA.length, 5)
