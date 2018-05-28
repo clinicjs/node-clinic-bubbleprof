@@ -156,11 +156,18 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         t.strictSame(syncActive.byAggregateId, {
           d: 1
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 1
+        })
 
         t.equals(asyncPending.callbackCount, 2)
         t.strictSame(asyncPending.byAggregateId, {
           e: 1,
           f: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 1
         })
         break
       case 4: // 23.32 - 23.585
@@ -170,6 +177,9 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         t.strictSame(syncActive.byAggregateId, {
           d: 1
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 1
+        })
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
@@ -177,18 +187,27 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           e: 2,
           f: 1
         })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 3
+        })
         break
       case 5: // 23.585 - 23.85
         wallTime.getSegments(23.585, 23.85, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 0)
         t.strictSame(syncActive.byAggregateId, {})
+        t.strictSame(syncActive.byTypeCategory, {})
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 2,
           f: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 3
         })
         break
       case 6: // 23.85 - 24.115
@@ -198,12 +217,19 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         t.strictSame(syncActive.byAggregateId, {
           e: 2
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 2
+        })
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 2,
           f: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 3
         })
         break
       case 7: // 24.115 - 24.38
@@ -213,11 +239,18 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         t.strictSame(syncActive.byAggregateId, {
           e: 2
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 2
+        })
 
         t.equals(asyncPending.callbackCount, 2)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           f: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 1
         })
         break
       case 8: // 24.38 - 24.645
@@ -227,6 +260,9 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         t.strictSame(syncActive.byAggregateId, {
           e: 2
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 2
+        })
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
@@ -234,6 +270,10 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           e: 1,
           f: 1,
           g: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 3
         })
         break
       case 9: // 24.645 - 24.91
@@ -243,6 +283,9 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         t.strictSame(syncActive.byAggregateId, {
           e: 1
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 1
+        })
 
         t.equals(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
@@ -250,6 +293,10 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           e: 1,
           f: 1,
           g: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 3
         })
         break
       case 10: // 24.91 - 25.175
@@ -260,6 +307,9 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           d: 1,
           e: 2
         })
+        t.strictSame(syncActive.byTypeCategory, {
+          other: 3
+        })
 
         t.equals(asyncPending.callbackCount, 5)
         t.strictSame(asyncPending.byAggregateId, {
@@ -268,6 +318,10 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           f: 1,
           g: 1,
           h: 1
+        })
+        t.strictSame(asyncPending.byTypeCategory, {
+          'files-streams': 1,
+          other: 4
         })
         break
     }

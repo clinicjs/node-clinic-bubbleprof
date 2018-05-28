@@ -56,7 +56,7 @@ class DataSet {
 class WallTime {
   constructor () {
     // Creates array of 100 wall time segments, one for each 1% segment of the total running time
-    this.percentSlices = Array.from({length: 100}, () => getWallTimeSegment())
+    this.percentSlices = Array.from({length: 100}, () => createWallTimeSlice())
 
     // Set in callback-event.js AllCallbackEvents.add()
     this.profileStart = 0 // Timestamp of first .init
@@ -92,18 +92,19 @@ class WallTime {
   }
 }
 
-function getWallTimeSegment () {
+function createWallTimeSlice () {
   // Refers to 1% of the time the profile was running for
   return {
-    syncActive: getWallTimeSubsegment(),
-    asyncPending: getWallTimeSubsegment()
+    syncActive: createSubSlice(),
+    asyncPending: createSubSlice()
   }
 }
 
-function getWallTimeSubsegment () {
+function createSubSlice () {
   return {
     byAggregateId: {},
-    callbackCount: 0
+    callbackCount: 0,
+    byTypeCategory: {}
   }
 }
 

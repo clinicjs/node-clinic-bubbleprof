@@ -167,11 +167,19 @@ function setToWallTimeSegment (callbackEvent, segmentData) {
   // Number of callbackEvents at a point in time will be the same as the number of asyncIds
   // because by definition there can't be two callbackEvents of the same asyncId at the same time
   segmentData.callbackCount++
+
   const aggregateId = callbackEvent.aggregateNode.aggregateId
   if (segmentData.byAggregateId[aggregateId]) {
     segmentData.byAggregateId[aggregateId]++
   } else {
     segmentData.byAggregateId[aggregateId] = 1
+  }
+
+  const typeCategory = callbackEvent.aggregateNode.typeCategory
+  if (segmentData.byTypeCategory[typeCategory]) {
+    segmentData.byTypeCategory[typeCategory]++
+  } else {
+    segmentData.byTypeCategory[typeCategory] = 1
   }
 }
 
