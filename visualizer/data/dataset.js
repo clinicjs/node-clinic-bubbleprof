@@ -91,14 +91,15 @@ class DataSet {
 function getWallTimeSegment () {
   // Refers to 1% of the time the profile was running for
   return {
-    syncActive: {
-      callbackCount: 0,
-      aggregateNodes: new Set()
-    },
-    asyncPending: {
-      callbackCount: 0,
-      aggregateNodes: new Set()
-    }
+    syncActive: getWallTimeSubsegment(),
+    asyncPending: getWallTimeSubsegment()
+  }
+}
+
+function getWallTimeSubsegment () {
+  return {
+    callbackCount: 0,
+    byAggregateId: {}
   }
 }
 

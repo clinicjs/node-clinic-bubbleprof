@@ -79,7 +79,7 @@ const dummyAggregateNodes = {
  * For example, ddd▓ = 1.5 async delay & 0.5 sync delay, in one callbackEvent, on aggregateNode d
  *
  * Test slices defined in 'Visualizer CallbackEvents - Wall time slices' test:
- *                     sliceA: __ (10 - 11)     sliceB: _______ (22.5 - 25)
+ *                     sliceA: __ (10 - 11)     sliceB: ______ (22.5 - 25)
  *  -----|-------------------------------------------------------------
  *  i=   | Time -------->      ⒑                  ⒛
  *       | 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9  Totals:     asyncIds:

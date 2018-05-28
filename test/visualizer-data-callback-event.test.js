@@ -123,8 +123,8 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
   t.equals(sliceA.length, 5)
 
   const expected = {
-    asyncAggregateIds: new Set(['a']),
-    syncIds: new Set()
+    syncIds: {},
+    asyncAggregateIds: { a: 2 }
   }
 
   let i
@@ -135,10 +135,10 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
     } = sliceA[i]
 
     t.equals(syncActive.callbackCount, 0)
-    t.strictSame(syncActive.aggregateNodes, expected.syncIds)
+    t.strictSame(syncActive.byAggregateId, expected.syncIds)
 
     t.equals(asyncPending.callbackCount, 2)
-    t.strictSame(asyncPending.aggregateNodes, expected.asyncAggregateIds)
+    t.strictSame(asyncPending.byAggregateId, expected.asyncAggregateIds)
   }
 
   // More complex slice
@@ -159,73 +159,122 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
         getSegments(22.26, 23.32, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 1)
-        t.strictSame(syncActive.aggregateNodes, new Set(['d']))
+        t.strictSame(syncActive.byAggregateId, {
+          d: 1
+        })
 
         t.equals(asyncPending.callbackCount, 2)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['e', 'f']))
+        t.strictSame(asyncPending.byAggregateId, {
+          e: 1,
+          f: 1
+        })
         break
       case 4: // 23.32 - 23.585
         getSegments(23.4, 23.585, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 1)
-        t.strictSame(syncActive.aggregateNodes, new Set(['d']))
+        t.strictSame(syncActive.byAggregateId, {
+          d: 1
+        })
 
         t.equals(asyncPending.callbackCount, 4)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          e: 2,
+          f: 1
+        })
         break
       case 5: // 23.585 - 23.85
         getSegments(23.585, 23.85, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 0)
-        t.strictSame(syncActive.aggregateNodes, new Set())
+        t.strictSame(syncActive.byAggregateId, {})
 
         t.equals(asyncPending.callbackCount, 4)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          e: 2,
+          f: 1
+        })
         break
       case 6: // 23.85 - 24.115
         getSegments(23.85, 24.115, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 2)
-        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+        t.strictSame(syncActive.byAggregateId, {
+          e: 2
+        })
 
         t.equals(asyncPending.callbackCount, 4)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          e: 2,
+          f: 1
+        })
         break
       case 7: // 24.115 - 24.38
         getSegments(24.115, 24.38, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 2)
-        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+        t.strictSame(syncActive.byAggregateId, {
+          e: 2
+        })
 
         t.equals(asyncPending.callbackCount, 2)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'f']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          f: 1
+        })
         break
       case 8: // 24.38 - 24.645
         getSegments(24.38, 24.645, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 2)
-        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+        t.strictSame(syncActive.byAggregateId, {
+          e: 2
+        })
 
         t.equals(asyncPending.callbackCount, 4)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          e: 1,
+          f: 1,
+          g: 1
+        })
         break
       case 9: // 24.645 - 24.91
         getSegments(24.645, 24.91, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 1)
-        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+        t.strictSame(syncActive.byAggregateId, {
+          e: 1
+        })
 
         t.equals(asyncPending.callbackCount, 4)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          e: 1,
+          f: 1,
+          g: 1
+        })
         break
       case 10: // 24.91 - 25.175
         getSegments(24.91, 25.175, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
         t.equals(syncActive.callbackCount, 3)
-        t.strictSame(syncActive.aggregateNodes, new Set(['d', 'e']))
+        t.strictSame(syncActive.byAggregateId, {
+          d: 1,
+          e: 2
+        })
 
         t.equals(asyncPending.callbackCount, 5)
-        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g', 'h']))
+        t.strictSame(asyncPending.byAggregateId, {
+          d: 1,
+          e: 1,
+          f: 1,
+          g: 1,
+          h: 1
+        })
         break
     }
   }
