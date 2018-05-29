@@ -335,10 +335,11 @@ class BubbleprofUI extends EventEmitter {
     })
   }
 
-  setData (layout) {
+  setData (layout, dataSet) {
     if (layout === this.layout) return
     const initialize = !this.layout
 
+    this.dataSet = dataSet || this.dataSet || this.parentUI.dataSet
     this.layout = layout
     this.setAsTopmostUI()
     this.emit('setData')

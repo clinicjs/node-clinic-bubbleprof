@@ -667,6 +667,13 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   stroke-width: 4px !important;
 }
 
+/* Area chart */
+
+.line-chart-svg {
+  width: 100%;
+  height: 125px;
+}
+
 /* Hover box */
 
 .hover-box {

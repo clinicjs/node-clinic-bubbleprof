@@ -86,6 +86,11 @@ function drawOuterUI () {
     htmlContent: staticKeyHtml
   }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
+  const callbacksOverTime = sideBar.addContent('LineChart', {
+    classNames: 'side-bar-item'
+  })
+  callbacksOverTime.addCollapseControl(true, { htmlContent: 'Async operations over time <span class="arrow"></span>' })
+
   const lookup = sideBar.addContent('Lookup', {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
