@@ -917,6 +917,35 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   border-color: var(--type-colour-5);
 }
 
+/* In area chart specifically, apply to fill instead of stroke */
+
+svg.line-chart-svg .area-line {
+  stroke: none;
+  opacity: 0.8;
+  cursor: pointer;
+}
+svg.line-chart-svg .area-line-even {
+  opacity: 0.6;
+}
+svg.line-chart-svg .area-line:hover {
+  mix-blend-mode: screen;
+  opacity: 1;
+}
+svg.line-chart-svg .area-line.type-files-streams {
+  fill: var(--type-colour-1);
+}
+svg.line-chart-svg .area-line.type-networks {
+  fill: var(--type-colour-2);
+}
+svg.line-chart-svg .area-line.type-crypto {
+  fill: var(--type-colour-3);
+}
+svg.line-chart-svg .area-line.type-timing-promises {
+  fill: var(--type-colour-4);
+}
+svg.line-chart-svg .area-line.type-other {
+  fill: var(--type-colour-5);
+}
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
    * Must * animate by transforms only, to keep animating when processor is busy */

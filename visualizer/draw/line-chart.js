@@ -90,7 +90,21 @@ class LineChart extends HtmlContent {
       .data(this.stackedData)
       .enter()
       .append('path')
+      .attr('class', d => `type-${this.ui.dataSet.aggregateNodes.get(d.key).typeCategory}`)
+      .classed('area-line-even', d => !(d.index % 2))
       .classed('area-line', true)
+      .on('mouseover', (d) => {
+        const aggregateNode = this.ui.dataSet.aggregateNodes.get(d.key)
+        const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
+        if (layoutNode) {
+          this.ui.highlightNode(layoutNode)
+        }
+      })
+      .on('mouseout', () => this.ui.highlightNode(null))
+      .on('click', (d) => {
+        const aggregateNode = this.ui.dataSet.aggregateNodes.get(d.key)
+        this.ui.jumpToAggregateNode(aggregateNode)
+      })
   }
   draw () {
     super.draw()
