@@ -104,8 +104,9 @@ class WallTime {
       if (percentSlice.syncActive.callbackCount > this.maxSyncActive) this.maxSyncActive = percentSlice.syncActive.callbackCount
       if (percentSlice.asyncPending.callbackCount > this.maxAsyncPending) this.maxAsyncPending = percentSlice.asyncPending.callbackCount
 
+      // Define maxAsyncByCategory[typeCategory] for each type category present and set it to the highest value
       for (const [typeCategory, value] of Object.entries(percentSlice.asyncPending.byTypeCategory)) {
-        if (value > (maxAsyncByCategory[typeCategory] || 0)) maxAsyncByCategory[typeCategory] = value
+        if (!maxAsyncByCategory[typeCategory] || value > maxAsyncByCategory[typeCategory]) maxAsyncByCategory[typeCategory] = value
       }
     }
 
