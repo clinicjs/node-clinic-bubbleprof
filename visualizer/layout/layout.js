@@ -118,9 +118,8 @@ class Layout {
     const layoutNodes = this.layoutNodes
     if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
       return this.layoutNodes.get(nodeId)
-    } else {
-      return this.findCollapsedNode(dataNode, recursive)
     }
+    return this.findCollapsedNode(dataNode, recursive)
   }
 
   findCollapsedNode (dataNode, recursive = false) {
