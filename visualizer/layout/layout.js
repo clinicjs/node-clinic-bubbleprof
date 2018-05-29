@@ -112,7 +112,8 @@ class Layout {
     this.prepareLayoutNodes(dataNodes)
   }
 
-  // Returns a containing layoutNode, or false if it can't be found at this level
+  // Returns a containing layoutNode. If dataNode can't be found at this level and
+  // `recursive` is true, it walks up parent layouts and re-tries; else it returns false
   findDataNode (dataNode, recursive = false) {
     const nodeId = dataNode.id
     const layoutNodes = this.layoutNodes
