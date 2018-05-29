@@ -25,6 +25,9 @@ class LineChart extends HtmlContent {
       this.initializeFromData()
     })
   }
+  getAggregateNode (id) {
+    return this.ui.dataSet.aggregateNodes.get(id)
+  }
   initializeElements () {
     super.initializeElements()
     this.d3Element.classed('line-chart', true)
@@ -90,21 +93,28 @@ class LineChart extends HtmlContent {
       .data(this.stackedData)
       .enter()
       .append('path')
-      .attr('class', d => `type-${this.ui.dataSet.aggregateNodes.get(d.key).typeCategory}`)
+      .attr('class', d => `type-${this.getAggregateNode(d.key).typeCategory}`)
       .classed('area-line-even', d => !(d.index % 2))
       .classed('area-line', true)
       .on('mouseover', (d) => {
-        const aggregateNode = this.ui.dataSet.aggregateNodes.get(d.key)
+        if (this.layoutNode) return
+        const aggregateNode = this.getAggregateNode(d.key)
         const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
         if (layoutNode) {
-          this.ui.highlightNode(layoutNode)
+          this.ui.highlightNode(layoutNode, aggregateNode)
         }
       })
-      .on('mouseout', () => this.ui.highlightNode(null))
+      .on('mouseout', () => {
+        if (this.layoutNode) return
+        this.ui.highlightNode(null)
+      })
       .on('click', (d) => {
-        const aggregateNode = this.ui.dataSet.aggregateNodes.get(d.key)
+        const aggregateNode = this.getAggregateNode(d.key)
         this.ui.jumpToAggregateNode(aggregateNode)
       })
+  }
+  applyLayoutNode (layoutNode = null) {
+    this.layoutNode = layoutNode
   }
   draw () {
     super.draw()
@@ -112,6 +122,26 @@ class LineChart extends HtmlContent {
       width,
       height
     } = this.d3LineChartSVG.node().getBoundingClientRect()
+
+    // If a layoutNode has been assigned, de-emphasise everything that's not in it
+    if (this.layoutNode) {
+      this.d3LineChartSVG.classed('filter-applied', true)
+      this.d3Lines.classed('filtered', d => {
+        if (!this.layoutNode) return false
+        const aggregateNode = this.getAggregateNode(d.key)
+        const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
+        return (layoutNode !== this.layoutNode)
+      })
+      if (this.ui.highlightedDataNode) {
+        this.d3Lines.classed('not-emphasised', d => {
+          const aggregateNode = this.getAggregateNode(d.key)
+          return (aggregateNode !== this.ui.highlightedDataNode)
+        })
+      }
+    } else {
+      this.d3LineChartSVG.classed('filter-applied', false)
+      this.d3Lines.classed('filtered', false)
+    }
 
     this.xScale.range([0, width])
     this.yScale.range([height, 0])

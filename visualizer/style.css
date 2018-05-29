@@ -14,6 +14,7 @@ html {
 
   --pure-white: rgb(255, 255, 255);
   --pure-black: rgb(0, 0, 0);
+  --translucent-black: rgba(0, 0, 0, 0.86);
 
   --cyan-bright: rgb(166, 228, 255);
   --cyan-highlight: rgb(96, 147, 208);
@@ -671,16 +672,15 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
 
 .line-chart-svg {
   width: 100%;
-  height: 125px;
+  height: 70px;
 }
 
 /* Hover box */
 
 .hover-box {
   position: absolute;
-  opacity: 0.86;
   width: 320px;
-  background-color: var(--pure-black);
+  background-color: var(--translucent-black);
   color: var(--nearform-grey);
   margin-left: 6px;
   z-index: 25;
@@ -945,6 +945,38 @@ svg.line-chart-svg .area-line.type-timing-promises {
 }
 svg.line-chart-svg .area-line.type-other {
   fill: var(--type-colour-5);
+}
+svg.line-chart-svg.filter-applied .area-line {
+  animation-name: fade-in;
+  animation-duration: 1.4s;
+  animation-fill-mode: forwards;
+}
+svg.line-chart-svg.filter-applied .area-line.not-emphasised {
+  animation-name: half-fade-out;
+}
+svg.line-chart-svg.filter-applied .area-line.filtered {
+  animation-name: mostly-fade-out;
+}
+
+@keyframes mostly-fade-out {
+  to {
+    opacity: 0.2;
+  }
+}
+@keyframes half-fade-out {
+  to {
+    opacity: 0.5;
+  }
+}
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.hover-box .line-chart {
+  background: var(--pure-black);
+  opacity: 1;
 }
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8

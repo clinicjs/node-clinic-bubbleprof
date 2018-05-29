@@ -141,7 +141,7 @@ class Lookup extends HtmlContent {
       .classed('suggestion', true)
       .html(textString)
       .on('mouseover', () => {
-        this.topmostUI.highlightNode(layoutNode)
+        this.topmostUI.highlightNode(layoutNode, dataNode)
       })
       .on('mouseout', () => {
         this.topmostUI.highlightNode(null)

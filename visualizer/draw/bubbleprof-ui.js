@@ -198,8 +198,9 @@ class BubbleprofUI extends EventEmitter {
     this.clearFrames()
   }
 
-  highlightNode (layoutNode = null) {
+  highlightNode (layoutNode = null, dataNode = null) {
     this.highlightedNode = layoutNode
+    this.highlightedDataNode = dataNode
     this.emit('hover', layoutNode)
   }
 

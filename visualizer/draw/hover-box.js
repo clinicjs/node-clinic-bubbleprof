@@ -39,9 +39,12 @@ class HoverBox extends HtmlContent {
     this.d3ClickMessage = this.d3TitleBlock.append('a')
       .classed('click-message', true)
 
-    this.d3TimeBlock = this.d3ContentWrapper.append('div')
-      .classed('block', true)
-      .classed('time-block', true)
+    this.asyncOperationsChart = this.addContent(LineChart, {
+      classNames: 'block time-block'
+    })
+    this.asyncOperationsChart.initializeElements()
+
+    this.d3TimeBlock = this.asyncOperationsChart.d3ContentWrapper
 
     this.d3BetweenTime = this.d3TimeBlock.append('p')
     this.d3WithinTime = this.d3TimeBlock.append('p')
@@ -146,6 +149,8 @@ class HoverBox extends HtmlContent {
     this.d3Element.on('mouseleave', () => {
       this.ui.highlightNode(null)
     })
+
+    this.asyncOperationsChart.applyLayoutNode(layoutNode)
 
     // Ensure off-bottom class is not applied before calculating if it's needed
     this.d3Element.classed('off-bottom', false)
