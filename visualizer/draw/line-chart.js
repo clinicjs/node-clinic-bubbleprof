@@ -60,9 +60,9 @@ class LineChart extends HtmlContent {
     })
 
     const keysLength = keys.length
-    const dataArray = wallTime.percentSlices.map((item, index) => {
+    const dataArray = wallTime.slices.map((item, index) => {
       const dataItem = {
-        time: wallTime.profileStart + index * wallTime.msPerPercent
+        time: wallTime.profileStart + index * wallTime.msPerSlice
       }
       for (var i = 0; i < keysLength; i++) {
         dataItem[keys[i]] = item.asyncPending.byAggregateId[keys[i]] || 0
