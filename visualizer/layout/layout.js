@@ -8,7 +8,7 @@ const { ShortcutNode } = require('../data/data-node.js')
 const CollapsedLayout = require('./collapsed-layout.js')
 
 class Layout {
-  constructor ({ dataNodes, connection }, settings) {
+  constructor ({ dataNodes, connection, parentLayout }, settings) {
     const defaultSettings = {
       collapseNodes: false,
       svgDistanceFromEdge: 30,
@@ -21,8 +21,11 @@ class Layout {
     this.settings = Object.assign(defaultSettings, settings)
     this.initialInput = {
       dataNodes,
-      connection
+      connection,
+      parentLayout
     }
+
+    this.parentLayout = parentLayout || null
 
     this.scale = new Scale(this)
     this.positioning = new Positioning(this)
@@ -107,6 +110,30 @@ class Layout {
       }
     }
     this.prepareLayoutNodes(dataNodes)
+  }
+
+  // Returns a containing layoutNode. If dataNode can't be found at this level and
+  // `recursive` is true, it walks up parent layouts and re-tries; else it returns false
+  findDataNode (dataNode, recursive = false) {
+    const nodeId = dataNode.id
+    const layoutNodes = this.layoutNodes
+    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
+      return this.layoutNodes.get(nodeId)
+    }
+    return this.findCollapsedNode(dataNode, recursive)
+  }
+
+  findCollapsedNode (dataNode, recursive = false) {
+    for (const layoutNode of this.layoutNodes.values()) {
+      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node === dataNode)) {
+        return layoutNode
+      }
+    }
+    return recursive && this.parentLayout ? this.parentLayout.findDataNode(dataNode, recursive) : false
+  }
+
+  findAggregateNode (aggregateNode, recursive = false) {
+    return this.findDataNode(aggregateNode, recursive) || this.findDataNode(aggregateNode.clusterNode, recursive)
   }
 
   processBetweenData (generateConnections = true) {

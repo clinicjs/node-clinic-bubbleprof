@@ -62,7 +62,7 @@ class Frames extends HtmlContent {
       this.drawFrames(this.framesByNode, this.d3ContentWrapper)
       this.d3Heading.html(`Showing async stack trace from async operation "<strong>${this.node.name}</strong>"`)
         .on('mouseover', () => {
-          const layoutNode = this.topmostUI.findDataNodeInLayout(this.node)
+          const layoutNode = this.topmostUI.layout.findDataNode(this.node)
           this.topmostUI.highlightNode(layoutNode)
         })
         .on('mouseout', () => {
@@ -126,7 +126,7 @@ class Frames extends HtmlContent {
               .classed('jump-to-node', true)
               .text('Select on diagram')
               .on('mouseover', () => {
-                const layoutNode = this.topmostUI.findDataNodeInLayout(frame.dataNode) || this.topmostUI.layout.rootLayoutNode
+                const layoutNode = this.topmostUI.layout.findDataNode(frame.dataNode) || this.topmostUI.layout.rootLayoutNode
                 this.topmostUI.highlightNode(layoutNode)
               })
               .on('mouseout', () => {
