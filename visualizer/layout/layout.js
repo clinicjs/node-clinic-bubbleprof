@@ -130,6 +130,10 @@ class Layout {
     return recursive && this.parentLayout ? this.parentLayout.findDataNode(dataNode, recursive) : false
   }
 
+  findAggregateNode (aggregateNode, recursive = false) {
+    return this.findDataNode(aggregateNode, recursive) || this.findDataNode(aggregateNode.clusterNode, recursive)
+  }
+
   processBetweenData (generateConnections = true) {
     for (const layoutNode of this.layoutNodes.values()) {
       layoutNode.stem = new Stem(this, layoutNode)
