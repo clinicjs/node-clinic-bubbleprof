@@ -46,7 +46,7 @@ function compare (dataNode, resultKeysArray, expected, expectedKeysArray) {
   return `Error: ${dataNode.constructor.name} ${dataNode.id} ${resultKeysString} is ${actualValue}, expected ${expectedValue}. \n`
 }
 
-test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {
+test('Visualizer data - CallbackEvents - ClusterNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
 
   for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
@@ -69,7 +69,7 @@ test('Visualizer CallbackEvents - ClusterNode stats from CallbackEvents', functi
   t.end()
 })
 
-test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', function (t) {
+test('Visualizer data - CallbackEvents - AggregateNode stats from CallbackEvents', function (t) {
   let errorMessage = ''
   for (const [aggregateId, aggregateNode] of dataSet.aggregateNodes) {
     const expected = expectedAggregateResults.get(aggregateId)
@@ -91,7 +91,7 @@ test('Visualizer CallbackEvents - AggregateNode stats from CallbackEvents', func
   t.end()
 })
 
-test('Visualizer CallbackEvents - Invalid data item', function (t) {
+test('Visualizer data - CallbackEvents - Invalid data item', function (t) {
   t.throws(() => {
     dataSet.clusterNodes.values().next().value.stats.setSync('14%')
   }, new Error('For ClusterNode A stats.sync: Got string 14%, must be a number'))
@@ -99,6 +99,136 @@ test('Visualizer CallbackEvents - Invalid data item', function (t) {
   t.throws(() => {
     dataSet.clusterNodes.values().next().value.stats.setSync(1 / 0)
   }, new Error('For ClusterNode A stats.sync: Got Infinity, must be finite'))
+
+  t.end()
+})
+
+test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
+  const {
+    profileStart,
+    profileEnd,
+    profileDuration,
+    msPerPercent,
+    getSegments
+  } = dataSet.wallTime
+
+  // Ensure essential stats from fake data set are calculated correctly from callback events
+  t.equals(profileStart, 3)
+  t.equals(profileEnd, 29.5)
+  t.equals(profileDuration, 26.5)
+  t.equals(msPerPercent, 0.265)
+
+  // Simple slice containing two instances of one aggregate node
+  const sliceA = getSegments(10, 11)
+  t.equals(sliceA.length, 5)
+
+  const expected = {
+    asyncAggregateIds: new Set(['a']),
+    syncIds: new Set()
+  }
+
+  let i
+  for (i = 0; i < sliceA.length; i++) {
+    const {
+      asyncPending,
+      syncActive
+    } = sliceA[i]
+
+    t.equals(syncActive.callbackCount, 0)
+    t.strictSame(syncActive.aggregateNodes, expected.syncIds)
+
+    t.equals(asyncPending.callbackCount, 2)
+    t.strictSame(asyncPending.aggregateNodes, expected.asyncAggregateIds)
+  }
+
+  // More complex slice
+  const sliceB = getSegments(22.5, 25)
+  t.equals(sliceB.length, 11)
+
+  for (i = 0; i < sliceB.length; i++) {
+    const {
+      asyncPending,
+      syncActive
+    } = sliceB[i]
+
+    switch (i) { // Comments show time spans in each 1% segment
+      case 0: // 22.26 - 22.525
+      case 1: // 22.525 - 22.79
+      case 2: // 22.79 - 23.055
+      case 3: // 23.055 - 23.32
+        getSegments(22.26, 23.32, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 1)
+        t.strictSame(syncActive.aggregateNodes, new Set(['d']))
+
+        t.equals(asyncPending.callbackCount, 2)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['e', 'f']))
+        break
+      case 4: // 23.32 - 23.585
+        getSegments(23.4, 23.585, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 1)
+        t.strictSame(syncActive.aggregateNodes, new Set(['d']))
+
+        t.equals(asyncPending.callbackCount, 4)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
+        break
+      case 5: // 23.585 - 23.85
+        getSegments(23.585, 23.85, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 0)
+        t.strictSame(syncActive.aggregateNodes, new Set())
+
+        t.equals(asyncPending.callbackCount, 4)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
+        break
+      case 6: // 23.85 - 24.115
+        getSegments(23.85, 24.115, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 2)
+        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+
+        t.equals(asyncPending.callbackCount, 4)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f']))
+        break
+      case 7: // 24.115 - 24.38
+        getSegments(24.115, 24.38, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 2)
+        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+
+        t.equals(asyncPending.callbackCount, 2)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'f']))
+        break
+      case 8: // 24.38 - 24.645
+        getSegments(24.38, 24.645, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 2)
+        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+
+        t.equals(asyncPending.callbackCount, 4)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g']))
+        break
+      case 9: // 24.645 - 24.91
+        getSegments(24.645, 24.91, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 1)
+        t.strictSame(syncActive.aggregateNodes, new Set(['e']))
+
+        t.equals(asyncPending.callbackCount, 4)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g']))
+        break
+      case 10: // 24.91 - 25.175
+        getSegments(24.91, 25.175, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
+
+        t.equals(syncActive.callbackCount, 3)
+        t.strictSame(syncActive.aggregateNodes, new Set(['d', 'e']))
+
+        t.equals(asyncPending.callbackCount, 5)
+        t.strictSame(asyncPending.aggregateNodes, new Set(['d', 'e', 'f', 'g', 'h']))
+        break
+    }
+  }
 
   t.end()
 })

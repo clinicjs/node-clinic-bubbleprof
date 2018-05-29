@@ -2,7 +2,10 @@
 
 const Frame = require('./frame.js')
 const { CallbackEvent } = require('./callback-event.js')
-const { validateNumber } = require('../validation.js')
+const {
+  validateNumber,
+  isNumber
+} = require('../validation.js')
 
 class DataNode {
   constructor (dataSet) {
@@ -47,9 +50,9 @@ class DataNode {
     return this.dataSet.getByNodeType(this.constructor.name, nodeId)
   }
 
-  validateStat (num, statType = '', aboveZero = false) {
+  validateStat (num, statType = '', conditions) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
-    return validateNumber(num, targetDescription, aboveZero)
+    return validateNumber(num, targetDescription, conditions)
   }
 
   static markFromArray (markArray) {
@@ -96,27 +99,20 @@ class ClusterNode extends DataNode {
       party: {between: new Map(), within: new Map()} // From .mark - 'user', 'module' or 'nodecore'
     }
 
-    this.nodeIds = new Set(node.nodes.map(node => node.aggregateId))
     this.nodes = new Map()
 
-    let firstNode = null
-
-    for (const subNode of node.nodes) {
-      this.nodeIds.add(subNode.aggregateId)
-      if (subNode.dataSet) {
-        // this is a node instance already
-        this.nodes.set(subNode.id, subNode)
-        if (!firstNode) firstNode = subNode
-      } else {
-        // these are the properties from which an aggregate node should be created
-        const aggregateNode = new AggregateNode(subNode, this)
-        this.nodes.set(subNode.aggregateId, aggregateNode)
-        if (!firstNode) firstNode = aggregateNode
-      }
+    const mark = node.mark || (node.nodes.length ? node.nodes[0].mark : null)
+    this.mark = mark ? DataNode.markFromArray(mark) : null
+  }
+  generateAggregateNodes (nodes) {
+    // TODO: if this is done out of sequence, it causes a 1d segment not found error in layout/node-allocation
+    // on opening some nodes (usually root node). Should ideally not rely on map order: investigate
+    const nodesLength = nodes.length
+    for (var i = 0; i < nodesLength; i++) {
+      const aggregateNode = new AggregateNode(nodes[i], this)
+      aggregateNode.generateSourceNodes(nodes[i].sources)
+      this.nodes.set(aggregateNode.aggregateId, aggregateNode)
     }
-
-    // All aggregateNodes within a clusterNode are by definition from the same party
-    this.mark = node.mark ? DataNode.markFromArray(node.mark) : firstNode.mark
   }
   setDecimal (num, classification, position, label) {
     const decimalsMap = this.decimals[classification][position]
@@ -166,7 +162,7 @@ class AggregateNode extends DataNode {
     this.children = node.children
     this.clusterNode = clusterNode
 
-    this.isBetweenClusters = node.parentAggregateId && !clusterNode.nodeIds.has(node.parentAggregateId)
+    this.isBetweenClusters = clusterNode.parentClusterId && clusterNode.getParentNode().nodes.has(node.parentAggregateId)
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
@@ -186,9 +182,22 @@ class AggregateNode extends DataNode {
     this.typeCategory = typeCategory
     this.typeSubCategory = typeSubCategory
 
-    this.sources = node.sources.map((source) => new SourceNode(source, this))
-
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
+  }
+  generateSourceNodes (sources) {
+    const debugMode = this.dataSet.settings.debugMode
+
+    // This loop runs thousands+ times, unbounded and scales with size of profile. Optimize for browsers
+    const sourcesLength = sources.length
+    // Only store sourceNodes in debugMode, otherwise extract their callbackEvents and discard
+    if (debugMode) this.sources = new Array(sourcesLength)
+
+    for (var i = 0; i < sourcesLength; i++) {
+      const sourceNode = new SourceNode(sources[i], this)
+      sourceNode.generateCallbackEvents()
+      if (debugMode) this.sources[i] = sourceNode
+    }
+    if (debugMode) this.dataSet.sourceNodes = this.dataSet.sourceNodes.concat(this.sources)
   }
   applyDecimalsToCluster () {
     const apply = (time, betweenOrWithin) => {
@@ -267,9 +276,9 @@ class AggregateNode extends DataNode {
   }
 }
 
-class SourceNode extends DataNode {
+class SourceNode {
   constructor (rawSource, aggregateNode) {
-    super(aggregateNode.dataSet)
+    this.dataSet = aggregateNode.dataSet
 
     const defaultProperties = {
       asyncId: 0,
@@ -288,25 +297,103 @@ class SourceNode extends DataNode {
     this.executionAsyncId = source.parentAsyncId
 
     this.init = source.init // numeric timestamp
-    this.before = source.before // array of numeric timestamps
-    this.after = source.after // array of numeric timestamps
+
+    // In rare cases, possibly due to a bug in streams or event tracing, arrays of .before and .after
+    // times are out of sequence. If this happens, sort them, warn the user, and provide debug data
+    const scrambledOrder = source.before.some((value, index) => index && value < source.before[index - 1])
+
+    this.before = scrambledOrder ? source.before.sort() : source.before // array of numeric timestamps
+    this.after = scrambledOrder ? source.after.sort() : source.after // array of numeric timestamps
     this.destroy = source.destroy // numeric timestamp
 
+    if (scrambledOrder) console.warn('The following async ID source data contained out-of-sequence .before and .after timestamps:', source)
+
     this.aggregateNode = aggregateNode
+  }
+  generateCallbackEvents () {
+    // Skip unusual cases of a broken asyncId with no init time (e.g. some root nodes)
+    if (!isNumber(this.init)) return this
 
-    source.before.forEach((value, callKey) => {
-      const callbackEvent = new CallbackEvent(callKey, this)
-      this.dataSet.callbackEvents.array.push(callbackEvent)
-    })
-
-    this.dataSet.sourceNodes.set(this.asyncId, this)
+    // This loop runs thousands+++ of times, unbounded and scales with size of profile. Optimize for browsers
+    const callbackEventCount = this.before.length
+    for (var i = 0; i < callbackEventCount; i++) {
+      // Skip incomplete items, e.g. bad application exits leaving a .before with no corresponding .after
+      if (isNumber(this.after[i])) this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
+    }
+    return this
   }
   get id () {
     return this.asyncId
   }
 }
 
+// ArticificalNodes are created in /layout/ for layout-specific combinations or modified versions of nodes
+class ArtificialNode extends ClusterNode {
+  constructor (rawNode, nodeToCopy) {
+    const nodeProperties = Object.assign({}, nodeToCopy, rawNode, {
+      clusterId: rawNode.id || nodeToCopy.id,
+      parentClusterId: rawNode.parentId || nodeToCopy.parentId,
+      nodes: []
+    })
+    super(nodeProperties, nodeToCopy.dataSet)
+
+    const defaultProperties = {
+      nodeType: 'AggregateNode'
+    }
+    const node = Object.assign(defaultProperties, rawNode)
+
+    this.nodeType = node.nodeType
+  }
+  applyAggregateNodes (nodes) {
+    if (!nodes.size) return
+
+    for (const [aggregateId, aggregateNode] of nodes) {
+      this.nodes.set(aggregateId, aggregateNode)
+      if (!this.mark) this.mark = aggregateNode.mark
+    }
+  }
+  applyMark (mark) {
+    if (!this.mark) this.mark = mark
+  }
+  getSameType (nodeId) {
+    return this.dataSet.getByNodeType(this.nodeType, nodeId)
+  }
+  aggregateStats (dataNode) {
+    this.stats.setSync(this.stats.sync + dataNode.stats.sync)
+    this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
+    this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
+
+    this.stats.rawTotals.sync += dataNode.stats.rawTotals.sync
+    this.stats.rawTotals.async.between += dataNode.stats.rawTotals.async.between
+    this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
+  }
+  aggregateDecimals (dataNode, classification, position) {
+    if (dataNode.decimals) {
+      // e.g. combining clusterNodes
+      const byLabel = dataNode.decimals[classification][position]
+      for (const [label, value] of byLabel) {
+        this.setDecimal(value, classification, position, label)
+      }
+    } else {
+      // e.g. combining aggregateNodes
+      const label = dataNode[classification]
+      const rawTotals = dataNode.stats.rawTotals
+      const value = rawTotals.async[position] + (position === 'within' ? rawTotals.sync : 0)
+      this.setDecimal(value, classification, position, label)
+    }
+  }
+}
+
+class ShortcutNode extends ArtificialNode {
+  constructor (rawNode, nodeToCopy) {
+    super(rawNode, nodeToCopy)
+    this.shortcutTo = nodeToCopy
+  }
+}
+
 module.exports = {
+  ShortcutNode,
+  ArtificialNode,
   ClusterNode,
   AggregateNode,
   SourceNode,

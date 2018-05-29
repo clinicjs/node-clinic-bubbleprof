@@ -5,7 +5,6 @@ const loadData = require('../visualizer/data/index.js')
 const DataSet = require('../visualizer/data/dataset.js')
 const slowioJson = require('./visualizer-util/sampledata-slowio.json')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
-const fakeJson = require('./visualizer-util/fakedata.json')
 const { AggregateNode } = require('../visualizer/data/data-node.js')
 const {
   fakeNodes,
@@ -37,28 +36,26 @@ function validateSourceNode (sourceNode) {
 function validateData (dataSet) {
   let result = ''
 
-  for (const [, clusterNode] of dataSet.clusterNodes) {
+  for (const clusterNode of dataSet.clusterNodes.values()) {
     result += validateClusterNode(clusterNode)
 
-    for (const [, aggregateNode] of clusterNode.nodes) {
+    for (const aggregateNode of clusterNode.nodes.values()) {
       result += validateAggregateNode(aggregateNode)
-
-      for (const sourceNode of aggregateNode.sources) {
-        result += validateSourceNode(sourceNode)
-      }
     }
   }
+
+  for (const sourceNode of dataSet.sourceNodes) {
+    result += validateSourceNode(sourceNode)
+  }
+
   result += validateClusterNode(dataSet.getByNodeType('ClusterNode', 1))
   result += validateAggregateNode(dataSet.getByNodeType('AggregateNode', 1))
-  result += validateSourceNode(dataSet.getByNodeType('SourceNode', 1))
 
   return result || 'Pass'
 }
 
-test('Visualizer data - examples/slow-io sample json', function (t) {
-  const dataSet = loadData(slowioJson)
-
-  t.equals(dataSet.settings.averaging, 'mean')
+test('Visualizer data - data nodes - examples/slow-io sample json', function (t) {
+  const dataSet = loadData({ debugMode: true }, slowioJson)
 
   t.equals(dataSet.clusterNodes.size, 33)
   t.equals(validateData(dataSet), 'Pass')
@@ -66,8 +63,8 @@ test('Visualizer data - examples/slow-io sample json', function (t) {
   t.end()
 })
 
-test('Visualizer data - acmeair sample json', function (t) {
-  const dataSet = loadData(acmeairJson, { averaging: 'median' })
+test('Visualizer data - data nodes - acmeair sample json', function (t) {
+  const dataSet = loadData({ debugMode: true, averaging: 'median' }, acmeairJson)
 
   t.equals(dataSet.settings.averaging, 'median')
 
@@ -77,39 +74,7 @@ test('Visualizer data - acmeair sample json', function (t) {
   t.end()
 })
 
-test('Visualizer data - fake json', function (t) {
-  const dataSet = loadData(fakeJson)
-
-  t.equals(dataSet.clusterNodes.size, 2)
-
-  t.end()
-})
-
-test('Visualizer data - empty data file', function (t) {
-  t.throws(() => {
-    loadData()
-  }, new Error('No valid data found, data.json is typeof string'))
-
-  t.end()
-})
-
-test('Visualizer data - invalid settings', function (t) {
-  t.throws(() => {
-    loadData({ map: () => {} }, { averaging: 'mode' })
-  }, new Error('Invalid key "mode" passed, valid types are: mean, median, sum'))
-
-  t.end()
-})
-
-test('Visualizer data - access invalid node id', function (t) {
-  const dataSet = loadData(slowioJson)
-
-  t.equal(dataSet.getByNodeType('ClusterNode', 'foo'), undefined)
-
-  t.end()
-})
-
-test('Visualizer data - less common, preset type categories', function (t) {
+test('Visualizer data - data nodes - less common, preset type categories', function (t) {
   const dataSet = new DataSet(fakeNodes)
   dataSet.processData()
   let result = ''
@@ -145,7 +110,7 @@ test('Visualizer data - less common, preset type categories', function (t) {
   t.end()
 })
 
-test('Visualizer data - decimals by type, category and party', function (t) {
+test('Visualizer data - data nodes - decimals by type, category and party', function (t) {
   function roundTo5Places (num) { return Number(num.toFixed(5)) }
 
   const dataSet = new DataSet(fakeNodes)
@@ -174,5 +139,24 @@ test('Visualizer data - decimals by type, category and party', function (t) {
     }
   }
   t.equal(result, '')
+  t.end()
+})
+
+test('Visualizer data - data nodes - set invalid stat', function (t) {
+  const dataSet = new DataSet(fakeNodes)
+  dataSet.processData()
+  const clusterNode = dataSet.clusterNodes.get('A')
+
+  t.throws(() => {
+    clusterNode.validateStat(0, '', { aboveZero: true })
+  }, new Error('For ClusterNode A: Got 0, must be > 0'))
+
+  t.throws(() => {
+    clusterNode.validateStat(Infinity, '')
+  }, new Error('For ClusterNode A: Got Infinity, must be finite'))
+
+  t.equals(clusterNode.validateStat(0, ''), 0)
+  t.equals(clusterNode.validateStat(Infinity, '', { isFinite: false }), Infinity)
+
   t.end()
 })

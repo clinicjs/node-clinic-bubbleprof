@@ -27,5 +27,8 @@ test('cmd - collect - detect server port', function (t) {
         t.end()
       })
     })
+    process.on('exit', function () {
+      cmd.cleanup()
+    })
   })
 })

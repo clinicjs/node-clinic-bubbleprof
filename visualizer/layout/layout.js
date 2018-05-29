@@ -4,9 +4,8 @@ const Stem = require('./stems.js')
 const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
-const { ClusterNode } = require('../data/data-node.js')
-const arrayFlatten = require('array-flatten')
-const { validateNumber } = require('../validation.js')
+const { ShortcutNode } = require('../data/data-node.js')
+const CollapsedLayout = require('./collapsed-layout.js')
 
 class Layout {
   constructor ({ dataNodes, connection, parentLayout }, settings) {
@@ -58,13 +57,15 @@ class Layout {
       if (dataNode.isRoot) this.rootLayoutNode = this.layoutNodes.get(dataNode.id)
 
       if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
-      for (const childNodeId of dataNode.children) {
+      for (let i = 0; i < dataNode.children.length; ++i) {
+        const childNodeId = dataNode.children[i]
         createLayoutNode(childNodeId, layoutNode)
       }
     }
     const topDataNodes = dataNodes.filter(dataNode => !dataNode.parent)
-    for (const dataNode of topDataNodes) {
-      createLayoutNode(dataNode.id)
+    for (let i = 0; i < topDataNodes.length; ++i) {
+      const topDataNode = topDataNodes[i]
+      createLayoutNode(topDataNode.id)
     }
   }
 
@@ -84,13 +85,14 @@ class Layout {
       dataNodes.unshift(shortcutToSource)
     }
 
-    for (const dataNode of dataNodes) {
-      // if (!nodeType) nodeType = node.constructor.name
+    for (let i = 0; i < dataNodes.length; ++i) {
+      const dataNode = dataNodes[i]
 
       if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
         shortcutToSource.children.push(dataNode.id)
       }
-      for (const childId of dataNode.children) {
+      for (let i = 0; i < dataNode.children.length; ++i) {
+        const childId = dataNode.children[i]
         // If this child is in another cluster, add a dummy leaf node -> clickable link/shortcut to that cluster
         if (!dataNodes.some(dataNode => dataNode.id === childId)) {
           const childNode = dataNode.getSameType(childId)
@@ -135,7 +137,9 @@ class Layout {
   }
 
   processBetweenData (generateConnections = true) {
-    for (const layoutNode of this.layoutNodes.values()) {
+    const layoutNodesIterator = this.layoutNodes.values()
+    for (let i = 0; i < this.layoutNodes.size; ++i) {
+      const layoutNode = layoutNodesIterator.next().value
       layoutNode.stem = new Stem(this, layoutNode)
 
       if (generateConnections && layoutNode.parent) {
@@ -167,7 +171,9 @@ class Layout {
   }
 
   updateStems () {
-    for (const layoutNode of this.layoutNodes.values()) {
+    const layoutNodesIterator = this.layoutNodes.values()
+    for (let i = 0; i < this.layoutNodes.size; ++i) {
+      const layoutNode = layoutNodesIterator.next().value
       layoutNode.stem.update()
     }
   }
@@ -180,126 +186,8 @@ class Layout {
   }
 
   collapseNodes () {
-    const { layoutNodes, scale } = this
-    // TODO: stop relying on coincidental Map.keys() order
-    const topLayoutNodes = [...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent)
-
-    // Set an upper limit so not too much gets squashed
-    // Else it's possible for everything to be squashed, making drilling down impossible/infinite
-    const squashingLimit = layoutNodes.size - 3
-    if (squashingLimit <= 1) return
-
-    let squashedCounter = 0
-    const hierarchyOrder = []
-
-    // TODO: optimize
-    const squash = (layoutNode, parent) => {
-      // Skip ArtificialNodes (including ShortcutNodes)
-      if (layoutNode instanceof ArtificialNode) return layoutNode
-
-      // Squash children first
-      const childrenAboveThreshold = []
-      const childrenBelowThreshold = []
-      const collapsedChildren = []
-      for (const childId of layoutNode.children) {
-        const child = layoutNodes.get(childId)
-
-        // Recurse, potentially squashing descendents, unless we've already hit the limit
-        const squashed = squashedCounter <= squashingLimit ? squash(child, layoutNode) : null
-
-        if (isBelowThreshold(child)) {
-          squashed ? collapsedChildren.push(squashed) : childrenBelowThreshold.push(child)
-        } else {
-          childrenAboveThreshold.push(child)
-
-          // Children squashed from above will add a collapsed node to the layout
-          if (squashed) squashedCounter--
-        }
-      }
-
-      if (squashedCounter + childrenBelowThreshold.length > squashingLimit) {
-        // We've squashed too many, unsquash the largest first
-        childrenBelowThreshold.sort((a, b) => a.getTotalTime() - b.getTotalTime())
-
-        while (childrenBelowThreshold.length && squashedCounter + childrenBelowThreshold.length > squashingLimit) {
-          const largestSquashedHere = childrenBelowThreshold.pop()
-          childrenAboveThreshold.push(largestSquashedHere)
-        }
-      }
-
-      // For detecting children-grandchildren collision
-      const childToCollapse = new Map()
-      for (const collapsedChild of collapsedChildren) {
-        for (const layoutNode of collapsedChild.collapsedNodes) {
-          childToCollapse.set(layoutNode.id, collapsedChild)
-        }
-      }
-      const collapsibleChildren = childrenBelowThreshold.concat(arrayFlatten(collapsedChildren.map(collapsedLayoutNode => collapsedLayoutNode.collapsedNodes)))
-      const grandChildren = arrayFlatten(collapsibleChildren.map(collapsedLayoutNode => collapsedLayoutNode.children)).filter(childId => !childToCollapse.get(childId))
-      let combinedSelfCollapse
-      let combinedChildrenCollapse
-      const selfBelowThreshold = isBelowThreshold(layoutNode)
-      const selfTopNode = topLayoutNodes.includes(layoutNode)
-      if (selfBelowThreshold && collapsibleChildren.length && !selfTopNode) {
-        // Combine children and self
-        combinedSelfCollapse = new CollapsedLayoutNode([layoutNode].concat(collapsibleChildren), parent, grandChildren.concat(childrenAboveThreshold.map(child => child.id)))
-
-        // Count squashed children at this level, from the level above has been counted already when recursing up the tree
-        squashedCounter += childrenBelowThreshold.length
-      } else if (collapsibleChildren.length >= 2) {
-        // Combine children only
-        combinedChildrenCollapse = new CollapsedLayoutNode(collapsibleChildren, layoutNode, grandChildren)
-        layoutNode.children = [combinedChildrenCollapse, ...childrenAboveThreshold].map(child => child.id)
-
-        // Minus one because collapse doesn't contain this node and adds collapsedLayoutNode to layout
-        squashedCounter += childrenBelowThreshold.length
-      }
-
-      let nodesToIndex
-      if (selfBelowThreshold && !selfTopNode) {
-        // If self collapsible, index only childrenAboveThreshold
-        nodesToIndex = childrenAboveThreshold
-      } else {
-        // If self not collapsible, index all children
-        nodesToIndex = childrenAboveThreshold.concat(combinedChildrenCollapse || childrenBelowThreshold.concat(collapsedChildren))
-      }
-      // If no parent index self
-      if (!parent) {
-        nodesToIndex.push(combinedSelfCollapse || layoutNode)
-      }
-      for (const layoutNode of nodesToIndex) {
-        if (layoutNode instanceof CollapsedLayoutNode) {
-          indexLayoutNode(layoutNode)
-        }
-        hierarchyOrder.unshift(layoutNode.id)
-      }
-
-      return combinedSelfCollapse || null
-    } // End of squash()
-
-    for (const layoutNode of topLayoutNodes) {
-      squash(layoutNode)
-    }
-    const newLayoutNodes = new Map()
-    for (const id of hierarchyOrder) {
-      newLayoutNodes.set(id, layoutNodes.get(id))
-    }
-    this.layoutNodes = newLayoutNodes
-
-    function indexLayoutNode (collapsedLayoutNode) {
-      layoutNodes.set(collapsedLayoutNode.id, collapsedLayoutNode)
-      for (const childId of collapsedLayoutNode.children) {
-        layoutNodes.get(childId).parent = collapsedLayoutNode
-      }
-      for (const layoutNode of collapsedLayoutNode.collapsedNodes) {
-        layoutNode.parent = null
-        layoutNode.children = []
-      }
-    }
-
-    function isBelowThreshold (layoutNode) {
-      return layoutNode.getTotalTime() * scale.sizeIndependentScale < 10
-    }
+    const collapsedLayout = new CollapsedLayout(this.layoutNodes, this.scale)
+    this.layoutNodes = collapsedLayout.layoutNodes
   }
 }
 
@@ -324,93 +212,6 @@ class LayoutNode {
   }
   validateStat (...args) {
     return this.node.validateStat(...args)
-  }
-}
-
-class CollapsedLayoutNode {
-  constructor (layoutNodes, parent, children) {
-    this.id = 'clump:' + layoutNodes.map(layoutNode => layoutNode.id).join(',')
-    this.collapsedNodes = layoutNodes
-    this.parent = parent
-    this.children = children || []
-
-    for (const layoutNode of layoutNodes) {
-      const node = layoutNode.node
-      if (!this.node) {
-        this.node = new ArtificialNode({
-          nodeType: node.constructor.name
-        }, node)
-      }
-      this.node.aggregateStats(node)
-      this.applyDecimals(node)
-    }
-  }
-  getBetweenTime () {
-    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
-  }
-  getWithinTime () {
-    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
-  }
-  validateStat (num, statType = '', aboveZero = false) {
-    const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
-    return validateNumber(num, targetDescription, aboveZero)
-  }
-  applyDecimals (otherNode) {
-    this.node.aggregateDecimals(otherNode, 'type', 'between')
-    this.node.aggregateDecimals(otherNode, 'type', 'within')
-    this.node.aggregateDecimals(otherNode, 'typeCategory', 'between')
-    this.node.aggregateDecimals(otherNode, 'typeCategory', 'within')
-    // TODO: aggregate party, draw appropriate pie
-  }
-}
-
-class ArtificialNode extends ClusterNode {
-  constructor (rawNode, nodeToCopy) {
-    const nodeProperties = Object.assign({}, nodeToCopy, rawNode, {
-      clusterId: rawNode.id || nodeToCopy.id,
-      parentClusterId: rawNode.parentId || nodeToCopy.parentId,
-      nodes: []
-    })
-    super(nodeProperties, nodeToCopy.dataSet)
-
-    const defaultProperties = {
-      nodeType: 'AggregateNode'
-    }
-    const node = Object.assign(defaultProperties, rawNode)
-
-    this.nodeType = node.nodeType
-  }
-  getSameType (nodeId) {
-    return this.dataSet.getByNodeType(this.nodeType, nodeId)
-  }
-  aggregateStats (dataNode) {
-    this.stats.setSync(this.stats.sync + dataNode.stats.sync)
-    this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
-    this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
-
-    this.stats.rawTotals.sync += dataNode.stats.rawTotals.sync
-    this.stats.rawTotals.async.between += dataNode.stats.rawTotals.async.between
-    this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
-  }
-  aggregateDecimals (dataNode, classification, position) {
-    if (dataNode.decimals) {
-      const byLabel = dataNode.decimals[classification][position]
-      for (const [label, value] of byLabel) {
-        this.setDecimal(value, classification, position, label)
-      }
-    } else {
-      const label = dataNode[classification]
-      const rawTotals = dataNode.stats.rawTotals
-      const value = rawTotals.async[position] + (position === 'within' ? rawTotals.sync : 0)
-      this.setDecimal(value, classification, position, label)
-    }
-  }
-}
-
-class ShortcutNode extends ArtificialNode {
-  constructor (rawNode, nodeToCopy) {
-    super(rawNode, nodeToCopy)
-    this.shortcutTo = nodeToCopy
   }
 }
 

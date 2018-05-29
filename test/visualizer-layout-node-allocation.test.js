@@ -23,28 +23,30 @@ test('Visualizer layout - node allocation - all assigned leaf units are proporti
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.generate()
 
   const unitsById = {}
+  const fixedUnitsById = {}
   for (const layoutNode of layout.layoutNodes.values()) {
     unitsById[layoutNode.id] = layoutNode.position.units
+    fixedUnitsById[layoutNode.id] = layoutNode.position.units.toFixed(8)
   }
 
   t.equal(unitsById[1], 1)
 
-  t.equal(unitsById[2], 100 / 1000)
-  t.equal(unitsById[3], 900 / 1000)
+  t.equal(fixedUnitsById[2], (100 / 1000).toFixed(8))
+  t.equal(fixedUnitsById[3], (900 / 1000).toFixed(8))
 
-  t.equal(unitsById[4], unitsById[3] * 500 / 1400)
-  t.equal(unitsById[6], unitsById[3] * 900 / 1400)
+  t.equal(fixedUnitsById[4], (unitsById[3] * 500 / 1400).toFixed(8))
+  t.equal(fixedUnitsById[6], (unitsById[3] * 900 / 1400).toFixed(8))
 
-  t.equal(unitsById[5], unitsById[4])
-  t.equal((unitsById[7]).toFixed(8), (unitsById[6] * 900 / 1400).toFixed(8))
-  t.equal(unitsById[8], unitsById[6] * 500 / 1400)
+  t.equal(fixedUnitsById[5], fixedUnitsById[4])
+  t.equal(fixedUnitsById[7], (unitsById[6] * 900 / 1400).toFixed(8))
+  t.equal(fixedUnitsById[8], (unitsById[6] * 500 / 1400).toFixed(8))
 
   t.equal((unitsById[2] + unitsById[5] + unitsById[7] + unitsById[8]).toFixed(0), 1 + '')
 
@@ -58,7 +60,7 @@ test('Visualizer layout - node allocation - three-sided space segments depend on
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -85,7 +87,7 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -120,7 +122,7 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -149,7 +151,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
@@ -225,7 +227,7 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
     ['1.3.6.7', 900 - 3],
     ['1.3.6.8', 500 - 3]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const subset = [6, 7, 8].map(nodeId => dataSet.clusterNodes.get(nodeId))
   const layout = new Layout({ dataNodes: subset }, settings)
@@ -277,17 +279,18 @@ test('Visualizer layout - node allocation - can handle subsets', function (t) {
 test('Visualizer layout - node allocation - can handle collapsets', function (t) {
   const topology = [
     ['1.2', 100 - 1],
-    ['1.3.4.5', 500 - 3],
-    ['1.3.6.7', 900 - 3],
-    ['1.3.6.8', 500 - 3]
+    ['1.3.4.5.6', 500 - 4],
+    ['1.3.7.8.9', 900 - 4],
+    ['1.3.7.10.11', 401 - 4]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
+  dataSet.clusterNodes.get(10).stats.async.between = 100 // make 10 long
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 3, 4, 6].every(c => ('' + key).includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 4, 7].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
@@ -316,15 +319,20 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
   t.equal(positionById[1].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
   t.equal(positionById[1].y.toFixed(0), (layout.settings.svgDistanceFromEdge + 1).toFixed(0))
 
-  t.ok(positionById[7].y > positionById[clumpId].y)
-  t.ok(positionById[7].x < positionById[clumpId].x)
-  t.ok(distanceById[7] < scaledStemById[7].ownBetween * 1.01)
-  t.ok(distanceById[7] > scaledStemById[7].ownBetween * 0.99)
+  t.ok(positionById[11].y > positionById[clumpId].y)
+  t.ok(positionById[11].x < positionById[clumpId].x)
+  t.ok(distanceById[11] < scaledStemById[11].ownBetween * 1.01)
+  t.ok(distanceById[11] > scaledStemById[11].ownBetween * 0.99)
 
-  t.ok(positionById[8].y > positionById[clumpId].y)
-  t.ok(positionById[8].x > positionById[clumpId].x)
-  t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
-  t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
+  t.ok(positionById[9].y > positionById[clumpId].y)
+  t.ok(positionById[9].x < positionById[clumpId].x)
+  t.ok(distanceById[9] < scaledStemById[9].ownBetween * 1.01)
+  t.ok(distanceById[9] > scaledStemById[9].ownBetween * 0.99)
+
+  t.ok(positionById[6].y > positionById[clumpId].y)
+  t.ok(positionById[6].x > positionById[clumpId].x)
+  t.ok(distanceById[6] < scaledStemById[6].ownBetween * 1.01)
+  t.ok(distanceById[6] > scaledStemById[6].ownBetween * 0.99)
 
   t.end()
 })
@@ -332,17 +340,17 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
 test('Visualizer layout - node allocation - can handle collapsets with clumpy leaves', function (t) {
   const topology = [
     ['1.2', 1],
-    ['1.3.4.5', 500 - 3],
-    ['1.3.6.7', 900 - 3],
-    ['1.3.6.8', 500 - 3]
+    ['1.3.4.5.6', 500 - 4],
+    ['1.3.7.8.9', 900 - 4],
+    ['1.3.7.10.11', 401 - 4]
   ]
-  const dataSet = loadData(mockTopology(topology))
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   t.ok(dataSet)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 4, 6].every(c => ('' + key).includes(c)))
+  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 4, 7].every(c => ('' + key).includes(c)))
   t.ok(clumpId)
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
@@ -369,22 +377,22 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   }
 
   t.equal(positionById[1].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
-  t.equal(positionById[1].y.toFixed(0), (layout.settings.svgDistanceFromEdge).toFixed(0))
+  t.equal(positionById[1].y.toFixed(0), (layout.settings.svgDistanceFromEdge + layout.layoutNodes.get(1).stem.scaled.ownDiameter).toFixed(0))
 
-  t.ok(positionById[5].y > positionById[clumpId].y)
-  t.ok(positionById[5].x < positionById[clumpId].x)
-  t.ok(distanceById[5] < scaledStemById[5].ownBetween * 1.01)
-  t.ok(distanceById[5] > scaledStemById[5].ownBetween * 0.99)
+  t.ok(positionById[11].y > positionById[clumpId].y)
+  t.ok(positionById[11].x < positionById[clumpId].x)
+  t.ok(distanceById[11] < scaledStemById[11].ownBetween * 1.01)
+  t.ok(distanceById[11] > scaledStemById[11].ownBetween * 0.99)
 
-  t.ok(positionById[7].y > positionById[clumpId].y)
-  t.ok(positionById[7].x === positionById[clumpId].x)
-  t.ok(distanceById[7] < scaledStemById[7].ownBetween * 1.01)
-  t.ok(distanceById[7] > scaledStemById[7].ownBetween * 0.99)
+  t.ok(positionById[9].y > positionById[clumpId].y)
+  t.ok(positionById[9].x < positionById[clumpId].x)
+  t.ok(distanceById[9] < scaledStemById[9].ownBetween * 1.01)
+  t.ok(distanceById[9] > scaledStemById[9].ownBetween * 0.99)
 
-  t.ok(positionById[8].y > positionById[clumpId].y)
-  t.ok(positionById[8].x > positionById[clumpId].x)
-  t.ok(distanceById[8] < scaledStemById[8].ownBetween * 1.01)
-  t.ok(distanceById[8] > scaledStemById[8].ownBetween * 0.99)
+  t.ok(positionById[6].y > positionById[clumpId].y)
+  t.ok(positionById[6].x > positionById[clumpId].x)
+  t.ok(distanceById[6] < scaledStemById[6].ownBetween * 1.01)
+  t.ok(distanceById[6] > scaledStemById[6].ownBetween * 0.99)
 
   t.end()
 })
