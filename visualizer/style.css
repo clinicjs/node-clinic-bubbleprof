@@ -51,6 +51,12 @@ html, body {
 
 body {
   background: var(--main-bg-color);
+
+  /* To resolve inconsistent browser issues:
+   * - Chrome flashes an empty y scrollbar inconstently on some events in sublayouts
+   * - Firefox adds an empty x scrollbar to sublayouts */
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 /* Global Typography */
