@@ -73,6 +73,10 @@ class BreadcrumbPanel extends HtmlContent {
   }
 }
 
+// Attempts to aesthetically limit string length
+// Initially it breaks string into words (space split)
+// Then it tries to detect a natural break that's not far from the max (15 +/- 3)
+// And prioritize such break over a hard cut, if available
 function trimToNearestSpace (str) {
   const trimThreshold = 15
   if (str.length < trimThreshold) return str
