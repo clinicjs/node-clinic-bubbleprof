@@ -17,42 +17,7 @@ class DataSet {
     settings = Object.assign(defaultSettings, settings)
     this.settings = settings
 
-    this.wallTime = {
-      // Creates array of 100 wall time segments, one for each 1% segment of the total running time
-      percentSlices: Array.from({length: 100}, () => getWallTimeSegment()),
-
-      // Set in callback-event.js AllCallbackEvents.add()
-      profileStart: 0, // Timestamp of first .init
-      profileEnd: 0, // Timestamp of last .after
-
-      // Set in callback-event.js AllCallbackEvents.processAll()
-      profileDuration: null, // Number of miliseconds from profileStart to profileEnd
-      msPerPercent: null, // profileDuration / 100, number of miliseconds spanned by each item in percentages array
-
-      getSegments: (startTime, endTime, discardFirst = false) => {
-        const {
-          profileStart,
-          profileEnd,
-          msPerPercent,
-          percentSlices
-        } = this.wallTime
-
-        // Don't allow seemingly valid non-failing output from logically invalid input
-        if (startTime < profileStart) throw new Error(`Wall time segment start time (${startTime}) precedes profile start time (${profileStart})`)
-        if (endTime > profileEnd) throw new Error(`Wall time segment end time (${endTime}) exceeds profile end time (${profileEnd})`)
-        if (startTime > endTime) {
-          throw new Error(`Wall time segment start time (${startTime}) doesn’t precede segment end time (${endTime})`)
-        }
-
-        const startIndex = Math.floor((startTime - profileStart) / msPerPercent)
-        const endIndex = Math.ceil((endTime - profileStart) / msPerPercent)
-        const segments = percentSlices.slice(startIndex, endIndex)
-
-        // The last item in getSegments(x, y) is always the same as the first in getSegments(y, z)
-        // so use discardFirst when needed to avoid duplication in adjacent segments
-        return discardFirst ? segments.slice(1) : segments
-      }
-    }
+    this.wallTime = new WallTime()
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents(this.wallTime) // CallbackEvents are created and pushed within SourceNode constructor
@@ -70,6 +35,7 @@ class DataSet {
   processData () {
     this.calculateFlattenedStats()
     this.calculateDecimals()
+    this.wallTime.processPercentSlices()
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
@@ -88,17 +54,82 @@ class DataSet {
   }
 }
 
-function getWallTimeSegment () {
+class WallTime {
+  constructor () {
+    // Creates array of 100 wall time segments, one for each 1% segment of the total running time
+    this.percentSlices = Array.from({length: 100}, () => createWallTimeSlice())
+
+    // Set in callback-event.js AllCallbackEvents.add()
+    this.profileStart = 0 // Timestamp of first .init
+    this.profileEnd = 0 // Timestamp of last .after
+
+    // Set in callback-event.js AllCallbackEvents.processAll()
+    this.profileDuration = null // Number of miliseconds from profileStart to profileEnd
+    this.msPerPercent = null // profileDuration / 100, number of miliseconds spanned by each item in percentages array
+
+    this.maxAsyncPending = 0
+    this.maxSyncActive = 0
+    this.categoriesOrdered = []
+  }
+
+  getSegments (startTime, endTime, discardFirst = false) {
+    const {
+      profileStart,
+      profileEnd,
+      msPerPercent,
+      percentSlices
+    } = this
+
+    // Don't allow seemingly valid non-failing output from logically invalid input
+    if (startTime < profileStart) throw new Error(`Wall time segment start time (${startTime}) precedes profile start time (${profileStart})`)
+    if (endTime > profileEnd) throw new Error(`Wall time segment end time (${endTime}) exceeds profile end time (${profileEnd})`)
+    if (startTime > endTime) {
+      throw new Error(`Wall time segment start time (${startTime}) doesn’t precede segment end time (${endTime})`)
+    }
+
+    const startIndex = Math.floor((startTime - profileStart) / msPerPercent)
+    const endIndex = Math.ceil((endTime - profileStart) / msPerPercent)
+    const segments = percentSlices.slice(startIndex, endIndex)
+
+    // The last item in getSegments(x, y) is always the same as the first in getSegments(y, z)
+    // so use discardFirst when needed to avoid duplication in adjacent segments
+    return discardFirst ? segments.slice(1) : segments
+  }
+
+  processPercentSlices () {
+    const maxAsyncByCategory = {}
+
+    for (var i = 0; i < 100; i++) {
+      const percentSlice = this.percentSlices[i]
+      if (percentSlice.syncActive.callbackCount > this.maxSyncActive) this.maxSyncActive = percentSlice.syncActive.callbackCount
+      if (percentSlice.asyncPending.callbackCount > this.maxAsyncPending) this.maxAsyncPending = percentSlice.asyncPending.callbackCount
+
+      // Define maxAsyncByCategory[typeCategory] for each type category present and set it to the highest value
+      for (const [typeCategory, value] of Object.entries(percentSlice.asyncPending.byTypeCategory)) {
+        if (!maxAsyncByCategory[typeCategory] || value > maxAsyncByCategory[typeCategory]) maxAsyncByCategory[typeCategory] = value
+      }
+    }
+
+    // Sort so the category with the tallest spike of pending events is first
+    this.categoriesOrdered = Object.keys(maxAsyncByCategory).sort((a, b) => {
+      return maxAsyncByCategory[b] - maxAsyncByCategory[a]
+    })
+  }
+}
+
+function createWallTimeSlice () {
   // Refers to 1% of the time the profile was running for
   return {
-    syncActive: {
-      callbackCount: 0,
-      aggregateNodes: new Set()
-    },
-    asyncPending: {
-      callbackCount: 0,
-      aggregateNodes: new Set()
-    }
+    syncActive: createSubSlice(),
+    asyncPending: createSubSlice()
+  }
+}
+
+function createSubSlice () {
+  return {
+    byAggregateId: {},
+    callbackCount: 0,
+    byTypeCategory: {}
   }
 }
 

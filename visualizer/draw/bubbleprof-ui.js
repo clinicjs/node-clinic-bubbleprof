@@ -81,6 +81,7 @@ class BubbleprofUI extends EventEmitter {
       const connection = layoutNode.inboundConnection
 
       const newLayout = new Layout({
+        parentLayout: this.layout,
         dataNodes: nodesArray,
         connection: connection || { targetNode: layoutNode.node }
       }, this.getSettingsForLayout())
@@ -201,7 +202,7 @@ class BubbleprofUI extends EventEmitter {
   // Selects a node that may or may not be collapsed
   jumpToNode (dataNode) {
     this.highlightNode(null)
-    const layoutNode = this.findDataNodeInLayout(dataNode)
+    const layoutNode = this.layout.findDataNode(dataNode)
 
     // If we can't find the node in this sublayout, step up one level and try again
     if (!layoutNode) {
@@ -237,30 +238,10 @@ class BubbleprofUI extends EventEmitter {
       const layoutNode = uiWithinClusterNode.layout.layoutNodes.get(nodeId)
       return uiWithinClusterNode.selectNode(layoutNode)
     } else {
-      const collapsedLayoutNode = uiWithinClusterNode.findCollapsedNodeInLayout(aggregateNode)
+      const collapsedLayoutNode = uiWithinClusterNode.layout.findCollapsedNode(aggregateNode)
       const uiWithinCollapsedNode = uiWithinClusterNode.selectNode(collapsedLayoutNode)
       return uiWithinCollapsedNode.jumpToNode(aggregateNode)
     }
-  }
-
-  // Returns a containing layoutNode, or false if it can't be found at this level
-  findDataNodeInLayout (dataNode) {
-    const nodeId = dataNode.id
-    const layoutNodes = this.layout.layoutNodes
-    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
-      return this.layout.layoutNodes.get(nodeId)
-    } else {
-      return this.findCollapsedNodeInLayout(dataNode)
-    }
-  }
-
-  findCollapsedNodeInLayout (dataNode) {
-    for (const layoutNode of this.layout.layoutNodes.values()) {
-      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node === dataNode)) {
-        return layoutNode
-      }
-    }
-    return false
   }
 
   outputFrames (aggregateNode, layoutNode = null) {
@@ -310,10 +291,11 @@ class BubbleprofUI extends EventEmitter {
   // so that browser paint etc can happen around the same time, minimising reflows
   initializeElements () {
     const d3Body = d3.select('body')
+    const d3Main = d3.select('main')
     d3Body.classed('initialized', true)
     d3Body.attr('data-view-mode', this.settings.viewMode)
 
-    this.mainContainer.d3Element = d3Body.append('main')
+    this.mainContainer.d3Element = d3Main.size() ? d3Main : d3Body.append('main')
     this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
 
     // TODO: try replacing with .emit('initializeElements')

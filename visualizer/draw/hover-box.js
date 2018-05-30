@@ -40,16 +40,9 @@ class HoverBox extends HtmlContent {
     })
   }
 
-  positionWithSidebar (nodePosition, responsiveScaleFactor, svgContainerBounds, bBox) {
+  positionSidewards (nodePosition, responsiveScaleFactor, svgContainerBounds, bBox) {
     const { width, height } = bBox
     const top = nodePosition.y * responsiveScaleFactor
-    const titleBlockHeight = this.d3TitleBlock.node().getBoundingClientRect().height
-
-    if (top + titleBlockHeight > svgContainerBounds.height) {
-      // Place hover box above to stop overflow below edge of page
-      this.positionWithoutSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds, bBox)
-      return
-    }
 
     const left = nodePosition.x * responsiveScaleFactor
     const horizontalFlip = left + width > window.innerWidth
@@ -62,7 +55,7 @@ class HoverBox extends HtmlContent {
     this.d3Element.classed('use-vertical-arrow', false)
   }
 
-  positionWithoutSidebar (nodePosition, responsiveScaleFactor, svgContainerBounds, bBox) {
+  position (nodePosition, responsiveScaleFactor, svgContainerBounds, bBox) {
     const { width, height } = bBox
     const verticalArrowPadding = 12
     const initialTop = nodePosition.y * responsiveScaleFactor + verticalArrowPadding
@@ -83,6 +76,12 @@ class HoverBox extends HtmlContent {
       const titleBlockHeight = this.d3TitleBlock.node().getBoundingClientRect().height
       adjustedTop -= titleBlockHeight + verticalArrowPadding * 2
       verticalFlip = true
+    }
+
+    // On short windows with no space above or below
+    if (adjustedTop < 0) {
+      this.positionSidewards(nodePosition, responsiveScaleFactor, svgContainerBounds, bBox)
+      return
     }
 
     this.d3Element.style('top', adjustedTop + 'px')
@@ -119,13 +118,8 @@ class HoverBox extends HtmlContent {
       // Ensure off-bottom class is not applied before calculating if it's needed
       this.d3Element.classed('off-bottom', false)
       const bBox = this.d3Element.node().getBoundingClientRect()
-      const arrowSpacing = 12
 
-      if (window.innerWidth > bBox.width * 2 + arrowSpacing && window.innerHeight < window.innerWidth) {
-        this.positionWithSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds, bBox)
-      } else {
-        this.positionWithoutSidebar(nodePosition, responsiveScaleFactor, svgContainerBounds, bBox)
-      }
+      this.position(nodePosition, responsiveScaleFactor, svgContainerBounds, bBox)
 
       const nodeType = layoutNode.node.constructor.name
       const dataNode = nodeType === 'ShortcutNode' ? layoutNode.node.shortcutTo : layoutNode.node
