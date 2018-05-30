@@ -150,11 +150,13 @@ class HoverBox extends HtmlContent {
           this.d3Element.attr('name', 'cluster-node')
           break
       }
-      this.d3TitleBlock.on('click', () => {
+      const clickHandler = () => {
         d3.event.stopPropagation()
         this.ui.highlightNode(null)
         this.ui.selectNode(layoutNode)
-      })
+      }
+      this.d3TitleBlock.on('click', clickHandler)
+      this.d3VerticalArrow.on('click', clickHandler)
     }
   }
 }
