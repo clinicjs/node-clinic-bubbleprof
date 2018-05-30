@@ -17,10 +17,10 @@ function drawOuterUI () {
 
   // Header
   const header = ui.sections.get('header')
-  const highlightBar = header.addContent(undefined, { classNames: 'header-bar', htmlContent: '<div></div>' })
+  const highlightBar = header.addContent(undefined, { classNames: 'header-bar highlight-bar', htmlContent: '<div></div>' })
   const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Party:</label>' })
   const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
-  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar', htmlContent: '<div></div>' })
+  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar', htmlContent: '<div></div>' })
   breadcrumbBar.addContent(BreadcrumbPanel, { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
   // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })

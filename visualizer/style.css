@@ -130,6 +130,8 @@ main {
 #header .header-bar {
   display: block;
   width: 100%;
+  margin-top: 6px;
+  margin-bottom: 6px;
   display: flex;
   flex-direction: row;
 }
@@ -142,11 +144,26 @@ main {
   color: var(--cyan);
 }
 
-.breadcrumb:hover {
+#header .highlight-bar {
+  margin-bottom: 3px;
+}
+
+#header .breadcrumb-bar {
+  margin-top: 0;
+}
+
+#header  .breadcrumb {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 3px 6px;
+  background-color: var(--pure-black);
+}
+
+#header .breadcrumb:hover {
   cursor: pointer;
 }
 
-.breadcrumb-separator {
+#header .breadcrumb-separator {
   margin-left: 5px;
   margin-right: 5px;
 }
@@ -969,7 +986,6 @@ body:not(.initialized):after {
 
 @media only screen and (max-width: 600px){
   #header {
-    max-height: 56px;
     overflow-y: auto;
     display: block;
     margin: 0;
@@ -978,7 +994,7 @@ body:not(.initialized):after {
     display: inline;
     margin: 0;
   }
-  #header label {
+  #header .highlight-bar *:not(.interactive-key) > label {
     display: none;
   }
 }
@@ -990,6 +1006,9 @@ body:not(.initialized):after {
   #banner svg {
     margin: 0;
     transform: scale(0.9);
+  }
+  .breadcrumb-bar {
+    padding-left: 7px;
   }
 }
 @media only screen and (max-width: 380px){
@@ -1014,7 +1033,6 @@ body:not(.initialized):after {
 
   #header {
     margin: 0;
-    max-height: 52px;
   }
 
   #side-bar,

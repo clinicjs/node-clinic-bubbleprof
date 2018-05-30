@@ -44,8 +44,6 @@ class BreadcrumbPanel extends HtmlContent {
 
   addLabel (ui) {
     const fullLabelText = ui.name || 'Main View'
-    const trimThreshold = 15
-    const acceptableStretch = 3
     const labelText = trimToNearestSpace(fullLabelText)
     this.d3Element
       .insert('label', ':first-child') // i.e. prepend instead of append
@@ -58,13 +56,13 @@ class BreadcrumbPanel extends HtmlContent {
           this.topmostUI.clearSublayout()
         }
       })
-      
-      document.onkeydown = (e) => {
-        if (e.keyCode === 27) {
+
+    document.onkeydown = (e) => {
+      if (e.keyCode === 27) {
           // ESC button
-          this.topmostUI.clearSublayout()
-        }
+        this.topmostUI.clearSublayout()
       }
+    }
 
     if (ui !== this.originalUI) {
       this.d3Element
