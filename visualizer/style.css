@@ -122,12 +122,15 @@ main {
   border-bottom: 1px solid var(--cyan);
   font-size: var(--main-text-size);
   height: var(--header-height);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   position: sticky;
   top: 0;
   z-index: 10;
   background: var(--main-bg-color);
+}
+
+#header:hover, #header:focus, #header:active {
+  overflow-x: auto;
 }
 
 #header .header-bar {
