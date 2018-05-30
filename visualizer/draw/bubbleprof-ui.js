@@ -262,10 +262,11 @@ class BubbleprofUI extends EventEmitter {
   // so that browser paint etc can happen around the same time, minimising reflows
   initializeElements () {
     const d3Body = d3.select('body')
+    const d3Main = d3.select('main')
     d3Body.classed('initialized', true)
     d3Body.attr('data-view-mode', this.settings.viewMode)
 
-    this.mainContainer.d3Element = d3Body.append('main')
+    this.mainContainer.d3Element = d3Main.size() ? d3Main : d3Body.append('main')
     this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
 
     // TODO: try replacing with .emit('initializeElements')
