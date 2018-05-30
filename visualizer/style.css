@@ -119,11 +119,11 @@ main {
 #header {
   width: 100%;
   margin: 0 24px;
-  padding: 4px 0;
   border-bottom: 1px solid var(--cyan);
   font-size: var(--main-text-size);
   height: var(--header-height);
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   position: sticky;
   top: 0;
   z-index: 10;
