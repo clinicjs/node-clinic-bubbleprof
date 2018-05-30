@@ -95,6 +95,7 @@ class BubbleprofUI extends EventEmitter {
       }, nodeLinkSection, this)
       const sublayout = uiWithinSublayout.sections.get(nodeLinkId)
       sublayout.addCollapseControl()
+      const closeBtn = sublayout.addContent(undefined, { classNames: 'close-btn' })
 
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
@@ -102,6 +103,26 @@ class BubbleprofUI extends EventEmitter {
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()
+
+      // Close button returns to originalUI
+      let closing = false
+      let topmostUI
+      closeBtn.d3Element
+        .property('textContent', '×')
+        .on('click', () => {
+          closing = true
+          topmostUI.clearSublayout()
+        })
+      this.originalUI.on('setTopmostUI', (newTopmostUI) => {
+        topmostUI = newTopmostUI
+        if (closing) {
+          if (topmostUI !== this.originalUI) {
+            topmostUI.clearSublayout()
+          } else {
+            closing = false
+          }
+        }
+      })
 
       uiWithinSublayout.setData(newLayout)
       return uiWithinSublayout

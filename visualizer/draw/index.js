@@ -117,6 +117,7 @@ function drawOuterUI () {
 
   // Complete
   ui.initializeElements()
+
   return ui
 }
 
