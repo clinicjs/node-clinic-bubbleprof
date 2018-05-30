@@ -979,6 +979,16 @@ svg.line-chart-svg.filter-applied .area-line.filtered {
   opacity: 1;
 }
 
+.line-chart .x-axis .tick text {
+  fill: var(--nearform-grey);
+}
+.line-chart .x-axis .tick line {
+  stroke: var(--nearform-grey);
+}
+.line-chart .x-axis .domain {
+  display: none;
+}
+
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
    * Must * animate by transforms only, to keep animating when processor is busy */
 

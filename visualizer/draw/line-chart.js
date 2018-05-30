@@ -5,13 +5,17 @@ const HtmlContent = require('./html-content.js')
 
 class LineChart extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
-    super(d3Container, contentProperties)
+    super(d3Container, Object.assign({
+      margins: {
+        top: 0,
+        left: 6,
+        right: 6,
+        bottom: 12
+      }
+    }, contentProperties))
 
     this.xScale = d3.scaleTime()
-    this.xAxis = d3.axisBottom().scale(this.xScale)
-
     this.yScale = d3.scaleLinear()
-    this.yAxis = d3.axisLeft().scale(this.yScale)
 
     this.areaMaker = d3.area()
       .x(d => this.xScale(d.data.time))
@@ -30,16 +34,22 @@ class LineChart extends HtmlContent {
   }
   initializeElements () {
     super.initializeElements()
+    const margins = this.contentProperties.margins
+
     this.d3Element.classed('line-chart', true)
 
     this.d3LineChartSVG = this.d3ContentWrapper.append('svg')
       .classed('line-chart-svg', true)
 
-    this.d3LinesGroup = this.d3LineChartSVG.append('g')
+    this.d3LineChartGroup = this.d3LineChartSVG.append('g')
+      .attr('transform', `translate(${margins.left}, ${margins.top})`)
+
+    this.d3LinesGroup = this.d3LineChartGroup.append('g')
       .classed('lines-group', true)
 
-    this.d3AxisGroup = this.d3LineChartSVG.append('g')
+    this.d3XAxisGroup = this.d3LineChartGroup.append('g')
       .classed('axis-group', true)
+      .classed('x-axis', true)
   }
   setData () {
     const {
@@ -47,7 +57,7 @@ class LineChart extends HtmlContent {
       aggregateNodes
     } = this.ui.dataSet
 
-    this.xScale.domain([wallTime.profileStart, wallTime.profileEnd])
+    this.xScale.domain([0, wallTime.profileEnd - wallTime.profileStart])
     this.yScale.domain([0, wallTime.maxAsyncPending])
 
     // Sort by category (same colours together) or if equal, by id (how early defined)
@@ -65,7 +75,7 @@ class LineChart extends HtmlContent {
     const keysLength = keys.length
     const dataArray = wallTime.slices.map((item, index) => {
       const dataItem = {
-        time: wallTime.profileStart + index * wallTime.msPerSlice
+        time: index * wallTime.msPerSlice
       }
       for (var i = 0; i < keysLength; i++) {
         dataItem[keys[i]] = item.asyncPending.byAggregateId[keys[i]] || 0
@@ -122,6 +132,10 @@ class LineChart extends HtmlContent {
       width,
       height
     } = this.d3LineChartSVG.node().getBoundingClientRect()
+    const margins = this.contentProperties.margins
+
+    const usableHeight = height - margins.bottom - margins.top
+    const usableWidth = width - margins.left - margins.right
 
     // If a layoutNode has been assigned, de-emphasise everything that's not in it
     if (this.layoutNode) {
@@ -143,10 +157,38 @@ class LineChart extends HtmlContent {
       this.d3Lines.classed('filtered', false)
     }
 
-    this.xScale.range([0, width])
-    this.yScale.range([height, 0])
+    this.xScale.range([0, usableWidth])
+    this.yScale.range([usableHeight, 0])
 
     this.d3Lines.attr('d', this.areaMaker)
+
+    const xAxis = d3.axisBottom()
+      .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
+      .tickSize(2)
+      .tickPadding(3)
+      .scale(this.xScale)
+      .tickFormat((dateStamp) => {
+        const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
+        switch (true) {
+          // Just show a simple '0' for the first axis label i.e. profile start
+          case d3.timeFormat('%Q')(dateStamp) === '0':
+            return `0${hairSpace}s`
+          case d3.timeSecond(dateStamp) < dateStamp:
+            // When space is moderately limited, show unlabelled mid point markers between seconds
+            if (width < 220) return ''
+            return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`// milliseconds like '500 ms'
+          case d3.timeMinute(dateStamp) < dateStamp:
+            return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`// seconds like '5 s'
+          case d3.timeHour(dateStamp) < dateStamp:
+            return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min` // minutes like '5 min'
+          default:
+            return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr` // hours like '5 hr'
+        }
+      })
+
+    this.d3XAxisGroup
+      .attr('transform', `translate(0, ${usableHeight})`)
+      .call(xAxis)
   }
 }
 
