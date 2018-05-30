@@ -104,30 +104,38 @@ class BubbleprofUI extends EventEmitter {
 
       uiWithinSublayout.initializeElements()
 
-      // Close button returns to originalUI
-      let closing = false
-      let topmostUI
-      closeBtn.d3Element
-        .property('textContent', '×')
-        .on('click', () => {
-          closing = true
-          topmostUI.clearSublayout()
-        })
-      this.originalUI.on('setTopmostUI', (newTopmostUI) => {
-        topmostUI = newTopmostUI
-        if (closing) {
-          if (topmostUI !== this.originalUI) {
-            topmostUI.clearSublayout()
-          } else {
-            closing = false
-          }
-        }
-      })
+      this.initializeCloseButton(closeBtn)
 
       uiWithinSublayout.setData(newLayout)
       return uiWithinSublayout
     }
     return this
+  }
+
+  initializeCloseButton (closeBtn) {
+    // Close button returns to originalUI
+    const { originalUI } = this
+    let closing = false
+    let topmostUI = null
+    closeBtn.d3Element
+      .property('textContent', '×')
+      .on('click', () => {
+        closing = true
+        topmostUI.clearSublayout()
+      })
+    originalUI.on('setTopmostUI', onUIChange)
+
+    function onUIChange (newTopmostUI) {
+      originalUI.removeListener('setTopmostUI', onUIChange)
+      topmostUI = newTopmostUI
+      if (closing) {
+        if (topmostUI !== originalUI) {
+          topmostUI.clearSublayout()
+        } else {
+          closing = false
+        }
+      }
+    }
   }
 
   formatNumber (num) {
