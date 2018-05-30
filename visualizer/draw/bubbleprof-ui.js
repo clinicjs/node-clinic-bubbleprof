@@ -102,9 +102,6 @@ class BubbleprofUI extends EventEmitter {
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()
-      sublayout.d3Element.on('click', () => {
-        uiWithinSublayout.clearSublayout()
-      })
 
       uiWithinSublayout.setData(newLayout)
       return uiWithinSublayout
