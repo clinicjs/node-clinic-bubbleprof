@@ -565,7 +565,8 @@ svg.bubbleprof .link-outer {
   color: var(--cyan);
   z-index: 20;
   position: absolute;
-  padding: 2px 11px 6px;
+  padding: 2px 11px;
+  line-height: 32px;
   font-size: 28px;
   cursor: pointer;
 }
