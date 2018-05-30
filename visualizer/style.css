@@ -38,6 +38,7 @@ html {
   /* Define element sizes used in calculations by other elements */
   --banner-height: 65px;
   --footer-height: 65px;
+  --header-height: 65px;
 }
 
 /* Main layout */
@@ -117,10 +118,12 @@ main {
 
 #header {
   width: 100%;
-  margin: 4px 24px 4px;
+  margin: 0 24px;
   padding: 4px 0;
   border-bottom: 1px solid var(--cyan);
   font-size: var(--main-text-size);
+  height: var(--header-height);
+  overflow: auto;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -150,9 +153,10 @@ main {
 
 #header .breadcrumb-bar {
   margin-top: 0;
+  white-space: nowrap;
 }
 
-#header  .breadcrumb {
+#header .breadcrumb {
   display: inline-block;
   margin-top: 3px;
   padding: 3px 6px;
@@ -435,9 +439,9 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 
 body[data-view-mode='fit'] #node-link {
   position: sticky;
-  top: 52px;
-  max-height: calc(100vh - var(--banner-height) - 52px);
-  min-height: calc(100vh - var(--banner-height) - 52px);
+  top: var(--header-height);
+  max-height: calc(100vh - var(--banner-height) - var(--header-height));
+  min-height: calc(100vh - var(--banner-height) - var(--header-height));
 }
 
 /* Node-link diagram and container */
@@ -958,7 +962,7 @@ body:not(.initialized):after {
 #node-link .loading-indicator {
   background: var(--main-bg-translucent);
   width: 100%;
-  height: calc(100% + 52px);
+  height: calc(100% + var(--header-height));
   top: 0;
   left: 0;
   position: absolute;
@@ -984,21 +988,22 @@ body:not(.initialized):after {
   }
 }
 
-@media only screen and (max-width: 600px){
-  #header {
-    overflow-y: auto;
-    display: block;
-    margin: 0;
+@media only screen and (max-width: 910px){
+  #header .highlight-bar *:not(.interactive-key) > label {
+    display: none;
   }
   #header .panel {
     display: inline;
     margin: 0;
   }
-  #header .highlight-bar *:not(.interactive-key) > label {
-    display: none;
+  #header {
+    overflow-y: auto;
+    display: block;
+    margin: 0;
   }
 }
-@media only screen and (max-width: 420px){
+
+@media only screen and (max-width: 750px){
   #header .panel .interactive-key {
     font-size: 9pt;
     padding: 0;
@@ -1010,7 +1015,28 @@ body:not(.initialized):after {
   .breadcrumb-bar {
     padding-left: 7px;
   }
+  .type-icon {
+    width: 7px;
+    margin-right: 3px;
+  }
 }
+
+@media only screen and (max-width: 635px){
+  body {
+    --header-height: 75px;
+  }
+}
+
+@media only screen and (max-width: 450px){
+  #header .panel {
+    display: block;
+    white-space: nowrap;
+  }
+  #header .highlight-bar {
+    display: block;
+  }
+}
+
 @media only screen and (max-width: 380px){
   #banner a:first-child {
     margin-left: -20px;
@@ -1041,8 +1067,8 @@ body:not(.initialized):after {
   }
 
   body[data-view-mode='fit'] #node-link {
-    max-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
-    min-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
+    max-height: calc(100vh - var(--banner-height) - var(--footer-height) - var(--header-height));
+    min-height: calc(100vh - var(--banner-height) - var(--footer-height) - var(--header-height));
   }
 
   #side-bar {
