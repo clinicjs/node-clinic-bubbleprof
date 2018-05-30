@@ -719,6 +719,7 @@ body[data-highlight-party='nodecore'] svg .party-root .by-variable {
 .hover-box .vertical-arrow {
   display: none;
   margin-left: 6px;
+  cursor: pointer;
 }
 
 .hover-box.use-vertical-arrow {
