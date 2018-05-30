@@ -31,6 +31,9 @@ class BubbleprofUI extends EventEmitter {
 
     this.highlightedNode = null
     this.selectedDataNode = null
+    this.name = this.parentUI && this.parentUI.selectedDataNode.name
+    this.name = this.name || 'Main view'
+    this.name = this.name.split(' ').filter(str => !str.includes('/') && !str.includes(':')).join(' ')
 
     // Main divisions of the page
     this.sections = new Map()
