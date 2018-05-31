@@ -59,7 +59,7 @@ class BreadcrumbPanel extends HtmlContent {
 
     document.onkeydown = (e) => {
       if (e.keyCode === 27) {
-          // ESC button
+        // ESC button
         this.topmostUI.clearSublayout()
       }
     }
