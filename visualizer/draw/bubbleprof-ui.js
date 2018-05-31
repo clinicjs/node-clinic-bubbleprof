@@ -1,12 +1,11 @@
 'use strict'
 
-const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
 const debounce = require('lodash/debounce')
 const EventEmitter = require('events')
+const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
-const SvgContainer = require('./svg-container.js')
-const HoverBox = require('./hover-box.js')
+const { validateKey } = require('../validation.js')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
@@ -39,12 +38,17 @@ class BubbleprofUI extends EventEmitter {
     this.sections = new Map()
 
     for (const sectionName of sections) {
-      this.sections.set(sectionName, new HtmlContent(appendTo, {
+      this.sections.set(sectionName, new htmlContentTypes.HtmlContent(appendTo, {
         htmlElementType: 'section',
         id: sectionName,
         classNames: this.settings.classNames
       }, this))
     }
+  }
+
+  getContentClass (className) {
+    validateKey(className, Object.keys(htmlContentTypes))
+    return htmlContentTypes[className]
   }
 
   getNodeLinkSection () {
@@ -98,10 +102,10 @@ class BubbleprofUI extends EventEmitter {
       sublayout.addCollapseControl()
       const closeBtn = sublayout.addContent(undefined, { classNames: 'close-btn' })
 
-      const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
+      const sublayoutSvg = sublayout.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
-      sublayout.addContent(HoverBox, {svg: sublayoutSvg})
+      sublayout.addContent('HoverBox', {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()
 
