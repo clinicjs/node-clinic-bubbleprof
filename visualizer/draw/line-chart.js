@@ -18,6 +18,8 @@ class LineChart extends HtmlContent {
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
 
+    this.pixelsPerSlice = 0
+
     this.areaMaker = d3.area()
       .x(d => this.xScale(d.data.time))
       .y0(d => this.yScale(d[0]))
@@ -39,10 +41,13 @@ class LineChart extends HtmlContent {
 
     this.d3Element.classed('line-chart', true)
 
-    this.d3LeadInText = this.d3ContentWrapper.append('p')
+    this.d3ChartWrapper = this.d3ContentWrapper.append('div')
+      .classed('line-chart', true)
+
+    this.d3LeadInText = this.d3ChartWrapper.append('p')
       .classed('lead-in-text', true)
 
-    this.d3LineChartSVG = this.d3ContentWrapper.append('svg')
+    this.d3LineChartSVG = this.d3ChartWrapper.append('svg')
       .classed('line-chart-svg', true)
 
     this.d3LineChartGroup = this.d3LineChartSVG.append('g')
@@ -54,6 +59,16 @@ class LineChart extends HtmlContent {
     this.d3XAxisGroup = this.d3LineChartGroup.append('g')
       .classed('axis-group', true)
       .classed('x-axis', true)
+
+    this.hoverBox = this.addContent('HoverBox', {
+      type: 'tool-tip',
+      allowableOverflow: 24
+    })
+    this.hoverBox.initializeElements()
+
+    this.d3SliceHighlight = this.d3ChartWrapper.append('div')
+      .classed('slice-highlight', true)
+      .classed('hidden', true)
   }
   setData () {
     const {
@@ -61,11 +76,13 @@ class LineChart extends HtmlContent {
       aggregateNodes
     } = this.ui.dataSet
 
+    this.slicesCount = wallTime.slicesCount
+
     this.xScale.domain([0, wallTime.profileEnd - wallTime.profileStart])
     this.yScale.domain([0, wallTime.maxAsyncPending])
 
     // Sort by category (same colours together) or if equal, by id (how early defined)
-    const keys = [...aggregateNodes.keys()].sort((a, b) => {
+    this.aggregateIds = [...aggregateNodes.keys()].sort((a, b) => {
       const aNode = aggregateNodes.get(a)
       const bNode = aggregateNodes.get(b)
       if (aNode.typeCategory !== bNode.typeCategory) {
@@ -76,21 +93,21 @@ class LineChart extends HtmlContent {
       return a - b
     })
 
-    const keysLength = keys.length
-    const dataArray = wallTime.slices.map((item, index) => {
+    const aggregateIdsCount = this.aggregateIds.length
+    this.dataArray = wallTime.slices.map((item, index) => {
       const dataItem = {
         time: index * wallTime.msPerSlice
       }
-      for (var i = 0; i < keysLength; i++) {
-        dataItem[keys[i]] = item.asyncPending.byAggregateId[keys[i]] || 0
+      for (var i = 0; i < aggregateIdsCount; i++) {
+        dataItem[this.aggregateIds[i]] = item.asyncPending.byAggregateId[this.aggregateIds[i]] || 0
       }
       return dataItem
     })
 
     const dataStacker = d3.stack()
-      .keys(keys)
+      .keys(this.aggregateIds)
 
-    this.stackedData = dataStacker(dataArray)
+    this.stackedData = dataStacker(this.dataArray)
 
     // Refresh on data / layout update. This includes screen resize
     if (!this.hidden) {
@@ -126,11 +143,29 @@ class LineChart extends HtmlContent {
         const aggregateNode = this.getAggregateNode(d.key)
         this.ui.jumpToAggregateNode(aggregateNode)
       })
+      .on('mousemove', () => {
+        this.showSlice(d3.event)
+      })
+
+    // Same behaviour on mouse movements off coloured area as on
+    this.d3LineChartSVG.on('mousemove', () => {
+      this.showSlice(d3.event)
+    })
+
+    this.d3ContentWrapper.on('mouseleave', () => {
+      this.hoverBox.hide()
+      this.d3SliceHighlight.classed('hidden', true)
+    })
 
     if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
   }
   applyLayoutNode (layoutNode = null) {
     this.layoutNode = layoutNode
+  }
+  layoutNodeHasAggregateId (aggregateId) {
+    const aggregateNode = this.getAggregateNode(aggregateId)
+    const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
+    return (layoutNode === this.layoutNode)
   }
   getLeadInText () {
     /* TODO: Enable this, adding lead in text to hover boxes, when nodes on diagram are drawn based on async / sync not within / between
@@ -149,6 +184,48 @@ class LineChart extends HtmlContent {
       to ${this.ui.dataSet.sourceNodesCount} asyncronous resources, over a time period
       of ${(this.ui.dataSet.wallTime.profileDuration).toFixed(0)} milliseconds.
     `
+  }
+  showSlice (event) {
+    const { offsetX } = event
+    // Note: d3.event is a live binding which fails if d3 is not bundled in a recommended way.
+    // See, for example, https://github.com/d3/d3-sankey/issues/30#issuecomment-307869620
+
+    const {
+      width,
+      height
+    } = this.d3LineChartSVG.node().getBoundingClientRect()
+    const margins = this.contentProperties.margins
+
+    // Show nothing if mouse movement is within chart margins
+    if (offsetX <= margins.left || offsetX + margins.left >= width) {
+      this.d3SliceHighlight.classed('hidden', true)
+      return
+    }
+
+    const leftPosition = offsetX - margins.left
+    const wrapperHeight = this.d3ChartWrapper.node().getBoundingClientRect().height
+
+    const index = Math.floor(leftPosition / this.pixelsPerSlice)
+    const timeSliceData = this.dataArray[index]
+
+    const value = this.aggregateIds.reduce((accum, aggregateId) => {
+      if (this.layoutNode && !this.layoutNodeHasAggregateId(aggregateId)) return accum
+      return accum + timeSliceData[aggregateId]
+    }, 0)
+
+    const topOffset = wrapperHeight - height - margins.bottom
+    const leftOffset = this.pixelsPerSlice * index + margins.left
+
+    this.d3SliceHighlight
+      .classed('hidden', false)
+      .style('left', leftOffset + 'px')
+
+    const pluralize = value === 1 ? '' : 's'
+    this.hoverBox.showContentAt(`<strong>${value}</strong> pending async operation${pluralize}`, {
+      x: leftOffset + this.pixelsPerSlice / 2,
+      y: topOffset
+    })
+    this.hoverBox.d3Element.classed('off-bottom', true)
   }
   draw () {
     super.draw()
@@ -170,9 +247,7 @@ class LineChart extends HtmlContent {
       this.d3LineChartSVG.classed('filter-applied', true)
       this.d3Lines.classed('filtered', d => {
         if (!this.layoutNode) return false
-        const aggregateNode = this.getAggregateNode(d.key)
-        const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
-        return (layoutNode !== this.layoutNode)
+        return !this.layoutNodeHasAggregateId(d.key)
       })
       if (this.ui.highlightedDataNode) {
         this.d3Lines.classed('not-emphasised', d => {
@@ -217,6 +292,12 @@ class LineChart extends HtmlContent {
     this.d3XAxisGroup
       .attr('transform', `translate(0, ${usableHeight})`)
       .call(xAxis)
+
+    this.pixelsPerSlice = usableWidth / this.slicesCount
+
+    this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
+    this.d3SliceHighlight.style('height', usableHeight + 'px')
+    this.d3SliceHighlight.style('bottom', margins.bottom + 'px')
   }
 }
 

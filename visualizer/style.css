@@ -668,11 +668,54 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   stroke-width: 4px !important;
 }
 
-/* Area chart */
+/* Line / Area chart */
 
 .line-chart-svg {
   width: 100%;
   height: 70px;
+  display: block;
+  position: relative;
+  mix-blend-mode: screen;
+  z-index: 2;
+}
+
+.line-chart {
+  position: relative;
+}
+
+.line-chart .slice-highlight {
+  background: var(--cyan-bright);
+  opacity: 0.2;
+  position: absolute;
+  z-index: 1;
+}
+
+.line-chart .hover-box {
+  width: 135px;
+  color: var(--grey-highlight);
+  font-size: var(--main-text-size);
+}
+
+.line-chart .hover-box .title-block {
+  padding: 12px 8px;
+}
+
+.line-chart .hover-box strong {
+  color: var(--pure-white);
+}
+
+.line-chart .hover-box .vertical-arrow {
+  margin-left: 9px;
+}
+
+#node-link .line-chart .hover-box > .vertical-arrow {
+  border-top-color: var(--main-bg-translucent);
+}
+
+#node-link .line-chart .hover-box {
+  background: var(--main-bg-translucent);
+  margin-top: -55px;
+  margin-left: 6px;
 }
 
 /* Hover box */
@@ -783,14 +826,14 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   border: 10px solid transparent;
 }
 
-.hover-box.use-vertical-arrow:not(.off-bottom) .vertical-arrow {
+.hover-box.use-vertical-arrow:not(.off-bottom) > .vertical-arrow {
   border-bottom-color: var(--pure-black);
   border-top: none;
   top: 0;
   margin-top: -9px;
 }
 
-.hover-box.use-vertical-arrow.off-bottom .vertical-arrow {
+.hover-box.use-vertical-arrow.off-bottom > .vertical-arrow {
   border-top-color: var(--pure-black);
   border-bottom: none;
   bottom: 0;
