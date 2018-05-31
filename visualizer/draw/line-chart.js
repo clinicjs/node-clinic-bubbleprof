@@ -228,76 +228,79 @@ class LineChart extends HtmlContent {
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
   draw () {
-    super.draw()
-    const {
-      width,
-      height
-    } = this.d3LineChartSVG.node().getBoundingClientRect()
-    const margins = this.contentProperties.margins
+    // Can be slow on extremely large profiles, do asyncronously
+    setTimeout(() => {
+      super.draw()
+      const {
+        width,
+        height
+      } = this.d3LineChartSVG.node().getBoundingClientRect()
+      const margins = this.contentProperties.margins
 
-    const usableHeight = height - margins.bottom - margins.top
-    const usableWidth = width - margins.left - margins.right
+      const usableHeight = height - margins.bottom - margins.top
+      const usableWidth = width - margins.left - margins.right
 
-    // If a layoutNode has been assigned, de-emphasise everything that's not in it
-    if (this.layoutNode) {
-      /* TODO: Enable this when nodes on diagram are drawn based on async / sync not within / between
-      this.d3LeadInText.html(this.getLeadInText())
-      */
+      // If a layoutNode has been assigned, de-emphasise everything that's not in it
+      if (this.layoutNode) {
+        /* TODO: Enable this when nodes on diagram are drawn based on async / sync not within / between
+        this.d3LeadInText.html(this.getLeadInText())
+        */
 
-      this.d3LineChartSVG.classed('filter-applied', true)
-      this.d3Lines.classed('filtered', d => {
-        if (!this.layoutNode) return false
-        return !this.layoutNodeHasAggregateId(d.key)
-      })
-      if (this.ui.highlightedDataNode) {
-        this.d3Lines.classed('not-emphasised', d => {
-          const aggregateNode = this.getAggregateNode(d.key)
-          return (aggregateNode !== this.ui.highlightedDataNode)
+        this.d3LineChartSVG.classed('filter-applied', true)
+        this.d3Lines.classed('filtered', d => {
+          if (!this.layoutNode) return false
+          return !this.layoutNodeHasAggregateId(d.key)
         })
-      }
-    } else {
-      this.d3LineChartSVG.classed('filter-applied', false)
-      this.d3Lines.classed('filtered', false)
-    }
-
-    this.xScale.range([0, usableWidth])
-    this.yScale.range([usableHeight, 0])
-
-    this.d3Lines.attr('d', this.areaMaker)
-
-    const xAxis = d3.axisBottom()
-      .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
-      .tickSize(2)
-      .tickPadding(3)
-      .scale(this.xScale)
-      .tickFormat((dateStamp) => {
-        const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
-        switch (true) {
-          // Just show a simple '0' for the first axis label i.e. profile start
-          case d3.timeFormat('%Q')(dateStamp) === '0':
-            return `0${hairSpace}s`
-          case d3.timeSecond(dateStamp) < dateStamp:
-            // When space is moderately limited, show unlabelled mid point markers between seconds
-            if (width < 220) return ''
-            return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`// milliseconds like '500 ms'
-          case d3.timeMinute(dateStamp) < dateStamp:
-            return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`// seconds like '5 s'
-          case d3.timeHour(dateStamp) < dateStamp:
-            return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min` // minutes like '5 min'
-          default:
-            return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr` // hours like '5 hr'
+        if (this.ui.highlightedDataNode) {
+          this.d3Lines.classed('not-emphasised', d => {
+            const aggregateNode = this.getAggregateNode(d.key)
+            return (aggregateNode !== this.ui.highlightedDataNode)
+          })
         }
-      })
+      } else {
+        this.d3LineChartSVG.classed('filter-applied', false)
+        this.d3Lines.classed('filtered', false)
+      }
 
-    this.d3XAxisGroup
-      .attr('transform', `translate(0, ${usableHeight})`)
-      .call(xAxis)
+      this.xScale.range([0, usableWidth])
+      this.yScale.range([usableHeight, 0])
 
-    this.pixelsPerSlice = usableWidth / this.slicesCount
+      this.d3Lines.attr('d', this.areaMaker)
 
-    this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
-    this.d3SliceHighlight.style('height', usableHeight + 'px')
-    this.d3SliceHighlight.style('bottom', margins.bottom + 'px')
+      const xAxis = d3.axisBottom()
+        .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
+        .tickSize(2)
+        .tickPadding(3)
+        .scale(this.xScale)
+        .tickFormat((dateStamp) => {
+          const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
+          switch (true) {
+            // Just show a simple '0' for the first axis label i.e. profile start
+            case d3.timeFormat('%Q')(dateStamp) === '0':
+              return `0${hairSpace}s`
+            case d3.timeSecond(dateStamp) < dateStamp:
+              // When space is moderately limited, show unlabelled mid point markers between seconds
+              if (width < 220) return ''
+              return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`// milliseconds like '500 ms'
+            case d3.timeMinute(dateStamp) < dateStamp:
+              return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`// seconds like '5 s'
+            case d3.timeHour(dateStamp) < dateStamp:
+              return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min` // minutes like '5 min'
+            default:
+              return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr` // hours like '5 hr'
+          }
+        })
+
+      this.d3XAxisGroup
+        .attr('transform', `translate(0, ${usableHeight})`)
+        .call(xAxis)
+
+      this.pixelsPerSlice = usableWidth / this.slicesCount
+
+      this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
+      this.d3SliceHighlight.style('height', usableHeight + 'px')
+      this.d3SliceHighlight.style('bottom', margins.bottom + 'px')
+    })
   }
 }
 
