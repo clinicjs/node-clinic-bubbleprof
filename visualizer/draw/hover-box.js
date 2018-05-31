@@ -9,8 +9,10 @@ class HoverBox extends HtmlContent {
     super(d3Container, Object.assign({
       type: 'node-link'
     }, contentProperties))
-    if (!this.contentProperties.svg) throw new Error('HoverBox requires contentProperties.svg to be defined')
     validateKey(this.contentProperties.type, ['node-link', 'tool-tip'])
+    if (this.contentProperties.type === 'node-link' && !this.contentProperties.svg) {
+      throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
+    }
 
     this.isHidden = true
   }
