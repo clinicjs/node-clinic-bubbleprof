@@ -616,16 +616,16 @@ body.spiderweb-layout svg.bubbleprof .link-inner {
   opacity: 0.5;
 }
 
-body[data-highlight-type='files-streams'] svg .type-files-streams,
-body[data-highlight-type='networks'] svg .type-networks,
-body[data-highlight-type='crypto'] svg .type-crypto,
-body[data-highlight-type='timing-promises'] svg .type-timing-promises,
-body[data-highlight-type='other'] svg .type-other,
+body[data-highlight-type='files-streams'] #node-link svg:not(:hover) .type-files-streams,
+body[data-highlight-type='networks'] #node-link svg:not(:hover) .type-networks,
+body[data-highlight-type='crypto'] #node-link svg:not(:hover) .type-crypto,
+body[data-highlight-type='timing-promises'] #node-link svg:not(:hover) .type-timing-promises,
+body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other,
 
-body[data-highlight-party='user'] svg .party-user .by-variable,
-body[data-highlight-party='external'] svg .party-external .by-variable ,
-body[data-highlight-party='nodecore'] svg .party-nodecore .by-variable,
-body[data-highlight-party='nodecore'] svg .party-root .by-variable {
+body[data-highlight-party='user'] #node-link svg:not(:hover) .party-user .by-variable,
+body[data-highlight-party='external'] #node-link svg:not(:hover) .party-external .by-variable ,
+body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-nodecore .by-variable,
+body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by-variable {
   /* !important overrides the stroke-width style set from js line width settings */
   stroke-width: 4px !important;
 }
