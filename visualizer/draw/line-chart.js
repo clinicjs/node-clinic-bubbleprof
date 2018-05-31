@@ -181,8 +181,8 @@ class LineChart extends HtmlContent {
     */
     return `
       <strong>${this.ui.dataSet.callbackEventsCount}</strong> calls were made
-      to ${this.ui.dataSet.sourceNodesCount} asyncronous resources, over a time period
-      of ${(this.ui.dataSet.wallTime.profileDuration).toFixed(0)} milliseconds.
+      to ${this.ui.dataSet.sourceNodesCount} asyncronous resources, over
+      a ${(this.ui.dataSet.wallTime.profileDuration).toFixed(0)} millisecond period.
     `
   }
   showSlice (event) {

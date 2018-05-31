@@ -681,6 +681,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
 
 .line-chart {
   position: relative;
+  font-size: var(--main-text-size);
 }
 
 .line-chart .slice-highlight {
@@ -693,7 +694,6 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
 .line-chart .hover-box {
   width: 135px;
   color: var(--grey-highlight);
-  font-size: var(--main-text-size);
 }
 
 .line-chart .hover-box .title-block {
@@ -778,8 +778,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
 }
 
 .hover-box p {
-  margin: 0;
-  padding: 6px 0;
+  margin: 14px 0 0 0;
   font-size: var(--main-text-size)
 }
 
@@ -991,7 +990,7 @@ svg.line-chart-svg .area-line.type-other {
 }
 svg.line-chart-svg.filter-applied .area-line {
   animation-name: fade-in;
-  animation-duration: 1.4s;
+  animation-duration: 0.4s;
   animation-fill-mode: forwards;
 }
 svg.line-chart-svg.filter-applied .area-line.not-emphasised {
@@ -999,16 +998,17 @@ svg.line-chart-svg.filter-applied .area-line.not-emphasised {
 }
 svg.line-chart-svg.filter-applied .area-line.filtered {
   animation-name: mostly-fade-out;
+  mix-blend-mode: luminosity;
 }
 
 @keyframes mostly-fade-out {
   to {
-    opacity: 0.2;
+    opacity: 0.14;
   }
 }
 @keyframes half-fade-out {
   to {
-    opacity: 0.5;
+    opacity: 0.45;
   }
 }
 @keyframes fade-in {
@@ -1025,9 +1025,15 @@ svg.line-chart-svg.filter-applied .area-line.filtered {
 .line-chart .x-axis .tick text {
   fill: var(--nearform-grey);
 }
+
 .line-chart .x-axis .tick line {
   stroke: var(--nearform-grey);
 }
+
+.hover-box .line-chart .x-axis .tick line {
+  stroke: var(--main-bg-color);
+}
+
 .line-chart .x-axis .domain {
   display: none;
 }

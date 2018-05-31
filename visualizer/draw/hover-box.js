@@ -48,9 +48,7 @@ class HoverBox extends HtmlContent {
     this.asyncOperationsChart.initializeElements()
 
     this.d3TimeBlock = this.asyncOperationsChart.d3ContentWrapper
-
-    this.d3BetweenTime = this.d3TimeBlock.append('p')
-    this.d3WithinTime = this.d3TimeBlock.append('p')
+    this.d3TimeStatement = this.d3TimeBlock.append('p')
 
     this.ui.on('hover', layoutNode => {
       if (layoutNode) this.layoutNode = layoutNode
@@ -181,8 +179,11 @@ class HoverBox extends HtmlContent {
 
     this.d3Title.text(dataNode.name)
 
-    this.d3BetweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
-    this.d3WithinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
+    this.d3TimeStatement.html(`
+      There were async operations pending within this group for
+      <strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong>, and for
+      <strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> while transitioning from the previous group.
+    `)
 
     // If a clusterNode only contains one aggregate, no point clicking down into it, just give us the frames
     const isIgnorableCluster = nodeType === 'ClusterNode' && layoutNode.node.nodes.size === 1
