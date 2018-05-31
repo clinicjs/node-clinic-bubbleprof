@@ -6,6 +6,7 @@ const HtmlContent = require('./html-content.js')
 class LineChart extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
     super(d3Container, Object.assign({
+      static: true,
       margins: {
         top: 0,
         left: 6,
@@ -37,6 +38,9 @@ class LineChart extends HtmlContent {
     const margins = this.contentProperties.margins
 
     this.d3Element.classed('line-chart', true)
+
+    this.d3LeadInText = this.d3ContentWrapper.append('p')
+      .classed('lead-in-text', true)
 
     this.d3LineChartSVG = this.d3ContentWrapper.append('svg')
       .classed('line-chart-svg', true)
@@ -122,9 +126,29 @@ class LineChart extends HtmlContent {
         const aggregateNode = this.getAggregateNode(d.key)
         this.ui.jumpToAggregateNode(aggregateNode)
       })
+
+    if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
   }
   applyLayoutNode (layoutNode = null) {
     this.layoutNode = layoutNode
+  }
+  getLeadInText () {
+    /* TODO: Enable this, adding lead in text to hover boxes, when nodes on diagram are drawn based on async / sync not within / between
+    if (this.layoutNode) {
+      const dataNode = this.layoutNode.node
+      console.log(this.layoutNode)
+      return `
+        For ${dataNode.getAsyncTime().toFixed(0)} milliseconds of the runtime of this profile,
+        an async resource from this grouping was pending. For ${dataNode.getSyncTime().toFixed(0)} milliseconds, an async resource was
+        active running a syncronous process.
+      `
+    }
+    */
+    return `
+      <strong>${this.ui.dataSet.callbackEventsCount}</strong> calls were made
+      to ${this.ui.dataSet.sourceNodesCount} asyncronous resources, over a time period
+      of ${(this.ui.dataSet.wallTime.profileDuration).toFixed(0)} milliseconds.
+    `
   }
   draw () {
     super.draw()
@@ -139,6 +163,10 @@ class LineChart extends HtmlContent {
 
     // If a layoutNode has been assigned, de-emphasise everything that's not in it
     if (this.layoutNode) {
+      /* TODO: Enable this when nodes on diagram are drawn based on async / sync not within / between
+      this.d3LeadInText.html(this.getLeadInText())
+      */
+
       this.d3LineChartSVG.classed('filter-applied', true)
       this.d3Lines.classed('filtered', d => {
         if (!this.layoutNode) return false

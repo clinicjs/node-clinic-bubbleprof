@@ -40,7 +40,8 @@ class HoverBox extends HtmlContent {
       .classed('click-message', true)
 
     this.asyncOperationsChart = this.addContent(LineChart, {
-      classNames: 'block time-block'
+      classNames: 'block time-block',
+      static: false
     })
     this.asyncOperationsChart.initializeElements()
 

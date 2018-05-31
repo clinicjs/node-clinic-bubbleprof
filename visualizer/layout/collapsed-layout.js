@@ -180,6 +180,12 @@ class CollapsedLayoutNode {
   getWithinTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
   }
+  getSyncTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getSyncTime(), 0)
+  }
+  getAsyncTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getAsyncTime(), 0)
+  }
   validateStat (num, statType = '', aboveZero = false) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
     return validateNumber(num, targetDescription, aboveZero)

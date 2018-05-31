@@ -22,7 +22,10 @@ class DataSet {
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents(this.wallTime) // CallbackEvents are created and pushed within SourceNode constructor
+    this.callbackEventsCount = 0
+
     // Source, Aggregate and Cluster Node maps persist in memory throughout
+    this.sourceNodesCount = 0
     if (this.settings.debugMode) this.sourceNodes = [] // SourceNodes are created from and pushed to this array in AggregateNode constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
     this.clusterNodes = new Map()
@@ -48,6 +51,7 @@ class DataSet {
   }
   calculateFlattenedStats () {
     this.callbackEvents.processAll()
+    this.callbackEventsCount = this.callbackEvents.array.length
     this.callbackEvents = null
   }
   calculateDecimals () {
