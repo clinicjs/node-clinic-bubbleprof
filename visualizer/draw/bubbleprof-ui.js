@@ -31,6 +31,9 @@ class BubbleprofUI extends EventEmitter {
 
     this.highlightedNode = null
     this.selectedDataNode = null
+    this.name = this.parentUI && this.parentUI.selectedDataNode.name
+    this.name = this.name || 'Main view'
+    this.name = this.name.split(' ').filter(str => !str.includes('/') && !str.includes(':')).join(' ')
 
     // Main divisions of the page
     this.sections = new Map()
@@ -93,6 +96,7 @@ class BubbleprofUI extends EventEmitter {
       }, nodeLinkSection, this)
       const sublayout = uiWithinSublayout.sections.get(nodeLinkId)
       sublayout.addCollapseControl()
+      const closeBtn = sublayout.addContent(undefined, { classNames: 'close-btn' })
 
       const sublayoutSvg = sublayout.addContent(SvgContainer, {id: 'sublayout-svg', svgBounds: {}})
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
@@ -100,14 +104,39 @@ class BubbleprofUI extends EventEmitter {
       sublayout.addContent(HoverBox, {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()
-      sublayout.d3Element.on('click', () => {
-        uiWithinSublayout.clearSublayout()
-      })
+
+      this.initializeCloseButton(closeBtn)
 
       uiWithinSublayout.setData(newLayout)
       return uiWithinSublayout
     }
     return this
+  }
+
+  initializeCloseButton (closeBtn) {
+    // Close button returns to originalUI
+    const { originalUI } = this
+    let closing = false
+    let topmostUI = null
+    closeBtn.d3Element
+      .property('textContent', '×')
+      .on('click', () => {
+        closing = true
+        topmostUI.clearSublayout()
+      })
+    originalUI.on('setTopmostUI', onUIChange)
+
+    function onUIChange (newTopmostUI) {
+      originalUI.removeListener('setTopmostUI', onUIChange)
+      topmostUI = newTopmostUI
+      if (closing) {
+        if (topmostUI !== originalUI) {
+          topmostUI.clearSublayout()
+        } else {
+          closing = false
+        }
+      }
+    }
   }
 
   formatNumber (num) {

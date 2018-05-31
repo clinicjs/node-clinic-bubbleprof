@@ -7,6 +7,7 @@ const SvgContainer = require('./svg-container.js')
 const staticKeyHtml = require('./static-key.js')
 const Frames = require('./frames.js')
 const Lookup = require('./lookup.js')
+const BreadcrumbPanel = require('./breadcrumb-panel.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -16,8 +17,11 @@ function drawOuterUI () {
 
   // Header
   const header = ui.sections.get('header')
-  const partyKeyPanel = header.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Party:</label>' })
-  const typeKeyPanel = header.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
+  const highlightBar = header.addContent(undefined, { classNames: 'header-bar highlight-bar', htmlContent: '<div></div>' })
+  const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Party:</label>' })
+  const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
+  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar', htmlContent: '<div></div>' })
+  breadcrumbBar.addContent(BreadcrumbPanel, { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
   // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })
 
@@ -113,6 +117,7 @@ function drawOuterUI () {
 
   // Complete
   ui.initializeElements()
+
   return ui
 }
 

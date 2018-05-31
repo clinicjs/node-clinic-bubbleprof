@@ -31,7 +31,6 @@ html {
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
-  --close-x: "×";
 
   /* Define text sizes */
   --main-text-size: 10pt;
@@ -39,6 +38,7 @@ html {
   /* Define element sizes used in calculations by other elements */
   --banner-height: 65px;
   --footer-height: 65px;
+  --header-height: 65px;
 }
 
 /* Main layout */
@@ -124,16 +124,28 @@ main {
 
 #header {
   width: 100%;
-  margin: 4px 24px 4px;
-  padding: 4px 0;
+  margin: 0 24px;
   border-bottom: 1px solid var(--cyan);
-  display: flex;
-  flex-direction: row;
   font-size: var(--main-text-size);
+  height: var(--header-height);
+  overflow: hidden;
   position: sticky;
   top: 0;
   z-index: 10;
   background: var(--main-bg-color);
+}
+
+#header:hover, #header:focus, #header:active {
+  overflow-x: auto;
+}
+
+#header .header-bar {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: row;
 }
 
 #header .panel {
@@ -142,6 +154,31 @@ main {
 
 #header .panel > label {
   color: var(--cyan);
+}
+
+#header .highlight-bar {
+  margin-bottom: 3px;
+}
+
+#header .breadcrumb-bar {
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+#header .breadcrumb {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 3px 6px;
+  background-color: var(--pure-black);
+}
+
+#header .breadcrumb:hover {
+  cursor: pointer;
+}
+
+#header .breadcrumb-separator {
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 #header .interactive-key {
@@ -411,9 +448,9 @@ body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .p
 
 body[data-view-mode='fit'] #node-link {
   position: sticky;
-  top: 52px;
-  max-height: calc(100vh - var(--banner-height) - 52px);
-  min-height: calc(100vh - var(--banner-height) - 52px);
+  top: var(--header-height);
+  max-height: calc(100vh - var(--banner-height) - var(--header-height));
+  min-height: calc(100vh - var(--banner-height) - var(--header-height));
 }
 
 /* Node-link diagram and container */
@@ -525,17 +562,17 @@ svg.bubbleprof .link-outer {
   z-index: 1;
 }
 
-#node-link .sublayout:after {
+#node-link .sublayout .close-btn {
   display: block;
   top: 8px;
   right: 8px;
-  height: 32px;
+  height: 40px;
   background: var(--pure-black);
   color: var(--cyan);
-  content: var(--close-x);
   z-index: 20;
   position: absolute;
-  padding: 2px 11px 6px;
+  padding: 2px 11px;
+  line-height: 32px;
   font-size: 28px;
   cursor: pointer;
 }
@@ -936,7 +973,7 @@ body:not(.initialized):after {
 #node-link .loading-indicator {
   background: var(--main-bg-translucent);
   width: 100%;
-  height: calc(100% + 52px);
+  height: calc(100% + var(--header-height));
   top: 0;
   left: 0;
   position: absolute;
@@ -962,22 +999,22 @@ body:not(.initialized):after {
   }
 }
 
-@media only screen and (max-width: 600px){
-  #header {
-    max-height: 56px;
-    overflow-y: auto;
-    display: block;
-    margin: 0;
+@media only screen and (max-width: 910px){
+  #header .highlight-bar *:not(.interactive-key) > label {
+    display: none;
   }
   #header .panel {
     display: inline;
     margin: 0;
   }
-  #header label {
-    display: none;
+  #header {
+    overflow-y: auto;
+    display: block;
+    margin: 0;
   }
 }
-@media only screen and (max-width: 420px){
+
+@media only screen and (max-width: 750px){
   #header .panel .interactive-key {
     font-size: 9pt;
     padding: 0;
@@ -986,7 +1023,31 @@ body:not(.initialized):after {
     margin: 0;
     transform: scale(0.9);
   }
+  .breadcrumb-bar {
+    padding-left: 7px;
+  }
+  .type-icon {
+    width: 7px;
+    margin-right: 3px;
+  }
 }
+
+@media only screen and (max-width: 635px){
+  body {
+    --header-height: 75px;
+  }
+}
+
+@media only screen and (max-width: 450px){
+  #header .panel {
+    display: block;
+    white-space: nowrap;
+  }
+  #header .highlight-bar {
+    display: block;
+  }
+}
+
 @media only screen and (max-width: 380px){
   #banner a:first-child {
     margin-left: -20px;
@@ -1009,7 +1070,6 @@ body:not(.initialized):after {
 
   #header {
     margin: 0;
-    max-height: 52px;
   }
 
   #side-bar,
@@ -1018,8 +1078,8 @@ body:not(.initialized):after {
   }
 
   body[data-view-mode='fit'] #node-link {
-    max-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
-    min-height: calc(100vh - var(--banner-height) - var(--footer-height) - 52px);
+    max-height: calc(100vh - var(--banner-height) - var(--footer-height) - var(--header-height));
+    min-height: calc(100vh - var(--banner-height) - var(--footer-height) - var(--header-height));
   }
 
   #side-bar {
