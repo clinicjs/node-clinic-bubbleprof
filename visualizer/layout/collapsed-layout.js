@@ -165,6 +165,7 @@ class CollapsedLayoutNode {
       const node = layoutNode.node
       if (!this.node) {
         this.node = new ArtificialNode({
+          id: this.id,
           nodeType: node.constructor.name
         }, node)
       }
