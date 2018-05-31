@@ -133,7 +133,7 @@ class Frames extends HtmlContent {
                 this.topmostUI.highlightNode(null)
               })
               .on('click', () => {
-                this.ui.jumpToAggregateNode(frame.dataNode)
+                this.topmostUI.jumpToAggregateNode(frame.dataNode)
               })
           }
 
