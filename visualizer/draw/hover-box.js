@@ -29,7 +29,6 @@ class HoverBox extends HtmlContent {
 
     if (this.contentProperties.type === 'node-link') {
       this.nodeLinkElements()
-      return
     }
   }
 
