@@ -109,7 +109,7 @@ class BubbleprofUI extends EventEmitter {
 
       uiWithinSublayout.initializeElements()
 
-      this.initializeCloseButton(closeBtn)
+      uiWithinSublayout.initializeCloseButton(closeBtn)
 
       uiWithinSublayout.setData(newLayout)
       return uiWithinSublayout
@@ -120,25 +120,21 @@ class BubbleprofUI extends EventEmitter {
   initializeCloseButton (closeBtn) {
     // Close button returns to originalUI
     const { originalUI } = this
-    let closing = false
     let topmostUI = null
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
-        closing = true
-        topmostUI.clearSublayout()
+        originalUI.on('setTopmostUI', onUIChange)
+        const currentUI = topmostUI || this
+        currentUI.clearSublayout()
       })
-    originalUI.on('setTopmostUI', onUIChange)
 
     function onUIChange (newTopmostUI) {
-      originalUI.removeListener('setTopmostUI', onUIChange)
       topmostUI = newTopmostUI
-      if (closing) {
-        if (topmostUI !== originalUI) {
-          topmostUI.clearSublayout()
-        } else {
-          closing = false
-        }
+      if (topmostUI !== originalUI) {
+        topmostUI.clearSublayout()
+      } else {
+        originalUI.removeListener('setTopmostUI', onUIChange)
       }
     }
   }
