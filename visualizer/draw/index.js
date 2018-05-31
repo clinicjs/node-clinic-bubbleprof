@@ -1,13 +1,7 @@
 'use strict'
 
 const BubbleprofUI = require('./bubbleprof-ui.js')
-const HoverBox = require('./hover-box.js')
-const InteractiveKey = require('./interactive-key.js')
-const SvgContainer = require('./svg-container.js')
 const staticKeyHtml = require('./static-key.js')
-const Frames = require('./frames.js')
-const Lookup = require('./lookup.js')
-const BreadcrumbPanel = require('./breadcrumb-panel.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -21,47 +15,47 @@ function drawOuterUI () {
   const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Party:</label>' })
   const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
   const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar', htmlContent: '<div></div>' })
-  breadcrumbBar.addContent(BreadcrumbPanel, { classNames: 'panel', originalUI: ui })
+  breadcrumbBar.addContent('BreadcrumbPanel', { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
   // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })
 
-  partyKeyPanel.addContent(InteractiveKey, {
+  partyKeyPanel.addContent('InteractiveKey', {
     name: 'user',
     targetType: 'party',
     label: 'Your code'
   })
-  partyKeyPanel.addContent(InteractiveKey, {
+  partyKeyPanel.addContent('InteractiveKey', {
     name: 'external',
     targetType: 'party',
     label: 'Module code'
   })
-  partyKeyPanel.addContent(InteractiveKey, {
+  partyKeyPanel.addContent('InteractiveKey', {
     name: 'nodecore',
     targetType: 'party',
     label: 'Node core'
   })
 
-  typeKeyPanel.addContent(InteractiveKey, {
+  typeKeyPanel.addContent('InteractiveKey', {
     name: 'files-streams',
     targetType: 'type',
     label: 'Files/Streams'
   })
-  typeKeyPanel.addContent(InteractiveKey, {
+  typeKeyPanel.addContent('InteractiveKey', {
     name: 'networks',
     targetType: 'type',
     label: 'Networks'
   })
-  typeKeyPanel.addContent(InteractiveKey, {
+  typeKeyPanel.addContent('InteractiveKey', {
     name: 'crypto',
     targetType: 'type',
     label: 'Crypto'
   })
-  typeKeyPanel.addContent(InteractiveKey, {
+  typeKeyPanel.addContent('InteractiveKey', {
     name: 'timing-promises',
     targetType: 'type',
     label: 'Timing/Promises'
   })
-  typeKeyPanel.addContent(InteractiveKey, {
+  typeKeyPanel.addContent('InteractiveKey', {
     name: 'other',
     targetType: 'type',
     label: 'Other'
@@ -71,11 +65,11 @@ function drawOuterUI () {
   const nodeLink = ui.sections.get('node-link')
   nodeLink.addLoadingAnimation()
 
-  const nodeLinkSVG = nodeLink.addContent(SvgContainer, {id: 'node-link-svg', svgBounds: {}})
+  const nodeLinkSVG = nodeLink.addContent('SvgContainer', {id: 'node-link-svg', svgBounds: {}})
   nodeLinkSVG.addBubbles()
   nodeLinkSVG.addLinks()
 
-  nodeLink.addContent(HoverBox, {svg: nodeLinkSVG})
+  nodeLink.addContent('HoverBox', {svg: nodeLinkSVG})
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
@@ -92,7 +86,7 @@ function drawOuterUI () {
     htmlContent: staticKeyHtml
   }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
-  const lookup = sideBar.addContent(Lookup, {
+  const lookup = sideBar.addContent('Lookup', {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
   })
@@ -113,7 +107,7 @@ function drawOuterUI () {
     collapseEvent: 'main-overlay',
     closeIcon: '×'
   })
-  footer.addContent(Frames, { id: 'frames-panel', classNames: 'side-bar-item' })
+  footer.addContent('Frames', { id: 'frames-panel', classNames: 'side-bar-item' })
 
   // Complete
   ui.initializeElements()

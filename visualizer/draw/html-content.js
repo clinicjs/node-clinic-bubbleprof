@@ -28,7 +28,8 @@ class HtmlContent {
     this.contentIds = []
   }
 
-  addContent (ContentClass = HtmlContent, contentProperties = {}, prepend = false) {
+  addContent (className = 'HtmlContent', contentProperties = {}, prepend = false) {
+    const ContentClass = this.ui.getContentClass(className)
     const item = new ContentClass(this, contentProperties)
     const identifier = uniqueMapKey(contentProperties.id || ContentClass.constructor.name, this.content)
 
