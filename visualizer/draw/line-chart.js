@@ -15,6 +15,7 @@ class LineChart extends HtmlContent {
       }
     }, contentProperties))
 
+    this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
 
@@ -33,6 +34,8 @@ class LineChart extends HtmlContent {
     })
     this.ui.on('setTopmostUI', topmostUI => {
       this.topmostUI = topmostUI
+      this.layoutNode = topmostUI.layoutNode
+      this.draw()
     })
   }
   getAggregateNode (id) {
@@ -167,7 +170,8 @@ class LineChart extends HtmlContent {
   }
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
-    const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
+    const targetUI = this.parentContent.constructor.name === 'HoverBox' ? this.topmostUI : this.topmostUI.parentUI
+    const layoutNode = targetUI.layout.findAggregateNode(aggregateNode)
     return (layoutNode === this.layoutNode)
   }
   getLeadInText () {
