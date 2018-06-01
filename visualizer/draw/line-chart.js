@@ -188,7 +188,7 @@ class LineChart extends HtmlContent {
     */
     return `
       <strong>${this.ui.dataSet.callbackEventsCount}</strong> calls were made
-      to ${this.ui.dataSet.sourceNodesCount} asyncronous resources, over
+      to ${this.ui.dataSet.sourceNodesCount} asynchronously resources, over
       a ${(this.ui.dataSet.wallTime.profileDuration).toFixed(0)} millisecond period.
     `
   }
@@ -235,7 +235,7 @@ class LineChart extends HtmlContent {
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
   draw () {
-    // Can be slow on extremely large profiles, do asyncronously
+    // Can be slow on extremely large profiles, do asynchronously
     setTimeout(() => {
       super.draw()
       const {
