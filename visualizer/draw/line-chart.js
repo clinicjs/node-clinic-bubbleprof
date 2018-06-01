@@ -281,21 +281,24 @@ class LineChart extends HtmlContent {
         .scale(this.xScale)
         .tickFormat((dateStamp) => {
           const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
-          switch (true) {
-            // Just show a simple '0' for the first axis label i.e. profile start
-            case d3.timeFormat('%Q')(dateStamp) === '0':
-              return `0${hairSpace}s`
-            case d3.timeSecond(dateStamp) < dateStamp:
-              // When space is moderately limited, show unlabelled mid point markers between seconds
-              if (width < 220) return ''
-              return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`// milliseconds like '500 ms'
-            case d3.timeMinute(dateStamp) < dateStamp:
-              return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`// seconds like '5 s'
-            case d3.timeHour(dateStamp) < dateStamp:
-              return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min` // minutes like '5 min'
-            default:
-              return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr` // hours like '5 hr'
+
+          // Start with 0 s
+          if (d3.timeFormat('%Q')(dateStamp) === '0') return `0${hairSpace}s`
+
+          // Show millisecond increments like '500 ms'
+          if (d3.timeSecond(dateStamp) < dateStamp) {
+            // When space is moderately limited, show unlabelled mid point markers between seconds
+            if (width < 220) return ''
+            return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`
           }
+          // Show second increments like '5 s'
+          if (d3.timeMinute(dateStamp) < dateStamp) return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`
+
+          // Show minute increments like '5 min'
+          if (d3.timeHour(dateStamp) < dateStamp) return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min`
+
+          // Show hour increments like '5 hr', with no units longer than hours
+          return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr`
         })
 
       this.d3XAxisGroup
