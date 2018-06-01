@@ -215,7 +215,7 @@ class LineChart extends HtmlContent {
     const index = Math.floor(leftPosition / this.pixelsPerSlice)
     const timeSliceData = this.dataArray[index]
 
-    const value = this.aggregateIds.reduce((accum, aggregateId) => {
+    const totalOperationsInSlice = this.aggregateIds.reduce((accum, aggregateId) => {
       if (this.layoutNode && !this.layoutNodeHasAggregateId(aggregateId)) return accum
       return accum + timeSliceData[aggregateId]
     }, 0)
@@ -227,8 +227,8 @@ class LineChart extends HtmlContent {
       .classed('hidden', false)
       .style('left', leftOffset + 'px')
 
-    const pluralize = value === 1 ? '' : 's'
-    this.hoverBox.showContentAt(`<strong>${value}</strong> pending async operation${pluralize}`, {
+    const pluralize = totalOperationsInSlice === 1 ? '' : 's'
+    this.hoverBox.showContentAt(`<strong>${totalOperationsInSlice}</strong> pending async operation${pluralize}`, {
       x: leftOffset + this.pixelsPerSlice / 2,
       y: topOffset
     })
