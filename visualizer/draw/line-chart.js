@@ -31,6 +31,9 @@ class LineChart extends HtmlContent {
     this.ui.on('initializeFromData', () => {
       this.initializeFromData()
     })
+    this.ui.on('setTopmostUI', topmostUI => {
+      this.topmostUI = topmostUI
+    })
   }
   getAggregateNode (id) {
     return this.ui.dataSet.aggregateNodes.get(id)
@@ -128,16 +131,16 @@ class LineChart extends HtmlContent {
       .classed('area-line-even', d => !(d.index % 2))
       .classed('area-line', true)
       .on('mouseover', (d) => {
-        if (this.layoutNode) return
+        if (this.parentContent.constructor.name === 'HoverBox') return
         const aggregateNode = this.getAggregateNode(d.key)
-        const layoutNode = this.ui.layout.findAggregateNode(aggregateNode)
+        const layoutNode = this.topmostUI.layout.findAggregateNode(aggregateNode)
         if (layoutNode) {
-          this.ui.highlightNode(layoutNode, aggregateNode)
+          this.topmostUI.highlightNode(layoutNode, aggregateNode)
         }
       })
       .on('mouseout', () => {
-        if (this.layoutNode) return
-        this.ui.highlightNode(null)
+        if (this.parentContent.constructor.name === 'HoverBox') return
+        this.topmostUI.highlightNode(null)
       })
       .on('click', (d) => {
         const aggregateNode = this.getAggregateNode(d.key)
