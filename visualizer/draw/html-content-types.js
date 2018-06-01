@@ -11,6 +11,7 @@ module.exports = {
   Frames: require('./frames.js'),
   HoverBox: require('./hover-box.js'),
   InteractiveKey: require('./interactive-key.js'),
+  LineChart: require('./line-chart.js'),
   Lookup: require('./lookup.js'),
   SvgContainer: require('./svg-container.js')
 }

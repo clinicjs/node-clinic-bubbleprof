@@ -81,10 +81,10 @@ function drawOuterUI () {
     portraitOnly: true
   })
 
-  sideBar.addContent(undefined, {
-    classNames: 'main-key side-bar-item',
-    htmlContent: staticKeyHtml
-  }).addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
+  const callbacksOverTime = sideBar.addContent('LineChart', {
+    classNames: 'side-bar-item'
+  })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations over time <span class="arrow"></span>' })
 
   const lookup = sideBar.addContent('Lookup', {
     classNames: 'side-bar-item',
@@ -92,6 +92,12 @@ function drawOuterUI () {
   })
   lookup.addCollapseControl(true, { htmlContent: 'Locate a stack frame <span class="arrow"></span>' })
   lookup.addLoadingAnimation({ hidden: true })
+
+  const key = sideBar.addContent(undefined, {
+    classNames: 'main-key side-bar-item',
+    htmlContent: staticKeyHtml
+  })
+  key.addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
 
   /* TODO: Add this when feature is implemented
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })

@@ -11,17 +11,21 @@ class DataSet {
     }
 
     const defaultSettings = {
-      debugMode: false // if true, keeps sourceNodes in memory and exposes dataSet and Layout to window
+      debugMode: false, // if true, keeps sourceNodes in memory and exposes dataSet and Layout to window
+      wallTimeSlices: 400
     }
 
     settings = Object.assign(defaultSettings, settings)
     this.settings = settings
 
-    this.wallTime = new WallTime()
+    this.wallTime = new WallTime(this.settings.wallTimeSlices)
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents(this.wallTime) // CallbackEvents are created and pushed within SourceNode constructor
+    this.callbackEventsCount = 0
+
     // Source, Aggregate and Cluster Node maps persist in memory throughout
+    this.sourceNodesCount = 0
     if (this.settings.debugMode) this.sourceNodes = [] // SourceNodes are created from and pushed to this array in AggregateNode constructor
     this.aggregateNodes = new Map() // AggregateNodes are created from ClusterNode constructor and set in their own constructor
     this.clusterNodes = new Map()
@@ -35,7 +39,7 @@ class DataSet {
   processData () {
     this.calculateFlattenedStats()
     this.calculateDecimals()
-    this.wallTime.processPercentSlices()
+    this.wallTime.processSlices()
   }
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
@@ -47,6 +51,7 @@ class DataSet {
   }
   calculateFlattenedStats () {
     this.callbackEvents.processAll()
+    this.callbackEventsCount = this.callbackEvents.array.length
     this.callbackEvents = null
   }
   calculateDecimals () {
@@ -55,9 +60,10 @@ class DataSet {
 }
 
 class WallTime {
-  constructor () {
-    // Creates array of 100 wall time segments, one for each 1% segment of the total running time
-    this.percentSlices = Array.from({length: 100}, () => createWallTimeSlice())
+  constructor (slicesCount) {
+    // Creates array of wall time slices, based on typical width of the chart they're to be drawn in, to be scalable
+    this.slicesCount = slicesCount
+    this.slices = Array.from({length: this.slicesCount}, () => createWallTimeSlice())
 
     // Set in callback-event.js AllCallbackEvents.add()
     this.profileStart = 0 // Timestamp of first .init
@@ -65,7 +71,7 @@ class WallTime {
 
     // Set in callback-event.js AllCallbackEvents.processAll()
     this.profileDuration = null // Number of miliseconds from profileStart to profileEnd
-    this.msPerPercent = null // profileDuration / 100, number of miliseconds spanned by each item in percentages array
+    this.msPerSlice = null // profileDuration / slicesCount, number of miliseconds spanned by each item in slices array
 
     this.maxAsyncPending = 0
     this.maxSyncActive = 0
@@ -76,8 +82,8 @@ class WallTime {
     const {
       profileStart,
       profileEnd,
-      msPerPercent,
-      percentSlices
+      msPerSlice,
+      slices
     } = this
 
     // Don't allow seemingly valid non-failing output from logically invalid input
@@ -87,25 +93,25 @@ class WallTime {
       throw new Error(`Wall time segment start time (${startTime}) doesn’t precede segment end time (${endTime})`)
     }
 
-    const startIndex = Math.floor((startTime - profileStart) / msPerPercent)
-    const endIndex = Math.ceil((endTime - profileStart) / msPerPercent)
-    const segments = percentSlices.slice(startIndex, endIndex)
+    const startIndex = Math.floor((startTime - profileStart) / msPerSlice)
+    const endIndex = Math.ceil((endTime - profileStart) / msPerSlice)
+    const segments = slices.slice(startIndex, endIndex)
 
     // The last item in getSegments(x, y) is always the same as the first in getSegments(y, z)
     // so use discardFirst when needed to avoid duplication in adjacent segments
     return discardFirst ? segments.slice(1) : segments
   }
 
-  processPercentSlices () {
+  processSlices () {
     const maxAsyncByCategory = {}
 
-    for (var i = 0; i < 100; i++) {
-      const percentSlice = this.percentSlices[i]
-      if (percentSlice.syncActive.callbackCount > this.maxSyncActive) this.maxSyncActive = percentSlice.syncActive.callbackCount
-      if (percentSlice.asyncPending.callbackCount > this.maxAsyncPending) this.maxAsyncPending = percentSlice.asyncPending.callbackCount
+    for (var i = 0; i < this.slicesCount; i++) {
+      const slice = this.slices[i]
+      if (slice.syncActive.callbackCount > this.maxSyncActive) this.maxSyncActive = slice.syncActive.callbackCount
+      if (slice.asyncPending.callbackCount > this.maxAsyncPending) this.maxAsyncPending = slice.asyncPending.callbackCount
 
       // Define maxAsyncByCategory[typeCategory] for each type category present and set it to the highest value
-      for (const [typeCategory, value] of Object.entries(percentSlice.asyncPending.byTypeCategory)) {
+      for (const [typeCategory, value] of Object.entries(slice.asyncPending.byTypeCategory)) {
         if (!maxAsyncByCategory[typeCategory] || value > maxAsyncByCategory[typeCategory]) maxAsyncByCategory[typeCategory] = value
       }
     }

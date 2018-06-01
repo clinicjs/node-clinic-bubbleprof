@@ -40,14 +40,14 @@ test('Visualizer data - DataSet - access invalid node id', function (t) {
 })
 
 test('Visualizer dataset - wallTime from real sample data', function (t) {
-  const dataSet = new DataSet(acmeairJson)
+  const dataSet = new DataSet(acmeairJson, { wallTimeSlices: 100 })
 
   // Ensure stats calculated from real profile data subset don't changed from unexpected future feature side effects
   t.equals(dataSet.wallTime.profileStart, 6783474.641)
   t.equals(dataSet.wallTime.profileEnd, 6786498.31)
   dataSet.processData()
   t.equals(dataSet.wallTime.profileDuration.toFixed(4), '3023.6690')
-  t.equals(dataSet.wallTime.msPerPercent.toFixed(4), '30.2367')
+  t.equals(dataSet.wallTime.msPerSlice.toFixed(4), '30.2367')
 
   t.end()
 })

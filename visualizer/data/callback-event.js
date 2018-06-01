@@ -49,7 +49,7 @@ class AllCallbackEvents {
     const asyncSegments = this.wallTime.getSegments(delayStart, before)
     const syncSegments = this.wallTime.getSegments(before, after)
 
-    // Browserified short-ish (<100) loops, within very long loop. Order isn't important.
+    // Browserified short-ish (few hundred) loops, within very long loop. Order isn't important.
     // For efficiency, use for (var), only check length once, no variables in block, send to ordinary function
     var i
     for (i = asyncSegments.length - 1; i >= 0; i--) {
@@ -65,7 +65,7 @@ class AllCallbackEvents {
     if (this.inversionCases.length) console.warn('Profile contains callbackEvents with .before timestamp(s) greater than the corresponding .after timestamp:', this.inversionCases)
 
     this.wallTime.profileDuration = this.wallTime.profileEnd - this.wallTime.profileStart
-    this.wallTime.msPerPercent = this.wallTime.profileDuration / 100
+    this.wallTime.msPerSlice = this.wallTime.profileDuration / this.wallTime.slicesCount
 
     const clusterStats = new Map()
     const aggregateStats = new Map()

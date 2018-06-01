@@ -7,7 +7,9 @@ const { validateKey } = require('../validation.js')
 class HoverBox extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
     super(d3Container, Object.assign({
-      type: 'node-link'
+      type: 'node-link',
+      position: { x: 0, y: 0 },
+      allowableOverflow: 0
     }, contentProperties))
     validateKey(this.contentProperties.type, ['node-link', 'tool-tip'])
     if (this.contentProperties.type === 'node-link' && !this.contentProperties.svg) {
@@ -39,12 +41,14 @@ class HoverBox extends HtmlContent {
     this.d3ClickMessage = this.d3TitleBlock.append('a')
       .classed('click-message', true)
 
-    this.d3TimeBlock = this.d3ContentWrapper.append('div')
-      .classed('block', true)
-      .classed('time-block', true)
+    this.asyncOperationsChart = this.addContent('LineChart', {
+      classNames: 'block time-block',
+      static: false
+    })
+    this.asyncOperationsChart.initializeElements()
 
-    this.d3BetweenTime = this.d3TimeBlock.append('p')
-    this.d3WithinTime = this.d3TimeBlock.append('p')
+    this.d3TimeBlock = this.asyncOperationsChart.d3ContentWrapper
+    this.d3TimeStatement = this.d3TimeBlock.append('p')
 
     this.ui.on('hover', layoutNode => {
       if (layoutNode) this.layoutNode = layoutNode
@@ -59,40 +63,42 @@ class HoverBox extends HtmlContent {
     const svgContainerBounds = svg.d3Element.node().getBoundingClientRect()
     const responsiveScaleFactor = svgContainerBounds.width / svg.svgBounds.width
 
-    const top = nodePosition.y * responsiveScaleFactor
-    const left = nodePosition.x * responsiveScaleFactor
-    this.position(top, left, svgContainerBounds)
+    const x = nodePosition.x * responsiveScaleFactor
+    const y = nodePosition.y * responsiveScaleFactor
+    this.contentProperties.position = { x, y }
+    this.position(x, y, svgContainerBounds)
   }
 
-  positionSidewards (top, left, svgContainerBounds, hoverBounds) {
-    const horizontalFlip = left + hoverBounds.width > window.innerWidth
+  positionSidewards (x, y, containerBounds, hoverBounds) {
+    const horizontalFlip = x + hoverBounds.width > window.innerWidth
 
-    this.d3Element.style('top', top + 'px')
-    this.d3Element.style('left', (horizontalFlip ? left - hoverBounds.width : left) + 'px')
+    this.d3Element.style('top', y + 'px')
+    this.d3Element.style('left', (horizontalFlip ? x - hoverBounds.width : x) + 'px')
 
-    this.d3Element.classed('off-bottom', top + hoverBounds.height > svgContainerBounds.height)
+    this.d3Element.classed('off-bottom', y + hoverBounds.height > containerBounds.height)
     this.d3Element.classed('horizontal-flip', horizontalFlip)
     this.d3Element.classed('use-vertical-arrow', false)
   }
 
-  position (top, left, svgContainerBounds) {
+  position (x, y, containerBounds) {
     const hoverBounds = this.d3Element.node().getBoundingClientRect()
 
     const verticalArrowPadding = 12
-    const initialTop = top + verticalArrowPadding
-    const initialLeft = left - verticalArrowPadding
+    const initialTop = y + verticalArrowPadding
+    const initialLeft = x - verticalArrowPadding
+    const allowableWidth = containerBounds.width + this.contentProperties.allowableOverflow
 
     let arrowOffset = verticalArrowPadding
     let adjustedLeft = initialLeft - verticalArrowPadding
-    const overflowX = initialLeft + hoverBounds.width - svgContainerBounds.width
+    const overflowX = initialLeft + hoverBounds.width - allowableWidth
     if (overflowX > 0) {
       adjustedLeft -= overflowX
-      arrowOffset = overflowX
+      arrowOffset = overflowX + verticalArrowPadding
     }
 
     let verticalFlip = false
     let adjustedTop = initialTop
-    const overflowY = initialTop + hoverBounds.height - svgContainerBounds.height
+    const overflowY = initialTop + hoverBounds.height - containerBounds.height
     if (overflowY > 0) {
       const titleBlockHeight = this.d3TitleBlock.node().getBoundingClientRect().height
       adjustedTop -= titleBlockHeight + verticalArrowPadding * 2
@@ -101,7 +107,7 @@ class HoverBox extends HtmlContent {
 
     // On short windows with no space above or below
     if (adjustedTop < 0) {
-      this.positionSidewards(top, left, svgContainerBounds, hoverBounds)
+      this.positionSidewards(x, y, containerBounds, hoverBounds)
       return
     }
 
@@ -119,6 +125,16 @@ class HoverBox extends HtmlContent {
     this.draw()
   }
 
+  showContentAt (htmlContent, position, allowableOverflow = 0) {
+    this.contentProperties.htmlContent = htmlContent
+    this.contentProperties.position = position
+    this.changeVisibility(true)
+  }
+
+  hide () {
+    this.changeVisibility(false)
+  }
+
   draw () {
     super.draw()
 
@@ -126,6 +142,10 @@ class HoverBox extends HtmlContent {
       this.nodeLinkDraw(this.layoutNode)
       return
     }
+
+    const { x, y } = this.contentProperties.position
+    this.position(x, y, this.parentContent.d3ContentWrapper.node().getBoundingClientRect())
+    if (this.contentProperties.htmlContent) this.d3TitleBlock.html(this.contentProperties.htmlContent)
 
     // Mouseover on the hover box itself causes mouseout of the element that showed the hover box
     // Re-show hover box so mouse/trackpad users can interact with hover content e.g. select text
@@ -147,6 +167,8 @@ class HoverBox extends HtmlContent {
       this.ui.highlightNode(null)
     })
 
+    this.asyncOperationsChart.applyLayoutNode(layoutNode)
+
     // Ensure off-bottom class is not applied before calculating if it's needed
     this.d3Element.classed('off-bottom', false)
 
@@ -157,8 +179,11 @@ class HoverBox extends HtmlContent {
 
     this.d3Title.text(dataNode.name)
 
-    this.d3BetweenTime.html(`<strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> aggregated delay from the previous bubble.`)
-    this.d3WithinTime.html(`<strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong> aggregated delay within this bubble.`)
+    this.d3TimeStatement.html(`
+      There were async operations pending within this group for
+      <strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong>, and for
+      <strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> while transitioning from the previous group.
+    `)
 
     // If a clusterNode only contains one aggregate, no point clicking down into it, just give us the frames
     const isIgnorableCluster = nodeType === 'ClusterNode' && layoutNode.node.nodes.size === 1
