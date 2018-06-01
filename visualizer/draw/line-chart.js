@@ -87,7 +87,7 @@ class LineChart extends HtmlContent {
     this.xScale.domain([0, wallTime.profileEnd - wallTime.profileStart])
     this.yScale.domain([0, wallTime.maxAsyncPending])
 
-    // Sort by category (same colours together) or if equal, by id (how early defined)
+    // Sort by category (same colours together), and where same category, by id (how early defined)
     this.aggregateIds = [...aggregateNodes.keys()].sort((a, b) => {
       const aNode = aggregateNodes.get(a)
       const bNode = aggregateNodes.get(b)
@@ -100,16 +100,20 @@ class LineChart extends HtmlContent {
     })
 
     const aggregateIdsCount = this.aggregateIds.length
-    this.dataArray = wallTime.slices.map((item, index) => {
-      const dataItem = {
+    this.dataArray = wallTime.slices.map((timeSlice, index) => {
+      // Creates an object for each time slice containing the start time and a key for each aggregateId
+      const asyncInSliceByAgId = {
         time: index * wallTime.msPerSlice
       }
       for (var i = 0; i < aggregateIdsCount; i++) {
-        dataItem[this.aggregateIds[i]] = item.asyncPending.byAggregateId[this.aggregateIds[i]] || 0
+        // Each aggregateId key is the number of async ops from that aggregate node active in this time slice
+        asyncInSliceByAgId[this.aggregateIds[i]] = timeSlice.asyncPending.byAggregateId[this.aggregateIds[i]] || 0
       }
-      return dataItem
+      return asyncInSliceByAgId
     })
 
+    // d3's stacker inverts the data array, so it is by aggregateId in sort order first, each containing array
+    // of timeslices, then stacks it such that [0] is the total of lower stacks and [1] is [0] + this datapoint
     const dataStacker = d3.stack()
       .keys(this.aggregateIds)
 
