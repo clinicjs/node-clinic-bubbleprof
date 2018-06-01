@@ -31,7 +31,8 @@ class HtmlContent {
   addContent (className = 'HtmlContent', contentProperties = {}, prepend = false) {
     const ContentClass = this.ui.getContentClass(className)
     const item = new ContentClass(this, contentProperties)
-    const identifier = uniqueMapKey(contentProperties.id || ContentClass.constructor.name, this.content)
+
+    const identifier = uniqueMapKey(contentProperties.id || ContentClass.name, this.content)
 
     this.content.set(identifier, item)
     this.contentIds[prepend ? 'unshift' : 'push'](identifier)

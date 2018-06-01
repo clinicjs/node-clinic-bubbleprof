@@ -41,6 +41,8 @@ class DataNode {
   }
   getWithinTime () { return this.stats.sync + this.stats.async.within }
   getBetweenTime () { return this.stats.async.between }
+  getAsyncTime () { return this.stats.async.between + this.stats.async.within }
+  getSyncTime () { return this.stats.sync }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
@@ -279,6 +281,7 @@ class AggregateNode extends DataNode {
 class SourceNode {
   constructor (rawSource, aggregateNode) {
     this.dataSet = aggregateNode.dataSet
+    this.dataSet.sourceNodesCount++
 
     const defaultProperties = {
       asyncId: 0,

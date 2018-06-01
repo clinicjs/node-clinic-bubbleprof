@@ -14,6 +14,7 @@ html {
 
   --pure-white: rgb(255, 255, 255);
   --pure-black: rgb(0, 0, 0);
+  --translucent-black: rgba(0, 0, 0, 0.86);
 
   --cyan-bright: rgb(166, 228, 255);
   --cyan-highlight: rgb(96, 147, 208);
@@ -667,13 +668,62 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   stroke-width: 4px !important;
 }
 
+/* Line / Area chart */
+
+.line-chart-svg {
+  width: 100%;
+  height: 70px;
+  display: block;
+  position: relative;
+  mix-blend-mode: screen;
+  z-index: 2;
+}
+
+.line-chart {
+  position: relative;
+  font-size: var(--main-text-size);
+}
+
+.line-chart .slice-highlight {
+  background: var(--cyan-bright);
+  opacity: 0.2;
+  position: absolute;
+  z-index: 1;
+}
+
+.line-chart .hover-box {
+  width: 135px;
+  color: var(--grey-highlight);
+}
+
+.line-chart .hover-box .title-block {
+  padding: 12px 8px;
+}
+
+.line-chart .hover-box strong {
+  color: var(--pure-white);
+}
+
+.line-chart .hover-box .vertical-arrow {
+  margin-left: 9px;
+}
+
+#node-link .line-chart .hover-box > .vertical-arrow {
+  border-top-color: var(--main-bg-translucent);
+}
+
+#node-link .line-chart .hover-box {
+  background: var(--main-bg-translucent);
+  margin-top: -55px;
+  margin-left: 6px;
+}
+
 /* Hover box */
 
 .hover-box {
   position: absolute;
-  opacity: 0.86;
   width: 320px;
-  background-color: var(--pure-black);
+  background-color: var(--translucent-black);
   color: var(--nearform-grey);
   margin-left: 6px;
   z-index: 25;
@@ -728,8 +778,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
 }
 
 .hover-box p {
-  margin: 0;
-  padding: 6px 0;
+  margin: 14px 0 0 0;
   font-size: var(--main-text-size)
 }
 
@@ -776,14 +825,14 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   border: 10px solid transparent;
 }
 
-.hover-box.use-vertical-arrow:not(.off-bottom) .vertical-arrow {
+.hover-box.use-vertical-arrow:not(.off-bottom) > .vertical-arrow {
   border-bottom-color: var(--pure-black);
   border-top: none;
   top: 0;
   margin-top: -9px;
 }
 
-.hover-box.use-vertical-arrow.off-bottom .vertical-arrow {
+.hover-box.use-vertical-arrow.off-bottom > .vertical-arrow {
   border-top-color: var(--pure-black);
   border-bottom: none;
   bottom: 0;
@@ -910,6 +959,84 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
   border-color: var(--type-colour-5);
 }
 
+/* In area chart specifically, apply to fill instead of stroke */
+
+svg.line-chart-svg .area-line {
+  stroke: none;
+  opacity: 0.8;
+  cursor: pointer;
+}
+svg.line-chart-svg .area-line-even {
+  opacity: 0.6;
+}
+svg.line-chart-svg .area-line:hover {
+  mix-blend-mode: screen;
+  opacity: 1;
+}
+svg.line-chart-svg .area-line.type-files-streams {
+  fill: var(--type-colour-1);
+}
+svg.line-chart-svg .area-line.type-networks {
+  fill: var(--type-colour-2);
+}
+svg.line-chart-svg .area-line.type-crypto {
+  fill: var(--type-colour-3);
+}
+svg.line-chart-svg .area-line.type-timing-promises {
+  fill: var(--type-colour-4);
+}
+svg.line-chart-svg .area-line.type-other {
+  fill: var(--type-colour-5);
+}
+svg.line-chart-svg.filter-applied .area-line {
+  animation-name: fade-in;
+  animation-duration: 0.4s;
+  animation-fill-mode: forwards;
+}
+svg.line-chart-svg.filter-applied .area-line.not-emphasised {
+  animation-name: half-fade-out;
+}
+svg.line-chart-svg.filter-applied .area-line.filtered {
+  animation-name: mostly-fade-out;
+  mix-blend-mode: luminosity;
+}
+
+@keyframes mostly-fade-out {
+  to {
+    opacity: 0.14;
+  }
+}
+@keyframes half-fade-out {
+  to {
+    opacity: 0.45;
+  }
+}
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+.hover-box .line-chart {
+  background: var(--pure-black);
+  opacity: 1;
+}
+
+.line-chart .x-axis .tick text {
+  fill: var(--nearform-grey);
+}
+
+.line-chart .x-axis .tick line {
+  stroke: var(--nearform-grey);
+}
+
+.hover-box .line-chart .x-axis .tick line {
+  stroke: var(--main-bg-color);
+}
+
+.line-chart .x-axis .domain {
+  display: none;
+}
 
 /* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
    * Must * animate by transforms only, to keep animating when processor is busy */

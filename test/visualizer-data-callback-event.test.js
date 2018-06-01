@@ -9,7 +9,7 @@ const {
 } = require('./visualizer-util/prepare-fake-nodes.js')
 
 // Create real DataSet from fake data
-const dataSet = new DataSet(fakeNodes)
+const dataSet = new DataSet(fakeNodes, { wallTimeSlices: 100 })
 dataSet.processData()
 
 // Fake data prepared.
@@ -110,7 +110,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
   t.equals(wallTime.profileStart, 3)
   t.equals(wallTime.profileEnd, 29.5)
   t.equals(wallTime.profileDuration, 26.5)
-  t.equals(wallTime.msPerPercent, 0.265)
+  t.equals(wallTime.msPerSlice, 0.265)
 
   t.equals(wallTime.maxAsyncPending, 5)
   t.equals(wallTime.maxSyncActive, 3)

@@ -21,6 +21,7 @@ class BubbleprofUI extends EventEmitter {
 
     this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
+    this.layoutNode = null // Is assigned if this is a sublayout with .layoutNode
 
     function getOriginalUI (parentUI) {
       return parentUI.parentUI ? getOriginalUI(parentUI.parentUI) : parentUI
@@ -98,6 +99,8 @@ class BubbleprofUI extends EventEmitter {
         nodeLinkId,
         classNames: 'sublayout'
       }, nodeLinkSection, this)
+      uiWithinSublayout.layoutNode = layoutNode
+
       const sublayout = uiWithinSublayout.sections.get(nodeLinkId)
       sublayout.addCollapseControl()
       const closeBtn = sublayout.addContent(undefined, { classNames: 'close-btn' })
@@ -112,6 +115,7 @@ class BubbleprofUI extends EventEmitter {
       uiWithinSublayout.initializeCloseButton(closeBtn)
 
       uiWithinSublayout.setData(newLayout)
+      uiWithinSublayout.setAsTopmostUI()
       return uiWithinSublayout
     }
     return this
@@ -194,8 +198,9 @@ class BubbleprofUI extends EventEmitter {
     this.clearFrames()
   }
 
-  highlightNode (layoutNode = null) {
+  highlightNode (layoutNode = null, dataNode = null) {
     this.highlightedNode = layoutNode
+    this.highlightedDataNode = dataNode
     this.emit('hover', layoutNode)
   }
 
@@ -331,12 +336,12 @@ class BubbleprofUI extends EventEmitter {
     })
   }
 
-  setData (layout) {
+  setData (layout, dataSet) {
     if (layout === this.layout) return
     const initialize = !this.layout
 
+    this.dataSet = dataSet || this.dataSet || this.parentUI.dataSet
     this.layout = layout
-    this.setAsTopmostUI()
     this.emit('setData')
 
     if (initialize) {
@@ -353,6 +358,11 @@ class BubbleprofUI extends EventEmitter {
 
     // Allow UI components to interact with whichever ui and layout is in focus
     this.originalUI.emit('setTopmostUI', this)
+  }
+
+  complete () {
+    this.setAsTopmostUI()
+    this.emit('complete')
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
