@@ -79,19 +79,8 @@ class BubbleprofUI extends EventEmitter {
   }
 
   createSubLayout (layoutNode) {
-    const collapsed = layoutNode.collapsedNodes
-    const nodesArray = collapsed ? collapsed.map(item => item.node) : [...layoutNode.node.nodes.values()]
-
-    if (nodesArray && nodesArray.length) {
-      const connection = layoutNode.inboundConnection
-
-      const newLayout = new Layout({
-        parentLayout: this.layout,
-        dataNodes: nodesArray,
-        connection: connection || { targetNode: layoutNode.node }
-      }, this.getSettingsForLayout())
-      newLayout.generate()
-
+    const newLayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
+    if (newLayout) {
       const nodeLinkSection = this.originalUI.getNodeLinkSection()
 
       const nodeLinkId = 'node-link-' + layoutNode.id

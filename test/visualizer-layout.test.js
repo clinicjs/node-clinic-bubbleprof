@@ -3,7 +3,6 @@
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const Layout = require('../visualizer/layout/layout.js')
-const Connection = require('../visualizer/layout/connections.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
@@ -31,13 +30,10 @@ test('Visualizer layout - builds sublayout from connection', function (t) {
   const initialDataNodes = [...dataSet.clusterNodes.values()]
   const uncollapsedSettings = Object.assign({ collapseNodes: false }, settings)
   const initialLayout = new Layout({ dataNodes: initialDataNodes }, uncollapsedSettings)
-  const traversal = {
-    layoutNodes: [initialLayout.layoutNodes.get(3), initialLayout.layoutNodes.get(4)],
-    dataNodes: [dataSet.clusterNodes.get(3), dataSet.clusterNodes.get(4)]
-  }
-  const connection = new Connection(...traversal.layoutNodes, initialLayout.scale)
-  const traversedLayout = new Layout({ dataNodes: traversal.dataNodes, connection }, uncollapsedSettings)
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ClusterNode:3', 'ClusterNode:4', 'ShortcutNode:5'])
+  initialLayout.processBetweenData()
+  const traversedLayoutNode = initialLayout.layoutNodes.get(4)
+  const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, uncollapsedSettings)
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode:3', 'AggregateNode:4', 'ShortcutNode:5'])
 
   t.end()
 })

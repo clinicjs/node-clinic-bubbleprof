@@ -178,6 +178,23 @@ class Layout {
     }
   }
 
+  createSubLayout (layoutNode, settings) {
+    const collapsed = layoutNode.collapsedNodes
+    const nodesArray = collapsed ? collapsed.map(item => item.node) : [...layoutNode.node.nodes.values()]
+
+    if (nodesArray && nodesArray.length) {
+      const connection = layoutNode.inboundConnection
+
+      const newLayout = new Layout({
+        parentLayout: this.layout,
+        dataNodes: nodesArray,
+        connection: connection || { targetNode: layoutNode.node }
+      }, settings)
+      newLayout.generate()
+      return newLayout
+    }
+  }
+
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
   generate (settingsOverride) {
     this.processHierarchy(settingsOverride)
