@@ -90,14 +90,14 @@ class BubbleprofUI extends EventEmitter {
       }, nodeLinkSection, this)
       uiWithinSublayout.layoutNode = layoutNode
 
-      const sublayout = uiWithinSublayout.sections.get(nodeLinkId)
-      sublayout.addCollapseControl()
-      const closeBtn = sublayout.addContent(undefined, { classNames: 'close-btn' })
+      const sublayoutHtml = uiWithinSublayout.sections.get(nodeLinkId)
+      sublayoutHtml.addCollapseControl()
+      const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
-      const sublayoutSvg = sublayout.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
+      const sublayoutSvg = sublayoutHtml.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
-      sublayout.addContent('HoverBox', {svg: sublayoutSvg})
+      sublayoutHtml.addContent('HoverBox', {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()
 
