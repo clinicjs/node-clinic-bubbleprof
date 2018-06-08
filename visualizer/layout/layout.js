@@ -181,7 +181,7 @@ class Layout {
   createSubLayout (layoutNode, settings) {
     const subsetInView = this.pickDataSubset(layoutNode)
 
-    if (subsetInView && subsetInView.length) {
+    if (subsetInView.length) {
       const connection = layoutNode.inboundConnection
 
       const sublayout = new Layout({
