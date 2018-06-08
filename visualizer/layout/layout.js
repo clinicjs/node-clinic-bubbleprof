@@ -185,13 +185,13 @@ class Layout {
     if (nodesArray && nodesArray.length) {
       const connection = layoutNode.inboundConnection
 
-      const newLayout = new Layout({
+      const sublayout = new Layout({
         parentLayout: this.layout,
         dataNodes: nodesArray,
         connection: connection || { targetNode: layoutNode.node }
       }, settings)
-      newLayout.generate()
-      return newLayout
+      sublayout.generate()
+      return sublayout
     }
   }
 

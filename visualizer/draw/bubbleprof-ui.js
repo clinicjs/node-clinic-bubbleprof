@@ -79,8 +79,8 @@ class BubbleprofUI extends EventEmitter {
   }
 
   createSubLayout (layoutNode) {
-    const newLayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
-    if (newLayout) {
+    const sublayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
+    if (sublayout) {
       const nodeLinkSection = this.originalUI.getNodeLinkSection()
 
       const nodeLinkId = 'node-link-' + layoutNode.id
@@ -103,7 +103,7 @@ class BubbleprofUI extends EventEmitter {
 
       uiWithinSublayout.initializeCloseButton(closeBtn)
 
-      uiWithinSublayout.setData(newLayout)
+      uiWithinSublayout.setData(sublayout)
       uiWithinSublayout.setAsTopmostUI()
       return uiWithinSublayout
     }
