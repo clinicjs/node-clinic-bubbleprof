@@ -180,14 +180,14 @@ class Layout {
 
   createSubLayout (layoutNode, settings) {
     const collapsed = layoutNode.collapsedNodes
-    const nodesArray = collapsed ? collapsed.map(item => item.node) : [...layoutNode.node.nodes.values()]
+    const subsetInView = collapsed ? collapsed.map(item => item.node) : [...layoutNode.node.nodes.values()]
 
-    if (nodesArray && nodesArray.length) {
+    if (subsetInView && subsetInView.length) {
       const connection = layoutNode.inboundConnection
 
       const sublayout = new Layout({
         parentLayout: this.layout,
-        dataNodes: nodesArray,
+        dataNodes: subsetInView,
         connection: connection || { targetNode: layoutNode.node }
       }, settings)
       sublayout.generate()
