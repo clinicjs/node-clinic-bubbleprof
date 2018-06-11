@@ -195,7 +195,7 @@ class Layout {
     function pickDataSubset () {
       // Use collapsed
       if (layoutNode.collapsedNodes) {
-        return layoutNode.collapsedNodes.map(layoutNode => layoutNode.node)
+        return layoutNode.collapsedNodes.map(hiddenLayoutNode => hiddenLayoutNode.node)
       }
       // Use aggregates
       return [...layoutNode.node.nodes.values()]
