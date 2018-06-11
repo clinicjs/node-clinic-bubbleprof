@@ -33,6 +33,7 @@ test('Visualizer layout - builds sublayout from connection', function (t) {
   initialLayout.processBetweenData()
   const traversedLayoutNode = initialLayout.layoutNodes.get(4)
   const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, uncollapsedSettings)
+  t.equal(traversedLayout.parentLayout.rootLayoutNode.id, initialLayout.rootLayoutNode.id)
   t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode:3', 'AggregateNode:4', 'ShortcutNode:5'])
 
   t.end()

@@ -185,7 +185,7 @@ class Layout {
       const connection = layoutNode.inboundConnection
 
       const sublayout = new Layout({
-        parentLayout: this.layout,
+        parentLayout: this,
         dataNodes: subsetInView,
         connection: connection || { targetNode: layoutNode.node }
       }, settings)
