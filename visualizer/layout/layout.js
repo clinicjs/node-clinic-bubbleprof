@@ -179,7 +179,7 @@ class Layout {
   }
 
   createSubLayout (layoutNode, settings) {
-    const subsetInView = this.pickDataSubset(layoutNode)
+    const subsetInView = pickDataSubset(layoutNode)
 
     if (subsetInView.length) {
       const connection = layoutNode.inboundConnection
@@ -191,15 +191,15 @@ class Layout {
       }, settings)
       return sublayout
     }
-  }
 
-  pickDataSubset (layoutNode) {
-    // Use collapsed
-    if (layoutNode.collapsedNodes) {
-      return layoutNode.collapsedNodes.map(layoutNode => layoutNode.node)
+    function pickDataSubset () {
+      // Use collapsed
+      if (layoutNode.collapsedNodes) {
+        return layoutNode.collapsedNodes.map(layoutNode => layoutNode.node)
+      }
+      // Use aggregates
+      return [...layoutNode.node.nodes.values()]
     }
-    // Use aggregates
-    return [...layoutNode.node.nodes.values()]
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
