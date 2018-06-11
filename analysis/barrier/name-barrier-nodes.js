@@ -221,7 +221,7 @@ function groupType (node, sysInfo) {
     case 'FSREQWRAP':
       return ['fs']
     default:
-      return []
+      return isCustomType(node.type) ? [node.type] : []
   }
 }
 
@@ -247,5 +247,11 @@ function toName (types) {
   if (types.includes('promise')) return 'promise'
   if (types.includes('random-bytes')) return 'random-bytes'
 
-  return ''
+  const customTypes = types.filter(isCustomType)
+  return customTypes.length ? customTypes[0] : ''
+}
+
+function isCustomType (type) {
+  // currently the user type heuristic is module:type
+  return type.indexOf(':') > -1
 }
