@@ -189,7 +189,6 @@ class Layout {
         dataNodes: subsetInView,
         connection: connection || { targetNode: layoutNode.node }
       }, settings)
-      sublayout.generate()
       return sublayout
     }
   }

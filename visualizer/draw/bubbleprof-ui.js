@@ -81,6 +81,7 @@ class BubbleprofUI extends EventEmitter {
   createSubLayout (layoutNode) {
     const sublayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
     if (sublayout) {
+      sublayout.generate()
       const nodeLinkSection = this.originalUI.getNodeLinkSection()
 
       const nodeLinkId = 'node-link-' + layoutNode.id
