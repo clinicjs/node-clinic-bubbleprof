@@ -6,6 +6,51 @@ Programmable interface to [clinic][12] bubbleprof
 
 ![banner](logo.png)
 
+## Supported node versions
+Node.js 9.4.0 and above
+Node.js 8.10.0 and above
+
+## Example
+
+```js
+const ClinicBubbleprof = require('clinic-bubbleprof')
+const bubbleprof = new ClinicBubbleprof()
+
+bubbleprof.collect(['node', './path-to-script.js'], function (err, filepath) {
+  if (err) throw err
+
+  bubbleprof.visualize(filepath, filepath + '.html', function (err) {
+    if (err) throw err
+  })
+})
+```
+
+## Documentation
+
+```js
+const ClinicBubbleprof = require('clinic-bubbleprof')
+const bubbleprof = new ClinicBubbleprof()
+```
+
+#### `bubbleprof.collect(args, callback)`
+
+Starts a process by using:
+
+```js
+const { spawn } = require('child_process')
+spawn(args[0], ['-r', 'sampler.js'].concat(args.slice(1)))
+```
+
+The injected sampler will produce a file in the current working directory, with the process `PID` in its filename. The filepath relative to the current working directory will be the value in the callback.
+
+stdout, stderr, and stdin will be relayed to the calling process. As will the `SIGINT` event.
+
+#### `bubbleprof.visualize(dataFilename, outputFilename, callback)`
+
+Will consume the data file specified by `dataFilename`, this data file will be produced by the sampler using `bubbleprof.collect`.
+
+`bubbleprof.visualize` will then output a standalone HTML file to `outputFilename`. When completed the callback will be called with no extra arguments, except a possible error.
+
 ## License
 [GPL 3.0](LICENSE)
 
