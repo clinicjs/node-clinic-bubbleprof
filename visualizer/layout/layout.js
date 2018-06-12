@@ -191,15 +191,6 @@ class Layout {
       }, settings)
       return sublayout
     }
-
-    function pickDataSubset () {
-      // Use collapsed
-      if (layoutNode.collapsedNodes) {
-        return layoutNode.collapsedNodes.map(hiddenLayoutNode => hiddenLayoutNode.node)
-      }
-      // Use aggregates
-      return [...layoutNode.node.nodes.values()]
-    }
   }
 
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
@@ -213,6 +204,15 @@ class Layout {
     const collapsedLayout = new CollapsedLayout(this.layoutNodes, this.scale)
     this.layoutNodes = collapsedLayout.layoutNodes
   }
+}
+
+function pickDataSubset (layoutNode) {
+  // Use collapsed
+  if (layoutNode.collapsedNodes) {
+    return layoutNode.collapsedNodes.map(hiddenLayoutNode => hiddenLayoutNode.node)
+  }
+  // Use aggregates
+  return [...layoutNode.node.nodes.values()]
 }
 
 class LayoutNode {
