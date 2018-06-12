@@ -79,19 +79,9 @@ class BubbleprofUI extends EventEmitter {
   }
 
   createSubLayout (layoutNode) {
-    const collapsed = layoutNode.collapsedNodes
-    const nodesArray = collapsed ? collapsed.map(item => item.node) : [...layoutNode.node.nodes.values()]
-
-    if (nodesArray && nodesArray.length) {
-      const connection = layoutNode.inboundConnection
-
-      const newLayout = new Layout({
-        parentLayout: this.layout,
-        dataNodes: nodesArray,
-        connection: connection || { targetNode: layoutNode.node }
-      }, this.getSettingsForLayout())
-      newLayout.generate()
-
+    const sublayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
+    if (sublayout) {
+      sublayout.generate()
       const nodeLinkSection = this.originalUI.getNodeLinkSection()
 
       const nodeLinkId = 'node-link-' + layoutNode.id
@@ -101,20 +91,20 @@ class BubbleprofUI extends EventEmitter {
       }, nodeLinkSection, this)
       uiWithinSublayout.layoutNode = layoutNode
 
-      const sublayout = uiWithinSublayout.sections.get(nodeLinkId)
-      sublayout.addCollapseControl()
-      const closeBtn = sublayout.addContent(undefined, { classNames: 'close-btn' })
+      const sublayoutHtml = uiWithinSublayout.sections.get(nodeLinkId)
+      sublayoutHtml.addCollapseControl()
+      const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
-      const sublayoutSvg = sublayout.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
+      const sublayoutSvg = sublayoutHtml.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
       sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
       sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
-      sublayout.addContent('HoverBox', {svg: sublayoutSvg})
+      sublayoutHtml.addContent('HoverBox', {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()
 
       uiWithinSublayout.initializeCloseButton(closeBtn)
 
-      uiWithinSublayout.setData(newLayout)
+      uiWithinSublayout.setData(sublayout)
       uiWithinSublayout.setAsTopmostUI()
       return uiWithinSublayout
     }

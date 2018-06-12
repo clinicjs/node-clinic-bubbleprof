@@ -11,7 +11,7 @@ function mockClusterNode ({ id, parentId, children, stemLength }) {
         // AggregateNode
         aggregateId: id,
         parentAggregateId: parentId,
-        children: [],
+        children,
         frames: [],
         sources: [
           {
