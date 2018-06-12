@@ -178,6 +178,21 @@ class Layout {
     }
   }
 
+  createSubLayout (layoutNode, settings) {
+    const subsetInView = pickDataSubset(layoutNode)
+
+    if (subsetInView.length) {
+      const connection = layoutNode.inboundConnection
+
+      const sublayout = new Layout({
+        parentLayout: this,
+        dataNodes: subsetInView,
+        connection: connection || { targetNode: layoutNode.node }
+      }, settings)
+      return sublayout
+    }
+  }
+
   // Like DataSet.processData(), call it seperately in main flow so that can be interupted in tests etc
   generate (settingsOverride) {
     this.processHierarchy(settingsOverride)
@@ -189,6 +204,15 @@ class Layout {
     const collapsedLayout = new CollapsedLayout(this.layoutNodes, this.scale)
     this.layoutNodes = collapsedLayout.layoutNodes
   }
+}
+
+function pickDataSubset (layoutNode) {
+  // Use collapsed
+  if (layoutNode.collapsedNodes) {
+    return layoutNode.collapsedNodes.map(hiddenLayoutNode => hiddenLayoutNode.node)
+  }
+  // Use aggregates
+  return [...layoutNode.node.nodes.values()]
 }
 
 class LayoutNode {
