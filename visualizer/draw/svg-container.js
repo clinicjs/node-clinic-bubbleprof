@@ -2,8 +2,11 @@
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
+const SvgNodeDiagram = require('./svg-node-diagram.js')
+/*
 const Bubbles = require('./svg-bubbles.js')
 const Links = require('./svg-links.js')
+*/
 
 class SvgContainer extends HtmlContent {
   constructor (parentContent, contentProperties = {}) {
@@ -23,7 +26,7 @@ class SvgContainer extends HtmlContent {
       }
       this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
-
+/*
     this.bubbles = null
     this.links = null
   }
@@ -35,35 +38,42 @@ class SvgContainer extends HtmlContent {
   addLinks (contentProperties) {
     this.links = new Links(this, contentProperties)
   }
+*/
+
+    this.svgNodeDiagram = new SvgNodeDiagram(this)
+
+    this.ui.on('setData', () => {
+      this.setData()
+    })
+  }
+
+  setData () {
+    const {
+      minX,
+      minY,
+      preserveAspectRatio
+    } = this.svgBounds
+    this.svgBounds.height = this.ui.layout.scale.finalSvgHeight || this.ui.layout.settings.svgHeight
+    this.svgBounds.width = this.ui.layout.settings.svgWidth
+
+    this.d3Element
+      .attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
+      .attr('preserveAspectRatio', preserveAspectRatio)
+  }
 
   initializeElements () {
     super.initializeElements()
 
-    if (this.svgBounds) {
-      const {
-        minX,
-        minY,
-        preserveAspectRatio
-      } = this.svgBounds
+    this.d3Element
+      .attr('id', this.contentProperties.id)
+      .classed('bubbleprof', true)
 
-      this.d3Element
-        .attr('id', this.contentProperties.id)
-        .attr('preserveAspectRatio', preserveAspectRatio)
-        .classed('bubbleprof', true)
-
-      this.ui.on('setData', () => {
-        this.svgBounds.height = this.ui.layout.scale.finalSvgHeight || this.ui.layout.settings.svgHeight
-        this.svgBounds.width = this.ui.layout.settings.svgWidth
-
-        this.d3Element.attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
-      })
-    }
-    if (this.bubbles) this.bubbles.initializeElements()
-    if (this.links) this.links.initializeElements()
+    this.svgNodeDiagram.initializeElements()
   }
 
   draw () {
-    this.ui.emit('svgDraw')
+    this.svgNodeDiagram.draw()
+//    this.ui.emit('svgDraw')
   }
 }
 

@@ -133,6 +133,14 @@ class ClusterNode extends DataNode {
   getDecimalLabels (classification, position) {
     return this.decimals[classification][position].keys()
   }
+  getDecimalsArray (classification, position) {
+    const decimalsArray = []
+    for (const label of dataNode.decimals[classification][position].keys()) {
+      const decimal = dataNode.getDecimal('typeCategory', 'within', label)
+      decimalsArray.push([label, decimal])
+    }
+    return decimalsArray
+  }
   get id () {
     return this.clusterId
   }
@@ -176,6 +184,7 @@ class AggregateNode extends DataNode {
     this.name = this.frames.length ? this.frames[0].formatted.slice(7) : (this.isRoot ? 'root' : 'empty frames')
 
     this.mark = DataNode.markFromArray(node.mark)
+    this.party = this.mark.get('party')
 
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
     // 29 possible values defined in node core, plus other user-defined values can exist
@@ -214,6 +223,11 @@ class AggregateNode extends DataNode {
     } else {
       apply(this.stats.rawTotals.async.between + this.stats.rawTotals.sync, 'within')
     }
+  }
+  getDecimalsArray (classification, position) {
+    return [
+      [this[classification], (position === 'between' ? this.getBetweenTime() : this.getWithinTime())]
+    ]
   }
   get id () {
     return this.aggregateId

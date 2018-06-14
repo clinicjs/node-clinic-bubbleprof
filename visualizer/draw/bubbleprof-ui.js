@@ -13,7 +13,7 @@ class BubbleprofUI extends EventEmitter {
 
     const defaultSettings = {
       numberFormatter: d3.format(',.0f'),
-      strokePadding: 3,
+      strokePadding: 4,
       nodeLinkId: 'node-link',
       classNames: '',
       viewMode: 'fit'

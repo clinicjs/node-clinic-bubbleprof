@@ -131,7 +131,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     // create script-file stream
     const b = browserify({
       'basedir': __dirname,
-      // 'debug': true,
+      'debug': true,
       'noParse': [fakeDataPath]
     })
     b.transform('brfs')
