@@ -1,6 +1,6 @@
 'use strict'
 
-const stream = require('stream')
+const stream = require('../lib/destroyable-stream')
 const endpoint = require('endpoint')
 
 const SystemInfo = require('./system-info.js')

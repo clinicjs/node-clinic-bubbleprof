@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 
 class FilterSourceNodes extends stream.Transform {
   constructor () {

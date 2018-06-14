@@ -1,5 +1,5 @@
 'use strict'
-const stream = require('stream')
+const stream = require('../../lib/destroyable-stream')
 const StackTrace = require('./stack-trace.js')
 
 class WrapAsStackTrace extends stream.Transform {

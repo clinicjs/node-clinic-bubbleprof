@@ -1,6 +1,6 @@
 'use strict'
 
-const stream = require('stream')
+const stream = require('../lib/destroyable-stream')
 const JSONStream = require('JSONStream')
 
 class TraceEvent {
