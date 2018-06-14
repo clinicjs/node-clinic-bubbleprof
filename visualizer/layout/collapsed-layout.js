@@ -98,12 +98,12 @@ class CollapsedLayout {
       }, targetLayoutNode.node)
       mergedShortcut.targetLayoutNode = targetLayoutNode
       const mergedLayoutNode = new LayoutNode(mergedShortcut, parentLayoutNode)
-      this.layoutNodes.set(mergedLayoutNode.id, mergedLayoutNode)
-      bijectiveShortcuts.push(mergedLayoutNode.id)
       for (let i = 0; i < shortcutNodes.length; ++i) {
         const shortcutLayoutNode = shortcutNodes[i]
         this.layoutNodes.delete(shortcutLayoutNode.id)
       }
+      this.layoutNodes.set(mergedLayoutNode.id, mergedLayoutNode)
+      bijectiveShortcuts.push(mergedLayoutNode.id)
     }
     return bijectiveShortcuts
   }
