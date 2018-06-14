@@ -1,8 +1,7 @@
 'use strict'
 
 const _ = {
-  difference: require('lodash/difference'),
-  intersection: require('lodash/intersection')
+  difference: require('lodash/difference')
 }
 
 const { CollapsedLayoutNode } = require('./layout-node.js')
@@ -85,16 +84,9 @@ class CollapsedLayout {
     return combined
   }
   combinelayoutNodes (hostNode, squashNode) {
-    // TODO: support uncollapsible shortcut nodes
-    // i.e. currently some views get really messy when we render them all
-    // we need to come up with some ux improvements on how to display them without making much noise
-    //
-    // const nodeTypes = [hostNode.node.constructor.name, squashNode.node.constructor.name]
-    // const forbiddenTypes = ['ShortcutNode']
-    // if (_.intersection(nodeTypes, forbiddenTypes).length) {
-    //   return
-    // }
-
+    if ([hostNode.node.constructor.name, squashNode.node.constructor.name].includes('ShortcutNode')) {
+      return
+    }
     if (!hostNode || !squashNode) {
       return
     }

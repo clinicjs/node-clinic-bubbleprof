@@ -54,6 +54,9 @@ class CollapsedLayoutNode {
   getWithinTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
   }
+  getTotalTime () {
+    return this.getBetweenTime() + this.getWithinTime()
+  }
   validateStat (num, statType = '', aboveZero = false) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
     return validateNumber(num, targetDescription, aboveZero)

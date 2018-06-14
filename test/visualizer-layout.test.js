@@ -19,7 +19,8 @@ const settings = {
   svgHeight: 1000,
   labelMinimumSpace: 0,
   lineWidth: 0,
-  svgDistanceFromEdge: 30
+  svgDistanceFromEdge: 30,
+  collapseNodes: true
 }
 
 test('Visualizer layout - builds sublayout from connection', function (t) {
@@ -59,6 +60,24 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toLink)
   t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => 5', '5 => '])
+
+  t.end()
+})
+
+test('Visualizer layout - collapse - does not collapse shortcut nodes', function (t) {
+  const topology = [
+    ['1.2.3', 1],
+    ['1.2.4', 1],
+    ['1.2.5', 1]
+  ]
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const initialDataNodes = [...dataSet.clusterNodes.values()]
+  const initialLayout = new Layout({ dataNodes: initialDataNodes }, settings)
+  initialLayout.processHierarchy()
+  const traversedLayoutNode = initialLayout.layoutNodes.get(2)
+  const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, settings)
+  traversedLayout.processHierarchy()
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode:1', 'AggregateNode:2', 'ShortcutNode:3', 'ShortcutNode:4', 'ShortcutNode:5'])
 
   t.end()
 })
