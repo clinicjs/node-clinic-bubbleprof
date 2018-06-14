@@ -154,14 +154,9 @@ class CollapsedLayout {
     if ([hostNode.node.constructor.name, squashNode.node.constructor.name].includes('ShortcutNode')) {
       return
     }
-    if (!hostNode || !squashNode) {
-      return
-    }
     if (!this.isCollapsible(hostNode) || !this.isCollapsible(squashNode)) {
       return
     }
-
-    // TODO: also check this.minimumNodes here?
 
     // hostNode is expected to be either direct parent or direct sibling of squashNode
     const parent = hostNode.parent
