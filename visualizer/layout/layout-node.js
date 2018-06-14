@@ -39,6 +39,7 @@ class CollapsedLayoutNode {
       const node = layoutNode.node
       if (!this.node) {
         this.node = new ArtificialNode({
+          id: this.id,
           nodeType: node.constructor.name
         }, node)
       }
@@ -53,6 +54,12 @@ class CollapsedLayoutNode {
   }
   getWithinTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
+  }
+  getSyncTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getSyncTime(), 0)
+  }
+  getAsyncTime () {
+    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getAsyncTime(), 0)
   }
   getTotalTime () {
     return this.getBetweenTime() + this.getWithinTime()
