@@ -20,7 +20,7 @@ function createLinkValidator (layout) {
 }
 
 function toTypeId (layoutNode) {
-  return layoutNode.node.constructor.name + ':' + layoutNode.id
+  return layoutNode.node.constructor.name + '-' + layoutNode.id
 }
 
 const settings = {
@@ -45,7 +45,7 @@ test('Visualizer layout - builds sublayout from connection', function (t) {
   const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, uncollapsedSettings)
   t.equal(traversedLayout.parentLayout.rootLayoutNode.id, initialLayout.rootLayoutNode.id)
   const toValidLink = createLinkValidator(traversedLayout)
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode:3', 'AggregateNode:4', 'ShortcutNode:5'])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-3', 'AggregateNode-4', 'ShortcutNode-5'])
   t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['3 => 4', '4 => 5', '5 => '])
 
   t.end()
@@ -89,7 +89,7 @@ test('Visualizer layout - collapse - does not collapse shortcut nodes', function
   const traversedLayoutNode = initialLayout.layoutNodes.get(2)
   const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, settings)
   traversedLayout.processHierarchy()
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode:1', 'AggregateNode:2', 'ShortcutNode:3', 'ShortcutNode:4', 'ShortcutNode:5'])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-1', 'AggregateNode-2', 'ShortcutNode-3', 'ShortcutNode-4', 'ShortcutNode-5'])
 
   t.end()
 })
