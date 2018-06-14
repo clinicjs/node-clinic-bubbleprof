@@ -202,7 +202,7 @@ class Layout {
   }
 
   collapseNodes () {
-    const collapsedLayout = new CollapsedLayout(this.layoutNodes, this.scale)
+    const collapsedLayout = new CollapsedLayout(this)
     this.layoutNodes = collapsedLayout.layoutNodes
   }
 }

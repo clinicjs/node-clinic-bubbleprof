@@ -8,10 +8,11 @@ const _ = {
 const { CollapsedLayoutNode } = require('./layout-node.js')
 
 class CollapsedLayout {
-  constructor (layoutNodes, scale) {
+  constructor (layout) {
+    this.uncollapsedLayout = layout
     // Shallow clone before modifying
-    this.layoutNodes = new Map([...layoutNodes.entries()])
-    this.scale = scale
+    this.layoutNodes = new Map([...layout.layoutNodes.entries()])
+    this.scale = layout.scale
     this.minimumNodes = 3
 
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
