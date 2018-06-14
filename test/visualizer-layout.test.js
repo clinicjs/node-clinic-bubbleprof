@@ -9,10 +9,14 @@ const { mockTopology } = require('./visualizer-util/fake-topology.js')
 function toLink (layout, layoutNode) {
   const strayChildren = layoutNode.children.map(childId => layout.layoutNodes.get(childId)).filter(child => child.parent !== layoutNode)
   if (strayChildren.length) {
-    const toParentLink = (layoutNode) => (layoutNode.parent ? layoutNode.parent.id : '') + ' <= ' + layoutNode.id
     throw new Error(`layoutNode ${layoutNode.id} has stray children: [${strayChildren.map(toParentLink).join(', ')}]`)
   }
   return layoutNode.id + ' => ' + layoutNode.children.join(';')
+}
+
+function toParentLink (layoutNode) {
+  const parentId = (layoutNode.parent && layoutNode.parent.id) || ''
+  return parentId + ' <= ' + layoutNode.id
 }
 
 function createLinkValidator (layout) {
