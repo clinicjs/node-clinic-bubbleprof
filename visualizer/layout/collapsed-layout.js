@@ -11,7 +11,8 @@ class CollapsedLayout {
   constructor (layout) {
     this.uncollapsedLayout = layout
     // Shallow clone before modifying
-    this.layoutNodes = new Map([...layout.layoutNodes.entries()])
+    // TODO: revisit idempotency of this class - mutates each LayoutNode internally
+    this.layoutNodes = new Map([...layout.layoutNodes])
     this.scale = layout.scale
     this.minimumNodes = 3
 
