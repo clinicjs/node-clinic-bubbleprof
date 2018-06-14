@@ -51,8 +51,8 @@ class CollapsedLayout {
     // Update refs
     layoutNode.children = dataNodes.concat(shortcutNodes)
     // Traverse down
-    for (let index = 0; index < layoutNode.children.length; ++index) {
-      const childId = layoutNode.children[index]
+    for (let i = 0; i < layoutNode.children.length; ++i) {
+      const childId = layoutNode.children[i]
       const childLayoutNode = this.layoutNodes.get(childId)
       this.mergeShortcutNodes(childLayoutNode)
     }
@@ -64,8 +64,8 @@ class CollapsedLayout {
     const shortcutsByTarget = new Map()
 
     const dataNodes = []
-    for (let index = 0; index < layoutNode.children.length; ++index) {
-      const childId = layoutNode.children[index]
+    for (let i = 0; i < layoutNode.children.length; ++i) {
+      const childId = layoutNode.children[i]
       const childLayoutNode = this.layoutNodes.get(childId)
       if (childLayoutNode.node.constructor.name === 'ShortcutNode') {
         const shortcutNode = childLayoutNode.node
