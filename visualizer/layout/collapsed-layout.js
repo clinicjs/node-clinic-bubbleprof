@@ -4,7 +4,8 @@ const _ = {
   difference: require('lodash/difference')
 }
 
-const { CollapsedLayoutNode } = require('./layout-node.js')
+const { ShortcutNode } = require('../data/data-node.js')
+const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 
 class CollapsedLayout {
   constructor (layout) {
@@ -30,6 +31,7 @@ class CollapsedLayout {
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
       const topNode = topNodesIterator.next().value
       this.collapseVertically(topNode)
+      this.mergeShortcutNodes(topNode)
       this.indexLayoutNode(newLayoutNodes, topNode)
     }
     this.layoutNodes = newLayoutNodes
@@ -40,6 +42,70 @@ class CollapsedLayout {
       const childId = layoutNode.children[i]
       this.indexLayoutNode(nodesMap, this.layoutNodes.get(childId))
     }
+  }
+  mergeShortcutNodes (layoutNode) {
+    // Reduce shortcuts
+    const { dataNodes, shortcutsByTarget } = this.groupNodesByTarget(layoutNode)
+    const shortcutNodes = this.formShortcutBijection(shortcutsByTarget, layoutNode)
+    // Update refs
+    layoutNode.children = dataNodes.concat(shortcutNodes)
+    // Traverse down
+    for (let index = 0; index < layoutNode.children.length; ++index) {
+      const childId = layoutNode.children[index]
+      const childLayoutNode = this.layoutNodes.get(childId)
+      this.mergeShortcutNodes(childLayoutNode)
+    }
+  }
+  groupNodesByTarget (layoutNode) {
+    // Used to group alike ShortcutNodes together
+    // Maps { LayoutNode => [...ShortcutNode] }
+    // e.g. { LayoutNode-2 => [ShortcutNode-2], CollapsedLayoutNode-clump:3,4,5 => [ShortcutNode-3, ShortcutNode-4, ShortcutNode-5] }
+    const shortcutsByTarget = new Map()
+
+    const dataNodes = []
+    for (let index = 0; index < layoutNode.children.length; ++index) {
+      const childId = layoutNode.children[index]
+      const childLayoutNode = this.layoutNodes.get(childId)
+      if (childLayoutNode.node.constructor.name === 'ShortcutNode') {
+        const shortcutNode = childLayoutNode.node
+        const targetLayoutNode = this.uncollapsedLayout.findDataNode(shortcutNode.shortcutTo, true)
+        let targetShortcuts = shortcutsByTarget.get(targetLayoutNode)
+        if (!targetShortcuts) {
+          targetShortcuts = []
+          shortcutsByTarget.set(targetLayoutNode, targetShortcuts)
+        }
+        targetShortcuts.push(childLayoutNode)
+      } else {
+        dataNodes.push(childId)
+      }
+    }
+    return { dataNodes, shortcutsByTarget }
+  }
+  formShortcutBijection (shortcutsByTarget, parentLayoutNode) {
+    const bijectiveShortcuts = []
+    const shortcutsIterator = shortcutsByTarget.entries()
+    for (let i = 0; i < shortcutsByTarget.size; ++i) {
+      const [targetLayoutNode, shortcutNodes] = shortcutsIterator.next().value
+      if (shortcutNodes.length === 1) {
+        bijectiveShortcuts.push(shortcutNodes[0].id)
+        continue
+      }
+
+      const mergedShortcut = new ShortcutNode({
+        id: targetLayoutNode.id,
+        children: [],
+        parentId: parentLayoutNode.id
+      }, targetLayoutNode.node)
+      mergedShortcut.targetLayoutNode = targetLayoutNode
+      const mergedLayoutNode = new LayoutNode(mergedShortcut, parentLayoutNode)
+      this.layoutNodes.set(mergedLayoutNode.id, mergedLayoutNode)
+      bijectiveShortcuts.push(mergedLayoutNode.id)
+      for (let i = 0; i < shortcutNodes.length; ++i) {
+        const shortcutLayoutNode = shortcutNodes[i]
+        this.layoutNodes.delete(shortcutLayoutNode.id)
+      }
+    }
+    return bijectiveShortcuts
   }
   collapseHorizontally (layoutNode) {
     let combined

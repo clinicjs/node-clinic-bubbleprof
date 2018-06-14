@@ -94,6 +94,34 @@ test('Visualizer layout - collapse - does not collapse shortcut nodes', function
   t.end()
 })
 
+test('Visualizer layout - collapse - merges shortcuts pointing to the same view', function (t) {
+  const topology = [
+    ['1.2.3.4.5', 1],
+    ['1.2.3.6.7', 1],
+    ['1.2.3.8.9', 1]
+  ]
+  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const initialDataNodes = [...dataSet.clusterNodes.values()]
+  dataSet.clusterNodes.get(2).stats.async.between = 100 // make 2 long
+  dataSet.clusterNodes.get(3).stats.async.between = 100 // make 3 long
+  dataSet.clusterNodes.get(5).stats.async.between = 100 // make 5 long
+  dataSet.clusterNodes.get(7).stats.async.between = 100 // make 7 long
+  dataSet.clusterNodes.get(9).stats.async.between = 100 // make 9 long
+  const initialLayout = new Layout({ dataNodes: initialDataNodes }, settings)
+  initialLayout.processHierarchy()
+  let toValidLink = createLinkValidator(initialLayout)
+  t.deepEqual([...initialLayout.layoutNodes.values()].map(toTypeId), ['ClusterNode-1', 'ClusterNode-2', 'ClusterNode-3', 'ArtificialNode-clump:4,6,8', 'ClusterNode-5', 'ClusterNode-7', 'ClusterNode-9'])
+  t.deepEqual([...initialLayout.layoutNodes.values()].map(toValidLink), ['1 => 2', '2 => 3', '3 => clump:4,6,8', 'clump:4,6,8 => 5;7;9', '5 => ', '7 => ', '9 => '])
+  const traversedLayoutNode = initialLayout.layoutNodes.get(3)
+  const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, settings)
+  traversedLayout.processHierarchy()
+  toValidLink = createLinkValidator(traversedLayout)
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-2', 'AggregateNode-3', 'ShortcutNode-clump:4,6,8'])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['2 => 3', '3 => clump:4,6,8', 'clump:4,6,8 => '])
+
+  t.end()
+})
+
 // R->T->T->P->L->T->T->P->L gives R->C->P->L->C->P->L
 test('Visualizer layout - collapse - collapses vertically with break (except root and Ps)', function (t) {
   const topology = [
