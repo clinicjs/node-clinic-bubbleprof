@@ -6,8 +6,17 @@ const Layout = require('../visualizer/layout/layout.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
-function toLink (layoutNode) {
+function toLink (layout, layoutNode) {
+  const strayChildren = layoutNode.children.map(childId => layout.layoutNodes.get(childId)).filter(child => child.parent !== layoutNode)
+  if (strayChildren.length) {
+    const toParentLink = (layoutNode) => (layoutNode.parent ? layoutNode.parent.id : '') + ' <= ' + layoutNode.id
+    throw new Error(`layoutNode ${layoutNode.id} has stray children: [${strayChildren.map(toParentLink).join(', ')}]`)
+  }
   return layoutNode.id + ' => ' + layoutNode.children.join(';')
+}
+
+function createLinkValidator (layout) {
+  return (layoutNode) => toLink(layout, layoutNode)
 }
 
 function toTypeId (layoutNode) {
@@ -35,7 +44,9 @@ test('Visualizer layout - builds sublayout from connection', function (t) {
   const traversedLayoutNode = initialLayout.layoutNodes.get(4)
   const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, uncollapsedSettings)
   t.equal(traversedLayout.parentLayout.rootLayoutNode.id, initialLayout.rootLayoutNode.id)
+  const toValidLink = createLinkValidator(traversedLayout)
   t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode:3', 'AggregateNode:4', 'ShortcutNode:5'])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['3 => 4', '4 => 5', '5 => '])
 
   t.end()
 })
@@ -53,12 +64,13 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5', '5 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => 5', '5 => '])
 
   t.end()
@@ -94,12 +106,13 @@ test('Visualizer layout - collapse - collapses vertically with break (except roo
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => 7', '7 => 8', '8 => 9', '9 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => clump:2,3', 'clump:2,3 => 4', '4 => 5', '5 => clump:6,7', 'clump:6,7 => 8', '8 => 9', '9 => '])
 
   t.end()
@@ -117,12 +130,13 @@ test('Visualizer layout - collapse - collapses vertically until minimum count th
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2', '2 => 3', '3 => 4', '4 => 5;6', '5 => ', '6 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,4,5,6', 'clump:3,4,5,6 => '])
 
   t.end()
@@ -148,12 +162,13 @@ test('Visualizer layout - collapse - collapses horizontally', function (t) {
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2', '2 => 3;5;7', '3 => 4', '4 => ', '5 => 6', '6 => ', '7 => 8', '8 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,7;5', 'clump:3,7 => 4;8', '4 => ', '8 => ', '5 => 6', '6 => '])
 
   t.end()
@@ -176,12 +191,13 @@ test('Visualizer layout - collapse - collapses both horizontally and vertically 
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2', '2 => 3;6', '3 => 4', '4 => 5', '5 => ', '6 => 7', '7 => 8', '8 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => clump:2,3,6', 'clump:2,3,6 => 4;7', '4 => 5', '5 => ', '7 => 8', '8 => '])
 
   t.end()
@@ -203,12 +219,13 @@ test('Visualizer layout - collapse - vertically collapses subset with missing ro
   const layout = new Layout({ dataNodes: subset }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['2 => clump:3,4', 'clump:3,4 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
 
   t.end()
@@ -230,12 +247,13 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
   const layout = new Layout({ dataNodes: subset }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2', '2 => 3;6', '3 => 4', '4 => ', '6 => 7', '7 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,6,4', 'clump:3,6,4 => 7', '7 => '])
 
   t.end()
@@ -271,12 +289,13 @@ test('Visualizer layout - collapse - complex example', function (t) {
   const layout = new Layout({ dataNodes }, settings)
   layout.processBetweenData()
   layout.updateScale()
-  const actualBefore = [...layout.layoutNodes.values()].map(toLink)
+  const toValidLink = createLinkValidator(layout)
+  const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualBefore, ['1 => 2;3', '2 => ', '3 => 4;5;7;10', '4 => ', '5 => 6', '6 => ', '7 => 8;9', '8 => ', '9 => ', '10 => 11;12', '11 => ', '12 => 13', '13 => '])
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
-  const actualAfter = [...layout.layoutNodes.values()].map(toLink)
+  const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => clump:4,5,7,6,8,9;10', 'clump:4,5,7,6,8,9 => ', '10 => clump:11,12,13', 'clump:11,12,13 => '])
 
   t.end()
