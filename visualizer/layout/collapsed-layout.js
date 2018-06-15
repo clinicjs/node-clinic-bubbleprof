@@ -1,18 +1,19 @@
 'use strict'
 
 const _ = {
-  difference: require('lodash/difference'),
-  intersection: require('lodash/intersection')
+  difference: require('lodash/difference')
 }
 
-const { ArtificialNode } = require('../data/data-node.js')
-const { validateNumber } = require('../validation.js')
+const { ShortcutNode } = require('../data/data-node.js')
+const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 
 class CollapsedLayout {
-  constructor (layoutNodes, scale) {
+  constructor (layout) {
+    this.uncollapsedLayout = layout
     // Shallow clone before modifying
-    this.layoutNodes = new Map([...layoutNodes.entries()])
-    this.scale = scale
+    // TODO: revisit idempotency of this class - mutates each LayoutNode internally
+    this.layoutNodes = new Map([...layout.layoutNodes])
+    this.scale = layout.scale
     this.minimumNodes = 3
 
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
@@ -31,6 +32,7 @@ class CollapsedLayout {
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
       const topNode = topNodesIterator.next().value
       this.collapseVertically(topNode)
+      this.mergeShortcutNodes(topNode)
       this.indexLayoutNode(newLayoutNodes, topNode)
     }
     this.layoutNodes = newLayoutNodes
@@ -41,6 +43,70 @@ class CollapsedLayout {
       const childId = layoutNode.children[i]
       this.indexLayoutNode(nodesMap, this.layoutNodes.get(childId))
     }
+  }
+  mergeShortcutNodes (layoutNode) {
+    // Reduce shortcuts
+    const { dataNodes, shortcutsByTarget } = this.groupNodesByTarget(layoutNode)
+    const shortcutNodes = this.formShortcutBijection(shortcutsByTarget, layoutNode)
+    // Update refs
+    layoutNode.children = dataNodes.concat(shortcutNodes)
+    // Traverse down
+    for (let i = 0; i < layoutNode.children.length; ++i) {
+      const childId = layoutNode.children[i]
+      const childLayoutNode = this.layoutNodes.get(childId)
+      this.mergeShortcutNodes(childLayoutNode)
+    }
+  }
+  groupNodesByTarget (layoutNode) {
+    // Used to group alike ShortcutNodes together
+    // Maps { LayoutNode => [...ShortcutNode] }
+    // e.g. { LayoutNode-2 => [ShortcutNode-2], CollapsedLayoutNode-clump:3,4,5 => [ShortcutNode-3, ShortcutNode-4, ShortcutNode-5] }
+    const shortcutsByTarget = new Map()
+
+    const dataNodes = []
+    for (let i = 0; i < layoutNode.children.length; ++i) {
+      const childId = layoutNode.children[i]
+      const childLayoutNode = this.layoutNodes.get(childId)
+      if (childLayoutNode.node.constructor.name === 'ShortcutNode') {
+        const shortcutNode = childLayoutNode.node
+        const targetLayoutNode = this.uncollapsedLayout.findDataNode(shortcutNode.shortcutTo, true)
+        let targetShortcuts = shortcutsByTarget.get(targetLayoutNode)
+        if (!targetShortcuts) {
+          targetShortcuts = []
+          shortcutsByTarget.set(targetLayoutNode, targetShortcuts)
+        }
+        targetShortcuts.push(childLayoutNode)
+      } else {
+        dataNodes.push(childId)
+      }
+    }
+    return { dataNodes, shortcutsByTarget }
+  }
+  formShortcutBijection (shortcutsByTarget, parentLayoutNode) {
+    const bijectiveShortcuts = []
+    const shortcutsIterator = shortcutsByTarget.entries()
+    for (let i = 0; i < shortcutsByTarget.size; ++i) {
+      const [targetLayoutNode, shortcutNodes] = shortcutsIterator.next().value
+      if (shortcutNodes.length === 1) {
+        bijectiveShortcuts.push(shortcutNodes[0].id)
+        continue
+      }
+
+      const mergedShortcut = new ShortcutNode({
+        id: targetLayoutNode.id,
+        children: [],
+        parentId: parentLayoutNode.id
+      }, targetLayoutNode.node)
+      mergedShortcut.targetLayoutNode = targetLayoutNode
+      const mergedLayoutNode = new LayoutNode(mergedShortcut, parentLayoutNode)
+      for (let i = 0; i < shortcutNodes.length; ++i) {
+        const shortcutLayoutNode = shortcutNodes[i]
+        this.layoutNodes.delete(shortcutLayoutNode.id)
+      }
+      this.layoutNodes.set(mergedLayoutNode.id, mergedLayoutNode)
+      bijectiveShortcuts.push(mergedLayoutNode.id)
+    }
+    return bijectiveShortcuts
   }
   collapseHorizontally (layoutNode) {
     let combined
@@ -85,24 +151,12 @@ class CollapsedLayout {
     return combined
   }
   combinelayoutNodes (hostNode, squashNode) {
-    // TODO: support uncollapsible shortcut nodes
-    // i.e. currently some views get really messy when we render them all
-    // we need to come up with some ux improvements on how to display them without making much noise
-    //
-    // const nodeTypes = [hostNode.node.constructor.name, squashNode.node.constructor.name]
-    // const forbiddenTypes = ['ShortcutNode']
-    // if (_.intersection(nodeTypes, forbiddenTypes).length) {
-    //   return
-    // }
-
-    if (!hostNode || !squashNode) {
+    if ([hostNode.node.constructor.name, squashNode.node.constructor.name].includes('ShortcutNode')) {
       return
     }
     if (!this.isCollapsible(hostNode) || !this.isCollapsible(squashNode)) {
       return
     }
-
-    // TODO: also check this.minimumNodes here?
 
     // hostNode is expected to be either direct parent or direct sibling of squashNode
     const parent = hostNode.parent
@@ -150,53 +204,6 @@ function insertLayoutNode (layoutNodes, parent, layoutNode) {
   for (let i = 0; i < layoutNode.children.length; ++i) {
     const child = layoutNodes.get(layoutNode.children[i])
     child.parent = layoutNode
-  }
-}
-
-class CollapsedLayoutNode {
-  constructor (layoutNodes, parent, children) {
-    this.id = 'clump:' + layoutNodes.map(layoutNode => layoutNode.id).join(',')
-    this.collapsedNodes = layoutNodes
-    this.parent = parent
-    this.children = children || []
-
-    for (let i = 0; i < layoutNodes.length; ++i) {
-      const layoutNode = layoutNodes[i]
-      const node = layoutNode.node
-      if (!this.node) {
-        this.node = new ArtificialNode({
-          id: this.id,
-          nodeType: node.constructor.name
-        }, node)
-      }
-      if (node.nodes) this.node.applyAggregateNodes(node.nodes)
-      this.node.applyMark(node.mark)
-      this.node.aggregateStats(node)
-      this.applyDecimals(node)
-    }
-  }
-  getBetweenTime () {
-    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
-  }
-  getWithinTime () {
-    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
-  }
-  getSyncTime () {
-    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getSyncTime(), 0)
-  }
-  getAsyncTime () {
-    return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getAsyncTime(), 0)
-  }
-  validateStat (num, statType = '', aboveZero = false) {
-    const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
-    return validateNumber(num, targetDescription, aboveZero)
-  }
-  applyDecimals (otherNode) {
-    this.node.aggregateDecimals(otherNode, 'type', 'between')
-    this.node.aggregateDecimals(otherNode, 'type', 'within')
-    this.node.aggregateDecimals(otherNode, 'typeCategory', 'between')
-    this.node.aggregateDecimals(otherNode, 'typeCategory', 'within')
-    // TODO: aggregate party, draw appropriate pie
   }
 }
 
