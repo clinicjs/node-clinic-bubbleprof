@@ -150,13 +150,13 @@ test('Analysis - pipeline', function (t) {
   const frameUser = {
     functionName: 'userMain',
     isToplevel: true,
-    fileName: '/user/main.js',
+    fileName: './user/main.js',
     lineNumber: 10
   }
   const frameExternal = {
     functionName: 'external',
     isToplevel: true,
-    fileName: '/node_modules/external/index.js',
+    fileName: './node_modules/external/index.js',
     lineNumber: 10
   }
   const frameNodecore = {
