@@ -4,6 +4,10 @@ const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const svgNodeElementTypes = require('./svg-node-element.js')
 
+
+// Layout assigns each node: diameter, scaled + length, scaled + label * 2 + lineWidth
+
+
 class SvgNodeDiagram {
   constructor (svgContainer) {
     this.svgContainer = svgContainer
@@ -41,6 +45,11 @@ class SvgNodeDiagram {
     this.d3Enter = this.d3Element.selectAll('g.node-group')
       .data(this.dataArray)
       .enter()
+
+    this.dataArray.forEach(layoutNode => {
+      if (!this.svgNodes.has(layoutNode.id)) this.svgNodes.set(layoutNode.id, new SvgNode(this))
+      this.svgNodes.get(layoutNode.id).setData(layoutNode)
+    })
   }
 
   initializeFromData () {
@@ -49,12 +58,15 @@ class SvgNodeDiagram {
       .each((layoutNode, i, nodes) => {
         const d3NodeGroup = d3.select(nodes[i])
 
-        const svgNode = new SvgNode(this)
-          .setData(layoutNode)
+        const svgNode = this.svgNodes.get(layoutNode.id)
           .initializeElements(d3NodeGroup)
-
-        this.svgNodes.set(layoutNode.id, svgNode)
-    })
+      })
+      .on('mouseover', layoutNode => this.ui.highlightNode(layoutNode))
+      .on('mouseout', () => this.ui.highlightNode(null))
+      .on('click', (layoutNode) => {
+        d3.event.stopPropagation()
+        this.ui.selectNode(layoutNode)
+      })
   }
   draw () {
     this.svgNodes.forEach(svgNode => svgNode.draw())
@@ -95,18 +107,25 @@ class SvgNode {
       this.syncBubbles.setData(layoutNode)
     }
 
-    this.setCoordinates()
+    if (this.d3NodeGroup) this.setCoordinates()
     return this
   }
 
   setCoordinates () {
-    this.strokePadding = this.ui.settings.strokePadding
-    this.labelMinimumSpace = this.ui.layout.settings.labelMinimumSpace
+    this.strokePadding = this.ui.settings.labelMinimumSpace // this.ui.settings.strokePadding
+    this.labelMinimumSpace = this.ui.settings.labelMinimumSpace
+    this.lineWidth = this.ui.settings.lineWidth
+
+    this.circleCentre = {
+      x: this.layoutNode.position.x,
+      y: this.layoutNode.position.y
+    }
 
     const inboundConnection = this.layoutNode.inboundConnection
     const previousPosition = inboundConnection ? inboundConnection.sourceLayoutNode.position : {
+      // Root node position
       x: this.layoutNode.position.x,
-      y: this.strokePadding + this.labelMinimumSpace
+      y: this.ui.settings.svgDistanceFromEdge - this.strokePadding - this.lineWidth
     }
     const connectCentresCoords = new LineCoordinates({
       x1: previousPosition.x,
@@ -120,7 +139,7 @@ class SvgNode {
     // TODO: check that this doesn't look wrong in cases of drawType = squash but has withinTime
     const sourceRadius = inboundConnection ? this.getRadius(inboundConnection.sourceLayoutNode) + this.strokePadding : 0
 
-    const offsetLength = sourceRadius + this.ui.settings.lineWidth / 2 + this.labelMinimumSpace
+    const offsetLength = sourceRadius + this.lineWidth / 2 + this.strokePadding
     const offsetBeforeLine = new LineCoordinates({
         radians: connectCentresCoords.radians,
         length: offsetLength,
@@ -146,20 +165,97 @@ class SvgNode {
 
     this.d3AsyncTimeLabel = this.d3NodeGroup.append('text')
       .classed('time-label', true)
-      .classed('name-label', true)
+      .classed('async-label', true)
 
     this.d3SyncTimeLabel = this.d3NodeGroup.append('text')
       .classed('time-label', true)
-      .classed('name-label', true)
+      .classed('sync-label', true)
 
+    this.setCoordinates()
     return this
   }
 
   draw () {
-    this.d3OuterPath.attr('d', this.getOuterPathDef())
+    this.drawOuterPath()
+    this.drawNameLabel()
   }
 
-  getOuterPathDef () {
+  drawNameLabel () {
+    this.d3NameLabel.text(this.layoutNode.node.name)
+
+    if (this.drawType === 'noNameLabel') {
+      this.d3NameLabel.classed('hidden', true)
+      return
+    }
+
+    if (!this.layoutNode.children.length) {
+      // Is a leaf / endpoint - position at end of line, continuing line
+      this.d3NameLabel.classed('endpoint-label', true)
+      this.d3NameLabel.classed('smaller-label', this.drawType === 'squash')
+
+      const toEndpoint = new LineCoordinates({
+        x1: this.circleCentre.x,
+        y1: this.circleCentre.y,
+        length: this.getRadius() + this.lineWidth + this.strokePadding,
+        degrees: this.degrees
+      })
+
+      const {
+        x2,
+        y2
+      } = toEndpoint
+
+      const lengthToSide = getLengthToSide(x2, y2, this.degrees, this.ui.settings)
+      const lengthToBottom = getLengthToBottom(x2, y2, this.degrees, this.ui.settings)
+      const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
+
+      const textAfterTrim = trimText(this.d3NameLabel, lengthToEdge)
+
+      this.d3NameLabel.classed('hidden', !textAfterTrim)
+
+      const labelDegrees = labelRotation(this.degrees)
+      const transformString = `translate(${x2}, ${y2}) rotate(${labelDegrees})`
+      if (textAfterTrim) this.d3NameLabel.attr('transform', transformString)
+
+      this.d3NameLabel.classed('flipped-label', labelDegrees !== this.degrees)
+    } else {
+      // Is not a leaf / endpoint - position on line or circle
+      this.d3NameLabel.classed('endpoint-label', false)
+      this.d3NameLabel.classed('smaller-label', false)
+      this.d3NameLabel.classed('flipped-label', false)
+
+      if (this.drawType === 'labelOnLine') {
+        const textAfterTrim = trimText(this.d3NameLabel, this.getLength() - this.strokePadding)
+        this.d3NameLabel.classed('hidden', !textAfterTrim)
+
+        const toMidwayPoint = new LineCoordinates({
+          x1: this.originPoint.x,
+          y1: this.originPoint.y,
+          length: this.getLength() / 2,
+          degrees: this.degrees
+        })
+        const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${labelRotation(this.degrees)})`
+        this.d3NameLabel.attr('transform', transformString)
+
+        this.d3NameLabel.classed('on-line-label', true)
+      } else {
+        this.d3NameLabel.classed('on-line-label', false)
+      }
+
+      if (this.drawType === 'labelInCircle') {
+        const textAfterTrim = trimText(this.d3NameLabel, this.getRadius() * 1.5 - this.strokePadding)
+        this.d3NameLabel.classed('hidden', !textAfterTrim)
+        this.d3NameLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
+
+        this.d3NameLabel.classed('in-circle-label', true)
+      } else {
+        this.d3NameLabel.classed('in-circle-label', false)
+      }
+    }
+
+  }
+
+  drawOuterPath () {
     let outerPath = ''
 
     const toLineTopLeft = new LineCoordinates({
@@ -183,9 +279,6 @@ class SvgNode {
       degrees: this.degrees - 180
     })
     outerPath += `Q ${toQCurveControlPoint.x2} ${toQCurveControlPoint.y2} ${toLineTopRight.x2} ${toLineTopRight.y2}`
-//    outerPath += `L ${toLineTopRight.x2} ${toLineTopRight.y2} `
-
-//    const lengthStat = this.drawType === 'squash' ? this.layoutNode.getBetweenTime() : this.layoutNode.getTotalTime()
     const lineLength = this.getLength()
 
     const toLineBottomRight = new LineCoordinates({
@@ -195,7 +288,6 @@ class SvgNode {
       degrees: this.degrees
     })
 
-    console.log('toLineBottomRight', toLineBottomRight, Object.assign({}, toLineBottomRight))
     outerPath += `L ${toLineBottomRight.x2} ${toLineBottomRight.y2} `
 
     if (this.drawType === 'squash') {
@@ -207,7 +299,6 @@ class SvgNode {
         length: lineLength + this.strokePadding,
         degrees: this.degrees
       })
-      console.log('toPointedTip', toPointedTip, Object.assign({}, toPointedTip))
 
       outerPath += `L ${toPointedTip.x2} ${toPointedTip.y2} `
 
@@ -215,7 +306,7 @@ class SvgNode {
     } else {
       // End with long-route circular arc around bubble, to bottom left x y
 
-      const arcRadius = this.getRadius() + this.strokePadding
+      const arcRadius = this.getRadius() + this.lineWidth
       // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
       outerPath += `A ${arcRadius} ${arcRadius} 0 1 0`
     }
@@ -229,11 +320,16 @@ class SvgNode {
 
     outerPath += ` ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
 
-    return outerPath
+    this.d3OuterPath.attr('d', outerPath)
+    this.d3OuterPath.attr('name', this.layoutNode.id)
   }
 
   getRadius (layoutNode = this.layoutNode) {
-    return this.ui.layout.scale.getCircleRadius(layoutNode.getWithinTime())
+    if (layoutNode === this.layoutNode && this.drawType === 'squash') {
+      return 0
+    } else {
+      return this.ui.layout.scale.getCircleRadius(layoutNode.getWithinTime())
+    }
   }
 
   getLength (layoutNode = this.layoutNode) {
@@ -248,9 +344,15 @@ class SvgNode {
     const circleRadius = this.getRadius()
     const lineLength = this.getLength()
 
-    if (circleRadius + lineLength < 2) {
-      return 'squash' // too small to discriminate node elements; show a very short line
-    }
+    // Too small to discriminate node elements; show a very short line
+    if (circleRadius + lineLength < 2) return 'squash'
+
+    // Prefer putting labels on lines over in circles if both are viable
+    if (lineLength > 30) return 'labelOnLine'
+
+    if (circleRadius > 30) return 'labelInCircle'
+
+    return 'noNameLabel'
   }
 }
 
@@ -267,8 +369,8 @@ class SvgNodeSection {
 
     this.d3NodeGroups = this.parentContent.d3NodeGroups
   }
-  setData (dataArray) {
-    this.dataArray = dataArray
+  setData (layoutNode) {
+    this.layoutNode = layoutNode
   }
   initializeFromData () {
     const SvgNodeElement = svgNodeElementTypes[this.settings.shapeClass]
@@ -290,12 +392,72 @@ class SvgNodeSection {
           this.byCategory.set(layoutNode.id, shapeByType)
         }
       })
-
   }
   draw () {
-
-
   }
+}
+
+function getLengthToBottom (x1, y1, degrees, settings) {
+  // Outer padding is partly for labels to use, allow encrouchment most of the way
+  const distanceFromEdge = settings.svgDistanceFromEdge / 4
+
+  const radians = LineCoordinates.degreesToRadians(90 - degrees)
+  const adjacentLength = settings.svgHeight - distanceFromEdge - y1
+  const hypotenuseLength = adjacentLength / Math.cos(radians)
+  return hypotenuseLength
+}
+
+function getLengthToSide (x1, y1, degrees, settings) {
+  // Outer padding is partly for labels to use, allow a little encrouchment
+  const distanceFromEdge = settings.svgDistanceFromEdge / 2
+
+  // Ensure degrees range is between -180 and 180
+  degrees = LineCoordinates.enforceDegreesRange(degrees)
+  let radians
+  let adjacentLength
+
+  if (degrees > 90 || degrees < -90) {
+    // Test against left side edge
+    radians = LineCoordinates.degreesToRadians(180 - degrees)
+    adjacentLength = x1 - distanceFromEdge
+  } else {
+    // Test against right side edge
+    radians = LineCoordinates.degreesToRadians(degrees)
+    adjacentLength = settings.svgWidth - distanceFromEdge - x1
+  }
+  const hypotenuseLength = adjacentLength / Math.cos(radians)
+  return hypotenuseLength
+}
+
+function labelRotation (degrees) {
+  // Prevent text from being displayed upside down
+  if (degrees > 90) return degrees -= 180
+  if (degrees < -90) return degrees += 180
+  return degrees
+}
+
+function trimText (d3Text, maxLength, reps = 0) {
+  d3Text.classed('hidden', false)
+
+  const width = d3Text.node().getBBox().width
+  const textString = d3Text.text()
+
+  if (width > maxLength) {
+    const decimal = maxLength / width
+    const trimToLength = Math.floor(textString.length * decimal) - 2
+
+    if (trimToLength > 1 && reps < 5) {
+      reps++ // Limit recursion in case unusual characters e.g. diacritics cause infinite loop
+      const ellipsisChar = '…'
+      const newText = textString.slice(0, trimToLength) + ellipsisChar
+      d3Text.text(newText)
+      // Check new text fits - won't if early chars are wider than later chars, e.g. 'Mmmmmm!!!!!!'
+      return (trimText(d3Text, maxLength, reps))
+    }
+    d3Text.text('')
+    return ''
+  }
+  return textString
 }
 
 module.exports = SvgNodeDiagram

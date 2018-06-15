@@ -13,7 +13,7 @@ class BubbleprofUI extends EventEmitter {
 
     const defaultSettings = {
       numberFormatter: d3.format(',.0f'),
-      strokePadding: 4,
+      strokePadding: 9,
       nodeLinkId: 'node-link',
       classNames: '',
       viewMode: 'fit'
@@ -96,8 +96,6 @@ class BubbleprofUI extends EventEmitter {
       const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
       const sublayoutSvg = sublayoutHtml.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
-      sublayoutSvg.addBubbles({nodeType: 'AggregateNode'})
-      sublayoutSvg.addLinks({nodeType: 'AggregateNode'})
       sublayoutHtml.addContent('HoverBox', {svg: sublayoutSvg})
 
       uiWithinSublayout.initializeElements()

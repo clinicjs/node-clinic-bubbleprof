@@ -11,9 +11,9 @@ class Layout {
   constructor ({ dataNodes, connection, parentLayout }, settings) {
     const defaultSettings = {
       collapseNodes: false,
-      svgDistanceFromEdge: 30,
+      svgDistanceFromEdge: 40,
       lineWidth: 1.5,
-      labelMinimumSpace: 12,
+      labelMinimumSpace: 9,
       svgWidth: 750,
       svgHeight: 750,
       allowStretch: true

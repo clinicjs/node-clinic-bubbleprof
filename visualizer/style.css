@@ -7,6 +7,9 @@ html {
   --banner-bg-color: rgb(41, 45, 57);
   --banner-logo-color: rgba(255, 255, 255, 0.87);
 
+/* Matches --banner-bg-color when overlaid over --main-bg-color */
+  --lighten-bg-color: rgba(212, 224, 255, 0.08);
+
   --nearform-red: rgb(237,24,40);
   --nearform-grey: rgb(121,122,124);
 
@@ -452,6 +455,37 @@ body[data-view-mode='fit'] #node-link {
   top: var(--header-height);
   max-height: calc(100vh - var(--banner-height) - var(--header-height));
   min-height: calc(100vh - var(--banner-height) - var(--header-height));
+}
+
+/* New style node-link diagram and container */
+
+svg.bubbleprof .outer-path {
+  fill: var(--lighten-bg-color);
+  stroke: none;
+}
+
+svg.bubbleprof .node-group .text-label {
+  font-size: 10pt;
+  dominant-baseline: middle;
+  font-weight: normal;
+}
+
+svg.bubbleprof .node-group .on-line-label {
+  text-anchor: middle
+}
+
+svg.bubbleprof .node-group .endpoint-label {
+  text-anchor: start;
+  opacity: 0.8;
+}
+
+svg.bubbleprof .node-group .flipped-label {
+  text-anchor: end;
+}
+
+svg.bubbleprof .node-group .smaller-label {
+  font-size: 9pt;
+  opacity: 0.6;
 }
 
 /* Node-link diagram and container */
