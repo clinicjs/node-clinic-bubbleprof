@@ -48,7 +48,7 @@ class Frame {
     if (!fileName) return ['empty', 'no file']
 
     // If first character is / or it's a letter followed by :\
-    if (fileName.charAt(0) === '/' || fileName.match(/^[a-zA-Z]:\\/)) {
+    if (fileName.charAt(0) === '.' || fileName.charAt(0) === '/' || fileName.match(/^[a-zA-Z]:\\/)) {
       // ...then this is a Unix or Windows style local file path
 
       if (fileName.match(/(?:\\|\/)node_modules(?:\\|\/)/)) {

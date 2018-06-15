@@ -25,6 +25,7 @@ const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-
 const NameBarrierNodes = require('./barrier/name-barrier-nodes.js')
 
 const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
+const AnonymiseClusterFrames = require('./cluster/anonymise-cluster-frames.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
@@ -103,6 +104,8 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   //   the AggregateNode pattern is guaranteed to be in the same cluster.
   // NOTE: BFS ordering is maintained in the ClusterNodes too.
     .pipe(new CombineAsClusterNodes())
+  // Anonymise the stacks
+    .pipe(new AnonymiseClusterFrames(systemInfo))
 
   return result
 }
