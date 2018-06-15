@@ -1,6 +1,7 @@
 'use strict'
 
 const util = require('util')
+const path = require('path')
 
 class Frame {
   constructor (frame) {
@@ -71,6 +72,13 @@ class Frame {
     return this.getFileNameWithoutModuleDirectory(systemInfo)
       .split(systemInfo.pathSeperator)
       .includes('node_modules')
+  }
+
+  anonymise (systemInfo) {
+    if (this.isNodecore(systemInfo) || !this.fileName || this.fileName[0] === '.') return
+    const rel = path.relative(systemInfo.mainDirectory, this.fileName)
+    if (!rel || rel[0] === '.') this.fileName = rel
+    else this.fileName = '.' + systemInfo.pathSeperator + rel
   }
 
   getModuleName (systemInfo) {

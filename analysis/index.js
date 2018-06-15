@@ -2,7 +2,6 @@
 
 const stream = require('stream')
 const endpoint = require('endpoint')
-const path = require('path')
 
 const SystemInfo = require('./system-info.js')
 
@@ -26,6 +25,7 @@ const MakeSynchronousBarrierNodes = require('./barrier/make-synchronous-barrier-
 const NameBarrierNodes = require('./barrier/name-barrier-nodes.js')
 
 const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
+const AnonymiseClusterFrames = require('./cluster/anonymise-cluster-frames.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Overview:
@@ -105,35 +105,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // NOTE: BFS ordering is maintained in the ClusterNodes too.
     .pipe(new CombineAsClusterNodes())
   // Anonymise the stacks
-    .pipe(new Anon(systemInfo))
+    .pipe(new AnonymiseClusterFrames(systemInfo))
 
   return result
-}
-
-class Anon extends stream.Transform {
-  constructor (sysInfo) {
-    super({
-      readableObjectMode: true,
-      writableObjectMode: true
-    })
-    this.systemInfo = sysInfo
-  }
-
-  _transform (data, enc, cb) {
-    const sysInfo = this.systemInfo
-    for (const node of data.nodes) {
-      if (!node.frames) continue
-      node.frames.forEach(function (frame) {
-        if (frame.isNodecore(sysInfo)) return
-        let rel = path.relative(sysInfo.mainDirectory, frame.fileName)
-        if (rel && rel[0] !== '.') {
-          rel = '.' + sysInfo.pathSeperator + rel
-        }
-        frame.fileName = rel
-      })
-    }
-    cb(null, data)
-  }
 }
 
 class Analysis extends stream.PassThrough {
