@@ -2,6 +2,7 @@
 
 const stream = require('stream')
 const endpoint = require('endpoint')
+const path = require('path')
 
 const SystemInfo = require('./system-info.js')
 
@@ -103,8 +104,36 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   //   the AggregateNode pattern is guaranteed to be in the same cluster.
   // NOTE: BFS ordering is maintained in the ClusterNodes too.
     .pipe(new CombineAsClusterNodes())
+  // Anonymise the stacks
+    .pipe(new Anon(systemInfo))
 
   return result
+}
+
+class Anon extends stream.Transform {
+  constructor (sysInfo) {
+    super({
+      readableObjectMode: true,
+      writableObjectMode: true
+    })
+    this.systemInfo = sysInfo
+  }
+
+  _transform (data, enc, cb) {
+    const sysInfo = this.systemInfo
+    for (const node of data.nodes) {
+      if (!node.frames) continue
+      node.frames.forEach(function (frame) {
+        if (frame.isNodecore(sysInfo)) return
+        let rel = path.relative(sysInfo.mainDirectory, frame.fileName)
+        if (rel === path.basename(rel)) {
+          rel = '.' + sysInfo.pathSeperator + rel
+        }
+        frame.fileName = rel
+      })
+    }
+    cb(null, data)
+  }
 }
 
 class Analysis extends stream.PassThrough {
