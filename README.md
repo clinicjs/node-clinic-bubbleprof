@@ -25,6 +25,8 @@ bubbleprof.collect(['node', './path-to-script.js'], function (err, filepath) {
 })
 ```
 
+To get started with bubbleprof you might want to take a look at the [examples repo](https://github.com/nearform/node-clinic-bubbleprof-examples).
+
 ## Documentation
 
 ```js
