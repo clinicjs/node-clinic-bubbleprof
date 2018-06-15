@@ -126,7 +126,7 @@ class Anon extends stream.Transform {
       node.frames.forEach(function (frame) {
         if (frame.isNodecore(sysInfo)) return
         let rel = path.relative(sysInfo.mainDirectory, frame.fileName)
-        if (rel === path.basename(rel)) {
+        if (rel && rel[0] !== '.') {
           rel = '.' + sysInfo.pathSeperator + rel
         }
         frame.fileName = rel
