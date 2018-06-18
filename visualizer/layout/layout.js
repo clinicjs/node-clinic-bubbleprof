@@ -5,6 +5,7 @@ const Connection = require('./connections.js')
 const Scale = require('./scale.js')
 const Positioning = require('./positioning.js')
 const { ShortcutNode } = require('../data/data-node.js')
+const { LayoutNode } = require('./layout-node.js')
 const CollapsedLayout = require('./collapsed-layout.js')
 
 class Layout {
@@ -202,7 +203,7 @@ class Layout {
   }
 
   collapseNodes () {
-    const collapsedLayout = new CollapsedLayout(this.layoutNodes, this.scale)
+    const collapsedLayout = new CollapsedLayout(this)
     this.layoutNodes = collapsedLayout.layoutNodes
   }
 }
@@ -214,30 +215,6 @@ function pickDataSubset (layoutNode) {
   }
   // Use aggregates
   return [...layoutNode.node.nodes.values()]
-}
-
-class LayoutNode {
-  constructor (node, parent) {
-    this.id = node.id
-    this.node = node
-    this.stem = null
-    this.position = null
-    this.inboundConnection = null
-    this.parent = parent
-    this.children = []
-  }
-  getBetweenTime () {
-    return this.node.getBetweenTime()
-  }
-  getWithinTime () {
-    return this.node.getWithinTime()
-  }
-  getTotalTime () {
-    return this.getBetweenTime() + this.getWithinTime()
-  }
-  validateStat (...args) {
-    return this.node.validateStat(...args)
-  }
 }
 
 module.exports = Layout
