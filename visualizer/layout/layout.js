@@ -13,7 +13,7 @@ class Layout {
       collapseNodes: false,
       svgDistanceFromEdge: 40,
       lineWidth: 1.5,
-      labelMinimumSpace: 9,
+      labelMinimumSpace: 10,
       svgWidth: 750,
       svgHeight: 750,
       allowStretch: true

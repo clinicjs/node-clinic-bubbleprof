@@ -163,13 +163,9 @@ class SvgNode {
       .classed('text-label', true)
       .classed('name-label', true)
 
-    this.d3AsyncTimeLabel = this.d3NodeGroup.append('text')
+    this.d3TimeLabel = this.d3NodeGroup.append('text')
+      .classed('text-label', true)
       .classed('time-label', true)
-      .classed('async-label', true)
-
-    this.d3SyncTimeLabel = this.d3NodeGroup.append('text')
-      .classed('time-label', true)
-      .classed('sync-label', true)
 
     this.setCoordinates()
     return this
@@ -178,19 +174,16 @@ class SvgNode {
   draw () {
     this.drawOuterPath()
     this.drawNameLabel()
+    this.drawTimeLabel()
   }
 
   drawNameLabel () {
     this.d3NameLabel.text(this.layoutNode.node.name)
 
-    if (this.drawType === 'noNameLabel') {
-      this.d3NameLabel.classed('hidden', true)
-      return
-    }
-
     if (!this.layoutNode.children.length) {
       // Is a leaf / endpoint - position at end of line, continuing line
       this.d3NameLabel.classed('endpoint-label', true)
+      this.d3NameLabel.classed('upper-label', false)
       this.d3NameLabel.classed('smaller-label', this.drawType === 'squash')
 
       const toEndpoint = new LineCoordinates({
@@ -219,7 +212,14 @@ class SvgNode {
 
       this.d3NameLabel.classed('flipped-label', labelDegrees !== this.degrees)
     } else {
+
+      if (this.drawType === 'noNameLabel') {
+        this.d3NameLabel.classed('hidden', true)
+        return
+      }
+
       // Is not a leaf / endpoint - position on line or circle
+      this.d3NameLabel.classed('upper-label', true)
       this.d3NameLabel.classed('endpoint-label', false)
       this.d3NameLabel.classed('smaller-label', false)
       this.d3NameLabel.classed('flipped-label', false)
@@ -253,6 +253,41 @@ class SvgNode {
       }
     }
 
+  }
+
+  drawTimeLabel () {
+    this.d3TimeLabel.text(formatTimeLabel(this.layoutNode.node.stats.overall))
+
+    if (!this.layoutNode.children.length || this.drawType === 'noNameLabel' || this.drawType === 'labelOnLine') {
+      // Position on line
+      const textAfterTrim = trimText(this.d3TimeLabel, this.getLength() - this.strokePadding)
+      this.d3TimeLabel.classed('hidden', !textAfterTrim)
+
+      const toMidwayPoint = new LineCoordinates({
+        x1: this.originPoint.x,
+        y1: this.originPoint.y,
+        length: this.getLength() / 2,
+        degrees: this.degrees
+      })
+      const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${labelRotation(this.degrees)})`
+      this.d3TimeLabel.attr('transform', transformString)
+
+      this.d3TimeLabel.classed('on-line-label', true)
+      this.d3TimeLabel.classed('in-circle-label', false)
+
+      // If this isn't an endpoint and there's a visible name label, drop below it; else vertically centre
+      this.d3TimeLabel.classed('lower-label', this.layoutNode.children.length && !this.d3NameLabel.classed('hidden'))
+      return
+    } else {
+      // Position in circle
+      const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding)
+      this.d3TimeLabel.classed('hidden', !textAfterTrim)
+      this.d3TimeLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
+
+      this.d3TimeLabel.classed('in-circle-label', true)
+      this.d3TimeLabel.classed('on-line-label', false)
+      this.d3TimeLabel.classed('lower-label', true)
+    }
   }
 
   drawOuterPath () {
@@ -347,8 +382,8 @@ class SvgNode {
     // Too small to discriminate node elements; show a very short line
     if (circleRadius + lineLength < 2) return 'squash'
 
-    // Prefer putting labels on lines over in circles if both are viable
-    if (lineLength > 30) return 'labelOnLine'
+    // Prefer putting labels on lines over in circles if both are viable and similar
+    if (lineLength > 30 && lineLength > circleRadius) return 'labelOnLine'
 
     if (circleRadius > 30) return 'labelInCircle'
 
@@ -458,6 +493,17 @@ function trimText (d3Text, maxLength, reps = 0) {
     return ''
   }
   return textString
+}
+
+function formatTimeLabel (num) {
+  // format as 2 significant figures, with ms or s units
+  const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
+  if (num > 1000) {
+    return `${parseFloat((num / 1000).toPrecision(2))}${hairSpace}s`
+  } else {
+    return `${parseFloat(num.toPrecision(2))}${hairSpace}ms`
+  }
+
 }
 
 module.exports = SvgNodeDiagram

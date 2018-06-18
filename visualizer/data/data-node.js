@@ -19,6 +19,9 @@ class DataNode {
       // stats are not set, so default 0 values are accessed. Such cases are rare but valid, e.g. root
       // TODO: give examples of some of the async_hook types that often have no callbackEvents.
 
+      overall: 0,
+      setOverall (num) { node.stats.overall = node.validateStat(num, 'stats.overall') },
+
       sync: 0,
       setSync (num) { node.stats.sync = node.validateStat(num, 'stats.sync') },
 

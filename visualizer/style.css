@@ -467,6 +467,7 @@ svg.bubbleprof .outer-path {
 svg.bubbleprof .node-group .text-label {
   font-size: 10pt;
   dominant-baseline: middle;
+  text-anchor: middle;
   font-weight: normal;
 }
 
@@ -488,7 +489,20 @@ svg.bubbleprof .node-group .smaller-label {
   opacity: 0.6;
 }
 
-/* Node-link diagram and container */
+svg.bubbleprof .node-group .time-label {
+  font-size: 8pt;
+}
+
+svg.bubbleprof .node-group .lower-label {
+  dominant-baseline: text-before-edge;
+}
+
+svg.bubbleprof .node-group .upper-label {
+  dominant-baseline: auto;
+}
+
+
+/* Node-link diagram and container
 
 svg.bubbleprof text.text-label {
   text-anchor: middle;
@@ -576,6 +590,7 @@ svg.bubbleprof .link-outer {
   fill: var(--pure-black);
   cursor: pointer;
 }
+*/
 
 #sublayout-svg {
   position: absolute;
