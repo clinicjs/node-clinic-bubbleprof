@@ -16,6 +16,7 @@ class Layout {
       labelMinimumSpace: 10,
       svgWidth: 750,
       svgHeight: 750,
+      shortcutLength: 60,
       allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)

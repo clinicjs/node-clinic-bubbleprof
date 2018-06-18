@@ -459,6 +459,10 @@ body[data-view-mode='fit'] #node-link {
 
 /* New style node-link diagram and container */
 
+svg.bubbleprof .node-group {
+  cursor: pointer;
+}
+
 svg.bubbleprof .outer-path {
   fill: var(--lighten-bg-color);
   stroke: none;
@@ -501,6 +505,14 @@ svg.bubbleprof .node-group .upper-label {
   dominant-baseline: auto;
 }
 
+svg.bubbleprof .node-group.shortcut .outer-path {
+  fill: var(--translucent-black);
+}
+
+svg.bubbleprof .node-group.shortcut .name-label {
+  font-size: 9pt;
+  fill: var(--pure-white);
+}
 
 /* Node-link diagram and container
 

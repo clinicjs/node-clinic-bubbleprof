@@ -23,8 +23,14 @@ class Stem {
       ownDiameter: radiusFromCircumference(layoutNode.getWithinTime()) * 2
     }
 
+    this.shortcutsInStem = layoutNode.node.constructor.name === 'ShortcutNode' ? 1 : 0
+
     for (const ancestorId of this.ancestors.ids) {
-      const ancestorStem = layout.layoutNodes.get(ancestorId).stem
+      const ancestor = layout.layoutNodes.get(ancestorId)
+      const ancestorStem = ancestor.stem
+
+      if (ancestor.node.constructor.name === 'ShortcutNode') this.shortcutsInStem++
+
       this.ancestors.totalBetween += ancestorStem.raw.ownBetween
       this.ancestors.totalDiameter += ancestorStem.raw.ownDiameter
       if (!layoutNode.children.length) {
@@ -35,7 +41,13 @@ class Stem {
   }
   update () {
     if (!this.lengths) {
-      const absolute = ((this.layout.settings.labelMinimumSpace * 2) + this.layout.settings.lineWidth) * this.ancestors.ids.length
+      const {
+        labelMinimumSpace,
+        lineWidth,
+        shortcutLength
+      } = this.layout.settings
+
+      const absolute = ((labelMinimumSpace * 2) + lineWidth) * this.ancestors.ids.length + shortcutLength * this.shortcutsInStem
       const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.raw.ownBetween + this.raw.ownDiameter
       this.lengths = {
         absolute: validateNumber(absolute, this.getValidationMessage()),

@@ -4,9 +4,7 @@ const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const svgNodeElementTypes = require('./svg-node-element.js')
 
-
 // Layout assigns each node: diameter, scaled + length, scaled + label * 2 + lineWidth
-
 
 class SvgNodeDiagram {
   constructor (svgContainer) {
@@ -55,6 +53,7 @@ class SvgNodeDiagram {
   initializeFromData () {
     this.d3NodeGroups = this.d3Enter.append('g')
       .classed('node-group', true)
+      .attr('name', layoutNode => layoutNode.id)
       .each((layoutNode, i, nodes) => {
         const d3NodeGroup = d3.select(nodes[i])
 
@@ -172,9 +171,114 @@ class SvgNode {
   }
 
   draw () {
-    this.drawOuterPath()
-    this.drawNameLabel()
-    this.drawTimeLabel()
+    if (this.layoutNode.node.constructor.name === 'ShortcutNode') {
+      this.drawShortcut()
+    } else {
+      this.drawOuterPath()
+      this.drawNameLabel()
+      this.drawTimeLabel()
+    }
+  }
+
+  drawShortcut () {
+    this.d3NodeGroup.classed('shortcut', true)
+
+    const backwards = !this.layoutNode.parent
+    const degrees = backwards ? LineCoordinates.enforceDegreesRange(this.degrees - 180) : this.degrees
+    const length = this.ui.settings.shortcutLength
+
+    let outerPath = ''
+
+    const arrowLine = new LineCoordinates({
+      x1: this.originPoint.x,
+      y1: this.originPoint.y,
+      degrees: this.degrees,
+      length
+    })
+
+    const start = {
+      x: backwards ? arrowLine.x2 : arrowLine.x1,
+      y: backwards ? arrowLine.y2 : arrowLine.y1
+    }
+
+    const end = {
+      x: backwards ? arrowLine.x1 : arrowLine.x2,
+      y: backwards ? arrowLine.y1 : arrowLine.y2
+    }
+
+    const toArrowLeftBase = new LineCoordinates({
+      x1: start.x,
+      y1: start.y,
+      length: this.strokePadding,
+      degrees: degrees - 90
+    })
+    outerPath += `M ${toArrowLeftBase.x2} ${toArrowLeftBase.y2} `
+
+    const toArrowRightBase = new LineCoordinates({
+      x1: toArrowLeftBase.x2,
+      y1: toArrowLeftBase.y2,
+      length: this.strokePadding * 2,
+      degrees: degrees + 90
+    })
+    outerPath += `L ${toArrowRightBase.x2} ${toArrowRightBase.y2} `
+
+    const toArrowheadRightBase = new LineCoordinates({
+      x1: toArrowRightBase.x2,
+      y1: toArrowRightBase.y2,
+      length: length - this.strokePadding * 2,
+      degrees
+    })
+    outerPath += `L ${toArrowheadRightBase.x2} ${toArrowheadRightBase.y2} `
+
+    const toArrowheadRightCorner = new LineCoordinates({
+      x1: toArrowheadRightBase.x2,
+      y1: toArrowheadRightBase.y2,
+      length: this.strokePadding,
+      degrees: degrees + 90
+    })
+    outerPath += `L ${toArrowheadRightCorner.x2} ${toArrowheadRightCorner.y2} `
+
+    const toArrowheadTip = new LineCoordinates({
+      x1: toArrowheadRightBase.x2,
+      y1: toArrowheadRightBase.y2,
+      x2: end.x,
+      y2: end.y,
+    })
+    outerPath += `L ${toArrowheadTip.x2} ${toArrowheadTip.y2} `
+
+    const toArrowheadLeftCorner = new LineCoordinates({
+      x1: toArrowheadRightCorner.x2,
+      y1: toArrowheadRightCorner.y2,
+      length: this.strokePadding * 4,
+      degrees: degrees - 90
+    })
+    outerPath += `L ${toArrowheadLeftCorner.x2} ${toArrowheadLeftCorner.y2} `
+
+    const toArrowheadLeftBase = new LineCoordinates({
+      x1: toArrowheadLeftCorner.x2,
+      y1: toArrowheadLeftCorner.y2,
+      length: this.strokePadding,
+      degrees: degrees + 90
+    })
+    outerPath += `L ${toArrowheadLeftBase.x2} ${toArrowheadLeftBase.y2} Z`
+
+    this.d3OuterPath.attr('d', outerPath)
+
+    const toArrowMidpoint = new LineCoordinates({
+      x1: start.x,
+      y1: start.y,
+      degrees,
+      length: length / 2
+    })
+
+    this.d3TimeLabel.classed('hidden', true)
+    this.d3NameLabel.text(this.layoutNode.node.name)
+      .classed('on-line-label', true)
+    trimText(this.d3NameLabel, length - this.strokePadding)
+
+    const labelDegrees = labelRotation(this.degrees)
+    const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${labelDegrees})`
+    this.d3NameLabel.attr('transform', transformString)
   }
 
   drawNameLabel () {
@@ -356,7 +460,6 @@ class SvgNode {
     outerPath += ` ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
 
     this.d3OuterPath.attr('d', outerPath)
-    this.d3OuterPath.attr('name', this.layoutNode.id)
   }
 
   getRadius (layoutNode = this.layoutNode) {
@@ -412,16 +515,16 @@ class SvgNodeSection {
 
     this.d3Groups = this.d3Enter.append('g')
       .each((layoutNode, i, nodes) => {
-        const d3Group = d3.select(nodes[i])
+        const d3NodeGroup = d3.select(nodes[i])
 
         for (const layoutNode of this.dataArray) {
           // For ctrl+f: calls new SvgLine(), new SvgSpiral() or new SvgCircle()
-          const shapeByParty = new SvgNodeElement(this, d3Group, 'party')
+          const shapeByParty = new SvgNodeElement(this, d3NodeGroup, 'party')
             .setData(layoutNode)
             .initializeFromData()
           this.byParty.set(layoutNode.id, shapeByParty)
 
-          const shapeByType = new SvgNodeElement(this, d3Group, 'typeCategory')
+          const shapeByType = new SvgNodeElement(this, d3NodeGroup, 'typeCategory')
             .setData(layoutNode)
             .initializeFromData()
           this.byCategory.set(layoutNode.id, shapeByType)
