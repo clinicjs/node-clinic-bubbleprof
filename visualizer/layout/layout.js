@@ -13,7 +13,7 @@ class Layout {
     const defaultSettings = {
       collapseNodes: false,
       svgDistanceFromEdge: 40,
-      lineWidth: 1.5,
+      lineWidth: 2,
       labelMinimumSpace: 10,
       svgWidth: 750,
       svgHeight: 750,

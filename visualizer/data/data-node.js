@@ -118,6 +118,8 @@ class ClusterNode extends DataNode {
       aggregateNode.generateSourceNodes(nodes[i].sources)
       this.nodes.set(aggregateNode.aggregateId, aggregateNode)
     }
+    this.setDecimal(this.getBetweenTime(), 'party', 'between', this.mark.get('party'))
+    this.setDecimal(this.getWithinTime(), 'party', 'within', this.mark.get('party'))
   }
   setDecimal (num, classification, position, label) {
     const decimalsMap = this.decimals[classification][position]
@@ -130,7 +132,8 @@ class ClusterNode extends DataNode {
 
     const statType = `decimals.${classification}.${position}->${label}`
     const num = this.decimals[classification][position].get(label)
-    const decimal = (num === 0 && rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
+
+    const decimal = (num === 0 || rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
     return decimal
   }
   getDecimalLabels (classification, position) {
@@ -138,8 +141,8 @@ class ClusterNode extends DataNode {
   }
   getDecimalsArray (classification, position) {
     const decimalsArray = []
-    for (const label of dataNode.decimals[classification][position].keys()) {
-      const decimal = dataNode.getDecimal('typeCategory', 'within', label)
+    for (const label of this.decimals[classification][position].keys()) {
+      const decimal = this.getDecimal(classification, position, label)
       decimalsArray.push([label, decimal])
     }
     return decimalsArray
@@ -228,9 +231,7 @@ class AggregateNode extends DataNode {
     }
   }
   getDecimalsArray (classification, position) {
-    return [
-      [this[classification], (position === 'between' ? this.getBetweenTime() : this.getWithinTime())]
-    ]
+    return [[this[classification], 1]]
   }
   get id () {
     return this.aggregateId

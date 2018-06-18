@@ -514,6 +514,11 @@ svg.bubbleprof .node-group.shortcut .name-label {
   fill: var(--pure-white);
 }
 
+svg.bubbleprof .node-group .inner-circle {
+  fill: var(--main-bg-color);
+  stroke: none;
+}
+
 /* Node-link diagram and container
 
 svg.bubbleprof text.text-label {
@@ -955,32 +960,32 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root .by
 /* Global classes linking styles to data properties */
 
 .party-user .party-icon,
-.party-user .by-variable {
+.line-segment.party-user {
   border-color: var(--party-colour-1);
   stroke: var(--party-colour-1);
 }
 .party-external .party-icon,
-.party-external .by-variable {
+.line-segment.party-external {
   border-color: var(--party-colour-2);
   stroke: var(--party-colour-2);
 }
 
 .party-root .party-icon,
-.party-root .by-variable,
+.line-segment.party-root,
 .party-nodecore .party-icon,
-.party-nodecore .by-variable {
+.line-segment.party-nodecore {
   border-color: var(--party-colour-3);
   stroke: var(--party-colour-3);
 }
 
-.party-user .text-label {
+.party-user.text-label {
   fill: var(--party-colour-1);
 }
-.party-external .text-label {
+.party-external.text-label {
   fill: var(--party-colour-2);
 }
-.party-root .text-label,
-.party-nodecore .text-label {
+.party-root.text-label,
+.party-nodecore.text-label {
   fill: var(--party-colour-3);
 }
 

@@ -2,7 +2,7 @@
 
 const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
-const svgNodeElementTypes = require('./svg-node-element.js')
+const SvgNodeSection = require('./svg-node-section.js')
 
 // Layout assigns each node: diameter, scaled + length, scaled + label * 2 + lineWidth
 
@@ -58,7 +58,7 @@ class SvgNodeDiagram {
         const d3NodeGroup = d3.select(nodes[i])
 
         const svgNode = this.svgNodes.get(layoutNode.id)
-          .initializeElements(d3NodeGroup)
+          .initializeFromData(d3NodeGroup)
       })
       .on('mouseover', layoutNode => this.ui.highlightNode(layoutNode))
       .on('mouseout', () => this.ui.highlightNode(null))
@@ -83,15 +83,18 @@ class SvgNode {
     this.originPoint = null
 
     this.asyncBetweenLines = new SvgNodeSection(this, {
-      dataPosition: 'asyncBetween',
+      dataPosition: 'between',
+//      dataPosition: 'asyncBetween',
       shapeClass: 'SvgLine'
     })
-    this.asyncWithinLines = new SvgNodeSection(this, {
-      dataPosition: 'asyncWithin',
-      shapeClass: 'SvgSpiral'
-    })
+//  TODO: visually distinguish sync and async-within using spirals
+//    this.asyncWithinLines = new SvgNodeSection(this, {
+//      dataPosition: 'asyncWithin',
+//      shapeClass: 'SvgSpiral'
+//    })
     this.syncBubbles = new SvgNodeSection(this, {
-      dataPosition: 'asyncWithin',
+      dataPosition: 'within',
+//      dataPosition: 'asyncWithin',
       shapeClass: 'SvgBubble'
     })
   }
@@ -102,7 +105,7 @@ class SvgNode {
 
     this.asyncBetweenLines.setData(layoutNode)
     if (this.drawType !== 'squash') {
-      this.asyncWithinLines.setData(layoutNode)
+//      this.asyncWithinLines.setData(layoutNode)
       this.syncBubbles.setData(layoutNode)
     }
 
@@ -135,10 +138,14 @@ class SvgNode {
 
     this.degrees = connectCentresCoords.degrees
 
+    // Prevent on-line or following-line label text being upside-down
+    this.labelDegrees = labelRotation(this.degrees)
+    this.flipLabel = !(this.degrees === this.labelDegrees)
+
     // TODO: check that this doesn't look wrong in cases of drawType = squash but has withinTime
     const sourceRadius = inboundConnection ? this.getRadius(inboundConnection.sourceLayoutNode) + this.strokePadding : 0
 
-    const offsetLength = sourceRadius + this.lineWidth / 2 + this.strokePadding
+    const offsetLength = sourceRadius - this.lineWidth / 2 + this.strokePadding
     const offsetBeforeLine = new LineCoordinates({
         radians: connectCentresCoords.radians,
         length: offsetLength,
@@ -152,17 +159,25 @@ class SvgNode {
     }
   }
 
-  initializeElements (d3NodeGroup) {
+  initializeFromData (d3NodeGroup) {
     this.d3NodeGroup = d3NodeGroup
+    const partyClass = `party-${this.layoutNode.node.mark.get('party')}`
 
     this.d3OuterPath = this.d3NodeGroup.append('path')
       .classed('outer-path', true)
 
+    this.asyncBetweenLines.initializeFromData()
+    if (this.drawType !== 'squash') {
+      this.syncBubbles.initializeFromData()
+    }
+
     this.d3NameLabel = this.d3NodeGroup.append('text')
+      .classed(partyClass, true)
       .classed('text-label', true)
       .classed('name-label', true)
 
     this.d3TimeLabel = this.d3NodeGroup.append('text')
+      .classed(partyClass, true)
       .classed('text-label', true)
       .classed('time-label', true)
 
@@ -177,6 +192,11 @@ class SvgNode {
       this.drawOuterPath()
       this.drawNameLabel()
       this.drawTimeLabel()
+
+      this.asyncBetweenLines.draw()
+      if (this.drawType !== 'squash') {
+        this.syncBubbles.draw()
+      }
     }
   }
 
@@ -273,11 +293,11 @@ class SvgNode {
 
     this.d3TimeLabel.classed('hidden', true)
     this.d3NameLabel.text(this.layoutNode.node.name)
+      .classed(`party-${this.layoutNode.node.mark.get('party')}`, true)
       .classed('on-line-label', true)
     trimText(this.d3NameLabel, length - this.strokePadding)
 
-    const labelDegrees = labelRotation(this.degrees)
-    const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${labelDegrees})`
+    const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${this.labelDegrees})`
     this.d3NameLabel.attr('transform', transformString)
   }
 
@@ -310,13 +330,11 @@ class SvgNode {
 
       this.d3NameLabel.classed('hidden', !textAfterTrim)
 
-      const labelDegrees = labelRotation(this.degrees)
-      const transformString = `translate(${x2}, ${y2}) rotate(${labelDegrees})`
+      const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
       if (textAfterTrim) this.d3NameLabel.attr('transform', transformString)
 
-      this.d3NameLabel.classed('flipped-label', labelDegrees !== this.degrees)
+      this.d3NameLabel.classed('flipped-label', this.flipLabel)
     } else {
-
       if (this.drawType === 'noNameLabel') {
         this.d3NameLabel.classed('hidden', true)
         return
@@ -338,7 +356,7 @@ class SvgNode {
           length: this.getLength() / 2,
           degrees: this.degrees
         })
-        const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${labelRotation(this.degrees)})`
+        const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${this.labelDegrees})`
         this.d3NameLabel.attr('transform', transformString)
 
         this.d3NameLabel.classed('on-line-label', true)
@@ -356,7 +374,6 @@ class SvgNode {
         this.d3NameLabel.classed('in-circle-label', false)
       }
     }
-
   }
 
   drawTimeLabel () {
@@ -396,6 +413,7 @@ class SvgNode {
 
   drawOuterPath () {
     let outerPath = ''
+    const lineLength = this.getLength()
 
     const toLineTopLeft = new LineCoordinates({
       x1: this.originPoint.x,
@@ -418,7 +436,6 @@ class SvgNode {
       degrees: this.degrees - 180
     })
     outerPath += `Q ${toQCurveControlPoint.x2} ${toQCurveControlPoint.y2} ${toLineTopRight.x2} ${toLineTopRight.y2}`
-    const lineLength = this.getLength()
 
     const toLineBottomRight = new LineCoordinates({
       x1: toLineTopRight.x2,
@@ -445,7 +462,7 @@ class SvgNode {
     } else {
       // End with long-route circular arc around bubble, to bottom left x y
 
-      const arcRadius = this.getRadius() + this.lineWidth
+      const arcRadius = this.getRadius() + this.lineWidth * 2
       // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
       outerPath += `A ${arcRadius} ${arcRadius} 0 1 0`
     }
@@ -491,47 +508,6 @@ class SvgNode {
     if (circleRadius > 30) return 'labelInCircle'
 
     return 'noNameLabel'
-  }
-}
-
-class SvgNodeSection {
-  constructor (parentContent, settings) {
-    this.parentContent = parentContent
-
-    const {
-      dataPosition,
-      shape
-    } = settings
-    this.dataPosition = dataPosition
-    this.shape = shape
-
-    this.d3NodeGroups = this.parentContent.d3NodeGroups
-  }
-  setData (layoutNode) {
-    this.layoutNode = layoutNode
-  }
-  initializeFromData () {
-    const SvgNodeElement = svgNodeElementTypes[this.settings.shapeClass]
-
-    this.d3Groups = this.d3Enter.append('g')
-      .each((layoutNode, i, nodes) => {
-        const d3NodeGroup = d3.select(nodes[i])
-
-        for (const layoutNode of this.dataArray) {
-          // For ctrl+f: calls new SvgLine(), new SvgSpiral() or new SvgCircle()
-          const shapeByParty = new SvgNodeElement(this, d3NodeGroup, 'party')
-            .setData(layoutNode)
-            .initializeFromData()
-          this.byParty.set(layoutNode.id, shapeByParty)
-
-          const shapeByType = new SvgNodeElement(this, d3NodeGroup, 'typeCategory')
-            .setData(layoutNode)
-            .initializeFromData()
-          this.byCategory.set(layoutNode.id, shapeByType)
-        }
-      })
-  }
-  draw () {
   }
 }
 

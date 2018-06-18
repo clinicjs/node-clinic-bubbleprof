@@ -73,7 +73,8 @@ class CollapsedLayoutNode {
     this.node.aggregateDecimals(otherNode, 'type', 'within')
     this.node.aggregateDecimals(otherNode, 'typeCategory', 'between')
     this.node.aggregateDecimals(otherNode, 'typeCategory', 'within')
-    // TODO: aggregate party, draw appropriate pie
+    this.node.aggregateDecimals(otherNode, 'party', 'between')
+    this.node.aggregateDecimals(otherNode, 'party', 'within')
   }
 }
 
