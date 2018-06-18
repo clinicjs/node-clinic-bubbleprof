@@ -93,7 +93,7 @@ class CollapsedLayout {
       }
 
       const mergedShortcut = new ShortcutNode({
-        id: targetLayoutNode.id,
+        id: `shortcut:${targetLayoutNode.id}`,
         children: [],
         parentId: parentLayoutNode.id
       }, targetLayoutNode.node)
