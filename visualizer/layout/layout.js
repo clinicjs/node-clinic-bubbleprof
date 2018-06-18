@@ -138,10 +138,15 @@ class Layout {
   }
 
   processBetweenData (generateConnections = true) {
+    // If re-doing after scale, remove old pre-scale pre-collapse stems
+    if (generateConnections) this.layoutNodes.forEach(layoutNode => { layoutNode.stem = null })
+
     const layoutNodesIterator = this.layoutNodes.values()
     for (let i = 0; i < this.layoutNodes.size; ++i) {
       const layoutNode = layoutNodesIterator.next().value
-      layoutNode.stem = new Stem(this, layoutNode)
+
+      // Missing ancestor stems are created within descendents' new Stem, so stem might already exist
+      if (!layoutNode.stem) layoutNode.stem = new Stem(this, layoutNode)
 
       if (generateConnections && layoutNode.parent) {
         const connection = new Connection(layoutNode.parent, layoutNode, this.scale)
