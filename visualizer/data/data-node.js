@@ -19,6 +19,9 @@ class DataNode {
       // stats are not set, so default 0 values are accessed. Such cases are rare but valid, e.g. root
       // TODO: give examples of some of the async_hook types that often have no callbackEvents.
 
+      overall: 0,
+      setOverall (num) { node.stats.overall = node.validateStat(num, 'stats.overall') },
+
       sync: 0,
       setSync (num) { node.stats.sync = node.validateStat(num, 'stats.sync') },
 
@@ -115,6 +118,8 @@ class ClusterNode extends DataNode {
       aggregateNode.generateSourceNodes(nodes[i].sources)
       this.nodes.set(aggregateNode.aggregateId, aggregateNode)
     }
+    this.setDecimal(this.getBetweenTime(), 'party', 'between', this.mark.get('party'))
+    this.setDecimal(this.getWithinTime(), 'party', 'within', this.mark.get('party'))
   }
   setDecimal (num, classification, position, label) {
     const decimalsMap = this.decimals[classification][position]
@@ -127,11 +132,20 @@ class ClusterNode extends DataNode {
 
     const statType = `decimals.${classification}.${position}->${label}`
     const num = this.decimals[classification][position].get(label)
-    const decimal = (num === 0 && rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
+
+    const decimal = (num === 0 || rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
     return decimal
   }
   getDecimalLabels (classification, position) {
     return this.decimals[classification][position].keys()
+  }
+  getDecimalsArray (classification, position) {
+    const decimalsArray = []
+    for (const label of this.decimals[classification][position].keys()) {
+      const decimal = this.getDecimal(classification, position, label)
+      decimalsArray.push([label, decimal])
+    }
+    return decimalsArray
   }
   get id () {
     return this.clusterId
@@ -168,14 +182,15 @@ class AggregateNode extends DataNode {
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
-      return {
-        formatted: frameItem.format(),
-        data: frameItem
-      }
+      const frameWrapper = { data: frameItem }
+      frameWrapper.name = frameItem.getName()
+      frameWrapper.formatted = frameItem.getFormatted(frameWrapper.name)
+      return frameWrapper
     })
-    this.name = this.frames.length ? this.frames[0].formatted.slice(7) : (this.isRoot ? 'root' : 'empty frames')
+    this.name = this.frames.length ? this.frames[0].name : (this.isRoot ? 'root' : 'empty frames')
 
     this.mark = DataNode.markFromArray(node.mark)
+    this.party = this.mark.get('party')
 
     // Node's async_hook types - see https://nodejs.org/api/async_hooks.html#async_hooks_type
     // 29 possible values defined in node core, plus other user-defined values can exist
@@ -214,6 +229,9 @@ class AggregateNode extends DataNode {
     } else {
       apply(this.stats.rawTotals.async.between + this.stats.rawTotals.sync, 'within')
     }
+  }
+  getDecimalsArray (classification, position) {
+    return [[this[classification], 1]]
   }
   get id () {
     return this.aggregateId
@@ -362,6 +380,7 @@ class ArtificialNode extends ClusterNode {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
   }
   aggregateStats (dataNode) {
+    this.stats.setOverall(this.stats.overall + dataNode.stats.overall)
     this.stats.setSync(this.stats.sync + dataNode.stats.sync)
     this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
     this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
