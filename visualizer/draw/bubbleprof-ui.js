@@ -147,14 +147,17 @@ class BubbleprofUI extends EventEmitter {
       .classed('hidden', true)
       .on('click', stepBack)
 
+    let topMostUI = this
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 8) {
         // Backspace button
+        if (topMostUI.selectedDataNode) {
+          return topMostUI.clearFrames()
+        }
         stepBack()
       }
     })
 
-    let topMostUI = this
     this.on('setTopmostUI', (newTopmostUI) => {
       topMostUI = newTopmostUI
     })
