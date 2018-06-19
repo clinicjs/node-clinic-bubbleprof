@@ -582,7 +582,7 @@ svg.bubbleprof .link-outer {
 #node-link .back-btn {
   display: block;
   top: 8px;
-  right: 55px;
+  left: 30px;
   width: 40px;
   height: 40px;
   background: var(--pure-black);
