@@ -1,12 +1,7 @@
 'use strict'
 
-// const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
 const SvgNodeDiagram = require('./svg-node-diagram.js')
-/*
-const Bubbles = require('./svg-bubbles.js')
-const Links = require('./svg-links.js')
-*/
 
 class SvgContainer extends HtmlContent {
   constructor (parentContent, contentProperties = {}) {
@@ -26,19 +21,6 @@ class SvgContainer extends HtmlContent {
       }
       this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
-/*
-    this.bubbles = null
-    this.links = null
-  }
-
-  addBubbles (contentProperties) {
-    this.bubbles = new Bubbles(this, contentProperties)
-  }
-
-  addLinks (contentProperties) {
-    this.links = new Links(this, contentProperties)
-  }
-*/
 
     this.svgNodeDiagram = new SvgNodeDiagram(this)
 
@@ -73,7 +55,6 @@ class SvgContainer extends HtmlContent {
 
   draw () {
     this.svgNodeDiagram.draw()
-//    this.ui.emit('svgDraw')
   }
 }
 

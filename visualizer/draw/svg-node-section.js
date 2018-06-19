@@ -123,7 +123,7 @@ class SvgLine extends SvgNodeElement {
 
     this.originPoint = {
       x: toOrigin.x2,
-      y: toOrigin.y2,
+      y: toOrigin.y2
     }
     return this
   }

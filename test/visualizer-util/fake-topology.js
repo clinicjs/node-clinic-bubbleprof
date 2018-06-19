@@ -6,6 +6,7 @@ function mockClusterNode ({ id, parentId, children, stemLength }) {
     // ClusterNode
     clusterId: id,
     parentClusterId: parentId,
+    mark: new Map([['party', 'user']]),
     nodes: [
       {
         // AggregateNode

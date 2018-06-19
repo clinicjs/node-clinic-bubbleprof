@@ -13,7 +13,6 @@ class SvgNodeDiagram {
 
     this.svgNodes = new Map()
 
-
     this.ui.on('initializeFromData', () => {
       // Called once, creates group contents using d3's .append()
       this.initializeFromData()
@@ -56,9 +55,7 @@ class SvgNodeDiagram {
       .attr('name', layoutNode => layoutNode.id)
       .each((layoutNode, i, nodes) => {
         const d3NodeGroup = d3.select(nodes[i])
-
-        const svgNode = this.svgNodes.get(layoutNode.id)
-          .initializeFromData(d3NodeGroup)
+        this.svgNodes.get(layoutNode.id).initializeFromData(d3NodeGroup)
       })
       .on('mouseover', layoutNode => this.ui.highlightNode(layoutNode))
       .on('mouseout', () => this.ui.highlightNode(null))
@@ -117,17 +114,10 @@ class SvgNode {
 
     this.asyncBetweenLines = new SvgNodeSection(this, {
       dataPosition: 'between',
-//      dataPosition: 'asyncBetween',
       shapeClass: 'SvgLine'
     })
-//  TODO: visually distinguish sync and async-within using spirals
-//    this.asyncWithinLines = new SvgNodeSection(this, {
-//      dataPosition: 'asyncWithin',
-//      shapeClass: 'SvgSpiral'
-//    })
     this.syncBubbles = new SvgNodeSection(this, {
       dataPosition: 'within',
-//      dataPosition: 'asyncWithin',
       shapeClass: 'SvgBubble'
     })
   }
@@ -180,11 +170,11 @@ class SvgNode {
 
     const offsetLength = sourceRadius - this.lineWidth / 2 + this.strokePadding
     const offsetBeforeLine = new LineCoordinates({
-        radians: connectCentresCoords.radians,
-        length: offsetLength,
-        x1: previousPosition.x,
-        y1: previousPosition.y
-      })
+      radians: connectCentresCoords.radians,
+      length: offsetLength,
+      x1: previousPosition.x,
+      y1: previousPosition.y
+    })
 
     this.originPoint = {
       x: offsetBeforeLine.x2,
@@ -296,7 +286,7 @@ class SvgNode {
       x1: toArrowheadRightBase.x2,
       y1: toArrowheadRightBase.y2,
       x2: end.x,
-      y2: end.y,
+      y2: end.y
     })
     outerPath += `L ${toArrowheadTip.x2} ${toArrowheadTip.y2} `
 
@@ -571,8 +561,8 @@ class SvgNode {
 
 function labelRotation (degrees) {
   // Prevent text from being displayed upside down
-  if (degrees > 90) return degrees -= 180
-  if (degrees < -90) return degrees += 180
+  if (degrees > 90) return (degrees -= 180)
+  if (degrees < -90) return (degrees += 180)
   return degrees
 }
 
@@ -614,7 +604,7 @@ function formatTimeLabel (num) {
 
 function formatNameLabel (string) {
   // Remove line numbers from aggregateNode names
-  string = string.replace(/\:\d+\:\d+/g, '')
+  string = string.replace(/:\d+:\d+/g, '')
 
   // Remove indicators of truncated module lists
   string = string.replace(/\.\.\. > /g, '')
