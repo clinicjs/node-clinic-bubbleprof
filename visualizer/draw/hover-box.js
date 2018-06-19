@@ -181,8 +181,8 @@ class HoverBox extends HtmlContent {
 
     this.d3TimeStatement.html(`
       There were async operations pending within this group for
-      <strong>${this.ui.formatNumber(dataNode.getWithinTime())}\u2009ms</strong>, and for
-      <strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> while transitioning from the previous group.
+      <strong>${this.ui.formatNumber(dataNode.stats.overall)}\u2009ms</strong>.
+      Of this, <strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> was from operations initiated in the previous group.
     `)
 
     // If a clusterNode only contains one aggregate, no point clicking down into it, just give us the frames
