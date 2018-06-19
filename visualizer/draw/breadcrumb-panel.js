@@ -22,6 +22,16 @@ class BreadcrumbPanel extends HtmlContent {
         this.draw()
       }
     })
+
+    document.addEventListener('keydown', (e) => {
+      if (e.keyCode === 27 && this.topmostUI !== this.originalUI) {
+        // ESC button
+        if (this.topmostUI.selectedDataNode) {
+          return this.topmostUI.clearFrames()
+        }
+        this.topmostUI.clearSublayout()
+      }
+    })
   }
 
   initializeElements () {
@@ -56,16 +66,6 @@ class BreadcrumbPanel extends HtmlContent {
           this.topmostUI.clearSublayout()
         }
       })
-
-    document.onkeydown = (e) => {
-      if (e.keyCode === 27) {
-        // ESC button
-        if (this.topmostUI.selectedDataNode) {
-          return this.topmostUI.clearFrames()
-        }
-        this.topmostUI.clearSublayout()
-      }
-    }
 
     if (ui !== this.originalUI) {
       this.d3Element
