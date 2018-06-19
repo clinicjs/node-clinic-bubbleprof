@@ -337,6 +337,7 @@ class SvgNode {
 
   drawNameLabel () {
     this.d3TimeLabel.classed('hidden', true)
+    this.d3NameLabel.classed('hidden', false)
 
     const nameLabel = formatNameLabel(this.layoutNode.node.name)
     const labelPlusTime = `${nameLabel}–${formatTimeLabel(this.layoutNode.node.stats.overall)}`
