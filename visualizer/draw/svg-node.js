@@ -1,6 +1,5 @@
 'use strict'
 
-const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const SvgNodeSection = require('./svg-node-section.js')
 
