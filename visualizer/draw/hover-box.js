@@ -209,7 +209,10 @@ class HoverBox extends HtmlContent {
     const clickHandler = () => {
       d3.event.stopPropagation()
       this.ui.highlightNode(null)
-      this.ui.selectNode(layoutNode)
+      const targetUI = this.ui.selectNode(layoutNode)
+      if (targetUI !== this.ui) {
+        this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+      }
     }
     this.d3TitleBlock.on('click', clickHandler)
     this.d3VerticalArrow.on('click', clickHandler)

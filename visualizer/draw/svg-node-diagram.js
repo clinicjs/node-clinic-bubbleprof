@@ -59,7 +59,10 @@ class SvgNodeDiagram {
       .on('mouseout', () => this.ui.highlightNode(null))
       .on('click', (layoutNode) => {
         d3.event.stopPropagation()
-        this.ui.selectNode(layoutNode)
+        const targetUI = this.ui.selectNode(layoutNode)
+        if (targetUI !== this.ui) {
+          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+        }
       })
   }
   draw () {
