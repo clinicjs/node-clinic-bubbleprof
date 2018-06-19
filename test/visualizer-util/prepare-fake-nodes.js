@@ -14,6 +14,7 @@ class TestClusterNode {
     const clusterNode = clusterNodes.get(clusterId)
     Object.assign(this, clusterNode)
     this.id = this.clusterId = clusterId
+    this.mark = new Map([['party', 'user']])
   }
 }
 

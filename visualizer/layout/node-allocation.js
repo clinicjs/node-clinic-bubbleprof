@@ -190,7 +190,8 @@ class NodeAllocation {
       const parentRadius = parentDiameter / 2
       const thisRadius = stem.scaled.ownDiameter / 2
       const lineLength = stem.scaled.ownBetween
-      const { x, y } = line.pointAtLength(parentRadius + lineLength + thisRadius)
+      const leafLength = layoutNode.node.constructor.name === 'ShortcutNode' ? this.layout.settings.shortcutLength : (lineLength + thisRadius)
+      const { x, y } = line.pointAtLength(parentRadius + leafLength)
 
       position.x = leaf.validateStat(x)
       position.y = leaf.validateStat(y)
@@ -206,7 +207,7 @@ class NodeAllocation {
         // TODO: spread out x's to declutter multiple top-level nodes, preferably using this.layout.positioning.order
         const rootPosition = this.getRootPosition(stem.scaled.ownDiameter)
         position.x = midPoint.validateStat(rootPosition.x)
-        position.y = midPoint.validateStat(rootPosition.y)
+        position.y = midPoint.validateStat(rootPosition.y + (layoutNode.node.constructor.name === 'ShortcutNode' ? this.layout.settings.shortcutLength : 0))
         continue
       }
       const parentStem = layoutNode.parent.stem

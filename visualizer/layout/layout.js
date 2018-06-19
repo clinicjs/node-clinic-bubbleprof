@@ -12,11 +12,12 @@ class Layout {
   constructor ({ dataNodes, connection, parentLayout }, settings) {
     const defaultSettings = {
       collapseNodes: false,
-      svgDistanceFromEdge: 30,
-      lineWidth: 1.5,
-      labelMinimumSpace: 12,
+      svgDistanceFromEdge: 40,
+      lineWidth: 2,
+      labelMinimumSpace: 10,
       svgWidth: 750,
       svgHeight: 750,
+      shortcutLength: 60,
       allowStretch: true
     }
     this.settings = Object.assign(defaultSettings, settings)

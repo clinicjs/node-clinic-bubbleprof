@@ -86,6 +86,7 @@ class AllCallbackEvents {
 class TemporaryStatsItem {
   constructor (node) {
     this.intervals = {
+      overall: new FlattenedIntervals(),
       sync: new FlattenedIntervals(),
       async: {
         between: new FlattenedIntervals(),
@@ -104,6 +105,7 @@ class TemporaryStatsItem {
   applyIntervalsTotals () {
     this.node.stats.rawTotals = this.rawTotals
 
+    this.node.stats.setOverall(this.intervals.overall.getFlattenedTotal())
     this.node.stats.setSync(this.intervals.sync.getFlattenedTotal())
     this.node.stats.async.setBetween(this.intervals.async.between.getFlattenedTotal())
     this.node.stats.async.setWithin(this.intervals.async.within.getFlattenedTotal())
@@ -153,6 +155,9 @@ class Interval {
 
     clusterStatsItem.intervals.async[this.getClusterDataType()].pushAndFlatten(this)
     aggregateStatsItem.intervals.async.between.pushAndFlatten(this)
+
+    clusterStatsItem.intervals.overall.pushAndFlatten(this)
+    aggregateStatsItem.intervals.overall.pushAndFlatten(this)
   }
   applySync (clusterStatsItem, aggregateStatsItem) {
     clusterStatsItem.rawTotals.sync += this.getDuration()
@@ -160,6 +165,9 @@ class Interval {
 
     clusterStatsItem.intervals.sync.pushAndFlatten(this)
     aggregateStatsItem.intervals.sync.pushAndFlatten(this)
+
+    clusterStatsItem.intervals.overall.pushAndFlatten(this)
+    aggregateStatsItem.intervals.overall.pushAndFlatten(this)
   }
 }
 
