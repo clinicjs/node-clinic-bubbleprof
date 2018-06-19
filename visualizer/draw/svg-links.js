@@ -45,7 +45,10 @@ class Links extends SvgContentGroup {
       .on('mouseout', () => this.ui.highlightNode(null))
       .on('click', connection => {
         d3.event.stopPropagation()
-        this.ui.selectNode(connection.targetLayoutNode)
+        const targetUI = this.ui.selectNode(connection.targetLayoutNode)
+        if (targetUI !== this.ui) {
+          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+        }
       })
 
     this.addLines()
