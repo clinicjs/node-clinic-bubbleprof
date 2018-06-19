@@ -28,8 +28,7 @@ class SvgNodeSection {
 
     const svgNodeElementClasses = {
       SvgLine,
-      SvgBubble,
-      SvgSpiral
+      SvgBubble
     }
 
     const SvgNodeElementClass = svgNodeElementClasses[this.shapeClass]
@@ -191,9 +190,6 @@ class SvgBubble extends SvgNodeElement {
       .attr('d', arcDatum => arcMaker(arcDatum))
       .attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y})`)
   }
-}
-
-class SvgSpiral extends SvgNodeElement {
 }
 
 module.exports = SvgNodeSection
