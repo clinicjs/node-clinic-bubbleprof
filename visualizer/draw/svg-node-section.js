@@ -43,6 +43,9 @@ class SvgNodeSection {
       .initializeFromData()
   }
   draw () {
+    // In case this was too small to show on page load, but screen has been resized up, and now it's big enough
+    if (!this.byParty) this.initializeFromData()
+
     this.byParty.draw()
     this.byType.draw()
 
