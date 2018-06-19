@@ -620,6 +620,8 @@ function trimText (d3Text, maxLength, reps = 0) {
 function formatTimeLabel (num) {
   // format as 2 significant figures, with ms or s units
   const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
+  if (num < 1) return `<1${hairSpace}ms`
+
   if (num > 1000) {
     return `${parseFloat((num / 1000).toPrecision(2))}${hairSpace}s`
   } else {
