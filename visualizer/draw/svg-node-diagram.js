@@ -385,6 +385,9 @@ class SvgNode {
           this.d3NameLabel.attr('transform', transformString)
 
           this.d3TimeLabel.classed('hidden', true)
+
+          // Tell the line drawing logic that the expected on-label line has been moved
+          if (this.drawType === 'labelOnLine') this.drawType = 'labelAfterLine'
           return
         } else {
           this.d3NameLabel.text(textAfterTrim)
