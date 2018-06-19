@@ -380,6 +380,7 @@ class ArtificialNode extends ClusterNode {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
   }
   aggregateStats (dataNode) {
+    this.stats.setOverall(this.stats.overall + dataNode.stats.overall)
     this.stats.setSync(this.stats.sync + dataNode.stats.sync)
     this.stats.async.setWithin(this.stats.async.within + dataNode.stats.async.within)
     this.stats.async.setBetween(this.stats.async.between + dataNode.stats.async.between)
