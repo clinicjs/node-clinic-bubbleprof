@@ -77,7 +77,7 @@ class Layout {
     const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
 
     const shortcutToSource = !connection.sourceNode ? null : new ShortcutNode({
-      id: connection.sourceNode.id,
+      id: `shortcut:${connection.sourceNode.id}`,
       isRoot: true,
       children: []
     }, connection.sourceNode)
@@ -100,7 +100,7 @@ class Layout {
 
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const shortcutNode = new ShortcutNode({
-            id: childId,
+            id: childId, // id in another cluster - can't be duplicated in this layout, is in parent's children array
             children: [],
             parentId: dataNode.id
           // Use the name, mark etc of the clusterNode the target node is inside
