@@ -55,8 +55,8 @@ class SvgNodeDiagram {
         const d3NodeGroup = d3.select(nodes[i])
         this.svgNodes.get(layoutNode.id).initializeFromData(d3NodeGroup)
       })
-      .on('mouseover', layoutNode => this.ui.highlightNode(layoutNode))
-      .on('mouseout', () => this.ui.highlightNode(null))
+      .on('mouseenter', layoutNode => this.ui.highlightNode(layoutNode))
+      .on('mouseleave', () => this.ui.highlightNode(null))
       .on('click', (layoutNode) => {
         d3.event.stopPropagation()
         const targetUI = this.ui.selectNode(layoutNode)
