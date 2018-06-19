@@ -343,7 +343,7 @@ class SvgNode {
     this.d3NameLabel.text(labelPlusTime)
 
     let textAfterTrim = ''
-    const spaceInCircle = Math.max(this.getRadius() * 1.5 - this.strokePadding, 0)
+    const spaceInCircle = Math.max(this.getRadius() * 2 - this.strokePadding - this.lineWidth, 0)
     const spaceOnLine = Math.max(this.getLength() - this.strokePadding, 0)
 
     if (!this.layoutNode.children.length) {
