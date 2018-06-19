@@ -113,24 +113,15 @@ class BubbleprofUI extends EventEmitter {
 
   initializeCloseButton (closeBtn) {
     // Close button returns to originalUI
-    const { originalUI } = this
     let topmostUI = null
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
-        originalUI.on('setTopmostUI', onUIChange)
-        const currentUI = topmostUI || this
-        currentUI.clearSublayout()
+        let targetUI = this
+        while (targetUI.layoutNode) {
+          targetUI = targetUI.clearSublayout()
+        }
       })
-
-    function onUIChange (newTopmostUI) {
-      topmostUI = newTopmostUI
-      if (topmostUI !== originalUI) {
-        topmostUI.clearSublayout()
-      } else {
-        originalUI.removeListener('setTopmostUI', onUIChange)
-      }
-    }
   }
 
   formatNumber (num) {
@@ -192,6 +183,8 @@ class BubbleprofUI extends EventEmitter {
 
     // Close the frames panel if it's open
     this.clearFrames()
+
+    return this.parentUI
   }
 
   highlightNode (layoutNode = null, dataNode = null) {
