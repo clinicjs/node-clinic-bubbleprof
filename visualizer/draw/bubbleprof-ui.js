@@ -113,13 +113,15 @@ class BubbleprofUI extends EventEmitter {
 
   initializeCloseButton (closeBtn) {
     // Close button returns to originalUI
-    let topmostUI = null
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
         let targetUI = this
         while (targetUI.layoutNode) {
           targetUI = targetUI.clearSublayout()
+        }
+        if (targetUI !== this.ui) {
+          this.originalUI.emit('navigation', { from: this, to: targetUI })
         }
       })
   }

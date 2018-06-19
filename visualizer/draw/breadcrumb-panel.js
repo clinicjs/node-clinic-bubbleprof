@@ -18,6 +18,7 @@ class BreadcrumbPanel extends HtmlContent {
       if (this.topmostUI !== this.traversing) {
         this.topmostUI.clearSublayout()
       } else {
+        this.originalUI.emit('navigation', { from: this.lastUI, to: this.traversing })
         this.traversing = null
         this.draw()
       }
@@ -26,10 +27,12 @@ class BreadcrumbPanel extends HtmlContent {
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 27 && this.topmostUI !== this.originalUI) {
         // ESC button
+        this.lastUI = this.topmostUI
         if (this.topmostUI.selectedDataNode) {
           return this.topmostUI.clearFrames()
         }
-        this.topmostUI.clearSublayout()
+        const targetUI = this.topmostUI.clearSublayout()
+        this.originalUI.emit('navigation', { from: this.lastUI, to: targetUI })
       }
     })
   }
@@ -62,6 +65,7 @@ class BreadcrumbPanel extends HtmlContent {
       .property('title', fullLabelText)
       .on('click', () => {
         if (this.topmostUI !== ui) {
+          this.lastUI = this.topmostUI
           this.traversing = ui
           this.topmostUI.clearSublayout()
         }
