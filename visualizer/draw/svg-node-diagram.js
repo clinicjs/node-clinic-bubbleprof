@@ -326,7 +326,7 @@ class SvgNode {
     })
 
     this.d3TimeLabel.classed('hidden', true)
-    this.d3NameLabel.text(this.layoutNode.node.name)
+    this.d3NameLabel.text(formatNameLabel(this.layoutNode.node.name))
       .classed(`party-${this.layoutNode.node.mark.get('party')}`, true)
       .classed('on-line-label', true)
     trimText(this.d3NameLabel, length - this.strokePadding)
@@ -338,7 +338,7 @@ class SvgNode {
   drawNameLabel () {
     this.d3TimeLabel.classed('hidden', true)
 
-    const nameLabel = this.layoutNode.node.name
+    const nameLabel = formatNameLabel(this.layoutNode.node.name)
     const labelPlusTime = `${nameLabel}–${formatTimeLabel(this.layoutNode.node.stats.overall)}`
     this.d3NameLabel.text(labelPlusTime)
 
@@ -622,7 +622,15 @@ function formatTimeLabel (num) {
   } else {
     return `${parseFloat(num.toPrecision(2))}${hairSpace}ms`
   }
+}
 
+function formatNameLabel (string) {
+  // Remove line numbers from aggregateNode names
+  string = string.replace(/\:\d+\:\d+/g, '')
+
+  // Remove indicators of truncated module lists
+  string = string.replace(/\.\.\. > /g, '')
+  return string
 }
 
 module.exports = SvgNodeDiagram
