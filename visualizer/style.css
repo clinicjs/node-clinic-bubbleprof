@@ -32,6 +32,7 @@ html {
 
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
+  --down-cyan-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(63,125,198)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
 
   /* Define text sizes */
   --main-text-size: 10pt;
@@ -576,6 +577,28 @@ svg.bubbleprof .link-outer {
   line-height: 32px;
   font-size: 28px;
   cursor: pointer;
+}
+
+#node-link .back-btn {
+  display: block;
+  top: 8px;
+  right: 55px;
+  width: 40px;
+  height: 40px;
+  background: var(--pure-black);
+  background-image: var(--down-cyan-chevron-arrow);
+  background-size: cover;
+  transform: rotate(270deg);
+  z-index: 20;
+  position: absolute;
+  padding: 2px 11px;
+  line-height: 32px;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+#node-link .back-btn.hidden {
+  display: none;
 }
 
 /* Temporary fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
