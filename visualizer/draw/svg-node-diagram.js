@@ -386,8 +386,8 @@ class SvgNode {
 
           this.d3TimeLabel.classed('hidden', true)
 
-          // Tell the line drawing logic that the expected on-label line has been moved
-          if (this.drawType === 'labelOnLine') this.drawType = 'labelAfterLine'
+          // Tell the rest of the drawing logic that the expected on-line/in-cirlce label has been moved
+          if (this.drawType === 'labelOnLine' || this.drawType === 'labelInCircle') this.drawType = 'labelAfterLine'
           return
         } else {
           this.d3NameLabel.text(textAfterTrim)
@@ -433,7 +433,11 @@ class SvgNode {
     }
 
     if (this.drawType === 'labelInCircle') {
-      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
+      // Don't include time label in text label, drop it below
+      this.d3TimeLabel.classed('hidden', false)
+      this.d3NameLabel.text(nameLabel)
+
+      textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
 
       if (!textAfterTrim) {
         this.drawType = 'noNameLabel'
@@ -454,36 +458,14 @@ class SvgNode {
     this.d3TimeLabel.classed('hidden', false)
     this.d3TimeLabel.text(formatTimeLabel(this.layoutNode.node.stats.overall))
 
-    if (!this.layoutNode.children.length || this.drawType === 'noNameLabel' || this.drawType === 'labelOnLine') {
-      // Position on line
-      const textAfterTrim = trimText(this.d3TimeLabel, this.getLength() - this.strokePadding)
-      this.d3TimeLabel.classed('hidden', !textAfterTrim)
+    // Position in circle
+    const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding)
+    this.d3TimeLabel.classed('hidden', !textAfterTrim)
+    this.d3TimeLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
-      const toMidwayPoint = new LineCoordinates({
-        x1: this.originPoint.x,
-        y1: this.originPoint.y,
-        length: this.getLength() / 2,
-        degrees: this.degrees
-      })
-      const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${labelRotation(this.degrees)})`
-      this.d3TimeLabel.attr('transform', transformString)
-
-      this.d3TimeLabel.classed('on-line-label', true)
-      this.d3TimeLabel.classed('in-circle-label', false)
-
-      // If this isn't an endpoint and there's a visible name label, drop below it; else vertically centre
-      this.d3TimeLabel.classed('lower-label', this.layoutNode.children.length && !this.d3NameLabel.classed('hidden'))
-      return
-    } else {
-      // Position in circle
-      const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding)
-      this.d3TimeLabel.classed('hidden', !textAfterTrim)
-      this.d3TimeLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
-
-      this.d3TimeLabel.classed('in-circle-label', true)
-      this.d3TimeLabel.classed('on-line-label', false)
-      this.d3TimeLabel.classed('lower-label', true)
-    }
+    this.d3TimeLabel.classed('in-circle-label', true)
+    this.d3TimeLabel.classed('on-line-label', false)
+    this.d3TimeLabel.classed('lower-label', true)
   }
 
   drawOuterPath () {
