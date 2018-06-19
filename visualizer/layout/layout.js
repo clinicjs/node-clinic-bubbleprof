@@ -78,7 +78,7 @@ class Layout {
     const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
 
     const shortcutToSource = !connection.sourceNode ? null : new ShortcutNode({
-      id: connection.sourceNode.id,
+      id: `shortcut:${connection.sourceNode.id}`,
       isRoot: true,
       children: []
     }, connection.sourceNode)
@@ -101,7 +101,7 @@ class Layout {
 
           // If we're inside a cluster of clusters, childNode might be on the top level of clusters
           const shortcutNode = new ShortcutNode({
-            id: childId,
+            id: childId, // id in another cluster - can't be duplicated in this layout, is in parent's children array
             children: [],
             parentId: dataNode.id
           // Use the name, mark etc of the clusterNode the target node is inside
@@ -139,10 +139,15 @@ class Layout {
   }
 
   processBetweenData (generateConnections = true) {
+    // If re-doing after scale, remove old pre-scale pre-collapse stems
+    if (generateConnections) this.layoutNodes.forEach(layoutNode => { layoutNode.stem = null })
+
     const layoutNodesIterator = this.layoutNodes.values()
     for (let i = 0; i < this.layoutNodes.size; ++i) {
       const layoutNode = layoutNodesIterator.next().value
-      layoutNode.stem = new Stem(this, layoutNode)
+
+      // Missing ancestor stems are created within descendents' new Stem, so stem might already exist
+      if (!layoutNode.stem) layoutNode.stem = new Stem(this, layoutNode)
 
       if (generateConnections && layoutNode.parent) {
         const connection = new Connection(layoutNode.parent, layoutNode, this.scale)

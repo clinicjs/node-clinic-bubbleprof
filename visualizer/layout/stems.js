@@ -10,10 +10,17 @@ function getNodeAncestorIds (parent) {
 class Stem {
   constructor (layout, layoutNode) {
     this.layout = layout
+
+    // Ancestor stem stats must be calculated before descendent stem stats
+    const parent = layoutNode.parent
+    if (parent && !parent.stem) {
+      parent.stem = new Stem(layout, parent)
+    }
+
     this.ancestors = {
       totalBetween: 0,
       totalDiameter: 0,
-      ids: getNodeAncestorIds(layoutNode.parent)
+      ids: getNodeAncestorIds(parent)
     }
     this.leaves = {
       ids: []
