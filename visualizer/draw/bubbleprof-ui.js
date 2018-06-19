@@ -146,7 +146,7 @@ class BubbleprofUI extends EventEmitter {
       .on('click', stepBack)
 
     document.addEventListener('keydown', (e) => {
-      if (e.keyCode === 8) {
+      if (e.keyCode === 8 && e.target.nodeName.toLowerCase() !== 'input') {
         // Backspace button
         stepBack()
       }
