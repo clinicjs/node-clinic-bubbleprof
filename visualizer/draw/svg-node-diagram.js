@@ -68,7 +68,40 @@ class SvgNodeDiagram {
       })
   }
   draw () {
+    this.bbox = this.d3Container.node().getBoundingClientRect()
     this.svgNodes.forEach(svgNode => svgNode.draw())
+  }
+
+  getLengthToBottom (x1, y1, degrees) {
+    // Outer padding is partly for labels to use, allow encrouchment most of the way
+    const distanceFromEdge = this.ui.settings.svgDistanceFromEdge / 4
+
+    const radians = LineCoordinates.degreesToRadians(90 - degrees)
+    const adjacentLength = this.bbox.height - distanceFromEdge - y1
+    const hypotenuseLength = adjacentLength / Math.cos(radians)
+    return hypotenuseLength
+  }
+
+  getLengthToSide (x1, y1, degrees) {
+    // Outer padding is partly for labels to use, allow a little encrouchment
+    const distanceFromEdge = this.ui.settings.svgDistanceFromEdge
+
+    // Ensure degrees range is between -180 and 180
+    degrees = LineCoordinates.enforceDegreesRange(degrees)
+    let radians
+    let adjacentLength
+
+    if (degrees > 90 || degrees < -90) {
+      // Test against left side edge
+      radians = LineCoordinates.degreesToRadians(180 - degrees)
+      adjacentLength = x1 - distanceFromEdge
+    } else {
+      // Test against right side edge
+      radians = LineCoordinates.degreesToRadians(degrees)
+      adjacentLength = this.bbox.width - distanceFromEdge - x1
+    }
+    const hypotenuseLength = adjacentLength / Math.cos(radians)
+    return hypotenuseLength
   }
 }
 
@@ -191,7 +224,8 @@ class SvgNode {
     } else {
       this.drawOuterPath()
       this.drawNameLabel()
-      this.drawTimeLabel()
+
+      if (this.drawType === 'labelInCircle') this.drawTimeLabel()
 
       this.asyncBetweenLines.draw()
       if (this.drawType !== 'squash') {
@@ -302,81 +336,119 @@ class SvgNode {
   }
 
   drawNameLabel () {
-    this.d3NameLabel.text(this.layoutNode.node.name)
+    this.d3TimeLabel.classed('hidden', true)
+
+    const nameLabel = this.layoutNode.node.name
+    const labelPlusTime = `${nameLabel}–${formatTimeLabel(this.layoutNode.node.stats.overall)}`
+    this.d3NameLabel.text(labelPlusTime)
+
+    let textAfterTrim = ''
+    const spaceInCircle = Math.max(this.getRadius() * 1.5 - this.strokePadding, 0)
+    const spaceOnLine = Math.max(this.getLength() - this.strokePadding, 0)
 
     if (!this.layoutNode.children.length) {
-      // Is a leaf / endpoint - position at end of line, continuing line
-      this.d3NameLabel.classed('endpoint-label', true)
-      this.d3NameLabel.classed('upper-label', false)
-      this.d3NameLabel.classed('smaller-label', this.drawType === 'squash')
+      // Is a leaf / endpoint - can position at end of line, continuing line
 
-      const toEndpoint = new LineCoordinates({
-        x1: this.circleCentre.x,
-        y1: this.circleCentre.y,
-        length: this.getRadius() + this.lineWidth + this.strokePadding,
-        degrees: this.degrees
-      })
+      // First see if the label fits fine on the line or in the circle
+      if (this.drawType === 'labelOnLine') textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
+      if (this.drawType === 'labelInCircle') textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
 
-      const {
-        x2,
-        y2
-      } = toEndpoint
+      if (textAfterTrim !== labelPlusTime) {
+        // See if putting the label after the line truncates it less
+        this.d3NameLabel.text(labelPlusTime)
 
-      const lengthToSide = getLengthToSide(x2, y2, this.degrees, this.ui.settings)
-      const lengthToBottom = getLengthToBottom(x2, y2, this.degrees, this.ui.settings)
-      const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
+        const toEndpoint = new LineCoordinates({
+          x1: this.circleCentre.x,
+          y1: this.circleCentre.y,
+          length: this.getRadius() + this.lineWidth + this.strokePadding,
+          degrees: this.degrees
+        })
 
-      const textAfterTrim = trimText(this.d3NameLabel, lengthToEdge)
+        const {
+          x2,
+          y2
+        } = toEndpoint
 
-      this.d3NameLabel.classed('hidden', !textAfterTrim)
+        const lengthToSide = this.parentContent.getLengthToSide(x2, y2, this.degrees, this.ui.settings)
+        const lengthToBottom = this.parentContent.getLengthToBottom(x2, y2, this.degrees, this.ui.settings)
+        const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
 
-      const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
-      if (textAfterTrim) this.d3NameLabel.attr('transform', transformString)
+        const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge)
 
-      this.d3NameLabel.classed('flipped-label', this.flipLabel)
-    } else {
-      if (this.drawType === 'noNameLabel') {
+        if (textAfterTrimToEdge.length > textAfterTrim.length) {
+          this.d3NameLabel.classed('flipped-label', this.flipLabel)
+          this.d3NameLabel.classed('endpoint-label', true)
+          this.d3NameLabel.classed('upper-label', false)
+          this.d3NameLabel.classed('smaller-label', this.drawType === 'squash')
+
+          const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
+          this.d3NameLabel.attr('transform', transformString)
+
+          this.d3TimeLabel.classed('hidden', true)
+          return
+        } else {
+          this.d3NameLabel.text(textAfterTrim)
+        }
+
+        this.d3NameLabel.classed('hidden', !textAfterTrim)
+      }
+    }
+
+    if (this.drawType === 'noNameLabel') {
+      this.d3NameLabel.classed('hidden', true)
+      return
+    }
+
+    // Is not a leaf / endpoint - position on line or circle
+    this.d3NameLabel.classed('upper-label', true)
+    this.d3NameLabel.classed('endpoint-label', false)
+    this.d3NameLabel.classed('smaller-label', false)
+    this.d3NameLabel.classed('flipped-label', false)
+
+    if (this.drawType === 'labelOnLine') {
+      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
+
+      if (!textAfterTrim) {
+        this.drawType = 'noNameLabel'
         this.d3NameLabel.classed('hidden', true)
         return
       }
+      this.d3NameLabel.classed('hidden', false)
 
-      // Is not a leaf / endpoint - position on line or circle
-      this.d3NameLabel.classed('upper-label', true)
-      this.d3NameLabel.classed('endpoint-label', false)
-      this.d3NameLabel.classed('smaller-label', false)
-      this.d3NameLabel.classed('flipped-label', false)
+      const toMidwayPoint = new LineCoordinates({
+        x1: this.originPoint.x,
+        y1: this.originPoint.y,
+        length: this.getLength() / 2,
+        degrees: this.degrees
+      })
+      const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${this.labelDegrees})`
+      this.d3NameLabel.attr('transform', transformString)
 
-      if (this.drawType === 'labelOnLine') {
-        const textAfterTrim = trimText(this.d3NameLabel, this.getLength() - this.strokePadding)
-        this.d3NameLabel.classed('hidden', !textAfterTrim)
+      this.d3NameLabel.classed('on-line-label', true)
+    } else {
+      this.d3NameLabel.classed('on-line-label', false)
+    }
 
-        const toMidwayPoint = new LineCoordinates({
-          x1: this.originPoint.x,
-          y1: this.originPoint.y,
-          length: this.getLength() / 2,
-          degrees: this.degrees
-        })
-        const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${this.labelDegrees})`
-        this.d3NameLabel.attr('transform', transformString)
+    if (this.drawType === 'labelInCircle') {
+      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
 
-        this.d3NameLabel.classed('on-line-label', true)
-      } else {
-        this.d3NameLabel.classed('on-line-label', false)
+      if (!textAfterTrim) {
+        this.drawType = 'noNameLabel'
+        this.d3NameLabel.classed('hidden', true)
+        return
       }
+      this.d3NameLabel.classed('hidden', false)
 
-      if (this.drawType === 'labelInCircle') {
-        const textAfterTrim = trimText(this.d3NameLabel, this.getRadius() * 1.5 - this.strokePadding)
-        this.d3NameLabel.classed('hidden', !textAfterTrim)
-        this.d3NameLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
+      this.d3NameLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
-        this.d3NameLabel.classed('in-circle-label', true)
-      } else {
-        this.d3NameLabel.classed('in-circle-label', false)
-      }
+      this.d3NameLabel.classed('in-circle-label', true)
+    } else {
+      this.d3NameLabel.classed('in-circle-label', false)
     }
   }
 
   drawTimeLabel () {
+    this.d3TimeLabel.classed('hidden', false)
     this.d3TimeLabel.text(formatTimeLabel(this.layoutNode.node.stats.overall))
 
     if (!this.layoutNode.children.length || this.drawType === 'noNameLabel' || this.drawType === 'labelOnLine') {
@@ -509,38 +581,6 @@ class SvgNode {
 
     return 'noNameLabel'
   }
-}
-
-function getLengthToBottom (x1, y1, degrees, settings) {
-  // Outer padding is partly for labels to use, allow encrouchment most of the way
-  const distanceFromEdge = settings.svgDistanceFromEdge / 4
-
-  const radians = LineCoordinates.degreesToRadians(90 - degrees)
-  const adjacentLength = settings.svgHeight - distanceFromEdge - y1
-  const hypotenuseLength = adjacentLength / Math.cos(radians)
-  return hypotenuseLength
-}
-
-function getLengthToSide (x1, y1, degrees, settings) {
-  // Outer padding is partly for labels to use, allow a little encrouchment
-  const distanceFromEdge = settings.svgDistanceFromEdge / 2
-
-  // Ensure degrees range is between -180 and 180
-  degrees = LineCoordinates.enforceDegreesRange(degrees)
-  let radians
-  let adjacentLength
-
-  if (degrees > 90 || degrees < -90) {
-    // Test against left side edge
-    radians = LineCoordinates.degreesToRadians(180 - degrees)
-    adjacentLength = x1 - distanceFromEdge
-  } else {
-    // Test against right side edge
-    radians = LineCoordinates.degreesToRadians(degrees)
-    adjacentLength = settings.svgWidth - distanceFromEdge - x1
-  }
-  const hypotenuseLength = adjacentLength / Math.cos(radians)
-  return hypotenuseLength
 }
 
 function labelRotation (degrees) {

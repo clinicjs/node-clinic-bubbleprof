@@ -99,13 +99,22 @@ class SvgLine extends SvgNodeElement {
     this.degrees = this.svgNode.degrees
     this.length = this.svgNode.drawType === 'squash' ? Math.max(this.svgNode.getLength(), 1) : this.svgNode.getLength()
 
-    const onLeftSide = (this.svgNode.flipLabel && this.dataType === 'typeCategory') || (!this.svgNode.flipLabel && this.dataType !== 'typeCategory')
+    let degrees
+    let length
+    if (this.svgNode.drawType === 'labelOnLine') {
+      degrees = this.degrees + 90 * (this.svgNode.flipLabel ? -1 : 1)
+      length = this.ui.settings.lineWidth * (this.dataType === 'typeCategory' ? 4 : 2)
+    } else {
+      const onLeftSide = (this.svgNode.flipLabel && this.dataType === 'typeCategory') || (!this.svgNode.flipLabel && this.dataType !== 'typeCategory')
+      degrees = this.degrees + 90 * (onLeftSide ? -1 : 1)
+      length = this.ui.settings.lineWidth
+    }
 
     const toOrigin = new LineCoordinates({
       x1: this.svgNode.originPoint.x,
       y1: this.svgNode.originPoint.y,
-      degrees: this.degrees + 90 * (this.svgNode.flipLabel ? -1 : 1),
-      length: this.ui.settings.lineWidth * (this.dataType === 'typeCategory' ? 3 : 1)
+      degrees,
+      length
     })
 
     this.originPoint = {
