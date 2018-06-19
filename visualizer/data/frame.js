@@ -15,8 +15,7 @@ class Frame {
     this.party = this.getFrameParty(this.fileName)
   }
 
-  format () {
-    // Get name
+  getName () {
     let name = this.functionName ? this.functionName : '<anonymous>'
     if (this.isEval) {
       // no change
@@ -29,8 +28,10 @@ class Frame {
     } else {
       name = this.typeName + '.' + name
     }
+    return name
+  }
 
-    // Get position
+  getFormatted (name) {
     let formatted = '    at ' + name
     if (this.isEval) {
       formatted += ' ' + this.evalOrigin
@@ -39,7 +40,6 @@ class Frame {
       formatted += ':' + (this.lineNumber > 0 ? this.lineNumber : '')
       formatted += (this.columnNumber > 0 ? ':' + this.columnNumber : '')
     }
-
     return formatted
   }
 

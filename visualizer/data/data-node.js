@@ -182,12 +182,12 @@ class AggregateNode extends DataNode {
 
     this.frames = node.frames.map((frame) => {
       const frameItem = new Frame(frame)
-      return {
-        formatted: frameItem.format(),
-        data: frameItem
-      }
+      const frameWrapper = { data: frameItem }
+      frameWrapper.name = frameItem.getName()
+      frameWrapper.formatted = frameItem.getFormatted(frameWrapper.name)
+      return frameWrapper
     })
-    this.name = this.frames.length ? this.frames[0].formatted.slice(7) : (this.isRoot ? 'root' : 'empty frames')
+    this.name = this.frames.length ? this.frames[0].name : (this.isRoot ? 'root' : 'empty frames')
 
     this.mark = DataNode.markFromArray(node.mark)
     this.party = this.mark.get('party')
