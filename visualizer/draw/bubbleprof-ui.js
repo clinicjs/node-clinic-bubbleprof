@@ -7,6 +7,8 @@ const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
 
+const history = []
+
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
     super()
@@ -44,6 +46,16 @@ class BubbleprofUI extends EventEmitter {
         id: sectionName,
         classNames: this.settings.classNames
       }, this))
+    }
+
+    if (this.originalUI === this) {
+      const nodeLinkSection = this.getNodeLinkSection()
+      this.backBtn = nodeLinkSection.addContent(undefined, { classNames: 'back-btn' })
+      history.push(this)
+      this.on('navigation', ({ to }) => {
+        history.push(to)
+        this.backBtn.d3Element.classed('hidden', history.length < 2)
+      })
     }
   }
 
@@ -111,24 +123,87 @@ class BubbleprofUI extends EventEmitter {
     return this
   }
 
+  // Close button returns to the originalUI
   initializeCloseButton (closeBtn) {
-    // Close button returns to originalUI
-    const { originalUI } = this
-    let topmostUI = null
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
-        originalUI.on('setTopmostUI', onUIChange)
-        const currentUI = topmostUI || this
-        currentUI.clearSublayout()
+        let targetUI = this
+        while (targetUI.layoutNode) {
+          targetUI = targetUI.clearSublayout()
+        }
+        if (targetUI !== this.ui) {
+          this.originalUI.emit('navigation', { from: this, to: targetUI })
+        }
       })
+  }
 
-    function onUIChange (newTopmostUI) {
-      topmostUI = newTopmostUI
-      if (topmostUI !== originalUI) {
-        topmostUI.clearSublayout()
+  // Back button goes back in user navigation one step at a time
+  // This does not record opening frames
+  // This does record pressing ESC and close button
+  initializeBackButton () {
+    const { backBtn, originalUI } = this
+    backBtn.d3Element
+      .classed('hidden', true)
+      .on('click', stepBack)
+
+    document.addEventListener('keydown', (e) => {
+      if (e.keyCode === 8) {
+        // Backspace button
+        stepBack()
+      }
+    })
+
+    let topMostUI = this
+    this.on('setTopmostUI', (newTopmostUI) => {
+      topMostUI = newTopmostUI
+    })
+
+    function stepBack () {
+      if (history.length < 2) {
+        return
+      }
+      if (topMostUI.selectedDataNode) {
+        return topMostUI.clearFrames()
+      }
+      history.pop()
+      const lastUI = history[history.length - 1]
+      const lastLayoutNode = lastUI.layoutNode
+      backBtn.d3Element.classed('hidden', history.length < 2)
+
+      if (lastUI === originalUI) {
+        while (topMostUI.layoutNode) {
+          topMostUI = topMostUI.clearSublayout()
+        }
+        return
+      }
+
+      // TODO: investigate why this is necessary
+      // i.e. it seems like jumpToNode/findDataNode cannot handle case where it has to inspect both .collapsedNodes and .nodes to find the target
+      // e.g. jump from aggregate clump in one branch to aggregate clump in another branch
+      if (lastLayoutNode.node.constructor.name === 'ArtificialNode') {
+        const pathDown = []
+        // Find ancestor ui with non-artificial DataNode
+        let ancestorUI = lastUI
+        while (ancestorUI) {
+          if (!ancestorUI.layoutNode || ancestorUI.layoutNode.node.constructor.name !== 'ArtificialNode') {
+            break
+          }
+          pathDown.unshift(ancestorUI)
+          ancestorUI = ancestorUI.parentUI
+        }
+        if (ancestorUI === originalUI) {
+          while (topMostUI.layoutNode) {
+            topMostUI = topMostUI.clearSublayout()
+          }
+        } else {
+          topMostUI = topMostUI.jumpToNode(ancestorUI.layoutNode.node)
+        }
+        for (const stepDownUI of pathDown) {
+          topMostUI = topMostUI.selectNode(stepDownUI.layoutNode)
+        }
       } else {
-        originalUI.removeListener('setTopmostUI', onUIChange)
+        topMostUI.jumpToNode(lastLayoutNode.node)
       }
     }
   }
@@ -137,6 +212,7 @@ class BubbleprofUI extends EventEmitter {
     return num < 1 ? '<1' : this.settings.numberFormatter(num)
   }
 
+  // Selects a node visible within current layout
   selectNode (layoutNode) {
     const dataNode = layoutNode.node
     const sameNode = this.selectedDataNode === dataNode
@@ -192,6 +268,8 @@ class BubbleprofUI extends EventEmitter {
 
     // Close the frames panel if it's open
     this.clearFrames()
+
+    return this.parentUI
   }
 
   highlightNode (layoutNode = null, dataNode = null) {
@@ -329,6 +407,10 @@ class BubbleprofUI extends EventEmitter {
       onWindowResizeBegin()
       onWindowResizeEnd()
     })
+
+    if (this.originalUI === this) {
+      this.initializeBackButton()
+    }
   }
 
   setData (layout, dataSet) {

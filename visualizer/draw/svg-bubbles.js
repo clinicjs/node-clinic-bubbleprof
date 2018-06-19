@@ -54,7 +54,10 @@ class Bubbles extends SvgContentGroup {
       .on('mouseout', () => this.ui.highlightNode(null))
       .on('click', (d, e) => {
         d3.event.stopPropagation()
-        this.ui.selectNode(d)
+        const targetUI = this.ui.selectNode(d)
+        if (targetUI !== this.ui) {
+          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+        }
       })
 
     this.addCircles()
