@@ -646,7 +646,7 @@ svg.bubbleprof .link-outer {
 /* Temporary fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
 section.sublayout:not(:last-child),
 svg#node-link-svg:not(:nth-last-child(2)) {
-  display: none;
+  visibility: hidden;
 }
 
 /* Sidebar */
