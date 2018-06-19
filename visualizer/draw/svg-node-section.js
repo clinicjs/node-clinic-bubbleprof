@@ -86,12 +86,13 @@ class SvgLine extends SvgNodeElement {
       .enter()
 
     const classPrepend = this.dataType === 'typeCategory' ? 'type' : 'party'
+    const highlightEvent = this.dataType === 'typeCategory' ? 'highlightType' : 'highlightParty'
 
     this.d3Shapes = d3Enter.append('line')
       .attr('class', decimal => `line-segment ${classPrepend}-${decimal[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth)
-      .on('mouseover', decimal => this.ui.emit('highlightType', decimal[0]))
-      .on('mouseout', () => this.ui.emit('highlightType', null))
+      .on('mouseover', decimal => this.ui.emit(highlightEvent, decimal[0]))
+      .on('mouseout', () => this.ui.emit(highlightEvent, null))
 
     return this
   }
@@ -162,12 +163,13 @@ class SvgBubble extends SvgNodeElement {
       .enter()
 
     const classPrepend = this.dataType === 'typeCategory' ? 'type' : 'party'
+    const highlightEvent = this.dataType === 'typeCategory' ? 'highlightType' : 'highlightParty'
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', arcDatum => `line-segment ${classPrepend}-${arcDatum.data[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth)
-      .on('mouseover', arcDatum => this.ui.emit('highlightType', arcDatum.data[0]))
-      .on('mouseout', () => this.ui.emit('highlightType', null))
+      .on('mouseover', arcDatum => this.ui.emit(highlightEvent, arcDatum.data[0]))
+      .on('mouseout', () => this.ui.emit(highlightEvent, null))
 
     return this
   }
