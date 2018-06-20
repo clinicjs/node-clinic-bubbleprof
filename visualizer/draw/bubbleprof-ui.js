@@ -14,6 +14,7 @@ class BubbleprofUI extends EventEmitter {
     super()
 
     const defaultSettings = {
+      animationDuration: 500,
       numberFormatter: d3.format(',.0f'),
       strokePadding: 10,
       nodeLinkId: 'node-link',
@@ -114,6 +115,9 @@ class BubbleprofUI extends EventEmitter {
       uiWithinSublayout.initializeCloseButton(closeBtn)
 
       uiWithinSublayout.setData(sublayout)
+
+      uiWithinSublayout.animate()
+
       uiWithinSublayout.setAsTopmostUI()
       return uiWithinSublayout
     }
@@ -269,6 +273,9 @@ class BubbleprofUI extends EventEmitter {
     if (this.parentUI) {
       this.getNodeLinkSection().d3Element.remove()
       this.parentUI.selectedDataNode = null
+
+      this.parentUI.animate(this)
+
       this.parentUI.setAsTopmostUI()
       if (this.parentUI.layoutNode) {
         const dataNode = this.parentUI.layoutNode.node
@@ -460,6 +467,10 @@ class BubbleprofUI extends EventEmitter {
       this.emit('initializeFromData')
     }
     this.emit('svgDraw')
+  }
+
+  animate (previousUI, callback) {
+    this.getNodeLinkSection().animate(previousUI)
   }
 
   setAsTopmostUI () {

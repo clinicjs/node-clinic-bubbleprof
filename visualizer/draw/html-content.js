@@ -113,6 +113,10 @@ class HtmlContent {
     }
   }
 
+  animate (previousUI) {
+    this.content.forEach(htmlContent => htmlContent.animate(previousUI))
+  }
+
   draw () {
     this.d3Element.classed('hidden', this.isHidden)
 

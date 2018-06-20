@@ -9,6 +9,9 @@ class SvgNodeDiagram {
     this.svgContainer = svgContainer
     this.ui = svgContainer.ui
 
+    this.isAnimating = false
+    this.onAnimationComplete = []
+
     this.svgNodes = new Map()
 
     this.ui.on('initializeFromData', () => {
@@ -65,7 +68,30 @@ class SvgNodeDiagram {
         }
       })
   }
+
+  animate (previousUI, callback) {
+    this.isAnimating = true
+
+    this.svgContainer.d3Element.classed('fade-in', !previousUI)
+    if (previousUI) {
+      previousUI.getNodeLinkSection().d3Element.classed('fade-out', true)
+    }
+
+    this.bbox = this.d3Container.node().getBoundingClientRect()
+
+    const svgNodeAnimations = []
+    this.svgNodes.forEach(svgNode => svgNode.animate(previousUI, svgNodeAnimations))
+
+    Promise.all(svgNodeAnimations).then(() => {
+      this.isAnimating = false
+      console.log()
+      if (callback) callback()
+    })
+  }
+
   draw () {
+    if (this.isAnimating) return
+
     this.bbox = this.d3Container.node().getBoundingClientRect()
     this.svgNodes.forEach(svgNode => svgNode.draw())
   }

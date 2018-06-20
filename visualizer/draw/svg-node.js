@@ -108,6 +108,13 @@ class SvgNode {
     return this
   }
 
+  animate (previousUI, svgNodeAnimations) {
+    this.asyncBetweenLines.animate(previousUI, svgNodeAnimations)
+    if (this.drawType !== 'squash') {
+      this.syncBubbles.animate(previousUI, svgNodeAnimations)
+    }
+  }
+
   draw () {
     if (this.layoutNode.node.constructor.name === 'ShortcutNode') {
       this.drawShortcut()

@@ -15,9 +15,11 @@ class SvgNodeSection {
     this.dataPosition = dataPosition
     this.shapeClass = shapeClass
   }
+
   setData (layoutNode) {
     this.layoutNode = layoutNode
   }
+
   initializeFromData () {
     this.d3NodeGroup = this.parentContent.d3NodeGroup
 
@@ -41,6 +43,12 @@ class SvgNodeSection {
       .setData(this.layoutNode)
       .initializeFromData()
   }
+
+  animate (previousUI, svgNodeAnimations) {
+    this.byParty.animate(previousUI, svgNodeAnimations)
+    this.byType.animate(previousUI, svgNodeAnimations)
+  }
+
   draw () {
     // In case this was too small to show on page load, but screen has been resized up, and now it's big enough
     if (!this.byParty) this.initializeFromData()
@@ -98,6 +106,7 @@ class SvgLine extends SvgNodeElement {
 
     return this
   }
+
   setCoordinates () {
     this.degrees = this.svgNode.degrees
     this.length = this.svgNode.drawType === 'squash' ? Math.max(this.svgNode.getLength(), 1) : this.svgNode.getLength()
@@ -126,7 +135,74 @@ class SvgLine extends SvgNodeElement {
     }
     return this
   }
-  draw () {
+
+  animate (previousUI, svgNodeAnimations) {
+    // TODO - check this draw() isn't redundant
+    const segmentLine = this.draw(true)
+
+    let origin
+    let overallLength
+    let parentBetweenTime
+    let degrees
+
+    // Get positions of this layout's layoutNode in the previousUI
+    if (!previousUI) {
+      // Stepping inside a node: look at it in the parentUI
+      const svgNodeInParent = this.ui.parentUI.svgNodeDiagram.svgNodes.get(this.ui.layoutNode.id)
+      origin = svgNodeInParent.originPoint
+      overallLength = svgNodeInParent.getLength()
+      parentBetweenTime = svgNodeInParent.layoutNode.node.getBetweenTime()
+      degrees = svgNodeInParent.degrees
+    } else {
+      // Stepping back to a higher layout
+
+    }
+
+    this.d3Shapes.each((segmentDatum, index, nodes) => {
+      svgNodeAnimations.push(new Promise((resolve, reject) => {
+        const d3LineSegment = d3.select(nodes[index])
+
+        const nodeBetweenTime = this.svgNode.layoutNode.node.getBetweenTime()
+        const segmentDecimalOfParentTime = (nodeBetweenTime / parentBetweenTime) * segmentDatum[1]
+
+        if (!previousUI) {
+
+          segmentDatum.contractedPosition = new LineCoordinates({
+            x1: origin.x,
+            y1: origin.y,
+            degrees,
+            length: overallLength * segmentDecimalOfParentTime
+          })
+
+          origin.x = segmentDatum.contractedPosition.x2
+          origin.y = segmentDatum.contractedPosition.y2
+
+          this.animateSegment(d3LineSegment, segmentDatum, resolve, true)
+        }
+      }))
+    })
+  }
+  animateSegment (d3LineSegment, segmentDatum, resolve, expanding = false) {
+    const startPosition = expanding ? segmentDatum.contractedPosition : segmentDatum.expandedPosition
+    const endPosition = expanding ? segmentDatum.expandedPosition : segmentDatum.contractedPosition
+
+    d3LineSegment.attr('x1', startPosition.x1)
+    d3LineSegment.attr('y1', startPosition.y1)
+    d3LineSegment.attr('x2', startPosition.x2)
+    d3LineSegment.attr('y2', startPosition.y2)
+
+    d3LineSegment.transition()
+      .duration(this.ui.settings.animationDuration)
+      .attr('x1', endPosition.x1)
+      .attr('x2', endPosition.x2)
+      .attr('y1', endPosition.y1)
+      .attr('y2', endPosition.y2)
+      .on('end', () => {
+        resolve(segmentDatum)
+      })
+  }
+
+  draw (preAnimate = false) {
     this.setCoordinates()
 
     let previousX = this.originPoint.x
@@ -145,10 +221,14 @@ class SvgLine extends SvgNodeElement {
       previousX = segmentLine.x2
       previousY = segmentLine.y2
 
-      d3LineSegment.attr('x1', segmentLine.x1)
-      d3LineSegment.attr('x2', segmentLine.x2)
-      d3LineSegment.attr('y1', segmentLine.y1)
-      d3LineSegment.attr('y2', segmentLine.y2)
+      if (preAnimate) {
+        segmentDatum.expandedPosition = segmentLine
+      } else {
+        d3LineSegment.attr('x1', segmentLine.x1)
+        d3LineSegment.attr('x2', segmentLine.x2)
+        d3LineSegment.attr('y1', segmentLine.y1)
+        d3LineSegment.attr('y2', segmentLine.y2)
+      }
     })
   }
 }
@@ -159,6 +239,7 @@ class SvgBubble extends SvgNodeElement {
     this.arcData = d3.pie().value((arcDatum) => arcDatum[1])(this.decimalsArray)
     return this
   }
+
   initializeFromData () {
     const d3Enter = this.d3Group.selectAll('path.segmented-bubble')
       .data(this.arcData)
@@ -175,10 +256,15 @@ class SvgBubble extends SvgNodeElement {
 
     return this
   }
+
   setCoordinates () {
     this.circleCentre = this.svgNode.circleCentre
     this.radius = this.svgNode.getRadius() - (this.dataType === 'typeCategory' ? this.ui.settings.lineWidth * 2 : 0)
   }
+
+  animate (previousUI) {
+  }
+
   draw () {
     this.setCoordinates()
 
