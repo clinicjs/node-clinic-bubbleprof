@@ -4,9 +4,45 @@
 const HtmlContent = require('./html-content.js')
 
 class InteractiveKey extends HtmlContent {
+  constructor (d3Container, contentProperties = {}) {
+    super(d3Container, contentProperties)
+
+    const {
+      hoverText,
+      collapsedText
+    } = contentProperties
+
+    this.hoverText = hoverText || null
+    if (hoverText) this.hoverBox = this.addHoverBox()
+
+    this.collapsedText = collapsedText || null
+    if (collapsedText) this.collapsedContent = this.addCollapsedContent(this.hoverBox || this)
+  }
+
+  addHoverBox () {
+    return this.addContent('HoverBox', {
+      htmlContent: this.hoverText,
+      type: 'tool-tip',
+      allowableOverflow: 48
+    })
+  }
+
+  addCollapsedContent (infoParent) {
+    console.log(infoParent)
+    const collapsedContent = infoParent.addContent(undefined, {
+      htmlContent: this.collapsedText
+    })
+    collapsedContent.addCollapseControl(true, {
+      htmlContent: this.contentProperties.collapseLabel ||  'More details <span class="arrow"></span>'
+    })
+    return collapsedContent
+  }
+
   initializeElements () {
     if (!this.contentProperties.name) throw new Error('InteractiveKey requires contentProperties.name to be defined')
     if (!this.contentProperties.targetType) throw new Error('InteractiveKey requires contentProperties.targetType to be defined')
+
+      console.log(this.contentProperties)
 
     const {
       name,
@@ -30,9 +66,11 @@ class InteractiveKey extends HtmlContent {
 
     this.d3Element.on('mouseover', () => {
       this.ui.emit(eventName, this.contentProperties.name)
+      if (this.hoverBox) this.hoverBox.show()
     })
     this.d3Element.on('mouseout', () => {
       this.ui.emit(eventName, null)
+      if (this.hoverBox) this.hoverBox.hide()
     })
   }
 }

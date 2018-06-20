@@ -125,6 +125,10 @@ class HoverBox extends HtmlContent {
     this.draw()
   }
 
+  show () {
+    this.changeVisibility(true)
+  }
+
   showContentAt (htmlContent, position, allowableOverflow = 0) {
     this.contentProperties.htmlContent = htmlContent
     this.contentProperties.position = position
