@@ -11,10 +11,13 @@ function drawOuterUI () {
 
   // Header
   const header = ui.sections.get('header')
-  const highlightBar = header.addContent(undefined, { classNames: 'header-bar highlight-bar', htmlContent: '<div></div>' })
-  const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Party:</label>' })
+  const highlightBar = header.addContent(undefined, { classNames: 'header-bar highlight-bar' })
+
+  // Analysis code uses term "party" as in "3rd-party", but it may be confusing to users. "Area" is clearer.
+  // TODO: repace 'party' with 'area' everywhere in code, including in analysis
+  const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Area:</label>' })
   const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
-  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar', htmlContent: '<div></div>' })
+  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
   breadcrumbBar.addContent('BreadcrumbPanel', { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
   // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })

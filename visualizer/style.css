@@ -157,6 +157,7 @@ main {
 }
 
 #header .highlight-bar {
+  justify-content: space-between;
   margin-bottom: 3px;
 }
 
