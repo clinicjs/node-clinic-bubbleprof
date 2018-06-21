@@ -162,6 +162,7 @@ test('Aggregate Node - aggregate.inspect', function (t) {
     aggregateId: 2,
     parentAggregateId: 1,
     children: [1, 2, 3],
+    name: null,
     mark: ['party', 'module', 'name'],
     type: 'CUSTOM',
     frames: [
@@ -182,6 +183,7 @@ test('Aggregate Node - aggregate.makeRoot', function (t) {
     aggregateId: 1,
     parentAggregateId: 0,
     children: [],
+    name: null,
     mark: ['root', null, null],
     type: null,
     frames: [],
@@ -259,6 +261,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
     parentAggregateId: 0,
     children: [],
     mark: [null, null, null],
+    name: null,
     type: 'CUSTOM',
     frames: [
       { fileName: 'fileName.js', isToplevel: true }
@@ -272,6 +275,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
     parentAggregateId: 0,
     children: [],
     mark: [null, null, null],
+    name: null,
     type: 'CUSTOM',
     frames: [
       { fileName: 'fileName.js', isToplevel: true }

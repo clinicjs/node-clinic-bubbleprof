@@ -60,6 +60,7 @@ class AggregateNode {
     this.isRoot = false
     this.mark = new Mark()
     this.type = null
+    this.name = null
     this.frames = new Frames([])
   }
 
@@ -92,6 +93,7 @@ class AggregateNode {
     return {
       aggregateId: this.aggregateId,
       parentAggregateId: this.parentAggregateId,
+      name: this.name,
       children: this.children,
       mark: this.mark.toJSON(),
       type: this.type,

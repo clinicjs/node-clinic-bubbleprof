@@ -187,7 +187,7 @@ class AggregateNode extends DataNode {
       frameWrapper.formatted = frameItem.getFormatted(frameWrapper.name)
       return frameWrapper
     })
-    this.name = this.frames.length ? this.frames[0].name : (this.isRoot ? 'root' : 'empty frames')
+    this.name = rawNode.name || (this.frames.length ? this.frames[0].name : (this.isRoot ? 'root' : 'empty frames'))
 
     this.mark = DataNode.markFromArray(node.mark)
     this.party = this.mark.get('party')
