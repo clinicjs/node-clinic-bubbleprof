@@ -25,6 +25,7 @@ class InteractiveKey extends HtmlContent {
     return this.headerContent.addContent('HoverBox', {
       type: 'static',
       htmlContent: this.hoverText,
+      allowableOverflow: 24,
       fixedOrientation: 'down'
     })
   }
