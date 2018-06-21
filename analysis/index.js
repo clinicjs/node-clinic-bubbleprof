@@ -18,6 +18,7 @@ const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
 const MarkPartyAggregateNodes = require('./aggregate/mark-party-aggregate-nodes.js')
 const MarkModuleAggregateNodes = require('./aggregate/mark-module-aggregate-nodes.js')
+const NameAggregateNodes = require('./aggregate/name-aggregate-nodes.js')
 
 const WrapAsBarrierNodes = require('./barrier/wrap-as-barrier-nodes.js')
 const MakeExternalBarrierNodes = require('./barrier/make-external-barrier-nodes.js')
@@ -71,6 +72,8 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new MarkModuleAggregateNodes(systemInfo))
   // Mark HTTP server nodes
     .pipe(new MarkHttpAggregateNodes())
+  // Name aggregate nodes
+    .pipe(new NameAggregateNodes(systemInfo))
 
   // BarrierNode:
   // Barriers are cut-off points in the aggregated tree. Initialize the tree
