@@ -197,7 +197,7 @@ class LineChart extends HtmlContent {
     const pluralResources = this.ui.dataSet.sourceNodesCount !== 1
 
     return `
-      <strong>${this.ui.formatNumber(this.ui.dataSet.callbackEventsCount)}</strong> call${pluralCalls ? 's' : ''}
+      <strong>${this.ui.formatNumber(this.ui.dataSet.callbackEventsCount)} call${pluralCalls ? 's' : ''}</strong>
       to ${this.ui.formatNumber(this.ui.dataSet.sourceNodesCount)} async resource${pluralResources ? 's' : ''}, over
       ${(this.ui.formatNumber(this.ui.dataSet.wallTime.profileDuration))} milliseconds.
     `
