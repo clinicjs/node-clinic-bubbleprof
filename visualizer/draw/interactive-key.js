@@ -13,7 +13,7 @@ class InteractiveKey extends HtmlContent {
       relativeContainer
     } = contentProperties
 
-    this.relativeContainer = relativeContainer
+    this.relativeContainer = relativeContainer || this.parentContent
 
     this.hoverText = hoverText || null
     if (hoverText) this.hoverBox = this.addHoverBox()
