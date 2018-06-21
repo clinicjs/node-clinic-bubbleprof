@@ -32,7 +32,7 @@ function drawOuterUI () {
     name: 'external',
     targetType: 'party',
     label: 'Dependencies',
-    hoverText: 'Operations initiated from a dependent module in node_modules'
+    hoverText: 'Operations initiated from a module dependency in node_modules'
   })
   partyKeyPanel.addContent('InteractiveKey', {
     name: 'nodecore',
