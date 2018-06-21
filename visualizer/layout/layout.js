@@ -119,7 +119,7 @@ class Layout {
   findDataNode (dataNode, recursive = false) {
     const nodeId = dataNode.id
     const layoutNodes = this.layoutNodes
-    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node === dataNode) {
+    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node.uid === dataNode.uid) {
       return this.layoutNodes.get(nodeId)
     }
     return this.findCollapsedNode(dataNode, recursive)
@@ -127,7 +127,7 @@ class Layout {
 
   findCollapsedNode (dataNode, recursive = false) {
     for (const layoutNode of this.layoutNodes.values()) {
-      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node === dataNode)) {
+      if (layoutNode.collapsedNodes && layoutNode.collapsedNodes.some((subLayoutNode) => subLayoutNode.node.uid === dataNode.uid)) {
         return layoutNode
       }
     }

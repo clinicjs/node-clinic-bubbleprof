@@ -213,7 +213,7 @@ class BubbleprofUI extends EventEmitter {
   // Selects a node visible within current layout
   selectNode (layoutNode) {
     const dataNode = layoutNode.node
-    const sameNode = this.selectedDataNode === dataNode
+    const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
 
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
@@ -286,7 +286,7 @@ class BubbleprofUI extends EventEmitter {
       return this.parentUI.jumpToNode(dataNode)
     }
 
-    if (layoutNode.node === dataNode) {
+    if (layoutNode.node.uid === dataNode.uid) {
       return this.selectNode(layoutNode)
     } else {
       // dataNode is inside one or more levels of collapsedNode - recurse
