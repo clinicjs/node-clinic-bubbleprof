@@ -17,21 +17,28 @@ module.exports = Name
 
 function getAggregateName (aggregateNode, sysInfo) {
   const frames = aggregateNode.frames.filter(frame => frame.fileName)
-  const interesting = frames
-    .filter(frame => !frame.isNodecore(sysInfo))
-    .filter(frame => frame.functionName)
-    .map(x => x)
+  const interesting = frames.filter(frame => name(frame)).map(x => x)
 
-  const userland = interesting.filter(frame => !frame.isExternal(sysInfo))
-  if (userland.length) return userland[0].functionName
+  const userland = interesting.filter(isUserland(sysInfo))
+  if (userland.length) return name(userland[0])
 
-  const modules = interesting
-    .map(function (frame) {
-      const mod = frame.getModuleName(sysInfo)
-      if (mod) return frame.functionName + '@' + mod.name
-    })
-    .filter(mod => mod)
-
+  const modules = interesting.map(toModule(sysInfo)).filter(mod => mod)
   if (modules.length) return modules[0]
+
   return null
+}
+
+function toModule (sysInfo) {
+  return function (frame) {
+    const mod = frame.getModuleName(sysInfo)
+    if (mod) return name(frame) + '@' + mod.name
+  }
+}
+
+function name (frame) {
+  return frame.functionName || frame.typeName
+}
+
+function isUserland (sysInfo) {
+  return frame => !frame.isExternal(sysInfo) && !frame.isNodecore(sysInfo)
 }
