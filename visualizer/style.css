@@ -149,7 +149,7 @@ main {
 }
 
 #header .panel {
-  margin: 0 18px 0 6px;
+  margin: 0 12px;
 }
 
 #header .panel > label {
@@ -165,6 +165,10 @@ main {
   margin-top: 0;
   white-space: nowrap;
   overflow-x: hidden;
+}
+
+#header .panel.breadcrumbs-panel {
+  margin: 0 6px;
 }
 
 #header .breadcrumb-bar:hover,
@@ -1269,7 +1273,6 @@ body:not(.initialized):after {
   }
   #header .panel {
     display: inline;
-    margin: 0;
   }
   #header {
     display: block;
@@ -1311,7 +1314,9 @@ body:not(.initialized):after {
 }
 
 @media only screen and (max-width: 450px){
-  #header .panel {
+  #header .panel,
+  #header .panel.breadcrumbs-panel {
+    margin: 0;
     display: block;
     white-space: nowrap;
   }
