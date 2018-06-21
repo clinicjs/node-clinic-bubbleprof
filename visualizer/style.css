@@ -278,6 +278,10 @@ main {
   text-decoration: none;
 }
 
+#header .help-link-block .help-link:before {
+  content: 'How to use this';
+}
+
 #header .help-link-block .help-link:link {
   border-bottom: 2px solid var(--cyan-highlight);
 }
@@ -1341,6 +1345,16 @@ body:not(.initialized):after {
   .type-icon {
     width: 7px;
     margin-right: 3px;
+  }
+
+  #header .help-link-block {
+    top: 2px;
+  }
+  #header .help-link-block .help-link:before {
+    content: 'Help';
+  }
+  #header .highlight-bar .panel:last-child {
+    margin-right: 52px;
   }
 }
 

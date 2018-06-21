@@ -20,7 +20,7 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
-    htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough">How to use this</a>'
+    htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"></a>'
   })
 
   const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
