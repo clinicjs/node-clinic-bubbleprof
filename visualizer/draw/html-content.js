@@ -18,7 +18,6 @@ class HtmlContent {
       classNames: ''
     }
     this.contentProperties = Object.assign(defaultProperties, contentProperties)
-
     this.isHidden = this.contentProperties.hidden
 
     this.collapseControl = null
@@ -74,7 +73,7 @@ class HtmlContent {
   }
 
   // Initial creation of elements independent of data and layout, before .setData() is called
-  initializeElements () {
+  initializeElements (skipContent = false) {
     const {
       htmlContent,
       htmlElementType,
@@ -107,7 +106,7 @@ class HtmlContent {
 
     if (id) this.d3Element.attr('id', id)
     if (classNames) this.d3Element.classed(classNames, true)
-    if (htmlContent) this.d3ContentWrapper.html(htmlContent)
+    if (htmlContent && !skipContent) this.d3ContentWrapper.html(htmlContent)
 
     for (const id of this.contentIds) {
       this.content.get(id).initializeElements()
@@ -129,9 +128,12 @@ class HtmlContent {
 }
 
 class CollapseControl extends HtmlContent {
-  constructor (parentContent, contentProperties, isCollapsed) {
+  constructor (parentContent, contentProperties, collapsedByDefault) {
     super(parentContent, contentProperties)
-    this.isCollapsed = isCollapsed
+
+    this.collapsedByDefault = collapsedByDefault
+    this.isCollapsed = collapsedByDefault
+
     this.closeIcon = contentProperties.closeIcon || null
     this.collapseEvent = contentProperties.collapseEvent || null
 
