@@ -17,6 +17,15 @@ function drawOuterUI () {
   // TODO: repace 'party' with 'area' everywhere in code, including in analysis
   const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Area:</label>' })
   const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
+
+  header.addContent(undefined, {
+    classNames: 'help-link-block panel',
+    // Uncomment this and comment out the other line to test that the animation doesn't play when the page is visited
+    // TODO: remove this when https://clinicjs.org is live
+    // htmlContent: '<a class="help-link external-link" href="https://www.bbc.com/news" title="Test link to a visitable page"></a>'
+    htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"></a>'
+  })
+
   const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
   breadcrumbBar.addContent('BreadcrumbPanel', { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
@@ -44,7 +53,7 @@ function drawOuterUI () {
     hoverText: 'Operations initiated from within node.js core only'
   })
 
-  const asyncHooksDocsLink = 'Async Hook types (<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
+  const asyncHooksDocsLink = 'Async Hook types (<a class="external-link" target="_blank" href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
 
   typeKeyPanel.addContent('InteractiveKey', {
     relativeContainer: header,

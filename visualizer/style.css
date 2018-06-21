@@ -97,6 +97,20 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   display: none;
 }
 
+a.external-link:after {
+  display: inline-block;
+  content: '⬈';
+  border-left: 1px solid var(--cyan);
+  border-bottom: 1px solid var(--cyan);
+  padding-bottom: 5px;
+  height: 5px;
+  width: 5px;
+  vertical-align: middle;
+  box-sizing: border-box;
+  margin: 0 4px 0 5px;
+  line-height: 0px;
+}
+
 /* Banner layout */
 
 #banner {
@@ -247,6 +261,80 @@ main {
 #header .hover-box .collapsible-content-wrapper ul {
   padding-left: 16px;
   margin-bottom: 0;
+}
+
+#header .help-link-block {
+  position: absolute;
+  right: 0;
+  padding: 2px 0;
+  margin-top: 3px;
+  background: var(--main-bg-translucent)
+  border-radius: 6px;
+}
+
+#header .help-link-block .help-link {
+  padding: 1px 3px;
+  display: block;
+  font-weight: bold;
+  text-decoration: none;
+  outline: 4px solid var(--banner-bg-color);
+}
+
+#header .help-link-block .help-link:before {
+  content: 'How to use this';
+}
+
+/* unvisited link only */
+#header .help-link-block .help-link:link {
+  animation-name: pulseLink;
+  color: var(--pure-white);
+  background-color: var(--banner-bg-color);
+}
+
+#header .help-link-block .help-link:link:after {
+  animation-name: pulseIcon;
+  color: var(--pure-white);
+  border-left-color: var(--pure-white);
+  border-bottom-color: var(--pure-white);
+}
+
+#header .help-link-block .help-link:link,
+#header .help-link-block .help-link:link:after {
+  animation-direction: alternate;
+  animation-duration: 0.8s;
+  animation-iteration-count: 8;
+  animation-timing-function: ease-in-out;
+}
+
+
+#header .help-link-block .help-link:visited {
+  background-color: var(--main-bg-color) !important;
+  outline-color: var(--main-bg-color) !important;
+  color: var(--cyan) !important;
+
+  /* :visited can't apply animation-name: none; */
+}
+
+#header .help-link-block .help-link:visited:after {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  /* :visited can't apply animation-name: none; */
+}
+
+@keyframes pulseLink {
+  100% {
+    background-color: var(--main-bg-color);
+    color: var(--cyan);
+    outline-color: var(--main-bg-color);
+  }
+}
+@keyframes pulseIcon {
+  100% {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  }
 }
 
 .type-icon,
@@ -1310,6 +1398,15 @@ body:not(.initialized):after {
 @media only screen and (max-width: 635px){
   body {
     --header-height: 75px;
+  }
+  #header .help-link-block {
+    top: 1px;
+  }
+  #header .help-link-block .help-link:before {
+    content: 'Help';
+  }
+  #header .highlight-bar .panel:last-child {
+    margin-right: 75px;
   }
 }
 
