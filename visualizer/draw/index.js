@@ -165,17 +165,17 @@ function drawOuterUI () {
     portraitOnly: true
   })
 
-  const callbacksOverTime = sideBar.addContent('LineChart', {
-    classNames: 'side-bar-item'
-  })
-  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
-
   const lookup = sideBar.addContent('Lookup', {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
   })
-  lookup.addCollapseControl(true, { htmlContent: 'Locate a stack frame <span class="arrow"></span>' })
+  lookup.addCollapseControl(true, { htmlContent: 'Search <span class="arrow"></span>' })
   lookup.addLoadingAnimation({ hidden: true })
+
+  const callbacksOverTime = sideBar.addContent('LineChart', {
+    classNames: 'side-bar-item'
+  })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
 
   const key = sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
