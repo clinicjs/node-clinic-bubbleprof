@@ -438,6 +438,19 @@ class BubbleprofUI extends EventEmitter {
   complete () {
     this.setAsTopmostUI()
     this.emit('complete')
+
+    if (window.location.hash) {
+      setTimeout(() => {
+        const id = parseInt(window.location.hash.slice(2))
+        if (window.location.hash.charAt(1) === 'a') {
+          const aggregateNode = this.dataSet.aggregateNodes.get(id)
+          this.jumpToAggregateNode(aggregateNode)
+        } else if (window.location.hash.charAt(1) === 'c') {
+          const clusterNode = this.dataSet.clusterNodes.get(id)
+          this.jumpToNode(clusterNode)
+        }
+      })
+    }
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
