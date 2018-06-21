@@ -17,6 +17,12 @@ function drawOuterUI () {
   // TODO: repace 'party' with 'area' everywhere in code, including in analysis
   const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Area:</label>' })
   const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
+
+  header.addContent(undefined, {
+    classNames: 'help-link-block panel',
+    htmlContent: '<a class="help-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough">How to use this</a>'
+  })
+
   const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
   breadcrumbBar.addContent('BreadcrumbPanel', { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
