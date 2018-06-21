@@ -91,6 +91,7 @@ class ClusterNode extends DataNode {
     this.isRoot = (node.isRoot || node.clusterId === 1)
 
     this.clusterId = node.clusterId
+    this.uid = 'C' + node.clusterId
     this.parentClusterId = node.parentClusterId
     this.name = node.name
 
@@ -174,6 +175,7 @@ class AggregateNode extends DataNode {
     this.isRoot = (node.isRoot || node.aggregateId === 1)
 
     this.aggregateId = node.aggregateId
+    this.uid = 'A' + node.aggregateId
     this.parentAggregateId = node.parentAggregateId
     this.children = node.children
     this.clusterNode = clusterNode
@@ -364,6 +366,7 @@ class ArtificialNode extends ClusterNode {
     const node = Object.assign(defaultProperties, rawNode)
 
     this.nodeType = node.nodeType
+    this.uid = rawNode.id
   }
   applyAggregateNodes (nodes) {
     if (!nodes.size) return

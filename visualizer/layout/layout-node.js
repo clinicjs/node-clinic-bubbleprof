@@ -29,7 +29,7 @@ class LayoutNode {
 
 class CollapsedLayoutNode {
   constructor (layoutNodes, parent, children) {
-    this.id = 'clump:' + layoutNodes.sort((a, b) => a.id - b.id).map(layoutNode => layoutNode.id).join(',')
+    this.id = 'clump:' + layoutNodes.sort((a, b) => a.id - b.id).map(layoutNode => layoutNode.node.uid).join(',')
     this.collapsedNodes = layoutNodes
     this.parent = parent
     this.children = children || []
