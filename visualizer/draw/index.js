@@ -20,6 +20,9 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
+    // Uncomment this and comment out the other line to test that the animation doesn't play when the page is visited
+    // TODO: remove this when https://clinicjs.org is live
+    // htmlContent: '<a class="help-link external-link" href="https://www.bbc.com/news" title="Test link to a visitable page"></a>'
     htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"></a>'
   })
 

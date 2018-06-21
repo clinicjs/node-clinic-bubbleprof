@@ -266,28 +266,75 @@ main {
 #header .help-link-block {
   position: absolute;
   right: 0;
-  padding: 2px;
+  padding: 2px 0;
+  margin-top: 3px;
   background: var(--main-bg-translucent)
+  border-radius: 6px;
 }
 
 #header .help-link-block .help-link {
+  padding: 1px 3px;
   display: block;
-  padding: 2px 0;
   font-weight: bold;
-  color: var(--cyan);
   text-decoration: none;
+  outline: 4px solid var(--banner-bg-color);
 }
 
 #header .help-link-block .help-link:before {
   content: 'How to use this';
 }
 
+/* unvisited link only */
 #header .help-link-block .help-link:link {
-  border-bottom: 2px solid var(--cyan-highlight);
+  animation-name: pulseLink;
+  color: var(--pure-white);
+  background-color: var(--banner-bg-color);
 }
 
+#header .help-link-block .help-link:link:after {
+  animation-name: pulseIcon;
+  color: var(--pure-white);
+  border-left-color: var(--pure-white);
+  border-bottom-color: var(--pure-white);
+}
+
+#header .help-link-block .help-link:link,
+#header .help-link-block .help-link:link:after {
+  animation-direction: alternate;
+  animation-duration: 0.8s;
+  animation-iteration-count: 8;
+  animation-timing-function: ease-in-out;
+}
+
+
 #header .help-link-block .help-link:visited {
-  border-bottom: 2px solid var(--nearform-grey);
+  background-color: var(--main-bg-color) !important;
+  outline-color: var(--main-bg-color) !important;
+  color: var(--cyan) !important;
+
+  /* :visited can't apply animation-name: none; */
+}
+
+#header .help-link-block .help-link:visited:after {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  /* :visited can't apply animation-name: none; */
+}
+
+@keyframes pulseLink {
+  100% {
+    background-color: var(--main-bg-color);
+    color: var(--cyan);
+    outline-color: var(--main-bg-color);
+  }
+}
+@keyframes pulseIcon {
+  100% {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  }
 }
 
 .type-icon,
@@ -1346,21 +1393,20 @@ body:not(.initialized):after {
     width: 7px;
     margin-right: 3px;
   }
-
-  #header .help-link-block {
-    top: 2px;
-  }
-  #header .help-link-block .help-link:before {
-    content: 'Help';
-  }
-  #header .highlight-bar .panel:last-child {
-    margin-right: 52px;
-  }
 }
 
 @media only screen and (max-width: 635px){
   body {
     --header-height: 75px;
+  }
+  #header .help-link-block {
+    top: 1px;
+  }
+  #header .help-link-block .help-link:before {
+    content: 'Help';
+  }
+  #header .highlight-bar .panel:last-child {
+    margin-right: 75px;
   }
 }
 
