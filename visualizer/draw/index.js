@@ -168,7 +168,7 @@ function drawOuterUI () {
   const callbacksOverTime = sideBar.addContent('LineChart', {
     classNames: 'side-bar-item'
   })
-  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations over time <span class="arrow"></span>' })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
 
   const lookup = sideBar.addContent('Lookup', {
     classNames: 'side-bar-item',
