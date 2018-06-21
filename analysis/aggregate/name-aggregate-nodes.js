@@ -17,7 +17,7 @@ module.exports = Name
 
 function getAggregateName (aggregateNode, sysInfo) {
   const frames = aggregateNode.frames.filter(frame => frame.fileName)
-  const interesting = frames.filter(frame => name(frame)).map(x => x)
+  const interesting = toArray(frames.filter(frame => name(frame)))
 
   const userland = interesting.filter(isUserland(sysInfo))
   if (userland.length) return name(userland[0])
@@ -26,6 +26,11 @@ function getAggregateName (aggregateNode, sysInfo) {
   if (modules.length) return modules[0]
 
   return null
+}
+
+function toArray (frames) {
+  // map converts the frame list into an actual array
+  return frames.map(x => x)
 }
 
 function toModule (sysInfo) {
