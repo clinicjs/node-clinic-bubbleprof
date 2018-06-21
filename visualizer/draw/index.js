@@ -23,7 +23,7 @@ function drawOuterUI () {
     name: 'user',
     targetType: 'party',
     label: 'Userland',
-    hoverText: 'Operations initiated from the application beign profiled'
+    hoverText: 'Operations initiated from inside the application being profiled'
   })
   partyKeyPanel.addContent('InteractiveKey', {
     name: 'external',
@@ -38,12 +38,14 @@ function drawOuterUI () {
     hoverText: 'Operations initiated from within node.js core only'
   })
 
+  const asyncHooksDocsLink = 'Async Hook types (<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
+
   typeKeyPanel.addContent('InteractiveKey', {
     name: 'networks',
     targetType: 'type',
     label: 'Networks',
     hoverText: 'Async operations related to networking, networks and DNS',
-    collapsedText: `<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type">Async Hook types:</a>
+    collapsedText: `${asyncHooksDocsLink}
     <ul>
       <li>HTTPPARSER
       <li>PIPECONNECTWRAP
@@ -67,7 +69,7 @@ function drawOuterUI () {
     targetType: 'type',
     label: 'Data',
     hoverText: 'Async operations related to the file system (fs) or data streams',
-    collapsedText: `<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type">Async Hook types:</a>
+    collapsedText: `${asyncHooksDocsLink}
     <ul>
       <li>FSEVENTWRAP
       <li>FSREQWRAP
@@ -86,7 +88,7 @@ function drawOuterUI () {
     targetType: 'type',
     label: 'Crypto',
     hoverText: 'Async operations related to cryptography and encryption',
-    collapsedText: `<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type">Async Hook types:</a>
+    collapsedText: `${asyncHooksDocsLink}
     <ul>
       <li>PBKDF2REQUEST
       <li>RANDOMBYTESREQUEST
@@ -100,7 +102,7 @@ function drawOuterUI () {
     targetType: 'type',
     label: 'Scheduling',
     hoverText: 'Async wrappers, such as timers, ticks and promises, used to schedule arbitrary code',
-    collapsedText: `<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type">Async Hook types:</a>
+    collapsedText: `${asyncHooksDocsLink}
     <ul>
       <li>TIMERWRAP
       <li>Timeout
@@ -115,7 +117,7 @@ function drawOuterUI () {
     targetType: 'type',
     label: 'Other',
     hoverText: 'Other async operations, including process wrappers and user-defined Async Hooks',
-    collapsedText: `<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type">Async Hook types:</a>
+    collapsedText: `${asyncHooksDocsLink}
     <ul>
       <li>PROCESSWRAP
       <li>TTYWRAP

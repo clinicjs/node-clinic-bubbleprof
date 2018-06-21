@@ -9,9 +9,10 @@ class HoverBox extends HtmlContent {
     super(d3Container, Object.assign({
       type: 'node-link',
       position: { x: 0, y: 0 },
-      allowableOverflow: 0
+      allowableOverflow: 0,
+      fixedOrientation: null
     }, contentProperties))
-    validateKey(this.contentProperties.type, ['node-link', 'tool-tip'])
+    validateKey(this.contentProperties.type, ['node-link', 'tool-tip', 'static'])
     if (this.contentProperties.type === 'node-link' && !this.contentProperties.svg) {
       throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
     }
@@ -20,7 +21,8 @@ class HoverBox extends HtmlContent {
   }
 
   initializeElements () {
-    super.initializeElements()
+    super.initializeElements(true) // Tells super not to add .htmlContent to default position
+
     this.d3Element.classed('hover-box', true)
     this.d3Element.classed('hidden', true)
 
@@ -30,6 +32,7 @@ class HoverBox extends HtmlContent {
     this.d3TitleBlock = this.d3ContentWrapper.append('div')
       .classed('block', true)
       .classed('title-block', true)
+      .html(this.contentProperties.htmlContent || '')
 
     if (this.contentProperties.type === 'node-link') {
       this.nodeLinkElements()
@@ -81,12 +84,17 @@ class HoverBox extends HtmlContent {
   }
 
   position (x, y, containerBounds) {
+    const {
+      allowableOverflow,
+      fixedOrientation
+    } = this.contentProperties
+
     const hoverBounds = this.d3Element.node().getBoundingClientRect()
 
     const verticalArrowPadding = 12
     const initialTop = y + verticalArrowPadding
     const initialLeft = x - verticalArrowPadding
-    const allowableWidth = containerBounds.width + this.contentProperties.allowableOverflow
+    const allowableWidth = containerBounds.width + allowableOverflow
 
     let arrowOffset = verticalArrowPadding
     let adjustedLeft = initialLeft - verticalArrowPadding
@@ -96,17 +104,20 @@ class HoverBox extends HtmlContent {
       arrowOffset = overflowX + verticalArrowPadding
     }
 
-    let verticalFlip = false
     let adjustedTop = initialTop
-    const overflowY = initialTop + hoverBounds.height - containerBounds.height
-    if (overflowY > 0) {
-      const titleBlockHeight = this.d3TitleBlock.node().getBoundingClientRect().height
-      adjustedTop -= titleBlockHeight + verticalArrowPadding * 2
-      verticalFlip = true
+    let verticalFlip = (fixedOrientation === 'up')
+
+    if (!fixedOrientation) {
+      const overflowY = initialTop + hoverBounds.height - containerBounds.height
+      if (overflowY > 0) {
+        const titleBlockHeight = this.d3TitleBlock.node().getBoundingClientRect().height
+        adjustedTop -= titleBlockHeight + verticalArrowPadding * 2
+        verticalFlip = true
+      }
     }
 
     // On short windows with no space above or below
-    if (adjustedTop < 0) {
+    if (adjustedTop < 0 && !fixedOrientation) {
       this.positionSidewards(x, y, containerBounds, hoverBounds)
       return
     }
@@ -122,15 +133,22 @@ class HoverBox extends HtmlContent {
 
   changeVisibility (show) {
     this.isHidden = !show
+    if (!show) {
+      this.content.forEach(contentItem => {
+        if (contentItem.collapseControl && contentItem.collapseControl.collapsedByDefault) {
+          contentItem.collapseClose()
+        }
+      })
+    }
     this.draw()
   }
 
-  show () {
-    this.changeVisibility(true)
+  showContentAt (htmlContent, position) {
+    this.contentProperties.htmlContent = htmlContent
+    this.showAt(position)
   }
 
-  showContentAt (htmlContent, position, allowableOverflow = 0) {
-    this.contentProperties.htmlContent = htmlContent
+  showAt (position) {
     this.contentProperties.position = position
     this.changeVisibility(true)
   }
@@ -149,7 +167,10 @@ class HoverBox extends HtmlContent {
 
     const { x, y } = this.contentProperties.position
     this.position(x, y, this.parentContent.d3ContentWrapper.node().getBoundingClientRect())
-    if (this.contentProperties.htmlContent) this.d3TitleBlock.html(this.contentProperties.htmlContent)
+
+    if (this.contentProperties.type !== 'static') {
+      this.d3TitleBlock.html(this.contentProperties.htmlContent || '')
+    }
 
     // Mouseover on the hover box itself causes mouseout of the element that showed the hover box
     // Re-show hover box so mouse/trackpad users can interact with hover content e.g. select text

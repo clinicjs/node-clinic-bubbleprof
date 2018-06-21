@@ -12,6 +12,8 @@ class InteractiveKey extends HtmlContent {
       collapsedText
     } = contentProperties
 
+    this.headerContent = this.parentContent.parentContent.parentContent
+
     this.hoverText = hoverText || null
     if (hoverText) this.hoverBox = this.addHoverBox()
 
@@ -20,20 +22,20 @@ class InteractiveKey extends HtmlContent {
   }
 
   addHoverBox () {
-    return this.addContent('HoverBox', {
+    return this.headerContent.addContent('HoverBox', {
+      type: 'static',
       htmlContent: this.hoverText,
-      type: 'tool-tip',
-      allowableOverflow: 48
+      fixedOrientation: 'down'
     })
   }
 
   addCollapsedContent (infoParent) {
-    console.log(infoParent)
     const collapsedContent = infoParent.addContent(undefined, {
-      htmlContent: this.collapsedText
+      htmlContent: this.collapsedText,
+      classNames: 'details-block block'
     })
     collapsedContent.addCollapseControl(true, {
-      htmlContent: this.contentProperties.collapseLabel ||  'More details <span class="arrow"></span>'
+      htmlContent: this.contentProperties.collapseLabel || 'Details <span class="arrow"></span>'
     })
     return collapsedContent
   }
@@ -41,8 +43,6 @@ class InteractiveKey extends HtmlContent {
   initializeElements () {
     if (!this.contentProperties.name) throw new Error('InteractiveKey requires contentProperties.name to be defined')
     if (!this.contentProperties.targetType) throw new Error('InteractiveKey requires contentProperties.targetType to be defined')
-
-      console.log(this.contentProperties)
 
     const {
       name,
@@ -66,10 +66,26 @@ class InteractiveKey extends HtmlContent {
 
     this.d3Element.on('mouseover', () => {
       this.ui.emit(eventName, this.contentProperties.name)
-      if (this.hoverBox) this.hoverBox.show()
+
+      if (this.hoverBox) {
+        this.hoverBox.d3TitleBlock.classed(targetClass, true)
+        this.hoverBox.d3TitleBlock.classed('by-variable', true)
+      }
+
+      const bbox = this.d3Element.node().getBoundingClientRect()
+      const hoverBbox = this.hoverBox.d3Element.node().getBoundingClientRect()
+      const containerBbox = this.headerContent.d3Element.node().getBoundingClientRect()
+
+      if (this.hoverBox) {
+        this.hoverBox.showAt({
+          x: bbox.left + bbox.width / 2 + hoverBbox.width / 2,
+          y: bbox.height + bbox.top - containerBbox.top
+        })
+      }
     })
     this.d3Element.on('mouseout', () => {
       this.ui.emit(eventName, null)
+      if (this.collapsedContent) this.collapsedContent.collapseClose()
       if (this.hoverBox) this.hoverBox.hide()
     })
   }
