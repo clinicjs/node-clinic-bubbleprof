@@ -11,10 +11,13 @@ function drawOuterUI () {
 
   // Header
   const header = ui.sections.get('header')
-  const highlightBar = header.addContent(undefined, { classNames: 'header-bar highlight-bar', htmlContent: '<div></div>' })
-  const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Party:</label>' })
+  const highlightBar = header.addContent(undefined, { classNames: 'header-bar highlight-bar' })
+
+  // Analysis code uses term "party" as in "3rd-party", but it may be confusing to users. "Area" is clearer.
+  // TODO: repace 'party' with 'area' everywhere in code, including in analysis
+  const partyKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Area:</label>' })
   const typeKeyPanel = highlightBar.addContent(undefined, { classNames: 'panel', htmlContent: '<label>Type:</label>' })
-  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar', htmlContent: '<div></div>' })
+  const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
   breadcrumbBar.addContent('BreadcrumbPanel', { classNames: 'panel', originalUI: ui })
   // TODO: when adding full-screen and light theme
   // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })
@@ -22,43 +25,109 @@ function drawOuterUI () {
   partyKeyPanel.addContent('InteractiveKey', {
     name: 'user',
     targetType: 'party',
-    label: 'Your code'
+    label: 'Userland',
+    hoverText: 'Operations initiated from inside the application being profiled'
   })
   partyKeyPanel.addContent('InteractiveKey', {
     name: 'external',
     targetType: 'party',
-    label: 'Module code'
+    label: 'Dependencies',
+    hoverText: 'Operations initiated from an external module in node_modules'
   })
   partyKeyPanel.addContent('InteractiveKey', {
     name: 'nodecore',
     targetType: 'party',
-    label: 'Node core'
+    label: 'Node core',
+    hoverText: 'Operations initiated from within node.js core only'
   })
 
-  typeKeyPanel.addContent('InteractiveKey', {
-    name: 'files-streams',
-    targetType: 'type',
-    label: 'Files/Streams'
-  })
+  const asyncHooksDocsLink = 'Async Hook types (<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
+
   typeKeyPanel.addContent('InteractiveKey', {
     name: 'networks',
     targetType: 'type',
-    label: 'Networks'
+    label: 'Networks',
+    hoverText: 'Async operations related to networks, including TCP, UDP and DNS',
+    collapsedText: `${asyncHooksDocsLink}
+    <ul>
+      <li>HTTPPARSER
+      <li>PIPECONNECTWRAP
+      <li>PIPEWRAP
+      <li>TCPCONNECTWRAP
+      <li>TCPSERVER
+      <li>TCPWRAP
+      <li>TCPSERVERWRAP
+
+      <li>UDPSENDWRAP
+      <li>UDPWRAP
+
+      <li>GETADDRINFOREQWRAP
+      <li>GETNAMEINFOREQWRAP
+      <li>QUERYWRAP
+    </ul>
+    `
+  })
+  typeKeyPanel.addContent('InteractiveKey', {
+    name: 'files-streams',
+    targetType: 'type',
+    label: 'Data',
+    hoverText: 'Async operations related to the file system (fs) or data streams',
+    collapsedText: `${asyncHooksDocsLink}
+    <ul>
+      <li>FSEVENTWRAP
+      <li>FSREQWRAP
+      <li>STATWATCHER
+
+      <li>JSSTREAM
+      <li>WRITEWRAP
+      <li>SHUTDOWNWRAP
+
+      <li>ZLIB
+    </ul>
+    `
   })
   typeKeyPanel.addContent('InteractiveKey', {
     name: 'crypto',
     targetType: 'type',
-    label: 'Crypto'
+    label: 'Crypto',
+    hoverText: 'Async operations related to cryptography and encryption',
+    collapsedText: `${asyncHooksDocsLink}
+    <ul>
+      <li>PBKDF2REQUEST
+      <li>RANDOMBYTESREQUEST
+      <li>TLSWRAP
+      <li>SSLCONNECTION
+    </ul>
+    `
   })
   typeKeyPanel.addContent('InteractiveKey', {
     name: 'timing-promises',
     targetType: 'type',
-    label: 'Timing/Promises'
+    label: 'Scheduling',
+    hoverText: 'Async wrappers, such as timers, ticks and promises, used to schedule arbitrary code',
+    collapsedText: `${asyncHooksDocsLink}
+    <ul>
+      <li>TIMERWRAP
+      <li>Timeout
+      <li>Immediate
+      <li>TickObject
+      <li>PROMISE
+    </ul>
+    `
   })
   typeKeyPanel.addContent('InteractiveKey', {
     name: 'other',
     targetType: 'type',
-    label: 'Other'
+    label: 'Other',
+    hoverText: 'Other async operations, including process wrappers and user-defined Async Hooks',
+    collapsedText: `${asyncHooksDocsLink}
+    <ul>
+      <li>PROCESSWRAP
+      <li>TTYWRAP
+      <li>SIGNALWRAP
+      <li>User-defined async hooks
+    </ul>
+    `
   })
 
   // Main panel - nodelink diagram
