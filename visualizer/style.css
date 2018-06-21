@@ -263,6 +263,29 @@ main {
   margin-bottom: 0;
 }
 
+#header .help-link-block {
+  position: absolute;
+  right: 0;
+  padding: 2px;
+  background: var(--main-bg-translucent)
+}
+
+#header .help-link-block .help-link {
+  display: block;
+  padding: 2px 0;
+  font-weight: bold;
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+#header .help-link-block .help-link:link {
+  border-bottom: 2px solid var(--cyan-highlight);
+}
+
+#header .help-link-block .help-link:visited {
+  border-bottom: 2px solid var(--nearform-grey);
+}
+
 .type-icon,
 .party-icon {
   display: inline-block;
