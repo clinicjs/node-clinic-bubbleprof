@@ -47,7 +47,7 @@ function drawOuterUI () {
     name: 'networks',
     targetType: 'type',
     label: 'Networks',
-    hoverText: 'Async operations related to networking, networks and DNS',
+    hoverText: 'Async operations related to networks, including TCP, UDP and DNS',
     collapsedText: `${asyncHooksDocsLink}
     <ul>
       <li>HTTPPARSER

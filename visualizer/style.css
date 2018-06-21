@@ -210,7 +210,7 @@ main {
   display: flex;
   flex-direction: column-reverse;
   color: var(--grey-highlight);
-  width: 245px;
+  width: 255px;
   margin-left: -25px;
   margin-top: -12px;
 }
