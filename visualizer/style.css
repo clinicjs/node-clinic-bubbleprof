@@ -97,6 +97,20 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   display: none;
 }
 
+a.external-link:after {
+  display: inline-block;
+  content: '⬈';
+  border-left: 1px solid var(--cyan);
+  border-bottom: 1px solid var(--cyan);
+  padding-bottom: 5px;
+  height: 5px;
+  width: 5px;
+  vertical-align: middle;
+  box-sizing: border-box;
+  margin: 0 4px 0 5px;
+  line-height: 0px;
+}
+
 /* Banner layout */
 
 #banner {

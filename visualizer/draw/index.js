@@ -20,7 +20,7 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
-    htmlContent: '<a class="help-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough">How to use this</a>'
+    htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough">How to use this</a>'
   })
 
   const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
@@ -47,7 +47,7 @@ function drawOuterUI () {
     hoverText: 'Operations initiated from within node.js core only'
   })
 
-  const asyncHooksDocsLink = 'Async Hook types (<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
+  const asyncHooksDocsLink = 'Async Hook types (<a class="external-link" target="_blank" href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
 
   typeKeyPanel.addContent('InteractiveKey', {
     name: 'networks',
