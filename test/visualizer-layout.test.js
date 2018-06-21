@@ -286,7 +286,7 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,6,4', 'clump:3,6,4 => 7', '7 => '])
+  t.deepEqual(actualAfter, ['1 => 2', '2 => clump:3,4,6', 'clump:3,4,6 => 7', '7 => '])
 
   t.end()
 })
@@ -328,7 +328,7 @@ test('Visualizer layout - collapse - complex example', function (t) {
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => clump:4,5,7,6,8,9;10', 'clump:4,5,7,6,8,9 => ', '10 => clump:11,12,13', 'clump:11,12,13 => '])
+  t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => clump:4,5,6,7,8,9;10', 'clump:4,5,6,7,8,9 => ', '10 => clump:11,12,13', 'clump:11,12,13 => '])
 
   t.end()
 })
