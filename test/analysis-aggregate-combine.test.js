@@ -76,6 +76,7 @@ test('Aggregate Node - combine', function (t) {
         children: [ 2 ],
         sources: [ aggregateNodes[0].sources[0].toJSON({ short: true }) ],
         mark: ['root', null, null],
+        name: null,
         type: null,
         frames: []
       })
@@ -87,6 +88,7 @@ test('Aggregate Node - combine', function (t) {
         children: [ 3 ],
         sources: [ serverNode.toJSON({ short: true }) ],
         mark: [null, null, null],
+        name: null,
         type: 'CUSTOM_SERVER',
         frames: [{ fileName: 'server.js' }]
       })
@@ -98,6 +100,7 @@ test('Aggregate Node - combine', function (t) {
         children: [ 4, 5 ],
         sources: socketNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
+        name: null,
         type: 'CUSTOM_SOCKET',
         frames: [{ fileName: 'server.js' }]
       })
@@ -109,6 +112,7 @@ test('Aggregate Node - combine', function (t) {
         children: [ ],
         sources: logNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
+        name: null,
         type: 'CUSTOM_LOG',
         frames: [{ fileName: 'log.js' }]
       })
@@ -120,6 +124,7 @@ test('Aggregate Node - combine', function (t) {
         children: [ ],
         sources: endNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
+        name: null,
         type: 'CUSTOM_END',
         frames: [{ fileName: 'server.js' }]
       })

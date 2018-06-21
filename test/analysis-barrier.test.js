@@ -194,6 +194,7 @@ test('Barrier Node - barrier.toJSON', function (t) {
       children: [3, 4],
       type: 'CUSTOM',
       mark: [null, null, null],
+      name: null,
       frames: [],
       sources: [ barrierNode.nodes[0].sources[0].toJSON({ short: true }) ]
     }]

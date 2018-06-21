@@ -15,15 +15,6 @@ class Name extends Transform {
 
 module.exports = Name
 
-function noDups () {
-  const seen = new Set()
-  return function (val) {
-    if (seen.has(val)) return false
-    seen.add(val)
-    return true
-  }
-}
-
 function getAggregateName (aggregateNode, sysInfo) {
   const frames = aggregateNode.frames.filter(frame => frame.fileName)
   const interesting = frames

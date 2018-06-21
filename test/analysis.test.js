@@ -97,6 +97,7 @@ function createExpectedStructure (frames) {
     after: [4],
     destroy: 7
   }))
+  aggregateNodeUser.name = frameUser.functionName
 
   const aggregateNodeExternal = new AggregateNode(3, 2)
   aggregateNodeExternal.mark.set(0, 'external')
@@ -112,6 +113,8 @@ function createExpectedStructure (frames) {
     after: [],
     destroy: 5
   }))
+  const modName = frameExternal.fileName.split('node_modules/')[1].split('/')[0]
+  aggregateNodeExternal.name = frameExternal.functionName + '@' + modName
 
   const barrierNodeRoot = new BarrierNode(1, 0)
   barrierNodeRoot.initializeAsWrapper(

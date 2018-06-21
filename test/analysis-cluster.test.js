@@ -136,6 +136,7 @@ test('Cluster Node - cluster.toJSON', function (t) {
       children: [3],
       type: 'CUSTOM',
       mark: [null, null, null],
+      name: null,
       frames: [],
       sources: [ clusterNode.nodes[0].sources[0].toJSON({ short: true }) ]
     }]
