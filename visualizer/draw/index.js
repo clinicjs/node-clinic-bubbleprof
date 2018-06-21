@@ -189,7 +189,7 @@ function drawOuterUI () {
   */
 
   // Footer
-  const footerCollapseHTML = '<div class="text">Stack frames</div><div class="arrow"></div>'
+  const footerCollapseHTML = '<div class="text">Call stacks</div><div class="arrow"></div>'
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
