@@ -9,10 +9,11 @@ class InteractiveKey extends HtmlContent {
 
     const {
       hoverText,
-      collapsedText
+      collapsedText,
+      relativeContainer
     } = contentProperties
 
-    this.headerContent = this.parentContent.parentContent.parentContent
+    this.relativeContainer = relativeContainer || this.parentContent
 
     this.hoverText = hoverText || null
     if (hoverText) this.hoverBox = this.addHoverBox()
@@ -22,7 +23,7 @@ class InteractiveKey extends HtmlContent {
   }
 
   addHoverBox () {
-    return this.headerContent.addContent('HoverBox', {
+    return this.relativeContainer.addContent('HoverBox', {
       type: 'static',
       htmlContent: this.hoverText,
       allowableOverflow: 24,
@@ -75,7 +76,7 @@ class InteractiveKey extends HtmlContent {
 
       const bbox = this.d3Element.node().getBoundingClientRect()
       const hoverBbox = this.hoverBox.d3Element.node().getBoundingClientRect()
-      const containerBbox = this.headerContent.d3Element.node().getBoundingClientRect()
+      const containerBbox = this.relativeContainer.d3Element.node().getBoundingClientRect()
 
       if (this.hoverBox) {
         this.hoverBox.showAt({

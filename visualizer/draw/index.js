@@ -23,18 +23,21 @@ function drawOuterUI () {
   // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })
 
   partyKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'user',
     targetType: 'party',
     label: 'Userland',
     hoverText: 'Operations initiated from inside the application being profiled'
   })
   partyKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'external',
     targetType: 'party',
     label: 'Dependencies',
     hoverText: 'Operations initiated from an external module in node_modules'
   })
   partyKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'nodecore',
     targetType: 'party',
     label: 'Node core',
@@ -44,6 +47,7 @@ function drawOuterUI () {
   const asyncHooksDocsLink = 'Async Hook types (<a href="https://nodejs.org/api/async_hooks.html#async_hooks_type" title="External link to official Node.js Async Hooks documentation">see docs</a>):'
 
   typeKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'networks',
     targetType: 'type',
     label: 'Networks',
@@ -68,6 +72,7 @@ function drawOuterUI () {
     `
   })
   typeKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'files-streams',
     targetType: 'type',
     label: 'Data',
@@ -87,6 +92,7 @@ function drawOuterUI () {
     `
   })
   typeKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'crypto',
     targetType: 'type',
     label: 'Crypto',
@@ -101,6 +107,7 @@ function drawOuterUI () {
     `
   })
   typeKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'timing-promises',
     targetType: 'type',
     label: 'Scheduling',
@@ -116,6 +123,7 @@ function drawOuterUI () {
     `
   })
   typeKeyPanel.addContent('InteractiveKey', {
+    relativeContainer: header,
     name: 'other',
     targetType: 'type',
     label: 'Other',
