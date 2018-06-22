@@ -932,6 +932,11 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
   margin-left: 6px;
 }
 
+#side-bar .line-chart .hover-box {
+  margin-top: -32px;
+}
+
+
 /* Hover box */
 
 .hover-box {
