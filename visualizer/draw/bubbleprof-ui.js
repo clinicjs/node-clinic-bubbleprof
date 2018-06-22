@@ -235,9 +235,11 @@ class BubbleprofUI extends EventEmitter {
       case 'AggregateNode':
         this.selectedDataNode = dataNode
         this.outputFrames(dataNode, layoutNode)
+        window.location.hash = 'a' + dataNode.aggregateId
         return this
 
       case 'ClusterNode':
+        window.location.hash = 'c' + dataNode.clusterId
         if (dataNode.nodes.size === 1) {
           // If there's only one aggregateNode, just select it
           this.selectedDataNode = dataNode.nodes.values().next().value
@@ -249,6 +251,7 @@ class BubbleprofUI extends EventEmitter {
         }
 
       case 'ArtificialNode':
+        window.location.hash = '_collapsed'
         this.selectedDataNode = dataNode
         return sameNode ? this : this.createSubLayout(layoutNode)
     }
