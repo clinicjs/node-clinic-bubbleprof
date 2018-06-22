@@ -251,9 +251,51 @@ class BubbleprofUI extends EventEmitter {
         }
 
       case 'ArtificialNode':
-        window.location.hash = '_collapsed'
         this.selectedDataNode = dataNode
-        return sameNode ? this : this.createSubLayout(layoutNode)
+        const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode)
+        window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
+        return uiWithinCollapsedNode
+    }
+  }
+
+  generateCollapsedNodeHash (uiWithinCollapsedNode) {
+    let hash = `l${uiWithinCollapsedNode.layoutNode.id}|`
+    const appendParentNode = (parentUI) => {
+      if (!parentUI.layoutNode) {
+        hash += 'm'
+      } else {
+        const dataNode = parentUI.layoutNode.node
+        switch (dataNode.constructor.name) {
+          case 'ClusterNode':
+            hash += 'c' + dataNode.clusterId
+            break
+          case 'ArtificialNode':
+            hash += `l${parentUI.layoutNode.id}|`
+            appendParentNode(parentUI.parentUI)
+            break
+        }
+      }
+    }
+    appendParentNode(uiWithinCollapsedNode.parentUI)
+    return hash
+  }
+
+  parseCollapsedNodeHash () {
+    const nodeIds = window.location.hash.slice(1).split('|')
+    const lastNodeId = nodeIds.pop()
+    let targetUI
+    if (lastNodeId === 'm') {
+      targetUI = this
+    } else {
+      const clusterId = parseInt(lastNodeId.slice(1))
+      const clusterNode = this.dataSet.clusterNodes.get(parseInt(lastNodeId.slice(1)))
+      targetUI = this.jumpToNode(clusterNode)
+    }
+
+    for (var i = nodeIds.length - 1; i >= 0; i--) {
+      const layoutNodeId = nodeIds[i].slice(1)
+      const layoutNode = targetUI.layout.layoutNodes.get(layoutNodeId)
+      targetUI = targetUI.selectNode(layoutNode)
     }
   }
 
@@ -445,12 +487,18 @@ class BubbleprofUI extends EventEmitter {
     if (window.location.hash) {
       setTimeout(() => {
         const id = parseInt(window.location.hash.slice(2))
-        if (window.location.hash.charAt(1) === 'a') {
-          const aggregateNode = this.dataSet.aggregateNodes.get(id)
-          this.jumpToAggregateNode(aggregateNode)
-        } else if (window.location.hash.charAt(1) === 'c') {
-          const clusterNode = this.dataSet.clusterNodes.get(id)
-          this.jumpToNode(clusterNode)
+        switch (window.location.hash.charAt(1)) {
+          case 'a':
+            const aggregateNode = this.dataSet.aggregateNodes.get(id)
+            this.jumpToAggregateNode(aggregateNode)
+            return
+          case 'c':
+            const clusterNode = this.dataSet.clusterNodes.get(id)
+            this.jumpToNode(clusterNode)
+            return
+          case 'l':
+            this.parseCollapsedNodeHash(window.location.hash)
+            return
         }
       })
     }
