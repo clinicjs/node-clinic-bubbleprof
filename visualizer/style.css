@@ -560,6 +560,10 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   margin: 0 6px -3px -3px;
 }
 
+#footer .close:before {
+  content: '×';
+}
+
 #side-bar .close,
 #footer .close {
   width: 24px;

@@ -152,9 +152,12 @@ class BubbleprofUI extends EventEmitter {
       }
     })
 
+    this.on('stepBack', stepBack)
+
     let topMostUI = this
     this.on('setTopmostUI', (newTopmostUI) => {
       topMostUI = newTopmostUI
+      topMostUI.on('stepBack', stepBack)
     })
 
     function stepBack () {
@@ -204,6 +207,10 @@ class BubbleprofUI extends EventEmitter {
         topMostUI.jumpToNode(lastLayoutNode.node)
       }
     }
+  }
+
+  stepBack () {
+    this.emit('stepBack')
   }
 
   formatNumber (num) {
