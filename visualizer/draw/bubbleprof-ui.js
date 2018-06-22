@@ -198,9 +198,11 @@ class BubbleprofUI extends EventEmitter {
       case 'AggregateNode':
         this.selectedDataNode = dataNode
         this.outputFrames(dataNode, layoutNode)
+        window.location.hash = 'a' + dataNode.aggregateId
         return this
 
       case 'ClusterNode':
+        window.location.hash = 'c' + dataNode.clusterId
         if (dataNode.nodes.size === 1) {
           // If there's only one aggregateNode, just select it
           this.selectedDataNode = dataNode.nodes.values().next().value
@@ -213,8 +215,52 @@ class BubbleprofUI extends EventEmitter {
 
       case 'ArtificialNode':
         this.selectedDataNode = dataNode
-        return sameNode ? this : this.createSubLayout(layoutNode)
+        const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode)
+        window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
+        return uiWithinCollapsedNode
     }
+  }
+
+  generateCollapsedNodeHash (uiWithinCollapsedNode) {
+    let hash = `l${uiWithinCollapsedNode.layoutNode.id}|`
+    const appendParentNode = (parentUI) => {
+      if (!parentUI.layoutNode) {
+        hash += 'm'
+      } else {
+        const dataNode = parentUI.layoutNode.node
+        switch (dataNode.constructor.name) {
+          case 'ClusterNode':
+            hash += 'c' + dataNode.clusterId
+            break
+          case 'ArtificialNode':
+            hash += `l${parentUI.layoutNode.id}|`
+            appendParentNode(parentUI.parentUI)
+            break
+        }
+      }
+    }
+    appendParentNode(uiWithinCollapsedNode.parentUI)
+    return hash
+  }
+
+  parseCollapsedNodeHash () {
+    const nodeIds = window.location.hash.slice(1).split('|')
+    const lastNodeId = nodeIds.pop()
+    let targetUI
+    if (lastNodeId === 'm') {
+      targetUI = this
+    } else {
+      const clusterId = parseInt(lastNodeId.slice(1))
+      const clusterNode = this.dataSet.clusterNodes.get(clusterId)
+      targetUI = this.jumpToNode(clusterNode)
+    }
+
+    for (var i = nodeIds.length - 1; i >= 0; i--) {
+      const layoutNodeId = nodeIds[i].slice(1)
+      const layoutNode = targetUI.layout.layoutNodes.get(layoutNodeId)
+      targetUI = targetUI.selectNode(layoutNode)
+    }
+    this.emit('navigation', { from: this, to: targetUI })
   }
 
   clearSublayout () {
@@ -225,6 +271,22 @@ class BubbleprofUI extends EventEmitter {
       this.getNodeLinkSection().d3Element.remove()
       this.parentUI.selectedDataNode = null
       this.parentUI.setAsTopmostUI()
+      if (this.parentUI.layoutNode) {
+        const dataNode = this.parentUI.layoutNode.node
+        switch (dataNode.constructor.name) {
+          case 'ClusterNode':
+            window.location.hash = 'c' + dataNode.clusterId
+            break
+          case 'AggregateNode':
+            window.location.hash = 'a' + dataNode.aggregateId
+            break
+          case 'ArtificialNode':
+            window.location.hash = this.generateCollapsedNodeHash(this.parentUI)
+            break
+        }
+      } else {
+        window.location.hash = ''
+      }
     }
 
     // Close the frames panel if it's open
@@ -412,6 +474,27 @@ class BubbleprofUI extends EventEmitter {
   complete () {
     this.setAsTopmostUI()
     this.emit('complete')
+
+    if (window.location.hash) {
+      setTimeout(() => {
+        const id = parseInt(window.location.hash.slice(2))
+        switch (window.location.hash.charAt(1)) {
+          case 'a':
+            const aggregateNode = this.dataSet.aggregateNodes.get(id)
+            const uiWithinAggregate = this.jumpToNode(aggregateNode)
+            this.emit('navigation', { from: this, to: uiWithinAggregate })
+            break
+          case 'c':
+            const clusterNode = this.dataSet.clusterNodes.get(id)
+            const uiWithinCluster = this.jumpToNode(clusterNode)
+            this.emit('navigation', { from: this, to: uiWithinCluster })
+            break
+          case 'l':
+            this.parseCollapsedNodeHash(window.location.hash)
+            break
+        }
+      })
+    }
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
