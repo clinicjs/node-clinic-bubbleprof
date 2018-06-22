@@ -70,7 +70,7 @@ class Frames extends HtmlContent {
         })
     } else {
       this.d3Heading.html(`
-        Click on a bubble or a connection to drill down and find the stack frames of the code it originates from.
+        Click on a grouping in the diagram above to drill down, and find the call stacks showing the exact lines of code these async operations originated from.
       `)
       this.d3Heading.on('mouseover', null)
       this.d3Heading.on('mouseout', null)
