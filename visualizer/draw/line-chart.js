@@ -65,7 +65,8 @@ class LineChart extends HtmlContent {
 
     this.hoverBox = this.addContent('HoverBox', {
       type: 'tool-tip',
-      allowableOverflow: 24
+      allowableOverflow: 24,
+      fixedOrientation: 'up'
     })
     this.hoverBox.initializeElements()
 
@@ -182,17 +183,6 @@ class LineChart extends HtmlContent {
     return (layoutNode === this.layoutNode)
   }
   getLeadInText () {
-    /* TODO: Enable this, adding lead in text to hover boxes, when nodes on diagram are drawn based on async / sync not within / between
-    if (this.layoutNode) {
-      const dataNode = this.layoutNode.node
-      console.log(this.layoutNode)
-      return `
-        For ${dataNode.getAsyncTime().toFixed(0)} milliseconds of the runtime of this profile,
-        an async resource from this grouping was pending. For ${dataNode.getSyncTime().toFixed(0)} milliseconds, an async resource was
-        active running a syncronous process.
-      `
-    }
-    */
     const pluralCalls = this.ui.dataSet.callbackEventsCount !== 1
     const pluralResources = this.ui.dataSet.sourceNodesCount !== 1
 
@@ -207,10 +197,7 @@ class LineChart extends HtmlContent {
     // Note: d3.event is a live binding which fails if d3 is not bundled in a recommended way.
     // See, for example, https://github.com/d3/d3-sankey/issues/30#issuecomment-307869620
 
-    const {
-      width,
-      height
-    } = this.d3LineChartSVG.node().getBoundingClientRect()
+    const width = this.d3LineChartSVG.node().getBoundingClientRect().width
     const margins = this.contentProperties.margins
 
     // Show nothing if mouse movement is within chart margins
@@ -220,7 +207,6 @@ class LineChart extends HtmlContent {
     }
 
     const leftPosition = offsetX - margins.left
-    const wrapperHeight = this.d3ChartWrapper.node().getBoundingClientRect().height
 
     const index = Math.floor(leftPosition / this.pixelsPerSlice)
     const timeSliceData = this.dataArray[index]
@@ -230,7 +216,7 @@ class LineChart extends HtmlContent {
       return accum + timeSliceData[aggregateId]
     }, 0)
 
-    const topOffset = wrapperHeight - height - margins.bottom
+    const topOffset = margins.top
     const leftOffset = this.pixelsPerSlice * index + margins.left
 
     this.d3SliceHighlight
@@ -319,7 +305,7 @@ class LineChart extends HtmlContent {
 
       this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
       this.d3SliceHighlight.style('height', usableHeight + 'px')
-      this.d3SliceHighlight.style('bottom', margins.bottom + 'px')
+      this.d3SliceHighlight.style('top', margins.top + 'px')
     })
   }
 }
