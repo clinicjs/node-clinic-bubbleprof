@@ -288,7 +288,7 @@ class BubbleprofUI extends EventEmitter {
       targetUI = this
     } else {
       const clusterId = parseInt(lastNodeId.slice(1))
-      const clusterNode = this.dataSet.clusterNodes.get(parseInt(lastNodeId.slice(1)))
+      const clusterNode = this.dataSet.clusterNodes.get(clusterId)
       targetUI = this.jumpToNode(clusterNode)
     }
 
@@ -491,14 +491,14 @@ class BubbleprofUI extends EventEmitter {
           case 'a':
             const aggregateNode = this.dataSet.aggregateNodes.get(id)
             this.jumpToAggregateNode(aggregateNode)
-            return
+            break
           case 'c':
             const clusterNode = this.dataSet.clusterNodes.get(id)
             this.jumpToNode(clusterNode)
-            return
+            break
           case 'l':
             this.parseCollapsedNodeHash(window.location.hash)
-            return
+            break
         }
       })
     }
