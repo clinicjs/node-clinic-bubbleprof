@@ -57,7 +57,7 @@ class Frames extends HtmlContent {
       this.parentContent.d3ContentWrapper.insert('span', ':first-child')
         .classed('close', true)
         .on('click', () => {
-          this.topmostUI.stepBack()
+          this.topmostUI.clearFrames()
           this.parentContent.collapseClose()
         })
     }
