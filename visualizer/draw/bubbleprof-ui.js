@@ -264,6 +264,7 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
+  // Should not be called directly, only via jumpToNode
   jumpToAggregateNode (aggregateNode) {
     this.highlightNode(null)
     const nodeId = aggregateNode.id
