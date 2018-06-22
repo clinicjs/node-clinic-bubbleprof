@@ -176,33 +176,7 @@ class BubbleprofUI extends EventEmitter {
         return
       }
 
-      // TODO: investigate why this is necessary
-      // i.e. it seems like jumpToNode/findDataNode cannot handle case where it has to inspect both .collapsedNodes and .nodes to find the target
-      // e.g. jump from aggregate clump in one branch to aggregate clump in another branch
-      if (lastLayoutNode.node.constructor.name === 'ArtificialNode') {
-        const pathDown = []
-        // Find ancestor ui with non-artificial DataNode
-        let ancestorUI = lastUI
-        while (ancestorUI) {
-          if (!ancestorUI.layoutNode || ancestorUI.layoutNode.node.constructor.name !== 'ArtificialNode') {
-            break
-          }
-          pathDown.unshift(ancestorUI)
-          ancestorUI = ancestorUI.parentUI
-        }
-        if (ancestorUI === originalUI) {
-          while (topMostUI.layoutNode) {
-            topMostUI = topMostUI.clearSublayout()
-          }
-        } else {
-          topMostUI = topMostUI.jumpToNode(ancestorUI.layoutNode.node)
-        }
-        for (const stepDownUI of pathDown) {
-          topMostUI = topMostUI.selectNode(stepDownUI.layoutNode)
-        }
-      } else {
-        topMostUI.jumpToNode(lastLayoutNode.node)
-      }
+      return topMostUI.jumpToNode(lastLayoutNode.node)
     }
   }
 
@@ -267,6 +241,12 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node that may or may not be collapsed
   jumpToNode (dataNode) {
+    if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
+      return this
+    }
+    if (dataNode.clusterNode) {
+      return this.jumpToAggregateNode(dataNode)
+    }
     this.highlightNode(null)
     const layoutNode = this.layout.findDataNode(dataNode)
     // If we can't find the node in this sublayout, step up one level and try again
@@ -288,24 +268,22 @@ class BubbleprofUI extends EventEmitter {
     this.highlightNode(null)
     const nodeId = aggregateNode.id
     const layoutNodes = this.layout.layoutNodes
-    if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node.constructor.name === 'AggregateNode') {
-      return this.selectNode(this.layout.layoutNodes.get(nodeId))
+    const layoutNodeInView = layoutNodes.get(nodeId)
+    if (layoutNodeInView && layoutNodeInView.node.uid === aggregateNode.uid) {
+      return this.selectNode(layoutNodeInView)
     }
 
-    this.clearSublayout()
-
     const uiWithinClusterNode = this.jumpToNode(aggregateNode.clusterNode)
-
-    // If that clusterNode contains only this aggregateNode, it will have been automatically selected already
-    if (uiWithinClusterNode.selectedDataNode === aggregateNode) return
-
-    if (uiWithinClusterNode.layout.layoutNodes.has(nodeId)) {
-      const layoutNode = uiWithinClusterNode.layout.layoutNodes.get(nodeId)
-      return uiWithinClusterNode.selectNode(layoutNode)
-    } else {
-      const collapsedLayoutNode = uiWithinClusterNode.layout.findCollapsedNode(aggregateNode)
-      const uiWithinCollapsedNode = uiWithinClusterNode.selectNode(collapsedLayoutNode)
-      return uiWithinCollapsedNode.jumpToNode(aggregateNode)
+    if (aggregateNode.clusterNode.nodes.size === 1) {
+      return uiWithinClusterNode
+    }
+    let currentUI = uiWithinClusterNode
+    while (currentUI) {
+      const layoutNode = currentUI.layout.findDataNode(aggregateNode)
+      currentUI = currentUI.selectNode(layoutNode)
+      if (layoutNode.node.uid === aggregateNode.uid) {
+        return currentUI
+      }
     }
   }
 
