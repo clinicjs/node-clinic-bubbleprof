@@ -260,6 +260,7 @@ class BubbleprofUI extends EventEmitter {
       const layoutNode = targetUI.layout.layoutNodes.get(layoutNodeId)
       targetUI = targetUI.selectNode(layoutNode)
     }
+    this.emit('navigation', { from: this, to: targetUI })
   }
 
   clearSublayout () {
@@ -464,11 +465,13 @@ class BubbleprofUI extends EventEmitter {
         switch (window.location.hash.charAt(1)) {
           case 'a':
             const aggregateNode = this.dataSet.aggregateNodes.get(id)
-            this.jumpToAggregateNode(aggregateNode)
+            const uiWithinAggregate = this.jumpToAggregateNode(aggregateNode)
+            this.emit('navigation', { from: this, to: uiWithinAggregate })
             break
           case 'c':
             const clusterNode = this.dataSet.clusterNodes.get(id)
-            this.jumpToNode(clusterNode)
+            const uiWithinCluster = this.jumpToNode(clusterNode)
+            this.emit('navigation', { from: this, to: uiWithinCluster })
             break
           case 'l':
             this.parseCollapsedNodeHash(window.location.hash)
