@@ -10,6 +10,8 @@ class Frames extends HtmlContent {
     this.framesByNode = []
     this.topmostUI = null
 
+    this.firstDraw = true
+
     this.ui.on('setTopmostUI', (topmostUI) => {
       this.topmostUI = topmostUI
     })
@@ -19,12 +21,6 @@ class Frames extends HtmlContent {
     super.initializeElements()
 
     this.d3Element.classed('frames-container', true)
-
-    this.d3Element.append('span')
-      .classed('close', true)
-      .on('click', () => {
-        this.parentContent.collapseClose()
-      })
 
     this.d3Heading = this.d3ContentWrapper.append('div')
       .classed('heading', true)
@@ -55,6 +51,17 @@ class Frames extends HtmlContent {
 
   draw () {
     super.draw()
+
+    if (this.firstDraw) {
+      this.firstDraw = false
+      this.parentContent.d3ContentWrapper.insert('span', ':first-child')
+        .classed('close', true)
+        .on('click', () => {
+          this.topmostUI.clearFrames()
+          this.parentContent.collapseClose()
+        })
+    }
+
     this.d3ContentWrapper.selectAll('.frame-item').remove()
     this.d3ContentWrapper.selectAll('.frame-group').remove()
 

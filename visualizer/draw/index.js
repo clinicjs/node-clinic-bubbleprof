@@ -194,8 +194,7 @@ function drawOuterUI () {
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
     classNames: 'bar',
-    collapseEvent: 'main-overlay',
-    closeIcon: '×'
+    collapseEvent: 'main-overlay'
   })
   footer.addContent('Frames', { id: 'frames-panel', classNames: 'side-bar-item' })
 
