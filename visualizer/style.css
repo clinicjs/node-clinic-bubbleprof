@@ -272,14 +272,12 @@ main {
 #header .help-link-block {
   position: absolute;
   right: 0;
-  padding: 2px 0;
-  margin-top: 3px;
   background: var(--main-bg-translucent)
   border-radius: 6px;
 }
 
 #header .help-link-block .help-link {
-  padding: 1px 3px;
+  padding: 3px;
   display: block;
   font-weight: bold;
   text-decoration: none;
@@ -1396,7 +1394,7 @@ body:not(.initialized):after {
     --header-height: 75px;
   }
   #header .help-link-block {
-    top: 1px;
+    top: 6px;
   }
   #header .help-link-block .help-link:before {
     content: 'Help';
@@ -1406,7 +1404,7 @@ body:not(.initialized):after {
   }
 }
 
-@media only screen and (max-width: 450px){
+@media only screen and (max-width: 515px){
   #header .panel,
   #header .panel.breadcrumbs-panel {
     margin: 0;
