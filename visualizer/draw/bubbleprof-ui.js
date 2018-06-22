@@ -281,6 +281,12 @@ class BubbleprofUI extends EventEmitter {
     let currentUI = uiWithinClusterNode
     while (currentUI) {
       const layoutNode = currentUI.layout.findDataNode(aggregateNode)
+      if (!layoutNode) {
+        const context = [...currentUI.layout.layoutNodes.values()].map(layoutNode => layoutNode.id).join(';')
+        const viewUID = `${currentUI.layoutNode && currentUI.layoutNode.node.uid} "${currentUI.name}"`
+        const clusterUID = aggregateNode.clusterNode && aggregateNode.clusterNode.uid
+        throw new Error(`Could not find aggregate ${aggregateNode.uid} from cluster ${clusterUID} in view ${viewUID} with nodes ${context}`)
+      }
       currentUI = currentUI.selectNode(layoutNode)
       if (layoutNode.node.uid === aggregateNode.uid) {
         return currentUI
