@@ -160,15 +160,15 @@ class HoverBox extends HtmlContent {
   draw () {
     super.draw()
 
-    if (this.contentProperties.type === 'node-link' && this.layoutNode) {
-      this.nodeLinkDraw(this.layoutNode)
+    if (this.contentProperties.type === 'node-link') {
+      if (this.layoutNode) this.nodeLinkDraw(this.layoutNode)
       return
     }
 
     const { x, y } = this.contentProperties.position
     this.position(x, y, this.parentContent.d3ContentWrapper.node().getBoundingClientRect())
 
-    if (this.contentProperties.type !== 'static') {
+    if (this.contentProperties.type === 'tool-tip') {
       this.d3TitleBlock.html(this.contentProperties.htmlContent || '')
     }
 
