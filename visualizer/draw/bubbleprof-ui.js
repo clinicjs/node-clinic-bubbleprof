@@ -217,20 +217,9 @@ class BubbleprofUI extends EventEmitter {
 
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
-        // Handle merged shortcut node
-        if (dataNode.targetLayoutNode) {
-          return this.selectNode(dataNode.targetLayoutNode)
-        }
-
-        // TODO: replace with something better designed e.g. a back button for within sublayouts
-        this.clearSublayout()
-        this.selectedDataNode = dataNode.shortcutTo
-
-        const uiWithinShortcutTarget = this.jumpToNode(dataNode.shortcutTo)
-
-        // If shortcutTarget is an aggregateNode, this will open its frames
-        uiWithinShortcutTarget.clearFrames()
-        return uiWithinShortcutTarget
+        const uiParent = this.clearSublayout() // Go up a level as shortcuts always point outside the node
+        const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
+        return uiParent.jumpToNode(targetDataNode)
 
       case 'AggregateNode':
         this.selectedDataNode = dataNode
