@@ -50,9 +50,6 @@ class LineChart extends HtmlContent {
     this.d3ChartWrapper = this.d3ContentWrapper.append('div')
       .classed('line-chart', true)
 
-    this.d3LeadInText = this.d3ChartWrapper.append('p')
-      .classed('lead-in-text', true)
-
     this.d3LineChartSVG = this.d3ChartWrapper.append('svg')
       .classed('line-chart-svg', true)
 
@@ -75,6 +72,9 @@ class LineChart extends HtmlContent {
     this.d3SliceHighlight = this.d3ChartWrapper.append('div')
       .classed('slice-highlight', true)
       .classed('hidden', true)
+
+    this.d3LeadInText = this.d3ChartWrapper.append('p')
+      .classed('lead-in-text', true)
   }
   setData () {
     const {
@@ -197,9 +197,9 @@ class LineChart extends HtmlContent {
     const pluralResources = this.ui.dataSet.sourceNodesCount !== 1
 
     return `
-      <strong>${this.ui.dataSet.callbackEventsCount}</strong> call${pluralCalls ? 's were' : ' was'} made
-      to ${this.ui.dataSet.sourceNodesCount} asynchronous resource${pluralResources ? 's' : ''}, over
-      a ${(this.ui.dataSet.wallTime.profileDuration).toFixed(0)} millisecond period.
+      <strong>${this.ui.formatNumber(this.ui.dataSet.callbackEventsCount)} call${pluralCalls ? 's' : ''}</strong>
+      to ${this.ui.formatNumber(this.ui.dataSet.sourceNodesCount)} async resource${pluralResources ? 's' : ''}, over
+      ${(this.ui.formatNumber(this.ui.dataSet.wallTime.profileDuration))} milliseconds.
     `
   }
   showSlice (event) {

@@ -204,10 +204,12 @@ class HoverBox extends HtmlContent {
 
     this.d3Title.text(dataNode.name)
 
+    const percentage = dataNode.stats.overall / this.ui.dataSet.wallTime.profileDuration * 100
+    const percentageFormatted = (percentage >= 100 ? '>99' : this.ui.formatNumber(percentage)) + '%'
+
     this.d3TimeStatement.html(`
-      There were async operations pending within this group for
-      <strong>${this.ui.formatNumber(dataNode.stats.overall)}\u2009ms</strong>.
-      Of this, <strong>${this.ui.formatNumber(dataNode.getBetweenTime())}\u2009ms</strong> was from operations initiated in the previous group.
+      For
+      <strong>${this.ui.formatNumber(dataNode.stats.overall)}\u2009ms</strong> (${percentageFormatted} of the profile runtime), async operations were pending from this group.
     `)
 
     // If a clusterNode only contains one aggregate, no point clicking down into it, just give us the frames
