@@ -29,7 +29,8 @@ class LayoutNode {
 
 class CollapsedLayoutNode {
   constructor (layoutNodes, parent, children) {
-    this.id = 'clump:' + layoutNodes.map(layoutNode => layoutNode.id).join(',')
+    const dataNodes = layoutNodes.sort((a, b) => a.id - b.id).map(layoutNode => layoutNode.node)
+    this.id = 'clump:' + dataNodes.map(dataNode => dataNode.uid).join(',')
     this.collapsedNodes = layoutNodes
     this.parent = parent
     this.children = children || []
@@ -41,7 +42,7 @@ class CollapsedLayoutNode {
         this.node = new ArtificialNode({
           id: this.id,
           nodeType: node.constructor.name
-        }, node)
+        }, node, dataNodes)
       }
       if (node.nodes) this.node.applyAggregateNodes(node.nodes)
       this.node.applyMark(node.mark)

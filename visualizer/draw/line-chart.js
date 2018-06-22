@@ -152,7 +152,7 @@ class LineChart extends HtmlContent {
       })
       .on('click', (d) => {
         const aggregateNode = this.getAggregateNode(d.key)
-        const targetUI = this.ui.jumpToAggregateNode(aggregateNode)
+        const targetUI = this.topmostUI.jumpToNode(aggregateNode)
         if (targetUI !== this.ui) {
           this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
         }
