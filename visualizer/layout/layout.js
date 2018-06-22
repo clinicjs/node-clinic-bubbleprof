@@ -122,6 +122,9 @@ class Layout {
     if (layoutNodes.has(nodeId) && layoutNodes.get(nodeId).node.uid === dataNode.uid) {
       return this.layoutNodes.get(nodeId)
     }
+    if (dataNode.contents) {
+      return this.findDataNode(dataNode.contents[0])
+    }
     return this.findCollapsedNode(dataNode, recursive)
   }
 

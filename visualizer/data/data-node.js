@@ -352,7 +352,7 @@ class SourceNode {
 
 // ArticificalNodes are created in /layout/ for layout-specific combinations or modified versions of nodes
 class ArtificialNode extends ClusterNode {
-  constructor (rawNode, nodeToCopy) {
+  constructor (rawNode, nodeToCopy, contents) {
     const nodeProperties = Object.assign({}, nodeToCopy, rawNode, {
       clusterId: rawNode.id || nodeToCopy.id,
       parentClusterId: rawNode.parentId || nodeToCopy.parentId,
@@ -364,9 +364,13 @@ class ArtificialNode extends ClusterNode {
       nodeType: 'AggregateNode'
     }
     const node = Object.assign(defaultProperties, rawNode)
+    if (nodeToCopy.clusterNode) {
+      this.clusterNode = nodeToCopy.clusterNode
+    }
 
     this.nodeType = node.nodeType
     this.uid = rawNode.id
+    this.contents = contents
   }
   applyAggregateNodes (nodes) {
     if (!nodes.size) return
