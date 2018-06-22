@@ -1,61 +1,41 @@
 'use strict'
 
-const svgBubble = `
-  <svg class="key-item-image bubbleprof">
-    <g class="node-group" transform="translate(24,24)">
-      <circle class="line-segment party-external" r="22" style="stroke-width: 2;"></circle>
-      <circle class="bubble-inner" r="18"></circle>
-    </g>
-  </svg>
-`
-
-const svgLink = `
-  <svg class="key-item-image bubbleprof">
-    <g class="node-group">
-      <path class="line-segment party-external" d="M21.5,0L21.5,42.5,24,45,26.5,42.5,26.5,0" style="stroke-width: 2;"></path>
-    </g>
-  </svg>
-`
-
-const svgText = `
-  <svg class="key-item-image bubbleprof">
-    <g class="node-group" transform="translate(24,24)">
-      <text class="time-label text-label party-external">1,234&thinsp;ms</text>
-    </g>
-  </svg>
-`
-
-const svgDonut = `
-  <svg class="key-item-image bubbleprof">
-    <g class="node-group" transform="translate(24,24),scale(0.20513)">
-    <path class="type-files-streams donut-segment" d="M-75.20022028443083,85.0128041483933A113.5,113.5,0,0,1,-25.382475550498956,-110.62540365995653A113.5,113.5,0,0,0,-75.20022028443083,85.0128041483933Z"></path>
-    <path class="type-networks donut-segment" d="M6.949870585161229e-15,-113.5A113.5,113.5,0,1,1,-75.20022028443083,85.0128041483933A113.5,113.5,0,1,0,6.949870585161229e-15,-113.5Z"></path>
-    <path class="type-other donut-segment" d="M-25.382475550498956,-110.62540365995653A113.5,113.5,0,0,1,-7.824214201613295,-113.22999457797069A113.5,113.5,0,0,0,-25.382475550498956,-110.62540365995653Z"></path>
-    <path class="type-crypto donut-segment" d="M-2.0849611755483687e-14,-113.5L-2.0849611755483687e-14,-113.5Z"></path>
-    <path class="type-timing-promises donut-segment" d="M-7.824214201613295,-113.22999457797069A113.5,113.5,0,0,1,-2.0849611755483687e-14,-113.5A113.5,113.5,0,0,0,-7.824214201613295,-113.22999457797069Z"></path>
+const svgSample = `
+  <svg class="key-item-image bubbleprof" style="width: 70px; height: 180px; display: block;">
+    <g class="node-group" name="11" transform="rotate(-16) translate(-254,-285)">
+      <path class="outer-path" d="M 294.6726593852533 304.365025784205 Q 287.82548583124384 291.99101211066295 275.4514721661044 298.838185648429L 245.9456762943194 401.45313620513423 A 34.49862255765599 34.49862255765599 0 1 0 265.1668635174329 406.97997632712253 Z"></path>
+      <line class="line-segment party-nodecore" x1="288.9063032183193" x2="259.4005073465343" y1="302.70697374760846" y2="405.3219243043137" style="stroke-width: 2;"></line>
+      <line class="line-segment type-networks" x1="292.75054066294194" x2="263.24474479115696" y1="303.81234177200616" y2="406.4272923287114" style="stroke-width: 2;"></line>
+      <circle class="inner-circle" cx="246.29919333121512" cy="436.4107210714518" r="22.49862255765599"></circle>
+      <path class="line-segment party-nodecore" d="M1.8675020246818336e-15,-30.49862255765599A30.49862255765599,30.49862255765599,0,1,1,-18.040781191743168,-24.590571199262715A30.49862255765599,30.49862255765599,0,1,0,1.8675020246818336e-15,-30.49862255765599Z" transform="translate(246.29919333121512, 436.4107210714518)" style="stroke-width: 2;"></path>
+      <path class="line-segment party-external" d="M-18.040781191743168,-24.590571199262715A30.49862255765599,30.49862255765599,0,0,1,-5.602506074045501e-15,-30.49862255765599A30.49862255765599,30.49862255765599,0,0,0,-18.040781191743168,-24.590571199262715Z" transform="translate(246.29919333121512, 436.4107210714518)" style="stroke-width: 2;"></path>
+      <path class="line-segment type-networks" d="M1.622572664852363e-15,-26.49862255765599A26.49862255765599,26.49862255765599,0,1,1,-22.827271325232676,-13.457068079538168A26.49862255765599,26.49862255765599,0,1,0,1.622572664852363e-15,-26.49862255765599Z" transform="translate(246.29919333121512, 436.4107210714518)" style="stroke-width: 2;"></path>
+      <path class="line-segment type-timing-promises" d="M-22.827271325232676,-13.457068079538168A26.49862255765599,26.49862255765599,0,0,1,-4.867717994557089e-15,-26.49862255765599A26.49862255765599,26.49862255765599,0,0,0,-22.827271325232676,-13.457068079538168Z" transform="translate(246.29919333121512, 436.4107210714518)" style="stroke-width: 2;"></path>
+      <text class="party-nodecore text-label name-label upper-label on-line-label" transform="translate(270.3091678378041, 352.90908100156344) rotate(-73.95799506878697)">example–1.2&#8202;s</text>
     </g>
   </svg>
 `
 
 const keyHtml = `
+  <div class="key-bubble-sample">${svgSample}</div>
   <p>
-    Bubbleprof observes the async operations of your application, groups them, measures their delays, and draws a map of the delays in your application's async flow.
+    <strong>⬋ Grouped async operations.</strong> Size represents time spent executing code and waiting for responses.
   </p>
   <p>
-    ${svgBubble}
-    The size of each bubble represents time within a group of operations. These are grouped where the flow stayed within either your own code, a module, or node core. Tiny adjacent groups are also grouped to reduce clutter.
+    The straight line segment represents async operations in this group initiated in the previous group.
   </p>
   <p>
-    ${svgLink}
-    The length of arrows connecting bubbles shows the delays while the flow moves from one group to another.
+    Colors indicate type and area of the grouped operations (labels above expand to give more details).
+  </p>
+  <h4>How to start exploring this</h4>
+  <p>
+    The diagram shows how groups of async operations branch out from the start point of this application, which is at the top centre.
   </p>
   <p>
-    ${svgDonut}
-    Inner coloured lines indicate the mix of types of async operation responsible for this delay. Click to explore.
+    <strong>Click on bubbles to explore deeper.</strong> When you reach groupings of only one async operation, call stacks are shown, allowing you to find the code behind the biggest delays.
   </p>
   <p>
-    ${svgText}
-    Line lengths between and around the bubbles and numeric labels reflect the aggregated delay in miliseconds (ms).
+    See also the <a href="https://clinicjs.org/bubbleprof/walkthrough" class="external-link">walkthrough and guides on the ClinicJs website</a>.
   </p>
 `
 

@@ -165,17 +165,17 @@ function drawOuterUI () {
     portraitOnly: true
   })
 
-  const callbacksOverTime = sideBar.addContent('LineChart', {
-    classNames: 'side-bar-item'
-  })
-  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations over time <span class="arrow"></span>' })
-
   const lookup = sideBar.addContent('Lookup', {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
   })
-  lookup.addCollapseControl(true, { htmlContent: 'Locate a stack frame <span class="arrow"></span>' })
+  lookup.addCollapseControl(true, { htmlContent: 'Search <span class="arrow"></span>' })
   lookup.addLoadingAnimation({ hidden: true })
+
+  const callbacksOverTime = sideBar.addContent('LineChart', {
+    classNames: 'side-bar-item'
+  })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
 
   const key = sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
@@ -189,13 +189,12 @@ function drawOuterUI () {
   */
 
   // Footer
-  const footerCollapseHTML = '<div class="text">Stack frames</div><div class="arrow"></div>'
+  const footerCollapseHTML = '<div class="text">Call stacks</div><div class="arrow"></div>'
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
     classNames: 'bar',
-    collapseEvent: 'main-overlay',
-    closeIcon: '×'
+    collapseEvent: 'main-overlay'
   })
   footer.addContent('Frames', { id: 'frames-panel', classNames: 'side-bar-item' })
 

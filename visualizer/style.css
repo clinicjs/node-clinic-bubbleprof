@@ -97,6 +97,12 @@ html.light-theme #header, html.light-theme #node-link, html.light-theme #side-ba
   display: none;
 }
 
+a.external-link:link,
+a.external-link:visited {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
 a.external-link:after {
   display: inline-block;
   content: '⬈';
@@ -266,14 +272,12 @@ main {
 #header .help-link-block {
   position: absolute;
   right: 0;
-  padding: 2px 0;
-  margin-top: 3px;
   background: var(--main-bg-translucent)
   border-radius: 6px;
 }
 
 #header .help-link-block .help-link {
-  padding: 1px 3px;
+  padding: 3px;
   display: block;
   font-weight: bold;
   text-decoration: none;
@@ -554,6 +558,10 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 #frames-panel .sub-collapse-control .arrow {
   display: inline-block;
   margin: 0 6px -3px -3px;
+}
+
+#footer .close:before {
+  content: '×';
 }
 
 #side-bar .close,
@@ -846,26 +854,16 @@ svg#node-link-svg:not(:nth-last-child(2)) {
   margin-left: 8px;
 }
 
-#side-bar .collapsible-content-wrapper .key-image {
-  display: block;
-  height: 48px;
-  width: 48px;
-  margin-left: 12px;
-  margin-bottom: 6px;
-  float: right;
-  background-size: cover;
-}
-
-#side-bar .key-item-image {
-  width: 48px;
-  height: 48px;
-  float: right;
-  margin-left: 6px;
+#side-bar .key-bubble-sample {
+  float: left;
+  margin-right: 6px;
+  margin-left: -12px;
   margin-bottom: 6px;
 }
 
-#side-bar .main-key p {
-  clear: right;
+#side-bar strong,
+#side-bar h4 {
+  color: var(--grey-highlight);
 }
 
 body.spiderweb-layout svg.bubbleprof .link-inner {
@@ -937,6 +935,11 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
   margin-top: -55px;
   margin-left: 6px;
 }
+
+#side-bar .line-chart .hover-box {
+  margin-top: -32px;
+}
+
 
 /* Hover box */
 
@@ -1400,7 +1403,7 @@ body:not(.initialized):after {
     --header-height: 75px;
   }
   #header .help-link-block {
-    top: 1px;
+    top: 6px;
   }
   #header .help-link-block .help-link:before {
     content: 'Help';
@@ -1410,7 +1413,7 @@ body:not(.initialized):after {
   }
 }
 
-@media only screen and (max-width: 450px){
+@media only screen and (max-width: 515px){
   #header .panel,
   #header .panel.breadcrumbs-panel {
     margin: 0;

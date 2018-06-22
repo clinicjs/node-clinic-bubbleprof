@@ -8,31 +8,20 @@ class BreadcrumbPanel extends HtmlContent {
 
     this.originalUI = contentProperties.originalUI
     this.topmostUI = contentProperties.originalUI
-    this.traversing = null // avoid unnecessary redraws
     contentProperties.originalUI.on('setTopmostUI', (newTopmostUI) => {
       this.topmostUI = newTopmostUI
-      if (!this.traversing) {
-        return this.draw()
-      }
-
-      if (this.topmostUI !== this.traversing) {
-        this.topmostUI.clearSublayout()
-      } else {
-        this.originalUI.emit('navigation', { from: this.lastUI, to: this.traversing })
-        this.traversing = null
-        this.draw()
-      }
+      this.draw()
     })
 
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 27 && this.topmostUI !== this.originalUI) {
         // ESC button
-        this.lastUI = this.topmostUI
         if (this.topmostUI.selectedDataNode) {
           return this.topmostUI.clearFrames()
         }
+        const lastUI = this.topmostUI
         const targetUI = this.topmostUI.clearSublayout()
-        this.originalUI.emit('navigation', { from: this.lastUI, to: targetUI })
+        this.originalUI.emit('navigation', { from: lastUI, to: targetUI })
       }
     })
   }
@@ -64,11 +53,7 @@ class BreadcrumbPanel extends HtmlContent {
       .property('textContent', labelText)
       .property('title', fullLabelText)
       .on('click', () => {
-        if (this.topmostUI !== ui) {
-          this.lastUI = this.topmostUI
-          this.traversing = ui
-          this.topmostUI.clearSublayout()
-        }
+        this.traverseUp(ui)
       })
 
     if (ui !== this.originalUI) {
@@ -76,6 +61,16 @@ class BreadcrumbPanel extends HtmlContent {
         .insert('label', ':first-child') // i.e. prepend instead of append
         .classed('breadcrumb-separator', true)
         .property('textContent', '➥')
+    }
+  }
+  traverseUp (targetUI) {
+    if (this.topmostUI !== targetUI) {
+      const lastUI = this.topmostUI
+      let currentUI = this.topmostUI
+      while (currentUI && currentUI !== targetUI) {
+        currentUI = currentUI.clearSublayout()
+      }
+      this.originalUI.emit('navigation', { from: lastUI, to: targetUI })
     }
   }
 }
