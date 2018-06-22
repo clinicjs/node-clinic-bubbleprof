@@ -147,7 +147,7 @@ class Lookup extends HtmlContent {
         this.topmostUI.highlightNode(null)
       })
       .on('click', () => {
-        const targetUI = this.ui.jumpToAggregateNode(dataNode)
+        const targetUI = this.topmostUI.jumpToNode(dataNode)
         if (targetUI !== this.ui) {
           this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
         }

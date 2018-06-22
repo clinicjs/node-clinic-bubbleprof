@@ -5,11 +5,11 @@ class Connection {
     // TODO: rename sourceNode everywhere to avoid confusion with DataNode->SourceNode class
     this.sourceId = sourceLayoutNode.id
     this.sourceLayoutNode = sourceLayoutNode
-    this.sourceNode = sourceLayoutNode.node
+    this.sourceNode = sourceLayoutNode.node.shortcutTo || sourceLayoutNode.node
 
     this.targetId = targetLayoutNode.id
     this.targetLayoutNode = targetLayoutNode
-    this.targetNode = targetLayoutNode.node
+    this.targetNode = targetLayoutNode.node.shortcutTo || targetLayoutNode.node
 
     this.scale = scale
 
