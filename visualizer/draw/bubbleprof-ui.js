@@ -271,6 +271,22 @@ class BubbleprofUI extends EventEmitter {
       this.getNodeLinkSection().d3Element.remove()
       this.parentUI.selectedDataNode = null
       this.parentUI.setAsTopmostUI()
+      if (this.parentUI.layoutNode) {
+        const dataNode = this.parentUI.layoutNode.node
+        switch (dataNode.constructor.name) {
+          case 'ClusterNode':
+            window.location.hash = 'c' + dataNode.clusterId
+            break
+          case 'AggregateNode':
+            window.location.hash = 'a' + dataNode.aggregateId
+            break
+          case 'ArtificialNode':
+            window.location.hash = this.generateCollapsedNodeHash(this.parentUI)
+            break
+        }
+      } else {
+        window.location.hash = ''
+      }
     }
 
     // Close the frames panel if it's open
@@ -465,7 +481,7 @@ class BubbleprofUI extends EventEmitter {
         switch (window.location.hash.charAt(1)) {
           case 'a':
             const aggregateNode = this.dataSet.aggregateNodes.get(id)
-            const uiWithinAggregate = this.jumpToAggregateNode(aggregateNode)
+            const uiWithinAggregate = this.jumpToNode(aggregateNode)
             this.emit('navigation', { from: this, to: uiWithinAggregate })
             break
           case 'c':
