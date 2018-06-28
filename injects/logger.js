@@ -16,7 +16,7 @@ fs.writeFileSync(paths['/systeminfo'], JSON.stringify(systemInfo(), null, 2))
 
 // setup encoded states file
 const encoder = new StackTraceEncoder()
-encoder.pipe(
+const out = encoder.pipe(
   fs.createWriteStream(paths['/stacktrace'], {
     // Open log file synchronously to ensure that that .write() only
     // corresponds to one async action. This makes it easy to filter .write()
@@ -55,6 +55,9 @@ hook.enable()
 process.once('beforeExit', function () {
   hook.disable()
   encoder.end()
+  out.on('close', function () {
+    process.exit()
+  })
 })
 
 // NOTE: Workaround until https://github.com/nodejs/node/issues/18476 is solved
