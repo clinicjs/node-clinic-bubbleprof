@@ -63,6 +63,6 @@ process.once('beforeExit', function () {
 // NOTE: Workaround until https://github.com/nodejs/node/issues/18476 is solved
 skipThis = true
 process.on('SIGINT', function () {
-  if (process.listenerCount('SIGINT') === 1) process.exit(0)
+  if (process.listenerCount('SIGINT') === 1) process.emit('beforeExit')
 })
 skipThis = false
