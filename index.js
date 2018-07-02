@@ -7,7 +7,6 @@ const path = require('path')
 const pump = require('pump')
 const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
-const Stringify = require('streaming-json-stringify')
 const browserify = require('browserify')
 const streamTemplate = require('stream-template')
 const joinTrace = require('node-trace-log-join')
@@ -115,12 +114,8 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     // create dataFile
     const dataFile = analysis(
-      systemInfoReader, stackTraceReader, traceEventReader
-    ).pipe(new Stringify({
-      seperator: ',\n',
-      stringifier: JSON.stringify
-    }))
-
+      systemInfoReader, stackTraceReader, traceEventReader, {stringify: true}
+    )
     // add logos
     const logoFile = fs.createReadStream(logoPath)
     const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
@@ -138,7 +133,6 @@ class ClinicBubbleprof extends events.EventEmitter {
     })
     b.add(scriptPath)
     const scriptFile = b.bundle()
-
     // create style-file stream
     const styleFile = fs.createReadStream(stylePath)
 

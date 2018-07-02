@@ -1,6 +1,6 @@
 'use strict'
 
-const data = require('../data.json') // base64 encoded source file
+const { data } = require('../data.json') // base64 encoded source file
 
 const DataSet = require('./dataset.js')
 
