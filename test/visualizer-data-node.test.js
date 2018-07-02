@@ -75,7 +75,7 @@ test('Visualizer data - data nodes - acmeair sample json', function (t) {
 })
 
 test('Visualizer data - data nodes - less common, preset type categories', function (t) {
-  const dataSet = new DataSet(fakeNodes)
+  const dataSet = new DataSet({data: fakeNodes})
   dataSet.processData()
   let result = ''
 
@@ -113,7 +113,7 @@ test('Visualizer data - data nodes - less common, preset type categories', funct
 test('Visualizer data - data nodes - decimals by type, category and party', function (t) {
   function roundTo5Places (num) { return Number(num.toFixed(5)) }
 
-  const dataSet = new DataSet(fakeNodes)
+  const dataSet = new DataSet({data: fakeNodes})
   dataSet.processData()
   let result = ''
 
@@ -143,7 +143,7 @@ test('Visualizer data - data nodes - decimals by type, category and party', func
 })
 
 test('Visualizer data - data nodes - set invalid stat', function (t) {
-  const dataSet = new DataSet(fakeNodes)
+  const dataSet = new DataSet({data: fakeNodes})
   dataSet.processData()
   const clusterNode = dataSet.clusterNodes.get('A')
 
