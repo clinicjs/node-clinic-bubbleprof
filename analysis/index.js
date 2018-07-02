@@ -13,6 +13,7 @@ const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
 const RestructureNetSourceNodes = require('./source/restructure-net-source-nodes.js')
+const RPS = require('./source/requests-per-second.js')
 
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
@@ -27,8 +28,6 @@ const NameBarrierNodes = require('./barrier/name-barrier-nodes.js')
 
 const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
 const AnonymiseClusterFrames = require('./cluster/anonymise-cluster-frames.js')
-
-const RPS = require('./requests-per-second.js')
 
 function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analysisStream) {
   // Overview:
@@ -60,7 +59,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analy
   // Key each SourceNode with an identify hash.
     .pipe(new IdentifySourceNodes())
   // Analyse RPS, we pass the stream instance as it populates the methods
-    .pipe(new RPS(systemInfo, analysisStream))
+    .pipe(new RPS(analysisStream))
 
   // AggregateNode:
   // Aggregate SourceNode's that have the same asynchronous path.
@@ -136,7 +135,8 @@ class Analysis extends stream.PassThrough {
 class Stringify extends stream.Transform {
   constructor (analysis) {
     super({
-      writableObjectMode: true
+      writableObjectMode: true,
+      readableObjectMode: false
     })
 
     this._sep = '\n'
