@@ -11,10 +11,16 @@ function isHTTPEnd (sourceNode) {
   return false
 }
 
+function upsert (nodes, id) {
+  const list = nodes.get(id) || []
+  if (!list.length) nodes.set(id, list)
+  return list
+}
+
 class RPS extends Transform {
   constructor (analysis) {
     super({readableObjectMode: true, writableObjectMode: true})
-    this._hits = new Map()
+    this._nodes = new Map()
     this._minTime = 0
     this._maxTime = 0
     this._analysis = analysis
@@ -30,19 +36,18 @@ class RPS extends Transform {
 
     if (isHTTPEnd(data)) {
       const id = data.identifier
-      const prev = this._hits.get(id)
-      this._hits.set(id, (prev || 0) + 1)
+      upsert(this._nodes, id).push(data.asyncId)
     }
 
     cb(null, data)
   }
 
   _maxRequests () {
-    var max = 0
-    for (const hits of this._hits.values()) {
-      if (hits > max) max = hits
+    var result = []
+    for (const nodes of this._nodes.values()) {
+      if (nodes.length > result.length) result = nodes
     }
-    return max
+    return result
   }
 
   _flush (cb) {

@@ -123,7 +123,7 @@ class Analysis extends stream.PassThrough {
       writableObjectMode: true
     })
 
-    this.requests = 0
+    this.requests = []
     this.runtime = 0
   }
 
@@ -151,8 +151,8 @@ class Stringify extends stream.Transform {
   }
 
   _flush (cb) {
-    const requests = this._analysis.requests
-    const runtime = this._analysis.runtime
+    const requests = JSON.stringify(this._analysis.requests)
+    const runtime = JSON.stringify(this._analysis.runtime)
     this.push(`],"requests":${requests},"runtime":${runtime}}`)
     cb()
   }
