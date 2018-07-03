@@ -17,7 +17,7 @@ function upsert (nodes, id) {
   return list
 }
 
-class RequestNodes extends Transform {
+class HTTPRequestNodes extends Transform {
   constructor (analysis) {
     super({readableObjectMode: true, writableObjectMode: true})
     this._nodes = new Map()
@@ -52,9 +52,9 @@ class RequestNodes extends Transform {
 
   _flush (cb) {
     this._analysis.runtime = this._maxTime - this._minTime
-    this._analysis.requests = this._maxRequests()
+    this._analysis.httpRequests = this._maxRequests()
     cb(null)
   }
 }
 
-module.exports = RequestNodes
+module.exports = HTTPRequestNodes

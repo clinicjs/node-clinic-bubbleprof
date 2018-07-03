@@ -13,7 +13,7 @@ const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
 const RestructureNetSourceNodes = require('./source/restructure-net-source-nodes.js')
-const RequestNodes = require('./source/request-nodes.js')
+const HTTPRequestNodes = require('./source/http-request-nodes.js')
 
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
@@ -60,7 +60,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analy
     .pipe(new IdentifySourceNodes())
   // Analyse and find http request nodes
   // We pass the stream instance as it populates the analysis digest
-    .pipe(new RequestNodes(analysisStream))
+    .pipe(new HTTPRequestNodes(analysisStream))
 
   // AggregateNode:
   // Aggregate SourceNode's that have the same asynchronous path.
@@ -124,7 +124,7 @@ class Analysis extends stream.PassThrough {
       writableObjectMode: true
     })
 
-    this.requests = []
+    this.httpRequests = []
     this.runtime = 0
   }
 
@@ -152,9 +152,9 @@ class Stringify extends stream.Transform {
   }
 
   _flush (cb) {
-    const requests = JSON.stringify(this._analysis.requests)
+    const httpRequests = JSON.stringify(this._analysis.httpRequests)
     const runtime = JSON.stringify(this._analysis.runtime)
-    this.push(`],"requests":${requests},"runtime":${runtime}}`)
+    this.push(`],"httpRequests":${httpRequests},"runtime":${runtime}}`)
     cb()
   }
 }
