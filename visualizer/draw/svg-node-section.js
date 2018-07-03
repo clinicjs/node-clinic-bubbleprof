@@ -91,14 +91,14 @@ class SvgNodeElement {
 
 class SvgLine extends SvgNodeElement {
   initializeFromData () {
-    const d3Enter = this.d3Group.selectAll('line.segmented-line')
+    const d3Enter = this.d3Group.selectAll('path.segmented-line')
       .data(this.decimalsArray)
       .enter()
 
     const classPrepend = this.dataType === 'typeCategory' ? 'type' : 'party'
     const highlightEvent = this.dataType === 'typeCategory' ? 'highlightType' : 'highlightParty'
 
-    this.d3Shapes = d3Enter.append('line')
+    this.d3Shapes = d3Enter.append('path')
       .attr('class', decimal => `line-segment ${classPrepend}-${decimal[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth)
       .on('mouseover', decimal => this.ui.emit(highlightEvent, decimal[0]))
@@ -186,17 +186,11 @@ class SvgLine extends SvgNodeElement {
     const startPosition = expanding ? segmentDatum.contractedPosition : segmentDatum.expandedPosition
     const endPosition = expanding ? segmentDatum.expandedPosition : segmentDatum.contractedPosition
 
-    d3LineSegment.attr('x1', startPosition.x1)
-    d3LineSegment.attr('y1', startPosition.y1)
-    d3LineSegment.attr('x2', startPosition.x2)
-    d3LineSegment.attr('y2', startPosition.y2)
+    d3LineSegment.attr('d', `M ${startPosition.x1} ${startPosition.y1} L ${startPosition.x2} ${startPosition.y2}`)
 
     d3LineSegment.transition()
       .duration(this.ui.settings.animationDuration)
-      .attr('x1', endPosition.x1)
-      .attr('x2', endPosition.x2)
-      .attr('y1', endPosition.y1)
-      .attr('y2', endPosition.y2)
+      .attr('d', `M ${endPosition.x1} ${endPosition.y1} L ${endPosition.x2} ${endPosition.y2}`)
       .on('end', () => {
         resolve(segmentDatum)
       })
@@ -224,10 +218,7 @@ class SvgLine extends SvgNodeElement {
       if (preAnimate) {
         segmentDatum.expandedPosition = segmentLine
       } else {
-        d3LineSegment.attr('x1', segmentLine.x1)
-        d3LineSegment.attr('x2', segmentLine.x2)
-        d3LineSegment.attr('y1', segmentLine.y1)
-        d3LineSegment.attr('y2', segmentLine.y2)
+        d3LineSegment.attr('d', `M ${segmentLine.x1} ${segmentLine.y1} L ${segmentLine.x2} ${segmentLine.y2}`)
       }
     })
   }
