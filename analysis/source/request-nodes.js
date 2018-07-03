@@ -17,7 +17,7 @@ function upsert (nodes, id) {
   return list
 }
 
-class RPS extends Transform {
+class RequestNodes extends Transform {
   constructor (analysis) {
     super({readableObjectMode: true, writableObjectMode: true})
     this._nodes = new Map()
@@ -57,4 +57,4 @@ class RPS extends Transform {
   }
 }
 
-module.exports = RPS
+module.exports = RequestNodes

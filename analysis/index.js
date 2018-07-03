@@ -13,7 +13,7 @@ const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
 const RestructureNetSourceNodes = require('./source/restructure-net-source-nodes.js')
-const RPS = require('./source/requests-per-second.js')
+const RequestNodes = require('./source/request-nodes.js')
 
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
@@ -58,8 +58,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analy
     .pipe(new RestructureNetSourceNodes())
   // Key each SourceNode with an identify hash.
     .pipe(new IdentifySourceNodes())
-  // Analyse RPS, we pass the stream instance as it populates the methods
-    .pipe(new RPS(analysisStream))
+  // Analyse and find http request nodes
+  // We pass the stream instance as it populates the analysis digest
+    .pipe(new RequestNodes(analysisStream))
 
   // AggregateNode:
   // Aggregate SourceNode's that have the same asynchronous path.
