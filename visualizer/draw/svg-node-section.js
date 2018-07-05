@@ -64,6 +64,11 @@ class SvgNodeSection {
         .attr('cy', this.parentContent.circleCentre.y)
         .attr('r', Math.max(this.parentContent.getRadius() - this.ui.settings.lineWidth * 4, 0))
     }
+
+    if (!this.layoutNode.chosen) {
+      console.log('#' + this.layoutNode.id, 'HIDE', this.d3NodeGroup.selectAll('*'))
+      this.d3NodeGroup.selectAll('*').classed('fluff', true)
+    }
   }
 }
 

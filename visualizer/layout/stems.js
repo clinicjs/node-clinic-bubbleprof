@@ -25,6 +25,7 @@ class Stem {
     this.leaves = {
       ids: []
     }
+    this.longestLeaf = null
     this.raw = {
       ownBetween: layoutNode.getBetweenTime(),
       ownDiameter: radiusFromCircumference(layoutNode.getWithinTime()) * 2
@@ -42,6 +43,11 @@ class Stem {
       this.ancestors.totalDiameter += ancestorStem.raw.ownDiameter
       if (!layoutNode.children.length) {
         ancestorStem.leaves.ids.push(layoutNode.id)
+        if (!ancestorStem.longestLeaf) {
+          ancestorStem.longestLeaf = ancestorStem.longestLeaf || layoutNode
+        } else {
+          ancestorStem.longestLeaf = layoutNode.getTotalTime() > ancestorStem.longestLeaf.getTotalTime() ? layoutNode : ancestorStem.longestLeaf
+        }
       }
     }
     this.update()

@@ -20,10 +20,23 @@ class CollapsedLayout {
     // e.g. we could attach .topNodes or some iterator to Layout instances
     this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
 
+    const nodesBySize = [...this.layoutNodes.values()].sort((a, b) => a.getTotalTime() - b.getTotalTime())
+    const q75Nodes = nodesBySize.slice(Math.floor(nodesBySize.length * 0.85), nodesBySize.length)
+    const chosenLeaves = new Set()
+    for (const layoutNode of q75Nodes) {
+      chosenLeaves.add(layoutNode.stem.longestLeaf || layoutNode)
+    }
+    for (const layoutNode of chosenLeaves) {
+      layoutNode.chosen = true
+      for (const ancestorId of layoutNode.stem.ancestors.ids) {
+        this.layoutNodes.get(ancestorId).chosen = true
+      }
+    }
+
     let topNodesIterator = this.topLayoutNodes.values()
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
       const topNode = topNodesIterator.next().value
-      this.collapseHorizontally(topNode)
+      // this.collapseHorizontally(topNode)
     }
     const newLayoutNodes = new Map()
     // Isolating vertical collapsing from horizontal collapsing
@@ -31,7 +44,7 @@ class CollapsedLayout {
     topNodesIterator = this.topLayoutNodes.values()
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
       const topNode = topNodesIterator.next().value
-      this.collapseVertically(topNode)
+      // this.collapseVertically(topNode)
       this.mergeShortcutNodes(topNode)
       this.indexLayoutNode(newLayoutNodes, topNode)
     }

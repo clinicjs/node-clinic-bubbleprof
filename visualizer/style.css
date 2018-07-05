@@ -1608,3 +1608,7 @@ body:not(.initialized):after {
     margin-top: 12px;
   }
 }
+
+.fluff {
+  fill: black!important;
+}
