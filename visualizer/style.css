@@ -589,6 +589,10 @@ body[data-view-mode='fit'] #node-link {
 
 /* New style node-link diagram and container */
 
+svg.bubbleprof .line-segment {
+  fill: none;
+}
+
 svg.bubbleprof .node-group {
   cursor: pointer;
 }

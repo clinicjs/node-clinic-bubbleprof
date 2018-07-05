@@ -14,7 +14,8 @@ class BubbleprofUI extends EventEmitter {
     super()
 
     const defaultSettings = {
-      animationDuration: 500,
+      animationDuration: 800,
+      animationEasing: d3.easeCubicInOut,
       numberFormatter: d3.format(',.0f'),
       strokePadding: 10,
       nodeLinkId: 'node-link',
