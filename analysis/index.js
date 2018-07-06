@@ -13,6 +13,7 @@ const FilterSourceNodes = require('./source/filter-source-nodes.js')
 const IdentifySourceNodes = require('./source/identify-source-nodes.js')
 const CombineAsSourceNodes = require('./source/combine-as-source-nodes.js')
 const RestructureNetSourceNodes = require('./source/restructure-net-source-nodes.js')
+const HTTPRequestNodes = require('./source/http-request-nodes.js')
 
 const MarkHttpAggregateNodes = require('./aggregate/mark-http-aggregate-nodes.js')
 const CombineAsAggregateNodes = require('./aggregate/combine-as-aggregate-nodes.js')
@@ -28,7 +29,7 @@ const NameBarrierNodes = require('./barrier/name-barrier-nodes.js')
 const CombineAsClusterNodes = require('./cluster/combine-as-cluster-nodes.js')
 const AnonymiseClusterFrames = require('./cluster/anonymise-cluster-frames.js')
 
-function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
+function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analysisStream) {
   // Overview:
   // The data progressing changes data structure a few times. The data
   // structures are transformed the following way:
@@ -57,6 +58,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
     .pipe(new RestructureNetSourceNodes())
   // Key each SourceNode with an identify hash.
     .pipe(new IdentifySourceNodes())
+  // Analyse and find http request nodes
+  // We pass the stream instance as it populates the analysis digest
+    .pipe(new HTTPRequestNodes(analysisStream))
 
   // AggregateNode:
   // Aggregate SourceNode's that have the same asynchronous path.
@@ -85,15 +89,15 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Finite-State-Machine.
   // * Try to express as much of the clustering logic using barriers.
   // NOTE: BFS ordering is maintained in the BarrierNodes too.
-   .pipe(new WrapAsBarrierNodes())
+    .pipe(new WrapAsBarrierNodes())
   // Create barriers where the user callSite is the same
-   .pipe(new MakeSynchronousBarrierNodes(systemInfo))
+    .pipe(new MakeSynchronousBarrierNodes(systemInfo))
   // Create barriers where one goes from user to external, or from external
   // to user. External includes nodecore.
-   .pipe(new MakeExternalBarrierNodes(systemInfo))
+    .pipe(new MakeExternalBarrierNodes(systemInfo))
   // Populates .name for each barrier node with a name corresponding
   // to what the node represents. Fx, nodecore.http.server or external.my-module
-   .pipe(new NameBarrierNodes(systemInfo))
+    .pipe(new NameBarrierNodes(systemInfo))
 
   // ClusterNode:
   // BarrierNodes that are not wrappers marks the beginning of a new
@@ -110,7 +114,7 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader) {
   // Anonymise the stacks
     .pipe(new AnonymiseClusterFrames(systemInfo))
 
-  return result
+  result.pipe(analysisStream)
 }
 
 class Analysis extends stream.PassThrough {
@@ -119,20 +123,52 @@ class Analysis extends stream.PassThrough {
       readableObjectMode: true,
       writableObjectMode: true
     })
+
+    this.httpRequests = []
+    this.runtime = 0
+  }
+
+  start (systemInfo, stackTraceReader, traceEventReader) {
+    analysisPipeline(systemInfo, stackTraceReader, traceEventReader, this)
   }
 }
 
-function analysis (systemInfoReader, stackTraceReader, traceEventReader) {
+class Stringify extends stream.Transform {
+  constructor (analysis) {
+    super({
+      writableObjectMode: true,
+      readableObjectMode: false
+    })
+
+    this._sep = '\n'
+    this._analysis = analysis
+    this.push('{"data":[')
+  }
+
+  _transform (data, enc, cb) {
+    this.push(this._sep + JSON.stringify(data))
+    this._sep = ',\n'
+    cb()
+  }
+
+  _flush (cb) {
+    const httpRequests = JSON.stringify(this._analysis.httpRequests)
+    const runtime = JSON.stringify(this._analysis.runtime)
+    this.push(`],"httpRequests":${httpRequests},"runtime":${runtime}}`)
+    cb()
+  }
+}
+
+function analysis (systemInfoReader, stackTraceReader, traceEventReader, opts) {
   const result = new Analysis()
 
   systemInfoReader.pipe(endpoint({ objectMode: true }, function (err, data) {
     if (err) return result.emit('error', err)
     const systemInfo = new SystemInfo(data[0])
-
-    analysisPipeline(systemInfo, stackTraceReader, traceEventReader)
-      .pipe(result)
+    result.start(systemInfo, stackTraceReader, traceEventReader)
   }))
 
+  if (opts && opts.stringify) return result.pipe(new Stringify(result))
   return result
 }
 

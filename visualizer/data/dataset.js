@@ -5,10 +5,12 @@ const { validateKey } = require('../validation.js')
 const { ClusterNode } = require('./data-node.js')
 
 class DataSet {
-  constructor (data, settings = {}) {
-    if (!data.map) {
-      throw new Error(`No valid data found, data.json is typeof ${typeof data}`)
+  constructor (json, settings = {}) {
+    if (!json.data || !json.data.map) {
+      throw new Error(`No valid data found, data.json is typeof ${typeof json}`)
     }
+
+    const data = json.data
 
     const defaultSettings = {
       debugMode: false, // if true, keeps sourceNodes in memory and exposes dataSet and Layout to window
