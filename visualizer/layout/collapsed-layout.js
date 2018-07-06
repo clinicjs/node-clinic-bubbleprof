@@ -21,7 +21,8 @@ class CollapsedLayout {
     this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
 
     const nodesBySize = [...this.layoutNodes.values()].sort((a, b) => a.getTotalTime() - b.getTotalTime())
-    const q75Nodes = nodesBySize.slice(Math.floor(nodesBySize.length * 0.85), nodesBySize.length)
+    const q75Index = Math.floor(nodesBySize.length * 0.85)
+    const q75Nodes = nodesBySize.slice(q75Index, nodesBySize.length)
     const chosenLeaves = new Set()
     for (const layoutNode of q75Nodes) {
       chosenLeaves.add(layoutNode.stem.longestLeaf || layoutNode)
@@ -32,23 +33,34 @@ class CollapsedLayout {
         this.layoutNodes.get(ancestorId).chosen = true
       }
     }
+    const remainingNodes = nodesBySize.slice(0, q75Index)
+    for (const layoutNode of remainingNodes) {
+      if (layoutNode.chosen) {
+        continue
+      }
+      if (layoutNode.parent) {
+        const index = layoutNode.parent.children.indexOf(layoutNode.id)
+        if (index !== -1) layoutNode.parent.children.splice(index, 1)
+      }
+      this.layoutNodes.delete(layoutNode.id)
+    }
 
-    let topNodesIterator = this.topLayoutNodes.values()
-    for (let i = 0; i < this.topLayoutNodes.size; ++i) {
-      const topNode = topNodesIterator.next().value
-      // this.collapseHorizontally(topNode)
-    }
-    const newLayoutNodes = new Map()
-    // Isolating vertical collapsing from horizontal collapsing
-    // Mainly for aesthetic reasons, but also reduces complexity (easier to debug)
-    topNodesIterator = this.topLayoutNodes.values()
-    for (let i = 0; i < this.topLayoutNodes.size; ++i) {
-      const topNode = topNodesIterator.next().value
-      // this.collapseVertically(topNode)
-      this.mergeShortcutNodes(topNode)
-      this.indexLayoutNode(newLayoutNodes, topNode)
-    }
-    this.layoutNodes = newLayoutNodes
+    // let topNodesIterator = this.topLayoutNodes.values()
+    // for (let i = 0; i < this.topLayoutNodes.size; ++i) {
+    //   const topNode = topNodesIterator.next().value
+    //   // this.collapseHorizontally(topNode)
+    // }
+    // const newLayoutNodes = new Map()
+    // // Isolating vertical collapsing from horizontal collapsing
+    // // Mainly for aesthetic reasons, but also reduces complexity (easier to debug)
+    // topNodesIterator = this.topLayoutNodes.values()
+    // for (let i = 0; i < this.topLayoutNodes.size; ++i) {
+    //   const topNode = topNodesIterator.next().value
+    //   // this.collapseVertically(topNode)
+    //   this.mergeShortcutNodes(topNode)
+    //   this.indexLayoutNode(newLayoutNodes, topNode)
+    // }
+    // this.layoutNodes = newLayoutNodes
   }
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
