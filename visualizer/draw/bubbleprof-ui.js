@@ -60,6 +60,14 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
+  /**
+  * Getters and formatters
+  **/
+
+  formatNumber (num) {
+    return num < 1 ? '<1' : this.settings.numberFormatter(num)
+  }
+
   getContentClass (className) {
     validateKey(className, Object.keys(htmlContentTypes))
     return htmlContentTypes[className]
@@ -90,6 +98,30 @@ class BubbleprofUI extends EventEmitter {
     }
     return settings
   }
+
+  truncateLabel (labelString, maxWords, maxChars) {
+    const labelWords = labelString.split(' ')
+    let truncatedLabel = labelString
+    let addEllipsis = false
+
+    if (labelWords.length > maxWords) {
+      truncatedLabel = labelWords.slice(0, maxWords).join(' ')
+      addEllipsis = true
+    }
+
+    if (truncatedLabel.length > maxChars) {
+      truncatedLabel = truncatedLabel.slice(0, maxChars - 2)
+      addEllipsis = true
+    }
+
+    if (addEllipsis) truncatedLabel += '…'
+
+    return truncatedLabel
+  }
+
+  /**
+  * Sublayouts / UIs and transitions between them
+  **/
 
   createSubLayout (layoutNode, callback) {
     const sublayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
@@ -125,6 +157,273 @@ class BubbleprofUI extends EventEmitter {
       return uiWithinSublayout
     }
     return this
+  }
+
+  clearSublayout (callback) {
+    this.selectedDataNode = null
+
+    // TODO: check that this frees up this and its layout for GC
+    if (this.parentUI) {
+      this.parentUI.selectedDataNode = null
+
+      this.animate(() => {
+        this.getNodeLinkSection().d3Element.remove()
+        if (callback) callback()
+      }, false)
+
+      this.parentUI.setAsTopmostUI()
+      if (this.parentUI.layoutNode) {
+        const dataNode = this.parentUI.layoutNode.node
+        switch (dataNode.constructor.name) {
+          case 'ClusterNode':
+            window.location.hash = 'c' + dataNode.clusterId
+            break
+          case 'AggregateNode':
+            window.location.hash = 'a' + dataNode.aggregateId
+            break
+          case 'ArtificialNode':
+            window.location.hash = this.generateCollapsedNodeHash(this.parentUI)
+            break
+        }
+      } else {
+        window.location.hash = ''
+      }
+    }
+
+    // Close the frames panel if it's open
+    this.clearFrames()
+    return this.parentUI
+  }
+
+  animate (callback, isExpanding) {
+    this.highlightNode(null)
+    this.parentUI.highlightNode(null)
+    this.svgNodeDiagram.animate(callback, isExpanding)
+  }
+
+  setAsTopmostUI () {
+    // Allow user to inspect layout object
+    window.layout = this.layout
+
+    // Allow UI components to interact with whichever ui and layout is in focus
+    this.originalUI.emit('setTopmostUI', this)
+  }
+
+  /**
+  * Node selection and navigation
+  **/
+
+  // Selects a node visible within current layout
+  selectNode (layoutNode) {
+    const dataNode = layoutNode.node
+    const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
+
+    switch (dataNode.constructor.name) {
+      case 'ShortcutNode':
+        const uiParent = this.clearSublayout() // Go up a level as shortcuts always point outside the node
+        const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
+        return uiParent.jumpToNode(targetDataNode)
+
+      case 'AggregateNode':
+        this.selectedDataNode = dataNode
+        this.outputFrames(dataNode, layoutNode)
+        window.location.hash = 'a' + dataNode.aggregateId
+        return this
+
+      case 'ClusterNode':
+        window.location.hash = 'c' + dataNode.clusterId
+        if (dataNode.nodes.size === 1) {
+          // If there's only one aggregateNode, just select it
+          this.selectedDataNode = dataNode.nodes.values().next().value
+          this.outputFrames(this.selectedDataNode, layoutNode)
+          return this
+        } else {
+          this.selectedDataNode = dataNode
+          return sameNode ? this : this.createSubLayout(layoutNode)
+        }
+
+      case 'ArtificialNode':
+        this.selectedDataNode = dataNode
+        const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode)
+        window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
+        return uiWithinCollapsedNode
+    }
+  }
+
+  // Selects a node that may or may not be collapsed
+  jumpToNode (dataNode) {
+    if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
+      return this
+    }
+    if (dataNode.clusterNode) {
+      return this.jumpToAggregateNode(dataNode)
+    }
+    this.highlightNode(null)
+    const layoutNode = this.layout.findDataNode(dataNode)
+    // If we can't find the node in this sublayout, step up one level and try again
+    if (!layoutNode) {
+      this.clearSublayout()
+      return this.parentUI.jumpToNode(dataNode)
+    }
+
+    if (layoutNode.node.uid === dataNode.uid) {
+      return this.selectNode(layoutNode)
+    } else {
+      // dataNode is inside one or more levels of collapsedNode - recurse
+      const uiWithinCollapsedNode = this.selectNode(layoutNode)
+      return uiWithinCollapsedNode.jumpToNode(dataNode)
+    }
+  }
+
+  // Should not be called directly, only via jumpToNode
+  jumpToAggregateNode (aggregateNode) {
+    this.highlightNode(null)
+    const nodeId = aggregateNode.id
+    const layoutNodes = this.layout.layoutNodes
+    const layoutNodeInView = layoutNodes.get(nodeId)
+    if (layoutNodeInView && layoutNodeInView.node.uid === aggregateNode.uid) {
+      return this.selectNode(layoutNodeInView)
+    }
+
+    const uiWithinClusterNode = this.jumpToNode(aggregateNode.clusterNode)
+    if (aggregateNode.clusterNode.nodes.size === 1) {
+      return uiWithinClusterNode
+    }
+    let currentUI = uiWithinClusterNode
+    while (currentUI) {
+      const layoutNode = currentUI.layout.findDataNode(aggregateNode)
+      if (!layoutNode) {
+        const context = [...currentUI.layout.layoutNodes.values()].map(layoutNode => layoutNode.id).join(';')
+        const viewUID = `${currentUI.layoutNode && currentUI.layoutNode.node.uid} "${currentUI.name}"`
+        const clusterUID = aggregateNode.clusterNode && aggregateNode.clusterNode.uid
+        throw new Error(`Could not find aggregate ${aggregateNode.uid} from cluster ${clusterUID} in view ${viewUID} with nodes ${context}`)
+      }
+      currentUI = currentUI.selectNode(layoutNode)
+      if (layoutNode.node.uid === aggregateNode.uid) {
+        return currentUI
+      }
+    }
+  }
+
+  generateCollapsedNodeHash (uiWithinCollapsedNode) {
+    let hash = `l${uiWithinCollapsedNode.layoutNode.id}|`
+    const appendParentNode = (parentUI) => {
+      if (!parentUI.layoutNode) {
+        hash += 'm'
+      } else {
+        const dataNode = parentUI.layoutNode.node
+        switch (dataNode.constructor.name) {
+          case 'ClusterNode':
+            hash += 'c' + dataNode.clusterId
+            break
+          case 'ArtificialNode':
+            hash += `l${parentUI.layoutNode.id}|`
+            appendParentNode(parentUI.parentUI)
+            break
+        }
+      }
+    }
+    appendParentNode(uiWithinCollapsedNode.parentUI)
+    return hash
+  }
+
+  parseCollapsedNodeHash () {
+    const nodeIds = window.location.hash.slice(1).split('|')
+    const lastNodeId = nodeIds.pop()
+    let targetUI
+    if (lastNodeId === 'm') {
+      targetUI = this
+    } else {
+      const clusterId = parseInt(lastNodeId.slice(1))
+      const clusterNode = this.dataSet.clusterNodes.get(clusterId)
+      targetUI = this.jumpToNode(clusterNode)
+    }
+
+    for (var i = nodeIds.length - 1; i >= 0; i--) {
+      const layoutNodeId = nodeIds[i].slice(1)
+      const layoutNode = targetUI.layout.layoutNodes.get(layoutNodeId)
+      targetUI = targetUI.selectNode(layoutNode)
+    }
+    this.emit('navigation', { from: this, to: targetUI })
+  }
+
+  /**
+  * Other interactions
+  **/
+
+  highlightNode (layoutNode = null, dataNode = null) {
+    this.highlightedNode = layoutNode
+    this.highlightedDataNode = dataNode
+    this.emit('hover', layoutNode)
+  }
+
+  outputFrames (aggregateNode, layoutNode = null) {
+    if (layoutNode) {
+      this.highlightNode(layoutNode)
+    }
+    this.originalUI.emit('outputFrames', aggregateNode)
+  }
+
+  clearFrames () {
+    this.selectedDataNode = null
+    this.originalUI.emit('outputFrames', null)
+  }
+
+  collapseEvent (eventName) {
+    // Called when a collapsable with a given collapseEvent name opens, to close all others
+    this.emit(`collapse-${eventName}`)
+  }
+
+  /**
+  * Initialization and draw
+  **/
+
+  // For all UI item instances, keep initial DOM element creation in initializeElements() method
+  // so that browser paint etc can happen around the same time, minimising reflows
+  initializeElements () {
+    const d3Body = d3.select('body')
+    const d3Main = d3.select('main')
+    d3Body.classed('initialized', true)
+    d3Body.attr('data-view-mode', this.settings.viewMode)
+
+    this.mainContainer.d3Element = d3Main.size() ? d3Main : d3Body.append('main')
+    this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
+
+    // TODO: try replacing with .emit('initializeElements')
+    for (const section of this.sections.values()) {
+      section.initializeElements()
+    }
+
+    this.on('highlightType', (className) => {
+      d3Body.attr('data-highlight-type', className || null)
+    })
+
+    this.on('highlightParty', (className) => {
+      d3Body.attr('data-highlight-party', className || null)
+    })
+
+    const debounceTime = 300
+    const nodeLinkSection = this.getNodeLinkSection()
+
+    const onWindowResizeBegin = debounce(() => {
+      nodeLinkSection.d3Element.classed('redraw', true)
+
+      // Use a shorter time period than the trailing debounce to prevent getting stuck
+    }, debounceTime * 0.9, { leading: true })
+
+    const onWindowResizeEnd = debounce(() => {
+      this.redrawLayout()
+      nodeLinkSection.d3Element.classed('redraw', false)
+    }, debounceTime)
+
+    window.addEventListener('resize', () => {
+      onWindowResizeBegin()
+      onWindowResizeEnd()
+    })
+
+    if (this.originalUI === this) {
+      this.initializeBackButton()
+    }
   }
 
   // Close button returns to the originalUI
@@ -186,278 +485,6 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
-  formatNumber (num) {
-    return num < 1 ? '<1' : this.settings.numberFormatter(num)
-  }
-
-  // Selects a node visible within current layout
-  selectNode (layoutNode) {
-    const dataNode = layoutNode.node
-    const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
-
-    switch (dataNode.constructor.name) {
-      case 'ShortcutNode':
-        const uiParent = this.clearSublayout() // Go up a level as shortcuts always point outside the node
-        const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
-        return uiParent.jumpToNode(targetDataNode)
-
-      case 'AggregateNode':
-        this.selectedDataNode = dataNode
-        this.outputFrames(dataNode, layoutNode)
-        window.location.hash = 'a' + dataNode.aggregateId
-        return this
-
-      case 'ClusterNode':
-        window.location.hash = 'c' + dataNode.clusterId
-        if (dataNode.nodes.size === 1) {
-          // If there's only one aggregateNode, just select it
-          this.selectedDataNode = dataNode.nodes.values().next().value
-          this.outputFrames(this.selectedDataNode, layoutNode)
-          return this
-        } else {
-          this.selectedDataNode = dataNode
-          return sameNode ? this : this.createSubLayout(layoutNode)
-        }
-
-      case 'ArtificialNode':
-        this.selectedDataNode = dataNode
-        const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode)
-        window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
-        return uiWithinCollapsedNode
-    }
-  }
-
-  generateCollapsedNodeHash (uiWithinCollapsedNode) {
-    let hash = `l${uiWithinCollapsedNode.layoutNode.id}|`
-    const appendParentNode = (parentUI) => {
-      if (!parentUI.layoutNode) {
-        hash += 'm'
-      } else {
-        const dataNode = parentUI.layoutNode.node
-        switch (dataNode.constructor.name) {
-          case 'ClusterNode':
-            hash += 'c' + dataNode.clusterId
-            break
-          case 'ArtificialNode':
-            hash += `l${parentUI.layoutNode.id}|`
-            appendParentNode(parentUI.parentUI)
-            break
-        }
-      }
-    }
-    appendParentNode(uiWithinCollapsedNode.parentUI)
-    return hash
-  }
-
-  parseCollapsedNodeHash () {
-    const nodeIds = window.location.hash.slice(1).split('|')
-    const lastNodeId = nodeIds.pop()
-    let targetUI
-    if (lastNodeId === 'm') {
-      targetUI = this
-    } else {
-      const clusterId = parseInt(lastNodeId.slice(1))
-      const clusterNode = this.dataSet.clusterNodes.get(clusterId)
-      targetUI = this.jumpToNode(clusterNode)
-    }
-
-    for (var i = nodeIds.length - 1; i >= 0; i--) {
-      const layoutNodeId = nodeIds[i].slice(1)
-      const layoutNode = targetUI.layout.layoutNodes.get(layoutNodeId)
-      targetUI = targetUI.selectNode(layoutNode)
-    }
-    this.emit('navigation', { from: this, to: targetUI })
-  }
-
-  clearSublayout (callback) {
-    this.selectedDataNode = null
-
-    // TODO: check that this frees up this and its layout for GC
-    if (this.parentUI) {
-      this.parentUI.selectedDataNode = null
-
-      this.animate(() => {
-        this.getNodeLinkSection().d3Element.remove()
-        if (callback) callback()
-      }, false)
-
-      this.parentUI.setAsTopmostUI()
-      if (this.parentUI.layoutNode) {
-        const dataNode = this.parentUI.layoutNode.node
-        switch (dataNode.constructor.name) {
-          case 'ClusterNode':
-            window.location.hash = 'c' + dataNode.clusterId
-            break
-          case 'AggregateNode':
-            window.location.hash = 'a' + dataNode.aggregateId
-            break
-          case 'ArtificialNode':
-            window.location.hash = this.generateCollapsedNodeHash(this.parentUI)
-            break
-        }
-      } else {
-        window.location.hash = ''
-      }
-    }
-
-    // Close the frames panel if it's open
-    this.clearFrames()
-
-    return this.parentUI
-  }
-
-  highlightNode (layoutNode = null, dataNode = null) {
-    this.highlightedNode = layoutNode
-    this.highlightedDataNode = dataNode
-    this.emit('hover', layoutNode)
-  }
-
-  // Selects a node that may or may not be collapsed
-  jumpToNode (dataNode) {
-    if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
-      return this
-    }
-    if (dataNode.clusterNode) {
-      return this.jumpToAggregateNode(dataNode)
-    }
-    this.highlightNode(null)
-    const layoutNode = this.layout.findDataNode(dataNode)
-    // If we can't find the node in this sublayout, step up one level and try again
-    if (!layoutNode) {
-      this.clearSublayout()
-      return this.parentUI.jumpToNode(dataNode)
-    }
-
-    if (layoutNode.node.uid === dataNode.uid) {
-      return this.selectNode(layoutNode)
-    } else {
-      // dataNode is inside one or more levels of collapsedNode - recurse
-      const uiWithinCollapsedNode = this.selectNode(layoutNode)
-      return uiWithinCollapsedNode.jumpToNode(dataNode)
-    }
-  }
-
-  // Should not be called directly, only via jumpToNode
-  jumpToAggregateNode (aggregateNode) {
-    this.highlightNode(null)
-    const nodeId = aggregateNode.id
-    const layoutNodes = this.layout.layoutNodes
-    const layoutNodeInView = layoutNodes.get(nodeId)
-    if (layoutNodeInView && layoutNodeInView.node.uid === aggregateNode.uid) {
-      return this.selectNode(layoutNodeInView)
-    }
-
-    const uiWithinClusterNode = this.jumpToNode(aggregateNode.clusterNode)
-    if (aggregateNode.clusterNode.nodes.size === 1) {
-      return uiWithinClusterNode
-    }
-    let currentUI = uiWithinClusterNode
-    while (currentUI) {
-      const layoutNode = currentUI.layout.findDataNode(aggregateNode)
-      if (!layoutNode) {
-        const context = [...currentUI.layout.layoutNodes.values()].map(layoutNode => layoutNode.id).join(';')
-        const viewUID = `${currentUI.layoutNode && currentUI.layoutNode.node.uid} "${currentUI.name}"`
-        const clusterUID = aggregateNode.clusterNode && aggregateNode.clusterNode.uid
-        throw new Error(`Could not find aggregate ${aggregateNode.uid} from cluster ${clusterUID} in view ${viewUID} with nodes ${context}`)
-      }
-      currentUI = currentUI.selectNode(layoutNode)
-      if (layoutNode.node.uid === aggregateNode.uid) {
-        return currentUI
-      }
-    }
-  }
-
-  outputFrames (aggregateNode, layoutNode = null) {
-    if (layoutNode) {
-      this.highlightNode(layoutNode)
-    }
-    this.originalUI.emit('outputFrames', aggregateNode)
-  }
-
-  clearFrames () {
-    this.selectedDataNode = null
-    this.originalUI.emit('outputFrames', null)
-  }
-
-  collapseEvent (eventName) {
-    // Called when a collapsable with a given collapseEvent name opens, to close all others
-    this.emit(`collapse-${eventName}`)
-  }
-
-  redrawLayout () {
-    const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
-    newLayout.generate()
-    this.setData(newLayout)
-  }
-
-  truncateLabel (labelString, maxWords, maxChars) {
-    const labelWords = labelString.split(' ')
-    let truncatedLabel = labelString
-    let addEllipsis = false
-
-    if (labelWords.length > maxWords) {
-      truncatedLabel = labelWords.slice(0, maxWords).join(' ')
-      addEllipsis = true
-    }
-
-    if (truncatedLabel.length > maxChars) {
-      truncatedLabel = truncatedLabel.slice(0, maxChars - 2)
-      addEllipsis = true
-    }
-
-    if (addEllipsis) truncatedLabel += '…'
-
-    return truncatedLabel
-  }
-
-  // For all UI item instances, keep initial DOM element creation in initializeElements() method
-  // so that browser paint etc can happen around the same time, minimising reflows
-  initializeElements () {
-    const d3Body = d3.select('body')
-    const d3Main = d3.select('main')
-    d3Body.classed('initialized', true)
-    d3Body.attr('data-view-mode', this.settings.viewMode)
-
-    this.mainContainer.d3Element = d3Main.size() ? d3Main : d3Body.append('main')
-    this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
-
-    // TODO: try replacing with .emit('initializeElements')
-    for (const section of this.sections.values()) {
-      section.initializeElements()
-    }
-
-    this.on('highlightType', (className) => {
-      d3Body.attr('data-highlight-type', className || null)
-    })
-
-    this.on('highlightParty', (className) => {
-      d3Body.attr('data-highlight-party', className || null)
-    })
-
-    const debounceTime = 300
-    const nodeLinkSection = this.getNodeLinkSection()
-
-    const onWindowResizeBegin = debounce(() => {
-      nodeLinkSection.d3Element.classed('redraw', true)
-
-      // Use a shorter time period than the trailing debounce to prevent getting stuck
-    }, debounceTime * 0.9, { leading: true })
-
-    const onWindowResizeEnd = debounce(() => {
-      this.redrawLayout()
-      nodeLinkSection.d3Element.classed('redraw', false)
-    }, debounceTime)
-
-    window.addEventListener('resize', () => {
-      onWindowResizeBegin()
-      onWindowResizeEnd()
-    })
-
-    if (this.originalUI === this) {
-      this.initializeBackButton()
-    }
-  }
-
   setData (layout, dataSet) {
     if (layout === this.layout) return
     const initialize = !this.layout
@@ -472,20 +499,6 @@ class BubbleprofUI extends EventEmitter {
       this.emit('initializeFromData')
     }
     this.emit('svgDraw')
-  }
-
-  animate (callback, isExpanding) {
-    this.highlightNode(null)
-    this.parentUI.highlightNode(null)
-    this.svgNodeDiagram.animate(callback, isExpanding)
-  }
-
-  setAsTopmostUI () {
-    // Allow user to inspect layout object
-    window.layout = this.layout
-
-    // Allow UI components to interact with whichever ui and layout is in focus
-    this.originalUI.emit('setTopmostUI', this)
   }
 
   complete () {
@@ -521,6 +534,12 @@ class BubbleprofUI extends EventEmitter {
     for (const section of this.sections.values()) {
       section.draw()
     }
+  }
+
+  redrawLayout () {
+    const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
+    newLayout.generate()
+    this.setData(newLayout)
   }
 }
 module.exports = BubbleprofUI
