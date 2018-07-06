@@ -35,6 +35,7 @@ class Stem {
 
     for (const ancestorId of this.ancestors.ids) {
       const ancestor = layout.layoutNodes.get(ancestorId)
+      if (!ancestor) console.log({ ancestorId })
       const ancestorStem = ancestor.stem
 
       if (ancestor.node.constructor.name === 'ShortcutNode') this.shortcutsInStem++

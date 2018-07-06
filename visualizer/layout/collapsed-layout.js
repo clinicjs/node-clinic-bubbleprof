@@ -4,7 +4,7 @@ const _ = {
   difference: require('lodash/difference')
 }
 
-const { ShortcutNode } = require('../data/data-node.js')
+const { DataNode, ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 
 class CollapsedLayout {
@@ -21,34 +21,151 @@ class CollapsedLayout {
     this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
 
     const nodesBySize = [...this.layoutNodes.values()].sort((a, b) => a.getTotalTime() - b.getTotalTime())
-    const q75Nodes = nodesBySize.slice(Math.floor(nodesBySize.length * 0.85), nodesBySize.length)
+    const nonShortcuts = nodesBySize.filter(ln => ln.node.constructor.name !== 'ShortcutNode')
+    console.log('nonShortcuts.length', nonShortcuts.length)
+    if (nonShortcuts.length < 8) {
+      for (const layoutNode of nonShortcuts) {
+        layoutNode.chosen = true
+      }
+      const newLayoutNodes = new Map()
+      const topNodesIterator = this.topLayoutNodes.values()
+      for (let i = 0; i < this.topLayoutNodes.size; ++i) {
+        const topNode = topNodesIterator.next().value
+        this.mergeShortcutNodes(topNode)
+        this.indexLayoutNode(newLayoutNodes, topNode)
+      }
+      this.layoutNodes = newLayoutNodes
+      return
+    }
+    const q75Index = Math.floor(nodesBySize.length * 0.85)
+    const q75Nodes = nodesBySize.slice(q75Index, nodesBySize.length)
+    console.log('q75Nodes.length', q75Nodes.length)
+    const getDepth = (stemlessNode) => {
+      const parentDepth = stemlessNode.parent ? getDepth(stemlessNode.parent) : 0
+      return parentDepth + 1
+    }
+    const byDepth = (a, b) => getDepth(a) - getDepth(b)
+    const remainingNodes = new Set(nodesBySize.slice(0, q75Index))// .sort(byDepth).reverse()
     const chosenLeaves = new Set()
+    const x = new Map()
     for (const layoutNode of q75Nodes) {
       chosenLeaves.add(layoutNode.stem.longestLeaf || layoutNode)
+      x.set(layoutNode.id, (layoutNode.stem.longestLeaf || layoutNode).id)
     }
+    console.log('chosenLeaves.size', chosenLeaves.size)
+    // const newLayoutNodes = new Map()
     for (const layoutNode of chosenLeaves) {
-      layoutNode.chosen = true
       for (const ancestorId of layoutNode.stem.ancestors.ids) {
-        this.layoutNodes.get(ancestorId).chosen = true
+        const ancestor = this.layoutNodes.get(ancestorId)
+        ancestor.chosen = true
+        remainingNodes.delete(ancestor)
+        // newLayoutNodes.set(ancestor.id, ancestor)
+      }
+      remainingNodes.delete(layoutNode)
+      layoutNode.chosen = true
+      // newLayoutNodes.set(layoutNode.id, layoutNode)
+    }
+    // console.log({q75Nodes, chosenLeaves, remainingNodes})
+    // console.log({uncollapsedLayout: this.uncollapsedLayout})
+
+    // console.log({
+    //   q75Nodes: q75Nodes.map(ln => ln.id),
+    //   remainingNodes: [...remainingNodes].map(ln => ln.id),
+    //   chosenLeaves: [...chosenLeaves].map(ln => ln.id),
+    //   x
+    // })
+
+    // TODO: use lodash memoize?
+    const findChosenAncestor = (layoutNode) => {
+      if (!layoutNode.parent) {
+        return
+      }
+      findChosenAncestor.cache = findChosenAncestor.cache || new Map()
+      const fromCache = findChosenAncestor.cache.get(layoutNode.parent)
+      if (fromCache) return fromCache
+      if (layoutNode.parent.chosen) {
+        findChosenAncestor.cache.set(layoutNode.parent, layoutNode.parent)
+        return layoutNode.parent
+      } else {
+        const deeper = findChosenAncestor(layoutNode.parent)
+        findChosenAncestor.cache.set(layoutNode.parent, deeper)
+        return deeper
       }
     }
 
-    let topNodesIterator = this.topLayoutNodes.values()
-    for (let i = 0; i < this.topLayoutNodes.size; ++i) {
-      const topNode = topNodesIterator.next().value
-      // this.collapseHorizontally(topNode)
+    const dropsByNode = new Map()
+    const shortcutsByNode = new Map()
+    for (const layoutNode of remainingNodes) {
+      const chosenAncestor = findChosenAncestor(layoutNode)
+      const arr = dropsByNode.get(chosenAncestor)
+      if (!dropsByNode.get(chosenAncestor)) {
+        dropsByNode.set(chosenAncestor, [])
+      }
+      if (!shortcutsByNode.get(chosenAncestor)) {
+        shortcutsByNode.set(chosenAncestor, [])
+      }
+      if (layoutNode.node.constructor.name === 'ShortcutNode') {
+        shortcutsByNode.get(chosenAncestor).push(layoutNode)
+      } else {
+        dropsByNode.get(chosenAncestor).push(layoutNode)
+      }
     }
+
+    const dropsByNodeByDepth = [...dropsByNode.keys()].sort(byDepth).map(layoutNode => ({ layoutNode, drops: dropsByNode.get(layoutNode), shortcuts: shortcutsByNode.get(layoutNode) }))
+    for (const { layoutNode, drops, shortcuts } of dropsByNodeByDepth) {
+      if (!drops.length) {
+        continue
+      }
+      const ids = drops.map(ln => ln.id)
+      const newChildren = _.difference(layoutNode.children, ids).concat(shortcuts.map(sh => sh.id))
+      const isTopNode = this.topLayoutNodes.has(layoutNode)
+      // console.log({isTopNode})
+      const newCollapse = isTopNode ? drops : [layoutNode].concat(drops)
+      const combined = new CollapsedLayoutNode(newCollapse, isTopNode ? layoutNode : layoutNode.parent, isTopNode ? [] : newChildren)
+      combined.chosen = true
+      this.layoutNodes.set(combined.id, combined)
+      if (isTopNode) {
+        layoutNode.children = newChildren.concat([combined.id])
+      }
+      if (layoutNode.parent) {
+        const index = layoutNode.parent.children.indexOf(layoutNode.id)
+        if (index !== -1) layoutNode.parent.children.splice(index, 1, combined.id)
+      }
+      for (const childId of newChildren) {
+        this.layoutNodes.get(childId).parent = combined
+      }
+    }
+
     const newLayoutNodes = new Map()
-    // Isolating vertical collapsing from horizontal collapsing
-    // Mainly for aesthetic reasons, but also reduces complexity (easier to debug)
-    topNodesIterator = this.topLayoutNodes.values()
+    const topNodesIterator = this.topLayoutNodes.values()
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
       const topNode = topNodesIterator.next().value
-      // this.collapseVertically(topNode)
-      this.mergeShortcutNodes(topNode)
       this.indexLayoutNode(newLayoutNodes, topNode)
     }
+
+    // console.log({ dropsByNodeByDepth, newLayoutNodes })
+
     this.layoutNodes = newLayoutNodes
+  }
+  collapseX (layoutNode) {
+    const children = layoutNode.children.map(childId => this.layoutNodes.get(childId))
+    let combined
+    for (let i = 0; i < children.length; ++i) {
+      let child = children[i]
+      const collapsedChild = this.collapseX(child)
+      const squashNode = collapsedChild || child
+      if (!squashNode.chosen) {
+        const hostNode = combined || layoutNode
+        // Do not vertically-collapse children which have at least one long grandchild
+        // const longGrandChild = squashNode.children.map(childId => this.layoutNodes.get(childId)).find(child => !this.isCollapsible(child))
+        // if (longGrandChild) {
+        //   continue
+        // }
+        combined = this.combinelayoutNodes(hostNode, squashNode)
+        if (combined) combined.chosen = layoutNode.chosen
+      }
+    }
+    return combined
   }
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
