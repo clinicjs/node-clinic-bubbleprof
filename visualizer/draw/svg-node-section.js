@@ -412,11 +412,11 @@ function repackArcString (arcObject) {
 
 function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
   // Factory function is passed to D3, given D3 context and passes interpolator function to d3's attrTween
-  return function tweenLineFactory (arcDatum) {
+  return function lineTweenFactory (arcDatum) {
     const d3Path = d3.select(this)
 
     // This is the interpolator function used by the D3 transition on each animation frame
-    return function tweenLineInterpolator (time) {
+    return function lineTweenInterpolator (time) {
       const easedTime = ease(time)
       const currentArc = unpackArcString(d3Path.attr('d'))
 
@@ -471,9 +471,7 @@ function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
 
 function tweenArcToArc (contractedArcDatum, contractedBubble, expandedBubble, ease, isExpanding) {
   // Factory function is passed to D3, given D3 context and passes interpolator function to d3's attrTween
-  return function tweenArcFactory (expandedArcDatum, b, c) {
-    const d3Path = d3.select(this)
-
+  return function arcTweenFactory (expandedArcDatum, b, c) {
     const interpolateStartAngle = d3.interpolateNumber(contractedArcDatum.startAngle, expandedArcDatum.startAngle)
     const interpolateEndAngle = d3.interpolateNumber(contractedArcDatum.endAngle, expandedArcDatum.endAngle)
     const interpolateValue = d3.interpolateNumber(contractedArcDatum.value, expandedArcDatum.value)
@@ -484,7 +482,7 @@ function tweenArcToArc (contractedArcDatum, contractedBubble, expandedBubble, ea
     const interpolateDegrees = d3.interpolateNumber(contractedBubble.svgNode.degrees, expandedBubble.svgNode.degrees)
 
     // This is the interpolator function used by the D3 transition on each animation frame
-    return function tweenArcInterpolator (time) {
+    return function arcTweenInterpolator (time) {
       const easedTime = ease(isExpanding ? time : 1 - time)
 
       const interpolatedArcDatum = {
@@ -495,7 +493,6 @@ function tweenArcToArc (contractedArcDatum, contractedBubble, expandedBubble, ea
       }
 
       const interpolatedRadius = interpolateRadius(easedTime)
-
       const interpolatedArcMaker = d3.arc()
         .innerRadius(interpolatedRadius)
         .outerRadius(interpolatedRadius)

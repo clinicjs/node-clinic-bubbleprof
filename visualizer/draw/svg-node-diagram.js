@@ -72,8 +72,16 @@ class SvgNodeDiagram {
   animate (callback, isExpanding) {
     this.isAnimating = true
 
-    this.svgContainer.d3Element.classed('fade-in', isExpanding)
-    this.svgContainer.d3Element.classed('fade-out', !isExpanding)
+    this.svgContainer.d3Element.classed('fade-elements-in', isExpanding)
+    this.svgContainer.d3Element.classed('fade-elements-out', !isExpanding)
+    this.svgContainer.d3Element.classed('complete-fade-out', false)
+    this.svgContainer.d3Element.classed('complete-fade-in', false)
+
+    const parentContainer = this.ui.parentUI.svgNodeDiagram.svgContainer
+    parentContainer.d3Element.classed('fade-elements-in', false)
+    parentContainer.d3Element.classed('fade-elements-out', false)
+    parentContainer.d3Element.classed('complete-fade-out', isExpanding)
+    parentContainer.d3Element.classed('complete-fade-in', !isExpanding)
 
     this.bbox = this.d3Container.node().getBoundingClientRect()
 
