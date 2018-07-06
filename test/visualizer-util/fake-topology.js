@@ -65,7 +65,7 @@ function mockTopology (topology) {
       clusterNodes.set(id, clusterNode)
     }
   }
-  return [...clusterNodes.values()]
+  return {data: [...clusterNodes.values()]}
 }
 
 function topologyToOrderedLeaves (topology) {
