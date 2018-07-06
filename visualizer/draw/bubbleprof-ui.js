@@ -91,7 +91,7 @@ class BubbleprofUI extends EventEmitter {
     return settings
   }
 
-  createSubLayout (layoutNode) {
+  createSubLayout (layoutNode, callback) {
     const sublayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
     if (sublayout) {
       sublayout.generate()
@@ -117,7 +117,9 @@ class BubbleprofUI extends EventEmitter {
 
       uiWithinSublayout.setData(sublayout)
 
-      uiWithinSublayout.animate()
+      uiWithinSublayout.animate(() => {
+        if (callback) callback()
+      }, true)
 
       uiWithinSublayout.setAsTopmostUI()
       return uiWithinSublayout
@@ -267,15 +269,17 @@ class BubbleprofUI extends EventEmitter {
     this.emit('navigation', { from: this, to: targetUI })
   }
 
-  clearSublayout () {
+  clearSublayout (callback) {
     this.selectedDataNode = null
 
     // TODO: check that this frees up this and its layout for GC
     if (this.parentUI) {
-      this.getNodeLinkSection().d3Element.remove()
       this.parentUI.selectedDataNode = null
 
-      this.parentUI.animate(this)
+      this.animate(() => {
+        this.getNodeLinkSection().d3Element.remove()
+        if (callback) callback()
+      }, false)
 
       this.parentUI.setAsTopmostUI()
       if (this.parentUI.layoutNode) {
@@ -470,8 +474,8 @@ class BubbleprofUI extends EventEmitter {
     this.emit('svgDraw')
   }
 
-  animate (previousUI, callback) {
-    this.getNodeLinkSection().animate(previousUI)
+  animate (callback, isExpanding) {
+    this.svgNodeDiagram.animate(callback, isExpanding)
   }
 
   setAsTopmostUI () {

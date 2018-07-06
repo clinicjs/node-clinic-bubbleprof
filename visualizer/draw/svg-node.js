@@ -108,10 +108,12 @@ class SvgNode {
     return this
   }
 
-  animate (previousUI, svgNodeAnimations) {
-    this.asyncBetweenLines.animate(previousUI, svgNodeAnimations)
+  animate (svgNodeAnimations, isExpanding) {
+    this.setCoordinates()
+
+    this.asyncBetweenLines.animate(svgNodeAnimations, isExpanding)
     if (this.drawType !== 'squash') {
-      this.syncBubbles.animate(previousUI, svgNodeAnimations)
+      this.syncBubbles.animate(svgNodeAnimations, isExpanding)
     }
   }
 

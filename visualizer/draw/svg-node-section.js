@@ -45,9 +45,9 @@ class SvgNodeSection {
       .initializeFromData()
   }
 
-  animate (previousUI, svgNodeAnimations) {
-    this.byParty.animate(previousUI, svgNodeAnimations)
-    this.byType.animate(previousUI, svgNodeAnimations)
+  animate (svgNodeAnimations, isExpanding) {
+    this.byParty.animate(svgNodeAnimations, isExpanding)
+    this.byType.animate(svgNodeAnimations, isExpanding)
   }
 
   draw () {
@@ -137,62 +137,46 @@ class SvgLine extends SvgNodeElement {
     return this
   }
 
-  animate (previousUI, svgNodeAnimations) {
-    // TODO - check this draw() isn't redundant
+  animate (svgNodeAnimations, isExpanding) {
+    this.setCoordinates()
+
     const dataNode = this.svgNode.layoutNode.node
-    const isExpanding = !previousUI
+    const contractedSvgNode = this.ui.parentUI.svgNodeDiagram.svgNodes.get(this.ui.layoutNode.id)
 
     let nodeWasBetweenInParent
-    let contractedOrigin
-    let expandedOrigin
-    let degrees
+    // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
+    if (contractedSvgNode.drawType === 'squash') {
+      nodeWasBetweenInParent = true
+    } else {
+      switch (dataNode.constructor.name) {
+        case 'ShortcutNode':
+          // Nothing to animate, so return and skip the rest of this method
+          return
+        case 'AggregateNode':
+          nodeWasBetweenInParent = dataNode.isBetweenClusters
+          break
+        case 'ArtificialNode':
+          nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
+          break
+        default:
+          // Cluster nodes are between cluster nodes by definition
+          nodeWasBetweenInParent = true
+          break
+      }
+    }
 
-    let overallLength
-    let parentBetweenTime
-    let parentWithinTime
+    const contractedOrigin = nodeWasBetweenInParent ? cloneXY(contractedSvgNode.originPoint) : defaultArcOrigin()
+    const expandedOrigin = cloneXY(this.originPoint)
+
+    const overallLength = contractedSvgNode.getLength()
+    const parentBetweenTime = contractedSvgNode.layoutNode.node.getBetweenTime()
+    const parentWithinTime = contractedSvgNode.layoutNode.node.getWithinTime()
+    const degrees = contractedSvgNode.degrees
 
     let parentBubble
-
-    // Get positions of this layout's layoutNode in the previousUI
-    if (isExpanding) {
-      // Stepping inside a node: look at it in the parentUI
-      const svgNodeInParent = this.ui.parentUI.svgNodeDiagram.svgNodes.get(this.ui.layoutNode.id)
-
-      // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
-      if (svgNodeInParent.drawType === 'squash') {
-        nodeWasBetweenInParent = true
-      } else {
-        switch (dataNode.constructor.name) {
-          case 'ShortcutNode':
-            // Nothing to animate, so return and skip the rest of this method
-            return
-          case 'AggregateNode':
-            nodeWasBetweenInParent = dataNode.isBetweenClusters
-            break
-          case 'ArtificialNode':
-            nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
-            break
-          default:
-            // Cluster nodes are between cluster nodes by definition
-            nodeWasBetweenInParent = true
-            break
-        }
-      }
-
-      contractedOrigin = nodeWasBetweenInParent ? cloneXY(svgNodeInParent.originPoint) : defaultArcOrigin()
-      expandedOrigin = cloneXY(this.originPoint)
-
-      overallLength = svgNodeInParent.getLength()
-      parentBetweenTime = svgNodeInParent.layoutNode.node.getBetweenTime()
-      parentWithinTime = svgNodeInParent.layoutNode.node.getWithinTime()
-      degrees = svgNodeInParent.degrees
-
-      if (!nodeWasBetweenInParent) {
-        const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
-        parentBubble = svgNodeInParent.syncBubbles[dataTypeKey]
-      }
-    } else {
-      // Stepping back to a higher layout
+    if (!nodeWasBetweenInParent) {
+      const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
+      parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
     }
 
     this.d3Shapes.each((segmentDatum, index, nodes) => {
@@ -227,7 +211,7 @@ class SvgLine extends SvgNodeElement {
         if (!nodeWasBetweenInParent) {
           const endArc = unpackArcString(endPath)
           if (endArc) {
-            d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing))
+            d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
             return
           }
         }
@@ -285,7 +269,7 @@ class SvgBubble extends SvgNodeElement {
       .outerRadius(this.radius)
   }
 
-  animate (previousUI) {
+  animate (svgNodeAnimations, isExpanding) {
   }
 
   draw () {
@@ -404,7 +388,7 @@ function unpackArcString (arcString) {
 }
 
 // tweenArcToLine is called on creating transition, passing params to the functions D3 handles
-function tweenArcToLine (endArc, svgElement, ease) {
+function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
   const arcMaker = svgElement.arcMaker
 
   // This factory function defines the interpolator function and returns it to d3's attrTween
@@ -452,12 +436,12 @@ function tweenArcToLine (endArc, svgElement, ease) {
         ],
         A: [
           numberForSVG(interpolate('A', 0), 'Arc ellipse rx'),
-          numberForSVG(interpolate('A', 1) * (1 - time), 'Arc ellipse ry'),
+          numberForSVG(interpolate('A', 1) * (isExpanding ? 1 - time : time), 'Arc ellipse ry'),
 
           numberForSVG(currentLine.degrees, 'Arc ellipse rotation'),
 
-          numberForSVG(parseInt(currentArc.A[3]), 'Arc binary large-arc flag'),
-          numberForSVG(parseInt(currentArc.A[4]), 'Arc binary sweep flag'),
+          numberForSVG(parseInt((isExpanding ? currentArc : endArc).A[3]), 'Arc binary large-arc flag'),
+          numberForSVG(parseInt((isExpanding ? currentArc : endArc).A[4]), 'Arc binary sweep flag'),
 
           numberForSVG(currentLine.x2, 'Arc endpoint X'),
           numberForSVG(currentLine.y2, 'Arc endpoint Y')

@@ -69,22 +69,19 @@ class SvgNodeDiagram {
       })
   }
 
-  animate (previousUI, callback) {
+  animate (callback, isExpanding) {
     this.isAnimating = true
 
-    this.svgContainer.d3Element.classed('fade-in', !previousUI)
-    if (previousUI) {
-      previousUI.getNodeLinkSection().d3Element.classed('fade-out', true)
-    }
+    this.svgContainer.d3Element.classed('fade-in', isExpanding)
+    this.svgContainer.d3Element.classed('fade-out', !isExpanding)
 
     this.bbox = this.d3Container.node().getBoundingClientRect()
 
     const svgNodeAnimations = []
-    this.svgNodes.forEach(svgNode => svgNode.animate(previousUI, svgNodeAnimations))
+    this.svgNodes.forEach(svgNode => svgNode.animate(svgNodeAnimations, isExpanding))
 
     Promise.all(svgNodeAnimations).then(() => {
       this.isAnimating = false
-      console.log()
       if (callback) callback()
     })
   }
