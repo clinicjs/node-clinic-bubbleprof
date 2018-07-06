@@ -185,7 +185,7 @@ class SvgLine extends SvgNodeElement {
 
         const nodeBetweenTime = this.svgNode.layoutNode.node.getBetweenTime()
         const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
-        const segmentDecimalOfParentTime = (nodeBetweenTime / parentTime) * segmentDatum[1]
+        const segmentDecimalOfParentTime = parentTime ? (nodeBetweenTime / parentTime) * segmentDatum[1] : 1
 
         let contractedPath
 
