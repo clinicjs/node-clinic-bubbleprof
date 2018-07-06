@@ -655,6 +655,10 @@ svg.bubbleprof .node-group .inner-circle {
   stroke: none;
 }
 
+.pending-animation svg.bubbleprof {
+  visibility: hidden;
+}
+
 svg.bubbleprof.fade-elements-in .outer-path,
 svg.bubbleprof.fade-elements-in .text-label,
 svg.bubbleprof.complete-fade-in {

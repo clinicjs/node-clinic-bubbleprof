@@ -69,7 +69,7 @@ class SvgNodeDiagram {
       })
   }
 
-  animate (callback, isExpanding) {
+  animate (isExpanding, callback) {
     this.isAnimating = true
 
     this.svgContainer.d3Element.classed('fade-elements-in', isExpanding)
