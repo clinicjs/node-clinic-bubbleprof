@@ -475,6 +475,8 @@ class BubbleprofUI extends EventEmitter {
   }
 
   animate (callback, isExpanding) {
+    this.highlightNode(null)
+    this.parentUI.highlightNode(null)
     this.svgNodeDiagram.animate(callback, isExpanding)
   }
 

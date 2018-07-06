@@ -88,6 +88,111 @@ class SvgNodeElement {
   getLength (layoutNode) {
     return this.ui.layout.scale.getLineLength(layoutNode.getBetweenTime())
   }
+
+  animate (svgNodeAnimations, isExpanding) {
+    this.setCoordinates()
+
+    const dataNode = this.svgNode.layoutNode.node
+    const contractedSvgNode = this.ui.parentUI.svgNodeDiagram.svgNodes.get(this.ui.layoutNode.id)
+
+    let nodeWasBetweenInParent
+    // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
+    if (this.constructor.name === 'SvgBubble') {
+      nodeWasBetweenInParent = false
+    } else {
+      if (contractedSvgNode.drawType === 'squash') {
+        nodeWasBetweenInParent = true
+      } else {
+        switch (dataNode.constructor.name) {
+          case 'ShortcutNode':
+            // Nothing to animate, so return and skip the rest of this method
+            return
+          case 'AggregateNode':
+            nodeWasBetweenInParent = dataNode.isBetweenClusters
+            break
+          case 'ArtificialNode':
+            nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
+            break
+          default:
+            // Cluster nodes are between cluster nodes by definition
+            nodeWasBetweenInParent = true
+            break
+        }
+      }
+    }
+
+    const contractedOrigin = nodeWasBetweenInParent ? cloneXY(contractedSvgNode.originPoint) : defaultArcOrigin()
+    const expandedOrigin = cloneXY(this.originPoint || this.circleCentre)
+
+    const overallLength = contractedSvgNode.getLength()
+    const parentBetweenTime = contractedSvgNode.layoutNode.node.getBetweenTime()
+    const parentWithinTime = contractedSvgNode.layoutNode.node.getWithinTime()
+    const degrees = contractedSvgNode.degrees
+
+    let parentBubble
+    if (!nodeWasBetweenInParent) {
+      const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
+      parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
+    }
+
+    this.d3Shapes.each((segmentDatum, index, nodes) => {
+      svgNodeAnimations.push(new Promise((resolve, reject) => {
+        const d3LineSegment = d3.select(nodes[index])
+
+        const segmentDecimal = this.constructor.name === 'SvgBubble' ? segmentDatum.data[1] : segmentDatum[1]
+        const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'SvgBubble' ? 'getWithinTime' : 'getBetweenTime')]()
+        const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
+        const segmentDecimalOfParentTime = parentTime ? (nodeTime / parentTime) * segmentDecimal : 1
+
+        let contractedPath
+        let arcDatum
+        if (nodeWasBetweenInParent) {
+          contractedPath = getLineUpdatingOrigin(contractedOrigin, degrees, overallLength * segmentDecimalOfParentTime)
+        } else {
+          const arcIncrement = getArcUpdatingAngle(contractedOrigin, segmentDecimalOfParentTime, parentBubble)
+          contractedPath = arcIncrement.arcString
+          arcDatum = arcIncrement.arcDatum
+        }
+
+        let expandedPath
+        if (this.constructor.name === 'SvgBubble') {
+          const arcObject = unpackArcString(adjustArcPath(this.arcMaker(segmentDatum), this))
+          removeA2FromPath(arcObject, this)
+          expandedPath = repackArcString(arcObject)
+        } else {
+          expandedPath = getLineUpdatingOrigin(expandedOrigin, this.degrees, this.length * segmentDatum[1])
+        }
+
+        const startPath = isExpanding ? contractedPath : expandedPath
+        const endPath = isExpanding ? expandedPath : contractedPath
+
+        d3LineSegment.attr('d', startPath)
+
+        const d3Transition = d3LineSegment.transition()
+          .duration(this.ui.settings.animationDuration)
+          .on('end', () => {
+            resolve(segmentDatum)
+          })
+
+        if (!nodeWasBetweenInParent && this.constructor.name === 'SvgLine') {
+          const endArc = unpackArcString(endPath)
+          if (endArc) {
+            d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
+            return
+          }
+        }
+
+        if (this.constructor.name === 'SvgBubble') {
+          d3Transition.attrTween('d', tweenArcToArc(arcDatum, parentBubble, this, this.ui.settings.animationEasing, isExpanding))
+          return
+        }
+
+        d3Transition
+          .ease(this.ui.settings.animationEasing)
+          .attr('d', endPath)
+      }))
+    })
+  }
 }
 
 class SvgLine extends SvgNodeElement {
@@ -137,91 +242,6 @@ class SvgLine extends SvgNodeElement {
     return this
   }
 
-  animate (svgNodeAnimations, isExpanding) {
-    this.setCoordinates()
-
-    const dataNode = this.svgNode.layoutNode.node
-    const contractedSvgNode = this.ui.parentUI.svgNodeDiagram.svgNodes.get(this.ui.layoutNode.id)
-
-    let nodeWasBetweenInParent
-    // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
-    if (contractedSvgNode.drawType === 'squash') {
-      nodeWasBetweenInParent = true
-    } else {
-      switch (dataNode.constructor.name) {
-        case 'ShortcutNode':
-          // Nothing to animate, so return and skip the rest of this method
-          return
-        case 'AggregateNode':
-          nodeWasBetweenInParent = dataNode.isBetweenClusters
-          break
-        case 'ArtificialNode':
-          nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
-          break
-        default:
-          // Cluster nodes are between cluster nodes by definition
-          nodeWasBetweenInParent = true
-          break
-      }
-    }
-
-    const contractedOrigin = nodeWasBetweenInParent ? cloneXY(contractedSvgNode.originPoint) : defaultArcOrigin()
-    const expandedOrigin = cloneXY(this.originPoint)
-
-    const overallLength = contractedSvgNode.getLength()
-    const parentBetweenTime = contractedSvgNode.layoutNode.node.getBetweenTime()
-    const parentWithinTime = contractedSvgNode.layoutNode.node.getWithinTime()
-    const degrees = contractedSvgNode.degrees
-
-    let parentBubble
-    if (!nodeWasBetweenInParent) {
-      const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
-      parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
-    }
-
-    this.d3Shapes.each((segmentDatum, index, nodes) => {
-      svgNodeAnimations.push(new Promise((resolve, reject) => {
-        const d3LineSegment = d3.select(nodes[index])
-
-        const nodeBetweenTime = this.svgNode.layoutNode.node.getBetweenTime()
-        const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
-        const segmentDecimalOfParentTime = parentTime ? (nodeBetweenTime / parentTime) * segmentDatum[1] : 1
-
-        let contractedPath
-
-        if (nodeWasBetweenInParent) {
-          contractedPath = getLineUpdatingOrigin(contractedOrigin, degrees, overallLength * segmentDecimalOfParentTime)
-        } else {
-          contractedPath = getArcUpdatingAngle(contractedOrigin, segmentDecimalOfParentTime, parentBubble)
-        }
-
-        const expandedPath = getLineUpdatingOrigin(expandedOrigin, this.degrees, this.length * segmentDatum[1])
-
-        const startPath = isExpanding ? contractedPath : expandedPath
-        const endPath = isExpanding ? expandedPath : contractedPath
-
-        d3LineSegment.attr('d', startPath)
-
-        const d3Transition = d3LineSegment.transition()
-          .duration(this.ui.settings.animationDuration)
-          .on('end', () => {
-            resolve(segmentDatum)
-          })
-
-        if (!nodeWasBetweenInParent) {
-          const endArc = unpackArcString(endPath)
-          if (endArc) {
-            d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
-            return
-          }
-        }
-        d3Transition
-          .ease(this.ui.settings.animationEasing)
-          .attr('d', endPath)
-      }))
-    })
-  }
-
   draw () {
     this.setCoordinates()
 
@@ -269,18 +289,13 @@ class SvgBubble extends SvgNodeElement {
       .outerRadius(this.radius)
   }
 
-  animate (svgNodeAnimations, isExpanding) {
-  }
-
   draw () {
     this.setCoordinates()
-
-    this.d3Shapes
-      .attr('d', arcDatum => {
-        const initialArc = this.arcMaker(arcDatum)
-        const adjustedArc = adjustArcPath(initialArc, this)
-        return adjustedArc
-      })
+    this.d3Shapes.attr('d', arcDatum => {
+      const initialArc = this.arcMaker(arcDatum)
+      const adjustedArc = adjustArcPath(initialArc, this)
+      return adjustedArc
+    })
   }
 }
 
@@ -310,7 +325,10 @@ function getArcUpdatingAngle (arcOrigin, decimal, targetBubble) {
   const adjustedArc = adjustArcPath(initialArc, targetBubble)
 
   arcOrigin.startAngle += angleIncrement
-  return adjustedArc
+  return {
+    arcDatum,
+    arcString: adjustedArc
+  }
 }
 
 function getLineUpdatingOrigin (origin, degrees, length) {
@@ -387,16 +405,18 @@ function unpackArcString (arcString) {
   return arcDef
 }
 
-// tweenArcToLine is called on creating transition, passing params to the functions D3 handles
-function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
-  const arcMaker = svgElement.arcMaker
+function repackArcString (arcObject) {
+  const arcString = `M ${arcObject.M.join(',')} A ${arcObject.A.join(',')}`
+  return arcObject.A2 ? arcString + ` A ${arcObject.A2.join(',')}` : arcString
+}
 
-  // This factory function defines the interpolator function and returns it to d3's attrTween
-  return function tweenFactory (arcDatum) {
+function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
+  // Factory function is passed to D3, given D3 context and passes interpolator function to d3's attrTween
+  return function tweenLineFactory (arcDatum) {
     const d3Path = d3.select(this)
 
     // This is the interpolator function used by the D3 transition on each animation frame
-    return function tweenInterpolator (time) {
+    return function tweenLineInterpolator (time) {
       const easedTime = ease(time)
       const currentArc = unpackArcString(d3Path.attr('d'))
 
@@ -411,16 +431,7 @@ function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
         return interpolated
       }
 
-      if (currentArc.A2) {
-        // Animate co-ordinates for one almost-complete arc, not two complete semi-circles
-        const singleArc = arcMaker({
-          startAngle: 0,
-          endAngle: LineCoordinates.degreesToRadians(359),
-          padAngle: 0
-        })
-
-        Object.assign(currentArc, unpackArcString(adjustArcPath(singleArc, svgElement)))
-      }
+      if (currentArc.A2) removeA2FromPath(currentArc, svgElement)
 
       const currentLine = new LineCoordinates({
         x1: interpolate('M', 0),
@@ -448,7 +459,7 @@ function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
         ]
       }
 
-      const interpolatedArcString = `M ${interpolatedArc.M.join(',')} A ${interpolatedArc.A.join(',')}`
+      const interpolatedArcString = repackArcString(interpolatedArc)
 
       svgElement.firstTween = true
 
@@ -456,6 +467,70 @@ function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
       return interpolatedArcString
     }
   }
+}
+
+function tweenArcToArc (contractedArcDatum, contractedBubble, expandedBubble, ease, isExpanding) {
+  // Factory function is passed to D3, given D3 context and passes interpolator function to d3's attrTween
+  return function tweenArcFactory (expandedArcDatum, b, c) {
+    const d3Path = d3.select(this)
+
+    const interpolateStartAngle = d3.interpolateNumber(contractedArcDatum.startAngle, expandedArcDatum.startAngle)
+    const interpolateEndAngle = d3.interpolateNumber(contractedArcDatum.endAngle, expandedArcDatum.endAngle)
+    const interpolateValue = d3.interpolateNumber(contractedArcDatum.value, expandedArcDatum.value)
+
+    const interpolateRadius = d3.interpolateNumber(contractedBubble.radius, expandedBubble.radius)
+    const interpolateX = d3.interpolateNumber(contractedBubble.circleCentre.x, expandedBubble.circleCentre.x)
+    const interpolateY = d3.interpolateNumber(contractedBubble.circleCentre.y, expandedBubble.circleCentre.y)
+    const interpolateDegrees = d3.interpolateNumber(contractedBubble.svgNode.degrees, expandedBubble.svgNode.degrees)
+
+    // This is the interpolator function used by the D3 transition on each animation frame
+    return function tweenArcInterpolator (time) {
+      const easedTime = ease(isExpanding ? time : 1 - time)
+
+      const interpolatedArcDatum = {
+        value: interpolateValue(easedTime),
+        startAngle: interpolateStartAngle(easedTime),
+        endAngle: interpolateEndAngle(easedTime),
+        padAngle: 0
+      }
+
+      const interpolatedRadius = interpolateRadius(easedTime)
+
+      const interpolatedArcMaker = d3.arc()
+        .innerRadius(interpolatedRadius)
+        .outerRadius(interpolatedRadius)
+
+      const interpolatedSvgElement = {
+        circleCentre: {
+          x: interpolateX(easedTime),
+          y: interpolateY(easedTime)
+        },
+        svgNode: {
+          degrees: interpolateDegrees(easedTime)
+        },
+        arcMaker: interpolatedArcMaker
+      }
+
+      const rawArcString = interpolatedArcMaker(interpolatedArcDatum)
+      const adjustedArcString = adjustArcPath(rawArcString, interpolatedSvgElement)
+      const arcObject = unpackArcString(adjustedArcString)
+      removeA2FromPath(arcObject, interpolatedSvgElement)
+      const arcString = repackArcString(arcObject)
+
+      return arcString
+    }
+  }
+}
+
+function removeA2FromPath (currentArc, svgElement) {
+  // Turn two complete semi-circle arcs into one almost-complete circular arc, for cleaner animation
+  const singleArc = svgElement.arcMaker({
+    startAngle: 0,
+    endAngle: LineCoordinates.degreesToRadians(359),
+    padAngle: 0
+  })
+
+  Object.assign(currentArc, unpackArcString(adjustArcPath(singleArc, svgElement)))
 }
 
 function numberForSVG (number, description, isInteger = false) {
