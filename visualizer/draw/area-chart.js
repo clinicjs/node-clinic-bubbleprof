@@ -3,7 +3,7 @@
 const d3 = require('./d3-subset.js')
 const HtmlContent = require('./html-content.js')
 
-class LineChart extends HtmlContent {
+class AreaChart extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
     super(d3Container, Object.assign({
       static: true,
@@ -45,21 +45,22 @@ class LineChart extends HtmlContent {
     super.initializeElements()
     const margins = this.contentProperties.margins
 
-    this.d3Element.classed('line-chart', true)
+    this.d3Element.classed('area-chart', true)
 
     this.d3ChartWrapper = this.d3ContentWrapper.append('div')
-      .classed('line-chart', true)
+      .classed('area-chart', true)
 
-    this.d3LineChartSVG = this.d3ChartWrapper.append('svg')
-      .classed('line-chart-svg', true)
+    this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
+      .classed('area-chart-svg', true)
 
-    this.d3LineChartGroup = this.d3LineChartSVG.append('g')
+    this.d3ChartOuter = this.d3AreaChartSVG.append('g')
+      .classed('chart-outer', true)
       .attr('transform', `translate(${margins.left}, ${margins.top})`)
 
-    this.d3LinesGroup = this.d3LineChartGroup.append('g')
-      .classed('lines-group', true)
+    this.d3ChartInner = this.d3ChartOuter.append('g')
+      .classed('chart-inner', true)
 
-    this.d3XAxisGroup = this.d3LineChartGroup.append('g')
+    this.d3XAxisGroup = this.d3ChartOuter.append('g')
       .classed('axis-group', true)
       .classed('x-axis', true)
 
@@ -127,17 +128,17 @@ class LineChart extends HtmlContent {
     }
   }
   initializeFromData () {
-    if (this.d3Lines) {
-      this.d3Lines.data(this.stackedData)
+    if (this.d3AreaPaths) {
+      this.d3AreaPaths.data(this.stackedData)
       return
     }
-    this.d3Lines = this.d3LinesGroup.selectAll('.area-line')
+    this.d3AreaPaths = this.d3ChartInner.selectAll('.area-path')
       .data(this.stackedData)
       .enter()
       .append('path')
       .attr('class', d => `type-${this.getAggregateNode(d.key).typeCategory}`)
-      .classed('area-line-even', d => !(d.index % 2))
-      .classed('area-line', true)
+      .classed('area-path-even', d => !(d.index % 2))
+      .classed('area-path', true)
       .on('mouseover', (d) => {
         if (this.parentContent.constructor.name === 'HoverBox') return
         const aggregateNode = this.getAggregateNode(d.key)
@@ -162,7 +163,7 @@ class LineChart extends HtmlContent {
       })
 
     // Same behaviour on mouse movements off coloured area as on
-    this.d3LineChartSVG.on('mousemove', () => {
+    this.d3AreaChartSVG.on('mousemove', () => {
       this.showSlice(d3.event)
     })
 
@@ -197,7 +198,7 @@ class LineChart extends HtmlContent {
     // Note: d3.event is a live binding which fails if d3 is not bundled in a recommended way.
     // See, for example, https://github.com/d3/d3-sankey/issues/30#issuecomment-307869620
 
-    const width = this.d3LineChartSVG.node().getBoundingClientRect().width
+    const width = this.d3AreaChartSVG.node().getBoundingClientRect().width
     const margins = this.contentProperties.margins
 
     // Show nothing if mouse movement is within chart margins
@@ -237,7 +238,7 @@ class LineChart extends HtmlContent {
       const {
         width,
         height
-      } = this.d3LineChartSVG.node().getBoundingClientRect()
+      } = this.d3AreaChartSVG.node().getBoundingClientRect()
       const margins = this.contentProperties.margins
 
       const usableHeight = height - margins.bottom - margins.top
@@ -249,26 +250,26 @@ class LineChart extends HtmlContent {
         this.d3LeadInText.html(this.getLeadInText())
         */
 
-        this.d3LineChartSVG.classed('filter-applied', true)
-        this.d3Lines.classed('filtered', d => {
+        this.d3AreaChartSVG.classed('filter-applied', true)
+        this.d3AreaPaths.classed('filtered', d => {
           if (!this.layoutNode) return false
           return !this.layoutNodeHasAggregateId(d.key)
         })
         if (this.ui.highlightedDataNode) {
-          this.d3Lines.classed('not-emphasised', d => {
+          this.d3AreaPaths.classed('not-emphasised', d => {
             const aggregateNode = this.getAggregateNode(d.key)
             return (aggregateNode !== this.ui.highlightedDataNode)
           })
         }
       } else {
-        this.d3LineChartSVG.classed('filter-applied', false)
-        this.d3Lines.classed('filtered', false)
+        this.d3AreaChartSVG.classed('filter-applied', false)
+        this.d3AreaPaths.classed('filtered', false)
       }
 
       this.xScale.range([0, usableWidth])
       this.yScale.range([usableHeight, 0])
 
-      this.d3Lines.attr('d', this.areaMaker)
+      this.d3AreaPaths.attr('d', this.areaMaker)
 
       const xAxis = d3.axisBottom()
         .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
@@ -310,4 +311,4 @@ class LineChart extends HtmlContent {
   }
 }
 
-module.exports = LineChart
+module.exports = AreaChart
