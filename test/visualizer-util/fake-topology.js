@@ -68,12 +68,30 @@ function mockTopology (topology) {
   return {data: [...clusterNodes.values()]}
 }
 
-function topologyToOrderedLeaves (topology) {
-  return topology.map(d => d[0].split('.').map(i => parseInt(i)).reverse()[0])
+function topologyToSplitArrays (topology, numeric = true) {
+  return topology.map(d => d[0].split('.').map(i => numeric ? parseInt(i) : i))
+}
+
+function topologyToOrderedLeaves (topology, numeric = true) {
+  return topologyToSplitArrays(topology, numeric).map(d => d.reverse()[0])
+}
+
+function topologyToSortedIds (topology, numeric = true) {
+  const splitArrays = topologyToSplitArrays(topology, numeric)
+  const maxDepth = splitArrays.reduce((max, arr) => arr.length > max ? arr.length : max, 0)
+  const orderedUniqueIds = []
+  for (var depth = 0; depth < maxDepth; depth++) {
+    for (var arrayIndex = 0; arrayIndex < splitArrays.length; arrayIndex++) {
+      const id = splitArrays[arrayIndex][depth]
+      if (id && !orderedUniqueIds.includes(id)) orderedUniqueIds.push(id)
+    }
+  }
+  return orderedUniqueIds
 }
 
 module.exports = {
   mockClusterNode,
   mockTopology,
-  topologyToOrderedLeaves
+  topologyToOrderedLeaves,
+  topologyToSortedIds
 }

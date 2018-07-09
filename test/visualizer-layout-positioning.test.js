@@ -8,7 +8,8 @@ const shuffle = require('shuffle-array')
 
 const {
   mockTopology,
-  topologyToOrderedLeaves
+  topologyToOrderedLeaves,
+  topologyToSortedIds
 } = require('./visualizer-util/fake-topology.js')
 
 test('Visualizer layout - positioning - mock topology', function (t) {
@@ -66,6 +67,9 @@ test('Visualizer layout - positioning - pyramid - simple', function (t) {
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
 
+  const expectedSortedIds = topologyToSortedIds(expectedTopology)
+  t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => layoutNode.id), expectedSortedIds)
+
   t.end()
 })
 
@@ -87,6 +91,9 @@ test('Visualizer layout - positioning - pyramid - gaps', function (t) {
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
+
+  const expectedSortedIds = topologyToSortedIds(expectedTopology)
+  t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => layoutNode.id), expectedSortedIds)
 
   t.end()
 })
@@ -115,6 +122,9 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
+
+  const expectedSortedIds = topologyToSortedIds(expectedTopology)
+  t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => layoutNode.id), expectedSortedIds)
 
   t.end()
 })
@@ -155,6 +165,9 @@ test('Visualizer layout - positioning - pyramid - example in docs', function (t)
 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
+
+  const expectedSortedIds = topologyToSortedIds(expectedTopology)
+  t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => layoutNode.id), expectedSortedIds)
 
   t.end()
 })
@@ -210,6 +223,10 @@ test('Visualizer layout - positioning - pyramid - can handle subsets', function 
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
 
+  const expectedSortedIds = topologyToSortedIds(expectedTopology)
+  const sortedLayoutNodes = layout.getSortedLayoutNodes().map(layoutNode => layoutNode.id)
+  t.deepEqual(sortedLayoutNodes, expectedSortedIds.filter(id => id !== 1 && id !== 2))
+
   t.end()
 })
 
@@ -236,6 +253,16 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   const expectedOrder = topologyToOrderedLeaves(expectedTopology)
   t.deepEqual(positioning.order, expectedOrder)
 
+  const expectedClumpedTopology = [
+    ['1.12', 50],
+    ['1.clump:C2,C3,C8.clump:C4,C6.5', 400],
+    ['1.clump:C2,C3,C8.clump:C4,C6.7', 250],
+    ['1.clump:C2,C3,C8.9.10', 200],
+    ['1.clump:C2,C3,C8.11', 100]
+  ]
+  const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
+  t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => `${layoutNode.id}`), expectedSortedIds)
+
   t.end()
 })
 
@@ -259,6 +286,15 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   positioning.formClumpPyramid()
 
   t.deepEqual(positioning.order, [5, 7, 10, 11])
+
+  const expectedClumpedTopology = [
+    ['1.clump:C12,C2,C3,C8.clump:C4,C6.5', 401],
+    ['1.clump:C12,C2,C3,C8.clump:C4,C6.7', 250],
+    ['1.clump:C12,C2,C3,C8.9.10', 200],
+    ['1.clump:C12,C2,C3,C8.11', 100]
+  ]
+  const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
+  t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => `${layoutNode.id}`), expectedSortedIds)
 
   t.end()
 })
