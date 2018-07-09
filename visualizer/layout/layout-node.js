@@ -29,8 +29,9 @@ class LayoutNode {
 
 class CollapsedLayoutNode {
   constructor (layoutNodes, parent, children) {
-    const dataNodes = layoutNodes.sort((a, b) => a.id - b.id).map(layoutNode => layoutNode.node)
-    this.id = 'clump:' + dataNodes.map(dataNode => dataNode.uid).join(',')
+    // layoutNodes should be an array sorted using layout.getLayoutNodeSorter()
+    const dataNodes = layoutNodes.map(layoutNode => layoutNode.node)
+    this.id = 'clump:' + dataNodes.map(dataNode => dataNode.uid).sort().join(',')
     this.collapsedNodes = layoutNodes
     this.parent = parent
     this.children = children || []

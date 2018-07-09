@@ -169,7 +169,9 @@ class CollapsedLayout {
 
     const hostNodes = hostNode.collapsedNodes ? [...hostNode.collapsedNodes] : [hostNode]
     const squashNodes = squashNode.collapsedNodes ? [...squashNode.collapsedNodes] : [squashNode]
-    const collapsed = new CollapsedLayoutNode(hostNodes.concat(squashNodes), parent, children)
+
+    const collapsedNodes = hostNodes.concat(squashNodes).sort(this.uncollapsedLayout.getLayoutNodeSorter())
+    const collapsed = new CollapsedLayoutNode(collapsedNodes, parent, children)
 
     // Update refs
     ejectLayoutNode(parent, hostNode)
