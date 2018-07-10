@@ -28,9 +28,7 @@ class SvgNode {
     this.drawType = this.getDrawType(layoutNode)
 
     this.asyncBetweenLines.setData(layoutNode)
-    if (this.drawType !== 'squash') {
-      this.syncBubbles.setData(layoutNode)
-    }
+    this.syncBubbles.setData(layoutNode)
 
     if (this.d3NodeGroup) this.setCoordinates()
     return this
@@ -65,7 +63,6 @@ class SvgNode {
     this.labelDegrees = labelRotation(this.degrees)
     this.flipLabel = !(this.degrees === this.labelDegrees)
 
-    // TODO: check that this doesn't look wrong in cases of drawType = squash but has withinTime
     const sourceRadius = inboundConnection ? this.getRadius(inboundConnection.sourceLayoutNode) + this.strokePadding : 0
 
     const offsetLength = sourceRadius - this.lineWidth / 2 + this.strokePadding
@@ -90,9 +87,7 @@ class SvgNode {
       .classed('outer-path', true)
 
     this.asyncBetweenLines.initializeFromData()
-    if (this.drawType !== 'squash') {
-      this.syncBubbles.initializeFromData()
-    }
+    this.syncBubbles.initializeFromData()
 
     this.d3NameLabel = this.d3NodeGroup.append('text')
       .classed(partyClass, true)
@@ -112,9 +107,7 @@ class SvgNode {
     this.setCoordinates()
 
     this.asyncBetweenLines.animate(svgNodeAnimations, isExpanding)
-    if (this.drawType !== 'squash') {
-      this.syncBubbles.animate(svgNodeAnimations, isExpanding)
-    }
+    this.syncBubbles.animate(svgNodeAnimations, isExpanding)
   }
 
   draw () {
@@ -127,9 +120,7 @@ class SvgNode {
       if (this.drawType === 'labelInCircle') this.drawTimeLabel()
 
       this.asyncBetweenLines.draw()
-      if (this.drawType !== 'squash') {
-        this.syncBubbles.draw()
-      }
+      this.syncBubbles.draw()
     }
   }
 
@@ -279,7 +270,7 @@ class SvgNode {
           this.d3NameLabel.classed('flipped-label', this.flipLabel)
           this.d3NameLabel.classed('endpoint-label', true)
           this.d3NameLabel.classed('upper-label', false)
-          this.d3NameLabel.classed('smaller-label', this.drawType === 'squash')
+          this.d3NameLabel.classed('smaller-label', this.drawType === 'tiny')
 
           const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
           this.d3NameLabel.attr('transform', transformString)
@@ -401,61 +392,34 @@ class SvgNode {
 
     outerPath += `L ${toLineBottomRight.x2} ${toLineBottomRight.y2} `
 
-    if (this.drawType === 'squash') {
-      // End with pointed arrow tip
-
-      const toPointedTip = new LineCoordinates({
-        x1: this.originPoint.x,
-        y1: this.originPoint.y,
-        length: lineLength + this.strokePadding,
-        degrees: this.degrees
-      })
-
-      outerPath += `L ${toPointedTip.x2} ${toPointedTip.y2} `
-
-      outerPath += 'L' // Ready for simple line to bottom left x y
-    } else {
-      // End with long-route circular arc around bubble, to bottom left x y
-
-      const arcRadius = this.getRadius() + this.lineWidth * 2
-      // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
-      outerPath += `A ${arcRadius} ${arcRadius} 0 1 0`
-    }
-
+    // End with long-route circular arc around bubble, to bottom left x y
+    const arcRadius = this.getRadius() + this.lineWidth * 2
     const toLineBottomLeft = new LineCoordinates({
       x1: toLineBottomRight.x2,
       y1: toLineBottomRight.y2,
       length: this.strokePadding * 2,
       degrees: this.degrees - 90
     })
-
-    outerPath += ` ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
+    // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
+    outerPath += `A ${arcRadius} ${arcRadius} 0 1 0 ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
 
     this.d3OuterPath.attr('d', outerPath)
   }
 
   getRadius (layoutNode = this.layoutNode) {
-    if (layoutNode === this.layoutNode && this.drawType === 'squash') {
-      return 0
-    } else {
-      return this.ui.layout.scale.getCircleRadius(layoutNode.getWithinTime())
-    }
+    return this.ui.layout.scale.getCircleRadius(layoutNode.getWithinTime())
   }
 
   getLength (layoutNode = this.layoutNode) {
-    if (this.drawType === 'squash') {
-      return this.ui.layout.scale.getLineLength(layoutNode.getBetweenTime() + layoutNode.getWithinTime())
-    } else {
-      return this.ui.layout.scale.getLineLength(layoutNode.getBetweenTime())
-    }
+    return this.ui.layout.scale.getLineLength(layoutNode.getBetweenTime())
   }
 
   getDrawType (layoutNode) {
     const circleRadius = this.getRadius()
     const lineLength = this.getLength()
 
-    // Too small to discriminate node elements; show a very short line
-    if (circleRadius + lineLength < 2) return 'squash'
+    // Smaller end-of-line labels for very small nodes
+    if (circleRadius + lineLength < 2) return 'tiny'
 
     // Prefer putting labels on lines over in circles if both are viable and similar
     if (lineLength > 30 && lineLength > circleRadius) return 'labelOnLine'

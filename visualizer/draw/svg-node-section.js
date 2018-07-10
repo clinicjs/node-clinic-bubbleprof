@@ -100,24 +100,20 @@ class SvgNodeElement {
     if (this.constructor.name === 'SvgBubble') {
       nodeWasBetweenInParent = false
     } else {
-      if (contractedSvgNode.drawType === 'squash') {
-        nodeWasBetweenInParent = true
-      } else {
-        switch (dataNode.constructor.name) {
-          case 'ShortcutNode':
-            // Nothing to animate, so return and skip the rest of this method
-            return
-          case 'AggregateNode':
-            nodeWasBetweenInParent = dataNode.isBetweenClusters
-            break
-          case 'ArtificialNode':
-            nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
-            break
-          default:
-            // Cluster nodes are between cluster nodes by definition
-            nodeWasBetweenInParent = true
-            break
-        }
+      switch (dataNode.constructor.name) {
+        case 'ShortcutNode':
+          // Nothing to animate, so return and skip the rest of this method
+          return
+        case 'AggregateNode':
+          nodeWasBetweenInParent = dataNode.isBetweenClusters
+          break
+        case 'ArtificialNode':
+          nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
+          break
+        default:
+          // Cluster nodes are between cluster nodes by definition
+          nodeWasBetweenInParent = true
+          break
       }
     }
 
@@ -129,11 +125,8 @@ class SvgNodeElement {
     const parentWithinTime = contractedSvgNode.layoutNode.node.getWithinTime()
     const degrees = contractedSvgNode.degrees
 
-    let parentBubble
-    if (!nodeWasBetweenInParent) {
-      const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
-      parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
-    }
+    const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
+    const parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
 
     this.d3Shapes.each((segmentDatum, index, nodes) => {
       svgNodeAnimations.push(new Promise((resolve, reject) => {
@@ -215,7 +208,7 @@ class SvgLine extends SvgNodeElement {
 
   setCoordinates () {
     this.degrees = this.svgNode.degrees
-    this.length = this.svgNode.drawType === 'squash' ? Math.max(this.svgNode.getLength(), 1) : this.svgNode.getLength()
+    this.length = this.svgNode.getLength()
 
     let degrees
     let length
