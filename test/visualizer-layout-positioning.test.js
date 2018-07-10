@@ -129,20 +129,20 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
   t.end()
 })
 
-//            6
-//            |     9
-//  13        C 14  | 15
-//    \       | /   |/
-// 16 _\   18 |/    C_ 17
-//      C    \C    /
-//       \    |   /
-//        C   C  C
-//         \  | /
-//          C C/
-//           \|
-//            C
+//            1
 //            |
-//            R
+//            2
+//           /|
+//         10 3_
+//         /  | \
+//       11   4  7
+//       /    |   \
+//     12    /5    \
+// 16 _/   18 |\    8_ 17
+//    /       | \   |\
+//  13        6 14  | 15
+//                  9
+
 test('Visualizer layout - positioning - pyramid - example in docs', function (t) {
   const topology = [
     ['1.2.10.11.12.16', 200],
