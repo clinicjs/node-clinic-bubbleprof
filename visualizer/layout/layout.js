@@ -222,12 +222,12 @@ class Layout {
       const aDepth = a.stem.ancestors.ids.length
       const bDepth = b.stem.ancestors.ids.length
 
-      // If the layoutNodes aren't siblings, sort by depth (number of ancestors including layout root)
+      // If the layoutNodes are at different depths, sort by depth (number of ancestors including layout root)
       if (aDepth !== bDepth) {
         return aDepth - bDepth
       }
 
-      // If they are siblings and positioning is complete, use left-to-right draw order based on positioning.order's leaf ID order
+      // If they are at same depth and positioning is complete, use left-to-right draw order based on positioning.order's leaf ID order
       if (positioning && positioning.order) {
         // A midpoint may have many leaves, but leaves bunch by stems. Comparing first with first == comparing bunch with bunch
         const aFirstLeafId = a.stem.leaves.ids.length ? a.stem.leaves.ids[0] : a.id
@@ -238,7 +238,7 @@ class Layout {
         return aFirstLeafIndex - bFirstLeafIndex
       }
 
-      // If they are siblings but positioning is incomplete, sort by id ~= earlier first
+      // If they are at same depth but positioning is incomplete, sort by id ~= earlier first
       return a.id - b.id
     }
   }
