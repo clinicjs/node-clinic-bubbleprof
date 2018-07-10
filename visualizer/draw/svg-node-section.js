@@ -389,6 +389,8 @@ function addMissingADefs (arcString) {
 
 function unpackArcString (arcString) {
   const arcDef = {}
+  // Discard everything after the second M
+  arcString = `M${arcString.split('M')[1]}`
 
   const splitString = arcString.split('A')
   if (splitString.length <= 1) return null
