@@ -137,11 +137,10 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
 //         /  | \
 //       11   4  7
 //       /    |   \
-//     12    /5    \
-// 16 _/   18 |\    8_ 17
-//    /       | \   |\
-//  13        6 14  | 15
-//                  9
+//     12     5    8__
+//     /|    /|\   |\ \
+//    / |   / | \  | \ \
+//  16 13  18 6 14 9 15 17
 
 test('Visualizer layout - positioning - pyramid - example in docs', function (t) {
   const topology = [
@@ -167,6 +166,7 @@ test('Visualizer layout - positioning - pyramid - example in docs', function (t)
   t.deepEqual(positioning.order, expectedOrder)
 
   const expectedSortedIds = topologyToSortedIds(expectedTopology)
+  t.deepEqual(expectedSortedIds, [1, 2, 10, 3, 11, 4, 7, 12, 5, 8, 16, 13, 18, 6, 14, 9, 15, 17])
   t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => layoutNode.id), expectedSortedIds)
 
   t.end()
