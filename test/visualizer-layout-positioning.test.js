@@ -290,11 +290,12 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   t.deepEqual(positioning.order, [5, 7, 10, 11])
 
   const expectedClumpedTopology = [
-    ['1.clump:C12,C2,C3,C8.clump:C4,C6.5', 401],
-    ['1.clump:C12,C2,C3,C8.clump:C4,C6.7', 250],
-    ['1.clump:C12,C2,C3,C8.9.10', 200],
-    ['1.clump:C12,C2,C3,C8.11', 100]
+    ['1.clump:C2,C3,C8,C12.clump:C4,C6.5', 401],
+    ['1.clump:C2,C3,C8,C12.clump:C4,C6.7', 250],
+    ['1.clump:C2,C3,C8,C12.9.10', 200],
+    ['1.clump:C2,C3,C8,C12.11', 100]
   ]
+
   const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
   t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => `${layoutNode.id}`), expectedSortedIds)
 
