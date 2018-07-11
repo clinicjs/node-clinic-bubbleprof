@@ -139,8 +139,10 @@ test('Visualizer layout - positioning - pyramid - clumping tiny together with lo
 //       /    |   \
 //     12     5    8__
 //     /|    /|\   |\ \
-//    / |   / | \  | \ \
-//  16 13  18 6 14 9 15 17
+//   16 |  18 | \  | \ 17
+//     13     | 14 | 15
+//            |    9
+//            6
 
 test('Visualizer layout - positioning - pyramid - example in docs', function (t) {
   const topology = [
