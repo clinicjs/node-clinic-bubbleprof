@@ -44,7 +44,7 @@ class HoverBox extends HtmlContent {
     this.d3ClickMessage = this.d3TitleBlock.append('a')
       .classed('click-message', true)
 
-    this.asyncOperationsChart = this.addContent('LineChart', {
+    this.asyncOperationsChart = this.addContent('AreaChart', {
       classNames: 'block time-block',
       static: false
     })
