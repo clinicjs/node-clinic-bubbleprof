@@ -31,7 +31,15 @@ class CollapsedLayoutNode {
   constructor (layoutNodes, parent, children) {
     // layoutNodes should be an array sorted using layout.getLayoutNodeSorter()
     const dataNodes = layoutNodes.map(layoutNode => layoutNode.node)
-    this.id = 'clump:' + dataNodes.map(dataNode => dataNode.uid).sort().join(',')
+
+    // Collapsed ids are for uniqueness and human inspection; sort ids into a human-readable order
+    this.id = 'clump:' + dataNodes.map(dataNode => dataNode.uid).sort((a, b) => {
+      if (a.charAt(0) !== b.charAt(0)) {
+        return a.charAt(0) > b.charAt(0) ? 1 : -1
+      }
+      return parseInt(a.slice(1)) - parseInt(b.slice(1))
+    }).join(',')
+
     this.collapsedNodes = layoutNodes
     this.parent = parent
     this.children = children || []
