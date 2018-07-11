@@ -31,7 +31,7 @@ class Stem {
     }
 
     this.shortcutsInStem = layoutNode.node.constructor.name === 'ShortcutNode' ? 1 : 0
-
+    this.deepestLeaf = null
     for (const ancestorId of this.ancestors.ids) {
       const ancestor = layout.layoutNodes.get(ancestorId)
       const ancestorStem = ancestor.stem
@@ -42,6 +42,11 @@ class Stem {
       this.ancestors.totalDiameter += ancestorStem.raw.ownDiameter
       if (!layoutNode.children.length) {
         ancestorStem.leaves.ids.push(layoutNode.id)
+      }
+      const isDeeper = !ancestorStem.deepestLeaf || ancestorStem.deepestLeaf.stem.ancestors.ids.length < this.ancestors.ids.length
+      const isShortcutNode = layoutNode.node.constructor.name === 'ShortcutNode'
+      if (isDeeper && !isShortcutNode) {
+        ancestorStem.deepestLeaf = layoutNode
       }
     }
     this.update()

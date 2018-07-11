@@ -6,11 +6,41 @@ const _ = {
 
 const { ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
+const { pickLeavesByLongest } = require('./stems.js')
 
 class CollapsedLayout {
   constructor (layout) {
     this.uncollapsedLayout = layout
-    if (this.uncollapsedLayout.originNode && this.uncollapsedLayout.originNode.collapsedNodes) {
+    // const insideCollapse = this.uncollapsedLayout.originNode && this.uncollapsedLayout.originNode.collapsedNodes
+    const nonShortcuts = [...layout.layoutNodes.values()].filter(layoutNode => layoutNode.node.constructor.name !== 'ShortcutNode')
+    // let deepest = layout.rootLayoutNode && layout.rootLayoutNode.stem.deepestLeaf
+    // deepest = deepest && deepest.stem.ancestors.ids.length
+    const getDeepest = () => {
+      if (getDeepest.deepest) {
+        return getDeepest.deepest
+      }
+      let deepest = layout.rootLayoutNode && layout.rootLayoutNode.stem.deepestLeaf
+      deepest = deepest && deepest.stem.ancestors.ids.length
+      getDeepest.deepest = deepest
+      return deepest
+    }
+    // const isHomogenousHorizontally = () => {
+    //   const allNamedSame = () => nonShortcuts.length < 2 || !nonShortcuts.some(layoutNode => layoutNode.node.name !== nonShortcuts[0].node.name)
+    //   const fromOriginNode = this.uncollapsedLayout.originNode && this.uncollapsedLayout.originNode.isHomogenousHorizontally
+    //   return fromOriginNode || (getDeepest() === 1 && allNamedSame())
+    // }
+    const isHomogenousHorizontally = () => {
+      const topLayoutNodes = [...layout.layoutNodes.values()].filter(layoutNode => !layoutNode.parent) // warning: not a Set like class member field
+      const firstChildren = topLayoutNodes.reduce((prev, next) => ({ children: prev.children.concat(next.children) }), { children: [] }).children.map(id => layout.layoutNodes.get(id))
+      const allNamedSame = () => firstChildren.length >= 2 && !firstChildren.some(layoutNode => layoutNode.node.name !== firstChildren[0].node.name)
+      const fromOriginNode = this.uncollapsedLayout.originNode && this.uncollapsedLayout.originNode.isHomogenousHorizontally
+      return (fromOriginNode || allNamedSame()) ? firstChildren[0].node.name : false
+    }
+    this.isHomogenous = {
+      horizontally: isHomogenousHorizontally()
+    }
+    const optimalSize = 5
+    if (nonShortcuts.length <= optimalSize) { // Prevent creating excess collapses
       this.layoutNodes = layout.layoutNodes
       return
     }
@@ -18,7 +48,6 @@ class CollapsedLayout {
     // TODO: revisit idempotency of this class - mutates each LayoutNode internally
     this.layoutNodes = new Map([...layout.layoutNodes])
     this.scale = layout.scale
-    this.minimumNodes = 3
 
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
     // e.g. we could attach .topNodes or some iterator to Layout instances
@@ -28,6 +57,7 @@ class CollapsedLayout {
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
       const topNode = topNodesIterator.next().value
       // this.collapseHorizontally(topNode)
+      this.collapseX(topNode)
     }
     const newLayoutNodes = new Map()
     // Isolating vertical collapsing from horizontal collapsing
@@ -40,6 +70,61 @@ class CollapsedLayout {
       this.indexLayoutNode(newLayoutNodes, topNode)
     }
     this.layoutNodes = newLayoutNodes
+  }
+  collapseX (layoutNode) {
+    let children = layoutNode.children.map(childId => this.layoutNodes.get(childId)).filter(ln => ln.node.constructor.name !== 'ShortcutNode')
+    if (!children.length) {
+      return
+    }
+    const nameMap = {}
+    for (let i = 0; i < children.length; ++i) {
+      const child = children[i]
+      const name = child.name || child.node.name
+      nameMap[name] = nameMap[name] || new Set()
+      nameMap[name].add(child)
+    }
+    let entries = Object.entries(nameMap)
+    entries.forEach(entry => entry[1] = Array.from(entry[1]))
+    if (children[0].node.name === this.isHomogenous.horizontally) { // do not accidentally spread descendants
+      const name = entries[0][0]
+      const layoutNodesInClump = entries[0][1]
+      let optimalSize = 5
+      let optimalStems = 5
+      if (layoutNodesInClump.length / optimalSize > optimalStems) { // when more nodes per stem than optimalSize, change size to fit into optimalStems
+        optimalSize = layoutNodesInClump.length / optimalStems
+        console.log('TOO MANY', { optimalSize, optimalStems })
+      } else if (layoutNodesInClump.length / optimalStems <  2) { // when not enough nodes to make optimalStems, make stem for every pair
+        optimalStems = Math.ceil(layoutNodesInClump.length / 2)
+        optimalSize = 2
+        console.log('TOO LITTLE', { optimalSize, optimalStems })
+      } else {
+        optimalSize = layoutNodesInClump.length / optimalStems
+        console.log('SIZE IS RIGHT', { optimalSize, optimalStems })
+      }
+      entries = []
+      for (let i = 0; i < optimalStems; ++i) {
+        const chunk = [name, layoutNodesInClump.splice(0, optimalSize)]
+        if (chunk[1].length) entries.push(chunk)
+      }
+    } // Prevent creating mono-views where only actionable is clicking to expand
+    for (let i = 0; i < entries.length; ++i) {
+      let layoutNodes = entries[i][1]
+      if (layoutNodes.length < 2) {
+        continue
+      }
+      let combined = layoutNodes[0]
+      for (let j = 1; j < layoutNodes.length; ++j) {
+        const child = layoutNodes[j]
+        combined = this.combinelayoutNodes(combined, child) || combined
+          // combined.allSame = true
+        combined.isHomogenousHorizontally = true
+      }
+    }
+    children = layoutNode.children.map(childId => this.layoutNodes.get(childId))
+    for (let i = 0; i < children.length; ++i) {
+      const child = children[i]
+      this.collapseX(child)
+    }
   }
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
@@ -163,9 +248,9 @@ class CollapsedLayout {
     if ([hostNode.node.constructor.name, squashNode.node.constructor.name].includes('ShortcutNode')) {
       return
     }
-    if (!this.isCollapsible(hostNode) || !this.isCollapsible(squashNode)) {
-      return
-    }
+    // if (!this.isCollapsible(hostNode) || !this.isCollapsible(squashNode)) {
+    //   return
+    // }
 
     // hostNode is expected to be either direct parent or direct sibling of squashNode
     const parent = hostNode.parent
@@ -175,6 +260,8 @@ class CollapsedLayout {
       throw new Error('Cannot combine nodes - clump/stem mismatch: ' + context)
     }
     const children = _.difference(hostNode.children.concat(squashNode.children), [squashNode.id])
+
+    const format = n => n.id + '[' + n.children.join(';') + ']'
 
     const hostNodes = hostNode.collapsedNodes ? [...hostNode.collapsedNodes] : [hostNode]
     const squashNodes = squashNode.collapsedNodes ? [...squashNode.collapsedNodes] : [squashNode]
