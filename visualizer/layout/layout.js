@@ -199,6 +199,7 @@ class Layout {
         dataNodes: subsetInView,
         connection: connection || { targetNode: layoutNode.node }
       }, settings)
+      sublayout.originNode = layoutNode
       return sublayout
     }
   }

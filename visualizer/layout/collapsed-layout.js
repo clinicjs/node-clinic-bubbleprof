@@ -10,6 +10,10 @@ const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 class CollapsedLayout {
   constructor (layout) {
     this.uncollapsedLayout = layout
+    if (this.uncollapsedLayout.originNode && this.uncollapsedLayout.originNode.collapsedNodes) {
+      this.layoutNodes = layout.layoutNodes
+      return
+    }
     // Shallow clone before modifying
     // TODO: revisit idempotency of this class - mutates each LayoutNode internally
     this.layoutNodes = new Map([...layout.layoutNodes])
