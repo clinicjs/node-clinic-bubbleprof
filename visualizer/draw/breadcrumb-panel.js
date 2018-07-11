@@ -65,12 +65,7 @@ class BreadcrumbPanel extends HtmlContent {
   }
   traverseUp (targetUI) {
     if (this.topmostUI !== targetUI) {
-      const lastUI = this.topmostUI
-      let currentUI = this.topmostUI
-      while (currentUI && currentUI !== targetUI) {
-        currentUI = currentUI.clearSublayout()
-      }
-      this.originalUI.emit('navigation', { from: lastUI, to: targetUI })
+      this.topmostUI.traverseUp(targetUI)
     }
   }
 }

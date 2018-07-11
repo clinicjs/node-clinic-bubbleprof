@@ -463,14 +463,20 @@ class BubbleprofUI extends EventEmitter {
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
-        let targetUI = this
-        while (targetUI.layoutNode) {
-          targetUI = targetUI.clearSublayout()
-        }
-        if (targetUI !== this.ui) {
-          this.originalUI.emit('navigation', { from: this, to: targetUI })
-        }
+        this.traverseUp()
       })
+  }
+
+  traverseUp (targetUI = null) {
+    let currentUI = this
+    const animationQueue = []
+    while (currentUI !== targetUI && currentUI.parentUI) {
+      currentUI = currentUI.clearSublayout(animationQueue)
+    }
+    if (currentUI !== this) {
+      this.originalUI.emit('navigation', { from: this, to: currentUI })
+      executeAnimationQueue(animationQueue)
+    }
   }
 
   // Back button goes back in user navigation one step at a time
