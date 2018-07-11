@@ -214,6 +214,38 @@ class Layout {
     const collapsedLayout = new CollapsedLayout(this)
     this.layoutNodes = collapsedLayout.layoutNodes
   }
+
+  getLayoutNodeSorter () {
+    // Returns a sorting function that accesses layout.positioning without `this`
+    const positioning = this.positioning
+    return (a, b) => {
+      const aDepth = a.stem.ancestors.ids.length
+      const bDepth = b.stem.ancestors.ids.length
+
+      // If the layoutNodes are at different depths, sort by depth (number of ancestors including layout root)
+      if (aDepth !== bDepth) {
+        return aDepth - bDepth
+      }
+
+      // If they are at same depth and positioning is complete, use left-to-right draw order based on positioning.order's leaf ID order
+      if (positioning && positioning.order) {
+        // A midpoint may have many leaves, but leaves bunch by stems. Comparing first with first == comparing bunch with bunch
+        const aFirstLeafId = a.stem.leaves.ids.length ? a.stem.leaves.ids[0] : a.id
+        const bFirstLeafId = b.stem.leaves.ids.length ? b.stem.leaves.ids[0] : b.id
+
+        const aFirstLeafIndex = positioning.order.indexOf(aFirstLeafId)
+        const bFirstLeafIndex = positioning.order.indexOf(bFirstLeafId)
+        return aFirstLeafIndex - bFirstLeafIndex
+      }
+
+      // If they are at same depth but positioning is incomplete, sort by id ~= earlier first
+      return a.id - b.id
+    }
+  }
+
+  getSortedLayoutNodes () {
+    return [...this.layoutNodes.values()].sort(this.getLayoutNodeSorter())
+  }
 }
 
 function pickDataSubset (layoutNode) {
