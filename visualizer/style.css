@@ -886,9 +886,9 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
   stroke-width: 4px !important;
 }
 
-/* Line / Area chart */
+/* Area chart */
 
-.line-chart-svg {
+.area-chart-svg {
   width: 100%;
   height: 70px;
   display: block;
@@ -897,46 +897,46 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
   z-index: 2;
 }
 
-.line-chart {
+.area-chart {
   position: relative;
   font-size: var(--main-text-size);
 }
 
-.line-chart .slice-highlight {
+.area-chart .slice-highlight {
   background: var(--cyan-bright);
   opacity: 0.2;
   position: absolute;
   z-index: 1;
 }
 
-.line-chart .hover-box {
+.area-chart .hover-box {
   width: 135px;
   color: var(--grey-highlight);
 }
 
-.line-chart .hover-box .title-block {
+.area-chart .hover-box .title-block {
   padding: 12px 8px;
 }
 
-.line-chart .hover-box strong {
+.area-chart .hover-box strong {
   color: var(--pure-white);
 }
 
-.line-chart .hover-box .vertical-arrow {
+.area-chart .hover-box .vertical-arrow {
   margin-left: 9px;
 }
 
-#node-link .line-chart .hover-box > .vertical-arrow {
+#node-link .area-chart .hover-box > .vertical-arrow {
   border-top-color: var(--main-bg-translucent);
 }
 
-#node-link .line-chart .hover-box {
+#node-link .area-chart .hover-box {
   background: var(--main-bg-translucent);
   margin-top: -55px;
   margin-left: 6px;
 }
 
-#side-bar .line-chart .hover-box {
+#side-bar .area-chart .hover-box {
   margin-top: -32px;
 }
 
@@ -1193,42 +1193,42 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 
 /* In area chart specifically, apply to fill instead of stroke */
 
-svg.line-chart-svg .area-line {
+svg.area-chart-svg .area-path {
   stroke: none;
   opacity: 0.8;
   cursor: pointer;
 }
-svg.line-chart-svg .area-line-even {
+svg.area-chart-svg .area-path-even {
   opacity: 0.6;
 }
-svg.line-chart-svg .area-line:hover {
+svg.area-chart-svg .area-path:hover {
   mix-blend-mode: screen;
   opacity: 1;
 }
-svg.line-chart-svg .area-line.type-files-streams {
+svg.area-chart-svg .area-path.type-files-streams {
   fill: var(--type-colour-1);
 }
-svg.line-chart-svg .area-line.type-networks {
+svg.area-chart-svg .area-path.type-networks {
   fill: var(--type-colour-2);
 }
-svg.line-chart-svg .area-line.type-crypto {
+svg.area-chart-svg .area-path.type-crypto {
   fill: var(--type-colour-3);
 }
-svg.line-chart-svg .area-line.type-timing-promises {
+svg.area-chart-svg .area-path.type-timing-promises {
   fill: var(--type-colour-4);
 }
-svg.line-chart-svg .area-line.type-other {
+svg.area-chart-svg .area-path.type-other {
   fill: var(--type-colour-5);
 }
-svg.line-chart-svg.filter-applied .area-line {
+svg.area-chart-svg.filter-applied .area-path {
   animation-name: fade-in;
   animation-duration: 0.4s;
   animation-fill-mode: forwards;
 }
-svg.line-chart-svg.filter-applied .area-line.not-emphasised {
+svg.area-chart-svg.filter-applied .area-path.not-emphasised {
   animation-name: half-fade-out;
 }
-svg.line-chart-svg.filter-applied .area-line.filtered {
+svg.area-chart-svg.filter-applied .area-path.filtered {
   animation-name: mostly-fade-out;
   mix-blend-mode: luminosity;
 }
@@ -1249,24 +1249,24 @@ svg.line-chart-svg.filter-applied .area-line.filtered {
   }
 }
 
-.hover-box .line-chart {
+.hover-box .area-chart {
   background: var(--pure-black);
   opacity: 1;
 }
 
-.line-chart .x-axis .tick text {
+.area-chart .x-axis .tick text {
   fill: var(--nearform-grey);
 }
 
-.line-chart .x-axis .tick line {
+.area-chart .x-axis .tick line {
   stroke: var(--nearform-grey);
 }
 
-.hover-box .line-chart .x-axis .tick line {
+.hover-box .area-chart .x-axis .tick line {
   stroke: var(--main-bg-color);
 }
 
-.line-chart .x-axis .domain {
+.area-chart .x-axis .domain {
   display: none;
 }
 

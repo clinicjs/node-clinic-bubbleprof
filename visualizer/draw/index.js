@@ -172,7 +172,7 @@ function drawOuterUI () {
   lookup.addCollapseControl(true, { htmlContent: 'Search <span class="arrow"></span>' })
   lookup.addLoadingAnimation({ hidden: true })
 
-  const callbacksOverTime = sideBar.addContent('LineChart', {
+  const callbacksOverTime = sideBar.addContent('AreaChart', {
     classNames: 'side-bar-item'
   })
   callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
