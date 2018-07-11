@@ -63,20 +63,20 @@ class Positioning {
 // Simplified example:
 // Leaves with ids 1..8, sorted by totalStemLength, result in following tree:
 //
-//           1
-//           |     2
-//  3        C  4  | 5
-//   \       | /   |/
-// 6 _\    8 |/    C_ 7
-//     C    \C    /
-//      \    |   /
-//       C   C  C
-//        \  | /
-//         C C/
-//          \|
-//           C
-//           |
 //           R
+//           |
+//           C
+//          /|
+//         C C\
+//        /  | \
+//       C   C  C
+//      /    |   \
+//     C    /C    \
+// 6 _/    8 |\    C_ 7
+//   /       | \   |\
+//  3        C  4  | 5
+//           |     2
+//           1
 
 // Walkthrough:
 // Leaf | Missing ancestor Clumps formed | Clump orientation   | Leaf insertion factor

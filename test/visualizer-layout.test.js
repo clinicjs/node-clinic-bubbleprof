@@ -253,12 +253,17 @@ test('Visualizer layout - collapse - vertically collapses subset with missing ro
   layout.updateScale()
   const toValidLink = createLinkValidator(layout)
   const actualBefore = [...layout.layoutNodes.values()].map(toValidLink)
+  const sortedBefore = layout.getSortedLayoutNodes().map(toValidLink)
   t.deepEqual(actualBefore, ['2 => 3', '3 => 4', '4 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
+  t.deepEqual(sortedBefore, ['2 => 3', '7 => 8', '3 => 4', '8 => 9', '4 => 5', '9 => 10', '5 => 6', '10 => ', '6 => '])
+
   layout.collapseNodes()
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
+  const sortedAfter = layout.getSortedLayoutNodes().map(toValidLink)
   t.deepEqual(actualAfter, ['2 => clump:C3,C4', 'clump:C3,C4 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
+  t.deepEqual(sortedAfter, ['2 => clump:C3,C4', '7 => 8', 'clump:C3,C4 => 5', '8 => 9', '5 => 6', '9 => 10', '6 => ', '10 => '])
 
   t.end()
 })
