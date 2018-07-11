@@ -89,14 +89,25 @@ class AreaChart extends HtmlContent {
     this.xScale.domain([0, wallTime.profileEnd - wallTime.profileStart])
     this.yScale.domain([0, wallTime.maxAsyncPending])
 
-    // Sort by category (same colours together), and where same category, by id (how early defined)
+    // Sort by category (same colours together), and where same category, by layoutNode
     this.aggregateIds = [...aggregateNodes.keys()].sort((a, b) => {
       const aNode = aggregateNodes.get(a)
       const bNode = aggregateNodes.get(b)
+
       if (aNode.typeCategory !== bNode.typeCategory) {
         const aIndex = wallTime.categoriesOrdered.indexOf(aNode.typeCategory)
         const bIndex = wallTime.categoriesOrdered.indexOf(bNode.typeCategory)
         return aIndex - bIndex
+      }
+      const aLayoutNode = this.ui.layout.findAggregateNode(aNode, true)
+      const bLayoutNode = this.ui.layout.findAggregateNode(bNode, true)
+
+      const aIsInLayout = this.ui.layout.layoutNodes.has(aLayoutNode.id)
+      const bIsInLayout = this.ui.layout.layoutNodes.has(bLayoutNode.id)
+
+      if (aIsInLayout && bIsInLayout) {
+        const sorter = this.ui.layout.getLayoutNodeSorter()
+        return sorter(aLayoutNode, bLayoutNode)
       }
       return a - b
     })
