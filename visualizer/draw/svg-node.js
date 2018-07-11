@@ -286,14 +286,12 @@ class SvgNode {
 
         this.d3NameLabel.classed('hidden', !textAfterTrim)
       }
-    }
-
-    if (this.drawType === 'noNameLabel') {
+    } else if (this.drawType === 'noNameLabel' || this.drawType === 'squash') {
       this.d3NameLabel.classed('hidden', true)
       return
     }
 
-    // Is not a leaf / endpoint - position on line or circle
+    // Has space and is not a leaf / endpoint - position on line or circle
     this.d3NameLabel.classed('upper-label', true)
     this.d3NameLabel.classed('endpoint-label', false)
     this.d3NameLabel.classed('smaller-label', false)
