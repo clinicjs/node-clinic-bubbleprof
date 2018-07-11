@@ -23,6 +23,8 @@ class BubbleprofUI extends EventEmitter {
       viewMode: 'fit'
     }
 
+    this.isAnimating = false
+
     this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
     this.layoutNode = null // Is assigned if this is a sublayout with .layoutNode
@@ -205,11 +207,14 @@ class BubbleprofUI extends EventEmitter {
   }
 
   animate (isExpanding, callback) {
+    this.isAnimating = true
+
     this.highlightNode(null)
     this.parentUI.highlightNode(null)
-    const nodeLinkSection = this.getNodeLinkSection()
 
+    const nodeLinkSection = this.getNodeLinkSection()
     this.svgNodeDiagram.animate(isExpanding, () => {
+      this.isAnimating = false
       if (!isExpanding) {
         nodeLinkSection.d3Element.remove()
         this.parentUI.svgNodeDiagram.deselectAll()
@@ -378,6 +383,7 @@ class BubbleprofUI extends EventEmitter {
   **/
 
   highlightNode (layoutNode = null, dataNode = null) {
+    if (this.isAnimating && layoutNode) return
     this.highlightedNode = layoutNode
     this.highlightedDataNode = dataNode
     this.emit('hover', layoutNode)

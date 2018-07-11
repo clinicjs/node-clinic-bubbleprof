@@ -9,7 +9,6 @@ class SvgNodeDiagram {
     this.svgContainer = svgContainer
     this.ui = svgContainer.ui
 
-    this.isAnimating = false
     this.onAnimationComplete = []
 
     this.svgNodes = new Map()
@@ -70,7 +69,7 @@ class SvgNodeDiagram {
   }
 
   animate (isExpanding, callback) {
-    this.isAnimating = true
+    this.ui.isAnimating = true
 
     this.svgContainer.d3Element.classed('fade-elements-in', isExpanding)
     this.svgContainer.d3Element.classed('fade-elements-out', !isExpanding)
@@ -89,7 +88,7 @@ class SvgNodeDiagram {
     this.svgNodes.forEach(svgNode => svgNode.animate(svgNodeAnimations, isExpanding))
 
     Promise.all(svgNodeAnimations).then(() => {
-      this.isAnimating = false
+      this.ui.isAnimating = false
       if (callback) callback()
     })
   }
@@ -99,7 +98,7 @@ class SvgNodeDiagram {
   }
 
   draw () {
-    if (this.isAnimating) return
+    if (this.ui.isAnimating) return
 
     this.bbox = this.d3Container.node().getBoundingClientRect()
     this.svgNodes.forEach(svgNode => svgNode.draw())
