@@ -210,7 +210,10 @@ class BubbleprofUI extends EventEmitter {
     const nodeLinkSection = this.getNodeLinkSection()
 
     this.svgNodeDiagram.animate(isExpanding, () => {
-      if (!isExpanding) nodeLinkSection.d3Element.remove()
+      if (!isExpanding) {
+        nodeLinkSection.d3Element.remove()
+        this.parentUI.svgNodeDiagram.deselectAll()
+      }
       if (callback) callback()
     })
   }
@@ -231,6 +234,7 @@ class BubbleprofUI extends EventEmitter {
   selectNode (layoutNode, animationQueue) {
     const dataNode = layoutNode.node
     const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
+    this.svgNodeDiagram.svgNodes.get(layoutNode.id).select()
 
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':

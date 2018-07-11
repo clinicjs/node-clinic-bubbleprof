@@ -94,6 +94,10 @@ class SvgNodeDiagram {
     })
   }
 
+  deselectAll () {
+    this.svgNodes.forEach(svgNode => svgNode.deselect())
+  }
+
   draw () {
     if (this.isAnimating) return
 

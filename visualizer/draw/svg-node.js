@@ -103,6 +103,15 @@ class SvgNode {
     return this
   }
 
+  deselect () {
+    this.d3OuterPath.classed('selected-node', false)
+  }
+
+  select () {
+    this.parentContent.deselectAll()
+    this.d3OuterPath.classed('selected-node', true)
+  }
+
   animate (svgNodeAnimations, isExpanding) {
     this.setCoordinates()
 

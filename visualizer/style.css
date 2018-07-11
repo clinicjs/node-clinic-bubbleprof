@@ -9,6 +9,7 @@ html {
 
 /* Matches --banner-bg-color when overlaid over --main-bg-color */
   --lighten-bg-color: rgba(212, 224, 255, 0.08);
+  --highlight-bg-color: rgba(212, 224, 255, 0.3);
 
   --nearform-red: rgb(237,24,40);
   --nearform-grey: rgb(121,122,124);
@@ -602,6 +603,11 @@ svg.bubbleprof .node-group {
 
 svg.bubbleprof .outer-path {
   fill: var(--lighten-bg-color);
+  stroke: none;
+}
+
+svg.bubbleprof .outer-path.selected-node {
+  fill: var(--highlight-bg-color);
   stroke: none;
 }
 
