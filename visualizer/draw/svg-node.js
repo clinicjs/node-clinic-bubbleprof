@@ -260,8 +260,8 @@ class SvgNode {
           y2
         } = toEndpoint
 
-        const lengthToSide = this.parentContent.getLengthToSide(x2, y2, this.degrees, this.ui.settings)
-        const lengthToBottom = this.parentContent.getLengthToBottom(x2, y2, this.degrees, this.ui.settings)
+        const lengthToSide = this.parentContent.getHorizontalLength(x2, y2, this.degrees)
+        const lengthToBottom = this.parentContent.getVerticalLength(x2, y2, this.degrees)
         const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
 
         const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge)

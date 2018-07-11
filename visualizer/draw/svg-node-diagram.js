@@ -70,19 +70,21 @@ class SvgNodeDiagram {
     this.svgNodes.forEach(svgNode => svgNode.draw())
   }
 
-  getLengthToBottom (x1, y1, degrees) {
-    // Outer padding is partly for labels to use, allow encrouchment most of the way
-    const distanceFromEdge = this.ui.settings.svgDistanceFromEdge / 4
-
-    const radians = LineCoordinates.degreesToRadians(90 - degrees)
-    const adjacentLength = this.bbox.height - distanceFromEdge - y1
-    const hypotenuseLength = adjacentLength / Math.cos(radians)
-    return hypotenuseLength
+  getVerticalLength (x, y, degrees) {
+    return this.getLengthToSide(x, y, 90 - degrees, false)
   }
 
-  getLengthToSide (x1, y1, degrees) {
-    // Outer padding is partly for labels to use, allow a little encrouchment
-    const distanceFromEdge = this.ui.settings.svgDistanceFromEdge
+  getHorizontalLength (x, y, degrees) {
+    return this.getLengthToSide(x, y, degrees, true)
+  }
+
+  getLengthToSide (x, y, degrees, horizontal = false) {
+    // Outer padding is partly for labels to use, allow a little encrouchment especially on vertical
+    const allowedEncrouchment = horizontal ? 3 : 6
+    const coordinate = horizontal ? x : y
+    const measurement = horizontal ? 'width' : 'height'
+
+    const distanceFromEdge = this.ui.settings.svgDistanceFromEdge / allowedEncrouchment
 
     // Ensure degrees range is between -180 and 180
     degrees = LineCoordinates.enforceDegreesRange(degrees)
@@ -90,13 +92,13 @@ class SvgNodeDiagram {
     let adjacentLength
 
     if (degrees > 90 || degrees < -90) {
-      // Test against left side edge
+      // Test against left or top side edgew
       radians = LineCoordinates.degreesToRadians(180 - degrees)
-      adjacentLength = x1 - distanceFromEdge
+      adjacentLength = coordinate - distanceFromEdge
     } else {
-      // Test against right side edge
+      // Test against right or bottom side edge
       radians = LineCoordinates.degreesToRadians(degrees)
-      adjacentLength = this.bbox.width - distanceFromEdge - x1
+      adjacentLength = this.bbox[measurement] - distanceFromEdge - coordinate
     }
     const hypotenuseLength = adjacentLength / Math.cos(radians)
     return hypotenuseLength
