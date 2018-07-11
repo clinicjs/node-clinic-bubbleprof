@@ -259,8 +259,12 @@ class BubbleprofUI extends EventEmitter {
 
       case 'AggregateNode':
         this.selectedDataNode = dataNode
-        this.outputFrames(dataNode, layoutNode)
-        window.location.hash = 'a' + dataNode.aggregateId
+        const thisUI = this
+        const selectAggregate = () => {
+          thisUI.outputFrames(dataNode, layoutNode)
+          window.location.hash = 'a' + dataNode.aggregateId
+        }
+        animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
         return this
 
       case 'ClusterNode':
@@ -607,7 +611,11 @@ function executeAnimationQueue (animationQueue, index = 0) {
   ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
   ui.animate(isExpanding, () => {
     if (callback) callback()
-    executeAnimationQueue(animationQueue, index)
+    if (animationQueue.length > index) {
+      executeAnimationQueue(animationQueue, index)
+    } else {
+      if (animationQueue.onComplete) animationQueue.onComplete()
+    }
   })
 }
 
