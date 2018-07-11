@@ -151,16 +151,20 @@ class BubbleprofUI extends EventEmitter {
 
       uiWithinSublayout.setData(sublayout)
 
+      const callback = () => {
+        uiWithinSublayout.setAsTopmostUI()
+      }
+
       if (animationQueue) {
         animationQueue.push({
           ui: uiWithinSublayout,
-          isExpanding: true
+          isExpanding: true,
+          callback
         })
       } else {
-        uiWithinSublayout.animate(true)
+        uiWithinSublayout.animate(true, callback)
       }
 
-      uiWithinSublayout.setAsTopmostUI()
       return uiWithinSublayout
     }
     return this
@@ -173,16 +177,20 @@ class BubbleprofUI extends EventEmitter {
     if (this.parentUI) {
       this.parentUI.selectedDataNode = null
 
+      const callback = () => {
+        this.parentUI.setAsTopmostUI()
+      }
+
       if (animationQueue) {
         animationQueue.push({
           ui: this,
-          isExpanding: false
+          isExpanding: false,
+          callback
         })
       } else {
-        this.animate(false)
+        this.animate(false, callback)
       }
 
-      this.parentUI.setAsTopmostUI()
       if (this.parentUI.layoutNode) {
         const dataNode = this.parentUI.layoutNode.node
         switch (dataNode.constructor.name) {
@@ -590,13 +598,15 @@ function executeAnimationQueue (animationQueue, index = 0) {
 
   const {
     ui,
-    isExpanding
+    isExpanding,
+    callback
   } = animationQueue[index]
 
   index++
 
   ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
   ui.animate(isExpanding, () => {
+    if (callback) callback()
     executeAnimationQueue(animationQueue, index)
   })
 }
