@@ -38,7 +38,6 @@ class AreaChart extends HtmlContent {
     })
     this.ui.on('setTopmostUI', topmostUI => {
       this.topmostUI = topmostUI
-      this.layoutNode = topmostUI.layoutNode
       this.draw()
     })
   }
@@ -187,7 +186,7 @@ class AreaChart extends HtmlContent {
       .enter()
       .append('path')
       .attr('class', d => `type-${d.key.split('_')[0]}`)
-      .classed('filtered', d => d.key.split('_')[1] === 'absent')
+      .classed('filtered', d => d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
       .classed('area-path-even', d => !(d.index % 2))
       .classed('area-path', true)
       .on('mouseover', (d) => {
@@ -221,7 +220,9 @@ class AreaChart extends HtmlContent {
   }
 
   applyLayoutNode (layoutNode = null) {
+    const redraw = layoutNode !== this.layoutNode
     this.layoutNode = layoutNode
+    if (redraw) this.draw()
   }
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
