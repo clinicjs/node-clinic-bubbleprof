@@ -12,7 +12,8 @@ const {
 test('Visualizer validation - isNumber', function (t) {
   t.equals(isNumber(123), true)
   t.equals(isNumber(Infinity), true)
-  t.equals(isNumber(1e23), true)
+  t.equals(isNumber(1e+23), true)
+  t.equals(isNumber(1e-23), true)
   t.equals(isNumber('123'), false)
   t.equals(isNumber('1e23'), false)
   t.equals(isNumber(NaN), false)
