@@ -4,6 +4,9 @@
 function isNumber (num) {
   return typeof num === 'number' && !Number.isNaN(num)
 }
+function isNumericString (str) {
+  return typeof str === 'string' && '' + parseFloat(str) === str
+}
 function validateKey (key, validOptions) {
   if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {
     throw new Error(`Invalid key "${key}" (typeof ${typeof key}) passed, valid keys are: ${validOptions.join(', ')}`)
@@ -48,6 +51,7 @@ function incrementKeyUntilUnique (key, counter, test) {
 
 module.exports = {
   isNumber,
+  isNumericString,
   validateKey,
   validateNumber,
   uniqueMapKey,
