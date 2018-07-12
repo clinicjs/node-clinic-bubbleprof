@@ -380,23 +380,24 @@ function addMissingADefs (arcString) {
   return unpackArcString(adjustedArcString)
 }
 
-function unpackArcString (arcString) {
+function unpackArcString (initialString) {
   const arcDef = {}
   // Discard everything after the second M
-  arcString = `M${arcString.split('M')[1]}`
+  const splitByM = initialString.split('M')
+  const arcString = `M${splitByM[1]}`
 
-  const splitString = arcString.split('A')
-  if (splitString.length <= 1) return null
+  const splitByA = arcString.split('A')
+  if (splitByA.length <= 1) return null
 
-  arcDef.M = splitString[0].slice(1).split(',')
+  arcDef.M = splitByA[0].slice(1).split(',')
 
   // The second A of a typical D3 arc where innerRadius === outerRadius retraces itself to the start
   // We can therefore discard it because it's invisible to the user and complicates animation
-  arcDef.A = splitString[1].split(',')
+  arcDef.A = splitByA[1].split(',')
 
   // Complete circles in D3 arcs are drawn as two outward semi-circles, then two retracing semi-circles
   // We keep the second semi-circle, and discard the redundant third and fourth retracing semi-circles
-  arcDef.A2 = splitString.length > 3 ? splitString[2].split(',') : null
+  arcDef.A2 = splitByM.length === 3 && splitByA.length === 3 ? splitByA[2].split(',') : null
   return arcDef
 }
 
