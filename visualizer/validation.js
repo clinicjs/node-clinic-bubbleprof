@@ -1,14 +1,14 @@
 'use strict'
 
 // Helper functions for validating data
-
 function isNumber (num) {
   return typeof num === 'number' && !Number.isNaN(num)
 }
 function validateKey (key, validOptions) {
   if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {
-    throw new Error(`Invalid key "${key}" passed, valid types are: ${validOptions.join(', ')}`)
+    throw new Error(`Invalid key "${key}" (typeof ${typeof key}) passed, valid keys are: ${validOptions.join(', ')}`)
   }
+  return true
 }
 function validateNumber (num, targetDescription = '', conditions = {}) {
   const defaultConditions = {
@@ -31,21 +31,25 @@ function validateNumber (num, targetDescription = '', conditions = {}) {
   return num
 }
 
-// Currently only used in /draw code
-/* istanbul ignore next */
 function uniqueMapKey (key, map) {
-  let counter = 0
-  function keyWithIncrement () {
-    counter++
-    const newKey = `${key}_${counter}`
-    return map.has(newKey) ? keyWithIncrement() : newKey
-  }
-  return map.has(key) ? keyWithIncrement(key + '_') : key
+  const test = (key) => !map.has(key)
+  return incrementKeyUntilUnique(key, 0, test)
+}
+
+function uniqueObjectKey (key, object) {
+  const test = (key) => typeof object[key] === 'undefined'
+  return incrementKeyUntilUnique(key, 0, test)
+}
+
+function incrementKeyUntilUnique (key, counter, test) {
+  const testKey = counter ? `${key}_${counter}` : key
+  return test(testKey) ? testKey : incrementKeyUntilUnique(key, counter + 1, test)
 }
 
 module.exports = {
   isNumber,
   validateKey,
   validateNumber,
-  uniqueMapKey
+  uniqueMapKey,
+  uniqueObjectKey
 }
