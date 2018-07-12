@@ -26,7 +26,7 @@ test('Visualizer data - DataSet - invalid getByNodeType', function (t) {
   t.throws(() => {
     const dataSet = loadData({ debugMode: true }, fakeJson)
     dataSet.getByNodeType('InvalidNode', 0)
-  }, new Error('Invalid key "InvalidNode" passed, valid types are: AggregateNode, ClusterNode'))
+  }, new Error('Invalid key "InvalidNode" (typeof string) passed, valid keys are: AggregateNode, ClusterNode'))
 
   t.end()
 })
