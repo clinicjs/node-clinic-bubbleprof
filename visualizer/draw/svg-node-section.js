@@ -116,8 +116,10 @@ class SvgNodeElement {
           break
       }
     }
+    const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
 
-    const contractedOrigin = nodeWasBetweenInParent ? cloneXY(contractedSvgNode.originPoint) : defaultArcOrigin()
+    const contractedSvgLineElement = contractedSvgNode.asyncBetweenLines[dataTypeKey]
+    const contractedOrigin = nodeWasBetweenInParent ? cloneXY(contractedSvgLineElement.originPoint) : defaultArcOrigin()
     const expandedOrigin = cloneXY(this.originPoint || this.circleCentre)
 
     const overallLength = contractedSvgNode.getLength()
@@ -125,7 +127,6 @@ class SvgNodeElement {
     const parentWithinTime = contractedSvgNode.layoutNode.node.getWithinTime()
     const degrees = contractedSvgNode.degrees
 
-    const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
     const parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
 
     this.d3Shapes.each((segmentDatum, index, nodes) => {
