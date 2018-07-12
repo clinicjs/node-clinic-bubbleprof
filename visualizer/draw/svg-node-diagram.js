@@ -92,7 +92,7 @@ class SvgNodeDiagram {
     let adjacentLength
 
     if (degrees > 90 || degrees < -90) {
-      // Test against left or top side edgew
+      // Test against left or top side edge
       radians = LineCoordinates.degreesToRadians(180 - degrees)
       adjacentLength = coordinate - distanceFromEdge
     } else {
