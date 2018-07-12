@@ -1220,15 +1220,15 @@ svg.area-chart-svg .area-path.type-timing-promises {
 svg.area-chart-svg .area-path.type-other {
   fill: var(--type-colour-5);
 }
-svg.area-chart-svg.filter-applied .area-path {
+svg.area-chart-svg .area-path {
   animation-name: fade-in;
   animation-duration: 0.4s;
   animation-fill-mode: forwards;
 }
-svg.area-chart-svg.filter-applied .area-path.not-emphasised {
+svg.area-chart-svg .area-path.not-emphasised {
   animation-name: half-fade-out;
 }
-svg.area-chart-svg.filter-applied .area-path.filtered {
+svg.area-chart-svg .area-path.filtered {
   animation-name: mostly-fade-out;
   mix-blend-mode: luminosity;
 }

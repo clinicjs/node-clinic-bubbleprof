@@ -2,6 +2,10 @@
 
 const d3 = require('./d3-subset.js')
 const HtmlContent = require('./html-content.js')
+const {
+  isNumericString,
+  uniqueObjectKey
+} = require('../validation.js')
 
 class AreaChart extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
@@ -127,13 +131,6 @@ class AreaChart extends HtmlContent {
       return asyncInSliceByAgId
     })
 
-    // d3's stacker inverts the data array, so it is by aggregateId in sort order first, each containing array
-    // of timeslices, then stacks it such that [0] is the total of lower stacks and [1] is [0] + this datapoint
-    const dataStacker = d3.stack()
-      .keys(this.aggregateIds)
-
-    this.stackedData = dataStacker(this.dataArray)
-
     // Refresh on data / layout update. This includes screen resize
     if (!this.hidden) {
       this.initializeFromData()
@@ -141,40 +138,6 @@ class AreaChart extends HtmlContent {
     }
   }
   initializeFromData () {
-    if (this.d3AreaPaths) {
-      this.d3AreaPaths.data(this.stackedData)
-      return
-    }
-    this.d3AreaPaths = this.d3ChartInner.selectAll('.area-path')
-      .data(this.stackedData)
-      .enter()
-      .append('path')
-      .attr('class', d => `type-${this.getAggregateNode(d.key).typeCategory}`)
-      .classed('area-path-even', d => !(d.index % 2))
-      .classed('area-path', true)
-      .on('mouseover', (d) => {
-        if (this.parentContent.constructor.name === 'HoverBox') return
-        const aggregateNode = this.getAggregateNode(d.key)
-        const layoutNode = this.topmostUI.layout.findAggregateNode(aggregateNode)
-        if (layoutNode) {
-          this.topmostUI.highlightNode(layoutNode, aggregateNode)
-        }
-      })
-      .on('mouseout', () => {
-        if (this.parentContent.constructor.name === 'HoverBox') return
-        this.topmostUI.highlightNode(null)
-      })
-      .on('click', (d) => {
-        const aggregateNode = this.getAggregateNode(d.key)
-        const targetUI = this.topmostUI.jumpToNode(aggregateNode)
-        if (targetUI !== this.ui) {
-          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-        }
-      })
-      .on('mousemove', () => {
-        this.showSlice(d3.event)
-      })
-
     // Same behaviour on mouse movements off coloured area as on
     this.d3AreaChartSVG.on('mousemove', () => {
       this.showSlice(d3.event)
@@ -187,6 +150,76 @@ class AreaChart extends HtmlContent {
 
     if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
   }
+  createPathsForLayout () {
+    if (this.d3AreaPaths) this.d3AreaPaths.remove()
+
+    const nodeGroups = []
+    let currentNodeGroup = applyAggregateIdToNodeGroup(this.aggregateIds[0], this.topmostUI, nodeGroups)
+
+    const aggregateIdsCount = this.aggregateIds.length
+    if (aggregateIdsCount > 1) {
+      // id [0] has already been done, start iterating at [1]
+      for (let aggregateIndex = 1; aggregateIndex < aggregateIdsCount; aggregateIndex++) {
+        currentNodeGroup = applyAggregateIdToNodeGroup(this.aggregateIds[aggregateIndex], this.topmostUI, nodeGroups, currentNodeGroup)
+      }
+    }
+
+    const combinedDataArray = Array(this.dataArray.length)
+
+    const timeSliceCount = this.dataArray.length
+    for (let timeIndex = 0; timeIndex < timeSliceCount; timeIndex++) {
+      const oldTimeSlice = this.dataArray[timeIndex]
+      combinedDataArray[timeIndex] = { time: oldTimeSlice.time }
+      nodeGroups.forEach(nodeGroup => nodeGroup.combineAggregateData(combinedDataArray[timeIndex], oldTimeSlice))
+    }
+
+    const nodeGroupKeys = nodeGroups.map(nodeGroup => nodeGroup.key)
+
+    // d3's stacker transposes the data array, so it is by key first in sort order, with each item containing an array
+    // of timeslices, then stacks it such that [0] is the total of lower stacks and [1] is [0] + this datapoint
+    const dataStacker = d3.stack()
+      .keys(nodeGroupKeys)
+
+    const stackedData = dataStacker(combinedDataArray)
+
+    this.d3AreaPaths = this.d3ChartInner.selectAll('.area-path')
+      .data(stackedData)
+      .enter()
+      .append('path')
+      .attr('class', d => `type-${d.key.split('_')[0]}`)
+      .classed('filtered', d => d.key.split('_')[1] === 'absent')
+      .classed('area-path-even', d => !(d.index % 2))
+      .classed('area-path', true)
+      .on('mouseover', (d) => {
+        const layoutNodeId = extractLayoutNodeId(d.key)
+        if (!layoutNodeId || this.parentContent.constructor.name === 'HoverBox') return
+
+        const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+        if (layoutNode) {
+          this.topmostUI.highlightNode(layoutNode)
+        }
+      })
+      .on('mouseout', () => {
+        if (this.parentContent.constructor.name === 'HoverBox') return
+        this.topmostUI.highlightNode(null)
+      })
+      .on('click', (d) => {
+        const layoutNodeId = extractLayoutNodeId(d.key)
+        if (!layoutNodeId) return
+
+        this.topmostUI.highlightNode(null)
+
+        const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+        const targetUI = this.topmostUI.selectNode(layoutNode)
+        if (targetUI !== this.ui) {
+          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+        }
+      })
+      .on('mousemove', () => {
+        this.showSlice(d3.event)
+      })
+  }
+
   applyLayoutNode (layoutNode = null) {
     this.layoutNode = layoutNode
   }
@@ -245,82 +278,101 @@ class AreaChart extends HtmlContent {
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
   draw () {
-    // Can be slow on extremely large profiles, do asynchronously
-    setTimeout(() => {
-      super.draw()
-      const {
-        width,
-        height
-      } = this.d3AreaChartSVG.node().getBoundingClientRect()
-      const margins = this.contentProperties.margins
+    this.createPathsForLayout()
 
-      const usableHeight = height - margins.bottom - margins.top
-      const usableWidth = width - margins.left - margins.right
+    super.draw()
+    const {
+      width,
+      height
+    } = this.d3AreaChartSVG.node().getBoundingClientRect()
+    const margins = this.contentProperties.margins
 
-      // If a layoutNode has been assigned, de-emphasise everything that's not in it
-      if (this.layoutNode) {
-        /* TODO: Enable this when nodes on diagram are drawn based on async / sync not within / between
-        this.d3LeadInText.html(this.getLeadInText())
-        */
+    const usableHeight = height - margins.bottom - margins.top
+    const usableWidth = width - margins.left - margins.right
 
-        this.d3AreaChartSVG.classed('filter-applied', true)
-        this.d3AreaPaths.classed('filtered', d => {
-          if (!this.layoutNode) return false
-          return !this.layoutNodeHasAggregateId(d.key)
-        })
-        if (this.ui.highlightedDataNode) {
-          this.d3AreaPaths.classed('not-emphasised', d => {
-            const aggregateNode = this.getAggregateNode(d.key)
-            return (aggregateNode !== this.ui.highlightedDataNode)
-          })
+    this.xScale.range([0, usableWidth])
+    this.yScale.range([usableHeight, 0])
+
+    this.d3AreaPaths.attr('d', this.areaMaker)
+
+    const xAxis = d3.axisBottom()
+      .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
+      .tickSize(2)
+      .tickPadding(3)
+      .scale(this.xScale)
+      .tickFormat((dateStamp) => {
+        const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
+
+        // Start with 0 s
+        if (d3.timeFormat('%Q')(dateStamp) === '0') return `0${hairSpace}s`
+
+        // Show millisecond increments like '500 ms'
+        if (d3.timeSecond(dateStamp) < dateStamp) {
+          // When space is moderately limited, show unlabelled mid point markers between seconds
+          if (width < 220) return ''
+          return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`
         }
-      } else {
-        this.d3AreaChartSVG.classed('filter-applied', false)
-        this.d3AreaPaths.classed('filtered', false)
-      }
+        // Show second increments like '5 s'
+        if (d3.timeMinute(dateStamp) < dateStamp) return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`
 
-      this.xScale.range([0, usableWidth])
-      this.yScale.range([usableHeight, 0])
+        // Show minute increments like '5 min'
+        if (d3.timeHour(dateStamp) < dateStamp) return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min`
 
-      this.d3AreaPaths.attr('d', this.areaMaker)
+        // Show hour increments like '5 hr', with no units longer than hours
+        return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr`
+      })
 
-      const xAxis = d3.axisBottom()
-        .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
-        .tickSize(2)
-        .tickPadding(3)
-        .scale(this.xScale)
-        .tickFormat((dateStamp) => {
-          const hairSpace = ' ' // &hairsp; unicode char, SVG doesn't like it as a HTML entity
+    this.d3XAxisGroup
+      .attr('transform', `translate(0, ${usableHeight})`)
+      .call(xAxis)
 
-          // Start with 0 s
-          if (d3.timeFormat('%Q')(dateStamp) === '0') return `0${hairSpace}s`
+    this.pixelsPerSlice = usableWidth / this.slicesCount
 
-          // Show millisecond increments like '500 ms'
-          if (d3.timeSecond(dateStamp) < dateStamp) {
-            // When space is moderately limited, show unlabelled mid point markers between seconds
-            if (width < 220) return ''
-            return d3.timeFormat('%L')(dateStamp) + `${hairSpace}ms`
-          }
-          // Show second increments like '5 s'
-          if (d3.timeMinute(dateStamp) < dateStamp) return parseInt(d3.timeFormat('%S')(dateStamp)) + `${hairSpace}s`
+    this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
+    this.d3SliceHighlight.style('height', usableHeight + 'px')
+    this.d3SliceHighlight.style('top', margins.top + 'px')
+  }
+}
 
-          // Show minute increments like '5 min'
-          if (d3.timeHour(dateStamp) < dateStamp) return d3.timeFormat('%M')(dateStamp) + `${hairSpace}min`
+function applyAggregateIdToNodeGroup (aggregateId, ui, nodeGroups, nodeGroup) {
+  const aggregateNode = ui.dataSet.aggregateNodes.get(aggregateId)
+  const layoutNode = ui.layout.findAggregateNode(aggregateNode)
+  if (!nodeGroup || !nodeGroup.applyNodeIfValid(aggregateNode, layoutNode)) {
+    nodeGroup = new NodeGroup(aggregateNode, layoutNode)
+    nodeGroups.push(nodeGroup)
+  }
+  return nodeGroup
+}
 
-          // Show hour increments like '5 hr', with no units longer than hours
-          return d3.timeFormat('%H')(dateStamp) + `${hairSpace}hr`
-        })
+function extractLayoutNodeId (nodeGroupKey) {
+  const rawId = nodeGroupKey.split('_')[1]
+  if (rawId === 'absent') return null
+  const layoutNodeId = isNumericString(rawId) ? parseInt(rawId) : rawId
+  return layoutNodeId
+}
 
-      this.d3XAxisGroup
-        .attr('transform', `translate(0, ${usableHeight})`)
-        .call(xAxis)
+class NodeGroup {
+  constructor (aggregateNode, layoutNode = null) {
+    this.typeCategory = aggregateNode.typeCategory
+    this.layoutNodeId = layoutNode ? layoutNode.id : 'absent'
+    this.aggregateNodes = [ aggregateNode ]
 
-      this.pixelsPerSlice = usableWidth / this.slicesCount
+    this.key = `${this.typeCategory}_${this.layoutNodeId}`
+  }
 
-      this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
-      this.d3SliceHighlight.style('height', usableHeight + 'px')
-      this.d3SliceHighlight.style('top', margins.top + 'px')
-    })
+  applyNodeIfValid (aggregateNode, layoutNode = null) {
+    const layoutNodeId = layoutNode ? layoutNode.id : 'absent'
+    if (layoutNodeId === this.layoutNodeId && aggregateNode.typeCategory === this.typeCategory) {
+      this.aggregateNodes.push(aggregateNode)
+      return this
+    }
+    return false
+  }
+
+  combineAggregateData (newTimeSlice, oldTimeSlice) {
+    const uniqueKey = uniqueObjectKey(this.key, newTimeSlice)
+    this.key = uniqueKey
+    newTimeSlice[uniqueKey] = this.aggregateNodes.reduce((total, aggregateNode) => total + oldTimeSlice[aggregateNode.id], 0)
   }
 }
 
