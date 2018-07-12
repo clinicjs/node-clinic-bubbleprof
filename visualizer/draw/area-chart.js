@@ -23,12 +23,16 @@ class AreaChart extends HtmlContent {
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
 
+    this.key = 'AreaChart-' + this.parentContent.constructor.name
+
     this.pixelsPerSlice = 0
 
     this.areaMaker = d3.area()
       .x(d => this.xScale(d.data.time))
       .y0(d => this.yScale(d[0]))
       .y1(d => this.yScale(d[1]))
+
+    this.listeningUIs = []
 
     this.ui.on('setData', () => {
       this.setData()
@@ -38,6 +42,15 @@ class AreaChart extends HtmlContent {
     })
     this.ui.on('setTopmostUI', topmostUI => {
       this.topmostUI = topmostUI
+
+      if (!this.listeningUIs.includes(topmostUI)) {
+        this.listeningUIs.push(this.ui)
+        topmostUI.on('hover', layoutNode => {
+          if (!this.d3AreaPaths) return
+          this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
+        })
+      }
+
       this.draw()
     })
   }

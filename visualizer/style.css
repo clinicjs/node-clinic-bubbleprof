@@ -1196,12 +1196,15 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 svg.area-chart-svg .area-path {
   stroke: none;
   opacity: 0.8;
+}
+svg.area-chart-svg .area-path:not(.filtered) {
   cursor: pointer;
 }
+
 svg.area-chart-svg .area-path-even {
   opacity: 0.6;
 }
-svg.area-chart-svg .area-path:hover {
+svg.area-chart-svg .area-path.highlighted {
   mix-blend-mode: screen;
   opacity: 1;
 }
@@ -1223,6 +1226,9 @@ svg.area-chart-svg .area-path.type-other {
 svg.area-chart-svg .area-path.not-emphasised {
   opacity: 0.45;
 }
+svg.area-chart-svg .area-path.filtered {
+  opacity: 0.14;
+}
 #side-bar svg.area-chart-svg .area-path.filtered {
   animation-name: mostly-fade-out;
 }
@@ -1231,14 +1237,6 @@ svg.area-chart-svg .area-path.not-emphasised {
   to {
     opacity: 0.14;
   }
-}
-
-svg.area-chart-svg .area-path.filtered {
-  opacity: 0.14;
-}
-
-.hover-box .area-chart-svg .area-path:hover:not(.filtered) {
-  opacity: 1 !important;
 }
 
 .hover-box .area-chart {
