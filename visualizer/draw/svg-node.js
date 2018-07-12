@@ -260,8 +260,8 @@ class SvgNode {
           y2
         } = toEndpoint
 
-        const lengthToSide = this.parentContent.getLengthToSide(x2, y2, this.degrees, this.ui.settings)
-        const lengthToBottom = this.parentContent.getLengthToBottom(x2, y2, this.degrees, this.ui.settings)
+        const lengthToSide = this.parentContent.getHorizontalLength(x2, y2, this.degrees)
+        const lengthToBottom = this.parentContent.getVerticalLength(x2, y2, this.degrees)
         const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
 
         const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge)
@@ -286,14 +286,12 @@ class SvgNode {
 
         this.d3NameLabel.classed('hidden', !textAfterTrim)
       }
-    }
-
-    if (this.drawType === 'noNameLabel') {
+    } else if (this.drawType === 'noNameLabel' || this.drawType === 'squash') {
       this.d3NameLabel.classed('hidden', true)
       return
     }
 
-    // Is not a leaf / endpoint - position on line or circle
+    // Has space and is not a leaf / endpoint - position on line or circle
     this.d3NameLabel.classed('upper-label', true)
     this.d3NameLabel.classed('endpoint-label', false)
     this.d3NameLabel.classed('smaller-label', false)
