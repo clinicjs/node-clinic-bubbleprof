@@ -1196,12 +1196,15 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 svg.area-chart-svg .area-path {
   stroke: none;
   opacity: 0.8;
+}
+svg.area-chart-svg .area-path:not(.filtered) {
   cursor: pointer;
 }
+
 svg.area-chart-svg .area-path-even {
   opacity: 0.6;
 }
-svg.area-chart-svg .area-path:hover {
+svg.area-chart-svg .area-path.highlighted {
   mix-blend-mode: screen;
   opacity: 1;
 }
@@ -1220,32 +1223,19 @@ svg.area-chart-svg .area-path.type-timing-promises {
 svg.area-chart-svg .area-path.type-other {
   fill: var(--type-colour-5);
 }
-svg.area-chart-svg.filter-applied .area-path {
-  animation-name: fade-in;
-  animation-duration: 0.4s;
-  animation-fill-mode: forwards;
+svg.area-chart-svg .area-path.not-emphasised {
+  opacity: 0.45;
 }
-svg.area-chart-svg.filter-applied .area-path.not-emphasised {
-  animation-name: half-fade-out;
+svg.area-chart-svg .area-path.filtered {
+  opacity: 0.14;
 }
-svg.area-chart-svg.filter-applied .area-path.filtered {
+#side-bar svg.area-chart-svg .area-path.filtered {
   animation-name: mostly-fade-out;
-  mix-blend-mode: luminosity;
 }
 
 @keyframes mostly-fade-out {
   to {
     opacity: 0.14;
-  }
-}
-@keyframes half-fade-out {
-  to {
-    opacity: 0.45;
-  }
-}
-@keyframes fade-in {
-  to {
-    opacity: 1;
   }
 }
 
