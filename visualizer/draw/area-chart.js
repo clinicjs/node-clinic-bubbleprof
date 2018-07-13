@@ -176,7 +176,7 @@ class AreaChart extends HtmlContent {
       }
     }
 
-    const combinedDataArray = Array(this.dataArray.length)
+    const combinedDataArray = new Array(this.dataArray.length)
 
     const timeSliceCount = this.dataArray.length
     for (let timeIndex = 0; timeIndex < timeSliceCount; timeIndex++) {
