@@ -93,8 +93,12 @@ class CollapsedLayout {
         continue
       }
 
+      let counter = 1
+      while (this.layoutNodes.get(`shortcut-${counter}:${targetLayoutNode.id}`)) {
+        counter++
+      }
       const mergedShortcut = new ShortcutNode({
-        id: `shortcut:${targetLayoutNode.id}`,
+        id: `shortcut-${counter}:${targetLayoutNode.id}`,
         children: [],
         parentId: parentLayoutNode.id
       }, targetLayoutNode.node)

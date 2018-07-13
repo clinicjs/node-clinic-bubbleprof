@@ -120,8 +120,8 @@ test('Visualizer layout - collapse - merges shortcuts pointing to the same view'
   const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, settings)
   traversedLayout.processHierarchy()
   toValidLink = createLinkValidator(traversedLayout)
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-shortcut:2', 'AggregateNode-3', 'ShortcutNode-shortcut:clump:C4,C6,C8'])
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['shortcut:2 => 3', '3 => shortcut:clump:C4,C6,C8', 'shortcut:clump:C4,C6,C8 => '])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-shortcut:2', 'AggregateNode-3', 'ShortcutNode-shortcut-1:clump:C4,C6,C8'])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['shortcut:2 => 3', '3 => shortcut-1:clump:C4,C6,C8', 'shortcut-1:clump:C4,C6,C8 => '])
 
   t.end()
 })
