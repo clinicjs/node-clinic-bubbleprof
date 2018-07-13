@@ -69,7 +69,8 @@ class CollapsedLayout {
       const childLayoutNode = this.layoutNodes.get(childId)
       if (childLayoutNode.node.constructor.name === 'ShortcutNode') {
         const shortcutNode = childLayoutNode.node
-        const targetLayoutNode = this.uncollapsedLayout.findDataNode(shortcutNode.shortcutTo, true)
+        const finder = !isNaN(shortcutNode.shortcutTo.aggregateId) ? 'findAggregateNode' : 'findDataNode'
+        const targetLayoutNode = this.uncollapsedLayout[finder](shortcutNode.shortcutTo, true)
         let targetShortcuts = shortcutsByTarget.get(targetLayoutNode)
         if (!targetShortcuts) {
           targetShortcuts = []
