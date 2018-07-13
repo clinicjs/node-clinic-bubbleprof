@@ -9,6 +9,8 @@ class SvgNodeDiagram {
     this.svgContainer = svgContainer
     this.ui = svgContainer.ui
 
+    this.onAnimationComplete = []
+
     this.svgNodes = new Map()
 
     this.ui.on('initializeFromData', () => {
@@ -65,7 +67,39 @@ class SvgNodeDiagram {
         }
       })
   }
+
+  animate (isExpanding, onComplete) {
+    this.ui.isAnimating = true
+
+    this.svgContainer.d3Element.classed('fade-elements-in', isExpanding)
+    this.svgContainer.d3Element.classed('fade-elements-out', !isExpanding)
+    this.svgContainer.d3Element.classed('complete-fade-out', false)
+    this.svgContainer.d3Element.classed('complete-fade-in', false)
+
+    const parentContainer = this.ui.parentUI.svgNodeDiagram.svgContainer
+    parentContainer.d3Element.classed('fade-elements-in', false)
+    parentContainer.d3Element.classed('fade-elements-out', false)
+    parentContainer.d3Element.classed('complete-fade-out', isExpanding)
+    parentContainer.d3Element.classed('complete-fade-in', !isExpanding)
+
+    this.bbox = this.d3Container.node().getBoundingClientRect()
+
+    const svgNodeAnimations = []
+    this.svgNodes.forEach(svgNode => svgNode.animate(svgNodeAnimations, isExpanding))
+
+    Promise.all(svgNodeAnimations).then(() => {
+      this.ui.isAnimating = false
+      if (onComplete) onComplete()
+    })
+  }
+
+  deselectAll () {
+    this.svgNodes.forEach(svgNode => svgNode.deselect())
+  }
+
   draw () {
+    if (this.ui.isAnimating) return
+
     this.bbox = this.d3Container.node().getBoundingClientRect()
     this.svgNodes.forEach(svgNode => svgNode.draw())
   }

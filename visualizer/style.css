@@ -9,6 +9,7 @@ html {
 
 /* Matches --banner-bg-color when overlaid over --main-bg-color */
   --lighten-bg-color: rgba(212, 224, 255, 0.08);
+  --highlight-bg-color: rgba(212, 224, 255, 0.3);
 
   --nearform-red: rgb(237,24,40);
   --nearform-grey: rgb(121,122,124);
@@ -44,6 +45,9 @@ html {
   --banner-height: 65px;
   --footer-height: 65px;
   --header-height: 65px;
+
+  /* Define animation variables */
+  --transition-duration: 0.8s;
 }
 
 /* Main layout */
@@ -587,7 +591,11 @@ body[data-view-mode='fit'] #node-link {
   min-height: calc(100vh - var(--banner-height) - var(--header-height));
 }
 
-/* New style node-link diagram and container */
+/* Node-link diagram and container */
+
+svg.bubbleprof .line-segment {
+  fill: none;
+}
 
 svg.bubbleprof .node-group {
   cursor: pointer;
@@ -595,6 +603,11 @@ svg.bubbleprof .node-group {
 
 svg.bubbleprof .outer-path {
   fill: var(--lighten-bg-color);
+  stroke: none;
+}
+
+svg.bubbleprof .outer-path.selected-node {
+  fill: var(--highlight-bg-color);
   stroke: none;
 }
 
@@ -648,99 +661,54 @@ svg.bubbleprof .node-group .inner-circle {
   stroke: none;
 }
 
-/* Node-link diagram and container
-
-svg.bubbleprof text.text-label {
-  text-anchor: middle;
+.pending-animation svg.bubbleprof {
+  visibility: hidden;
 }
 
-svg.bubbleprof .bubble-wrapper .time-label {
-  dominant-baseline: middle;
+svg.bubbleprof.fade-elements-in .outer-path,
+svg.bubbleprof.fade-elements-in .text-label,
+svg.bubbleprof.complete-fade-in {
+  animation-duration: var(--transition-duration);
+  animation-fill-mode: forwards;
+  animation-timing-function: linear;
+  animation-name: transition-fade-in;
 }
 
-svg.bubbleprof .bubble-wrapper .name-label {
-  dominant-baseline: text-after-edge;
+svg.bubbleprof.fade-elements-out .outer-path,
+svg.bubbleprof.fade-elements-out .text-label,
+svg.bubbleprof.complete-fade-out {
+  animation-duration: var(--transition-duration);
+  animation-fill-mode: forwards;
+  animation-timing-function: linear;
+  animation-name: transition-fade-out;
 }
 
-svg.bubbleprof .bubble-wrapper .name-label.flipped-label {
-  dominant-baseline: text-before-edge;
+@keyframes transition-fade-in {
+  0% {
+    opacity: 0;
+  }
+  67% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-svg.bubbleprof .name-label {
-  font-weight: bold;
-  font-size: 11pt;
+@keyframes transition-fade-out {
+  0% {
+    opacity: 1;
+  }
+  33% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
-
-svg.bubbleprof .bubble-wrapper text.name-label.pointing-right {
-  text-anchor: start;
-  dominant-baseline: middle;
-}
-
-svg.bubbleprof .bubble-wrapper text.name-label.pointing-left {
-  text-anchor: end;
-  dominant-baseline: middle;
-}
-
-svg.bubbleprof .below-threshold-1 .name-label {
-  font-size: 10pt;
-  opacity: 0.9;
-}
-
-svg.bubbleprof .below-threshold-2 .name-label {
-  font-size: 9pt;
-  opacity: 0.8;
-}
-
-svg.bubbleprof .below-threshold-3 .name-label {
-  font-size: 8pt;
-  opacity: 0.7;
-}
-
-svg.bubbleprof .time-label {
-  font-size: 8pt;
-  font-weight: bold;
-  paint-order: stroke fill;
-  stroke: var(--main-bg-color);
-  stroke-width: 4px;
-  stroke-opacity: 0.9;
-}
-
-svg.bubbleprof .link-wrapper .time-label {
-  dominant-baseline: hanging;
-}
-
-svg.bubbleprof .below-threshold-1.bubble-wrapper .time-label {
-  display: none;
-}
-
-svg.bubbleprof .bubble-wrapper,
-svg.bubbleprof .link-wrapper {
-  cursor: pointer;
-}
-
-svg.bubbleprof .bubble-wrapper .bubble-outer {
-  fill: var(--pure-black);
-  cursor: pointer;
-}
-
-svg.bubbleprof .bubble-wrapper .bubble-inner {
-  fill: var(--main-bg-color);
-  stroke: none;
-}
-
-svg.bubbleprof .bubble-wrapper.below-threshold-2 .bubble-inner {
-  opacity: 0;
-}
-
-svg.bubbleprof .link-outer {
-  fill: var(--pure-black);
-  cursor: pointer;
-}
-*/
 
 #sublayout-svg {
   position: absolute;
-  background: var(--main-bg-color);
   top: 0;
 }
 
@@ -798,12 +766,6 @@ svg.bubbleprof .link-outer {
 
 #node-link .back-btn.hidden {
   display: none;
-}
-
-/* Temporary fix to https://github.com/nearform/node-clinic-bubbleprof/issues/92 for sublayouts */
-section.sublayout:not(:last-child),
-svg#node-link-svg:not(:nth-last-child(2)) {
-  visibility: hidden;
 }
 
 /* Sidebar */
