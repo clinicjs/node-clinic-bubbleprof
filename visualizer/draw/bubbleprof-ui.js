@@ -259,11 +259,7 @@ class BubbleprofUI extends EventEmitter {
 
       case 'AggregateNode':
         this.selectedDataNode = dataNode
-        const thisUI = this
-        const selectAggregate = () => {
-          thisUI.outputFrames(dataNode, layoutNode)
-          window.location.hash = 'a' + dataNode.aggregateId
-        }
+        const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
         animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
         return this
 
@@ -272,7 +268,8 @@ class BubbleprofUI extends EventEmitter {
         if (dataNode.nodes.size === 1) {
           // If there's only one aggregateNode, just select it
           this.selectedDataNode = dataNode.nodes.values().next().value
-          this.outputFrames(this.selectedDataNode, layoutNode)
+          const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
+          animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
           return this
         } else {
           this.selectedDataNode = dataNode
@@ -284,6 +281,14 @@ class BubbleprofUI extends EventEmitter {
         const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
         window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
         return uiWithinCollapsedNode
+    }
+  }
+
+  getAggregateNodeSelector (dataNode, layoutNode) {
+    const thisUI = this
+    return () => {
+      thisUI.outputFrames(dataNode, layoutNode)
+      window.location.hash = 'a' + dataNode.aggregateId
     }
   }
 
