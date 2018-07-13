@@ -3,7 +3,7 @@
 const d3 = require('./d3-subset.js')
 const HtmlContent = require('./html-content.js')
 const {
-  isNumericString,
+  numberiseIfNumericString,
   uniqueObjectKey
 } = require('../validation.js')
 
@@ -361,7 +361,7 @@ function applyAggregateIdToNodeGroup (aggregateId, ui, nodeGroups, nodeGroup) {
 function extractLayoutNodeId (nodeGroupKey) {
   const rawId = nodeGroupKey.split('_')[1]
   if (rawId === 'absent') return null
-  const layoutNodeId = isNumericString(rawId) ? parseInt(rawId) : rawId
+  const layoutNodeId = numberiseIfNumericString(rawId)
   return layoutNodeId
 }
 

@@ -3,7 +3,7 @@
 const test = require('tap').test
 const {
   isNumber,
-  isNumericString,
+  numberiseIfNumericString,
   validateKey,
   validateNumber,
   uniqueMapKey,
@@ -21,20 +21,20 @@ test('Visualizer validation - isNumber', function (t) {
   t.end()
 })
 
-test('Visualizer validation - isNumericString', function (t) {
-  t.equals(isNumericString(123), false)
+test('Visualizer validation - numberiseIfNumericString', function (t) {
+  t.equals(numberiseIfNumericString(123), 123)
 
-  t.equals(isNumericString('123'), true)
-  t.equals(isNumericString('-123'), true)
-  t.equals(isNumericString('1.23'), true)
-  t.equals(isNumericString('1e+23'), true)
-  t.equals(isNumericString('1e-23'), true)
+  t.equals(numberiseIfNumericString('123'), 123)
+  t.equals(numberiseIfNumericString('-123'), -123)
+  t.equals(numberiseIfNumericString('1.23'), 1.23)
+  t.equals(numberiseIfNumericString('1e+23'), 1e+23)
+  t.equals(numberiseIfNumericString('1e-23'), 1e-23)
+  t.equals(numberiseIfNumericString(' 123 '), 123)
 
-  t.equals(isNumericString('123%'), false)
-  t.equals(isNumericString('A123'), false)
-  t.equals(isNumericString('1.2.3'), false)
-  t.equals(isNumericString(' 123 '), false)
-  t.equals(isNumericString(''), false)
+  t.equals(numberiseIfNumericString('123%'), '123%')
+  t.equals(numberiseIfNumericString('A123'), 'A123')
+  t.equals(numberiseIfNumericString('1.2.3'), '1.2.3')
+  t.equals(numberiseIfNumericString(''), '')
   t.end()
 })
 

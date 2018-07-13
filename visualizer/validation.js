@@ -4,8 +4,10 @@
 function isNumber (num) {
   return typeof num === 'number' && !Number.isNaN(num)
 }
-function isNumericString (str) {
-  return typeof str === 'string' && '' + parseFloat(str) === str
+function numberiseIfNumericString (str) {
+  if (typeof str !== 'string' || !str.length) return str
+  const num = Number(str)
+  return isNumber(num) ? num : str
 }
 function validateKey (key, validOptions) {
   if (typeof key !== 'string' || validOptions.indexOf(key) === -1) {
@@ -51,7 +53,7 @@ function incrementKeyUntilUnique (key, counter, test) {
 
 module.exports = {
   isNumber,
-  isNumericString,
+  numberiseIfNumericString,
   validateKey,
   validateNumber,
   uniqueMapKey,
