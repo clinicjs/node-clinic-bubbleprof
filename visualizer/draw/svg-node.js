@@ -295,7 +295,7 @@ class SvgNode {
 
         this.d3NameLabel.classed('hidden', !textAfterTrim)
       }
-    } else if (this.drawType === 'noNameLabel' || this.drawType === 'squash') {
+    } else if (this.drawType === 'noNameLabel' || this.drawType === 'tiny') {
       this.d3NameLabel.classed('hidden', true)
       return
     }
