@@ -68,7 +68,7 @@ class SvgNodeDiagram {
       })
   }
 
-  animate (isExpanding, callback) {
+  animate (isExpanding, onComplete) {
     this.ui.isAnimating = true
 
     this.svgContainer.d3Element.classed('fade-elements-in', isExpanding)
@@ -89,7 +89,7 @@ class SvgNodeDiagram {
 
     Promise.all(svgNodeAnimations).then(() => {
       this.ui.isAnimating = false
-      if (callback) callback()
+      if (onComplete) onComplete()
     })
   }
 

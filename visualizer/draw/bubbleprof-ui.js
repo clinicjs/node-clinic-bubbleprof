@@ -151,7 +151,7 @@ class BubbleprofUI extends EventEmitter {
 
       uiWithinSublayout.setData(sublayout)
 
-      const callback = () => {
+      const onAnimationStep = () => {
         uiWithinSublayout.setAsTopmostUI()
       }
 
@@ -159,10 +159,10 @@ class BubbleprofUI extends EventEmitter {
         animationQueue.push({
           ui: uiWithinSublayout,
           isExpanding: true,
-          callback
+          onAnimationStep
         })
       } else {
-        uiWithinSublayout.animate(true, callback)
+        uiWithinSublayout.animate(true, onAnimationStep)
       }
 
       return uiWithinSublayout
@@ -177,7 +177,7 @@ class BubbleprofUI extends EventEmitter {
     if (this.parentUI) {
       this.parentUI.selectedDataNode = null
 
-      const callback = () => {
+      const onAnimationStep = () => {
         this.parentUI.setAsTopmostUI()
       }
 
@@ -185,10 +185,10 @@ class BubbleprofUI extends EventEmitter {
         animationQueue.push({
           ui: this,
           isExpanding: false,
-          callback
+          onAnimationStep
         })
       } else {
-        this.animate(false, callback)
+        this.animate(false, onAnimationStep)
       }
 
       if (this.parentUI.layoutNode) {
@@ -214,7 +214,7 @@ class BubbleprofUI extends EventEmitter {
     return this.parentUI
   }
 
-  animate (isExpanding, callback) {
+  animate (isExpanding, onAnimationStep) {
     this.isAnimating = true
 
     this.highlightNode(null)
@@ -227,7 +227,7 @@ class BubbleprofUI extends EventEmitter {
         nodeLinkSection.d3Element.remove()
         this.parentUI.svgNodeDiagram.deselectAll()
       }
-      if (callback) callback()
+      if (onAnimationStep) onAnimationStep()
     })
   }
 
@@ -601,14 +601,14 @@ function executeAnimationQueue (animationQueue, index = 0) {
   const {
     ui,
     isExpanding,
-    callback
+    onAnimationStep
   } = animationQueue[index]
 
   index++
 
   ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
   ui.animate(isExpanding, () => {
-    if (callback) callback()
+    if (onAnimationStep) onAnimationStep()
     if (animationQueue.length > index) {
       executeAnimationQueue(animationQueue, index)
     } else {
