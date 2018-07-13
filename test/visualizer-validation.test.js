@@ -3,6 +3,7 @@
 const test = require('tap').test
 const {
   isNumber,
+  numberiseIfNumericString,
   validateKey,
   validateNumber,
   uniqueMapKey,
@@ -17,6 +18,23 @@ test('Visualizer validation - isNumber', function (t) {
   t.equals(isNumber('123'), false)
   t.equals(isNumber('1e23'), false)
   t.equals(isNumber(NaN), false)
+  t.end()
+})
+
+test('Visualizer validation - numberiseIfNumericString', function (t) {
+  t.equals(numberiseIfNumericString(123), 123)
+
+  t.equals(numberiseIfNumericString('123'), 123)
+  t.equals(numberiseIfNumericString('-123'), -123)
+  t.equals(numberiseIfNumericString('1.23'), 1.23)
+  t.equals(numberiseIfNumericString('1e+23'), 1e+23)
+  t.equals(numberiseIfNumericString('1e-23'), 1e-23)
+  t.equals(numberiseIfNumericString(' 123 '), 123)
+
+  t.equals(numberiseIfNumericString('123%'), '123%')
+  t.equals(numberiseIfNumericString('A123'), 'A123')
+  t.equals(numberiseIfNumericString('1.2.3'), '1.2.3')
+  t.equals(numberiseIfNumericString(''), '')
   t.end()
 })
 
