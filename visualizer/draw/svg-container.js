@@ -23,6 +23,7 @@ class SvgContainer extends HtmlContent {
     }
 
     this.svgNodeDiagram = new SvgNodeDiagram(this)
+    this.ui.svgNodeDiagram = this.svgNodeDiagram
 
     this.ui.on('setData', () => {
       this.setData()
@@ -51,6 +52,10 @@ class SvgContainer extends HtmlContent {
       .classed('bubbleprof', true)
 
     this.svgNodeDiagram.initializeElements()
+  }
+
+  animate (previousUI) {
+    this.svgNodeDiagram.animate(previousUI)
   }
 
   draw () {
