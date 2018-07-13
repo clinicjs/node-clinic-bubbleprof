@@ -495,44 +495,42 @@ class BubbleprofUI extends EventEmitter {
   // This does not record opening frames
   // This does record pressing ESC and close button
   initializeBackButton () {
-    const { backBtn, originalUI } = this
-    backBtn.d3Element
-      .classed('hidden', true)
-      .on('click', stepBack)
-
-    document.addEventListener('keydown', (e) => {
-      if (e.keyCode === 8 && e.target.nodeName.toLowerCase() !== 'input') {
-        // Backspace button
-        stepBack()
-      }
-    })
-
     let topMostUI = this
     this.on('setTopmostUI', (newTopmostUI) => {
       topMostUI = newTopmostUI
     })
 
-    function stepBack () {
-      if (history.length < 2) {
-        return
-      }
-      if (topMostUI.selectedDataNode) {
-        return topMostUI.clearFrames()
-      }
-      history.pop()
-      const lastUI = history[history.length - 1]
-      const lastLayoutNode = lastUI.layoutNode
-      backBtn.d3Element.classed('hidden', history.length < 2)
+    this.backBtn.d3Element
+      .classed('hidden', true)
+      .on('click', () => this.stepBack(topMostUI))
 
-      if (lastUI === originalUI) {
-        while (topMostUI.layoutNode) {
-          topMostUI = topMostUI.clearSublayout()
-        }
-        return
+    document.addEventListener('keydown', (e) => {
+      if (e.keyCode === 8 && e.target.nodeName.toLowerCase() !== 'input') {
+        // Backspace button
+        this.stepBack(topMostUI)
       }
+    })
+  }
 
-      return topMostUI.jumpToNode(lastLayoutNode.node)
+  stepBack (topMostUI) {
+    if (history.length < 2) {
+      return
     }
+    if (topMostUI.selectedDataNode) {
+      return topMostUI.clearFrames()
+    }
+    history.pop()
+    const lastUI = history[history.length - 1]
+    const lastLayoutNode = lastUI.layoutNode
+    this.backBtn.d3Element.classed('hidden', history.length < 2)
+
+    if (lastUI === this.originalUI) {
+      while (topMostUI.layoutNode) {
+        topMostUI = topMostUI.clearSublayout()
+      }
+      return
+    }
+    return topMostUI.jumpToNode(lastLayoutNode.node)
   }
 
   setData (layout, dataSet) {
