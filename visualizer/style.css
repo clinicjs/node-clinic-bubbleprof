@@ -884,6 +884,7 @@ body[data-highlight-party='external'] #node-link svg:not(:hover) .party-external
 body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-nodecore,
 body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
   stroke-width: var(--highlighted-area-width) !important;
+  stroke-linecap: round;
 }
 
 body[data-highlight-type='files-streams'] #node-link svg:not(:hover) .type-files-streams,
@@ -892,6 +893,7 @@ body[data-highlight-type='crypto'] #node-link svg:not(:hover) .type-crypto,
 body[data-highlight-type='timing-promises'] #node-link svg:not(:hover) .type-timing-promises,
 body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   stroke-width: var(--highlighted-type-width) !important;
+  stroke-linecap: round;
 }
 
 /* Area chart */
