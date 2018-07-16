@@ -200,7 +200,7 @@ class SvgLine extends SvgNodeElement {
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', decimal => `line-segment ${classPrepend}-${decimal[0]}`)
-      .style('stroke-width', this.ui.settings.lineWidth)
+      .style('stroke-width', this.ui.settings.lineWidth + (this.dataType === 'typeCategory' ? 1.5 : -0.5))
       .on('mouseover', decimal => this.ui.emit(highlightEvent, decimal[0]))
       .on('mouseout', () => this.ui.emit(highlightEvent, null))
 
@@ -268,7 +268,7 @@ class SvgBubble extends SvgNodeElement {
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', arcDatum => `line-segment ${classPrepend}-${arcDatum.data[0]}`)
-      .style('stroke-width', this.ui.settings.lineWidth)
+      .style('stroke-width', this.ui.settings.lineWidth + (this.dataType === 'typeCategory' ? 1.5 : -0.5))
       .on('mouseover', arcDatum => this.ui.emit(highlightEvent, arcDatum.data[0]))
       .on('mouseout', () => this.ui.emit(highlightEvent, null))
 

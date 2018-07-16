@@ -27,5 +27,8 @@ setTimeout(() => {
   ui.setData(layout, dataSet)
 
   /* istanbul ignore next */
+  ui.draw()
+
+  /* istanbul ignore next */
   ui.complete()
 })

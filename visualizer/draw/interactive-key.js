@@ -56,12 +56,13 @@ class InteractiveKey extends HtmlContent {
     const eventName = `highlight${targetType.charAt(0).toUpperCase()}${targetType.slice(1)}`
     const targetClass = `${targetType}-${name}`
 
-    if (!htmlContent) {
-      this.contentProperties.htmlContent = `
-        <span style="border-width: ${this.ui.settings.lineWidth}px;" class="${targetType}-icon"></span><label>${label}</label>
-      `
-    }
     super.initializeElements()
+
+    this.d3Icon = this.d3Element.append('span')
+      .classed(`${targetType}-icon`, true)
+
+    this.d3Label = this.d3Element.append('label')
+      .html(label)
 
     this.d3Element.classed(targetClass, true)
     this.d3Element.classed('interactive-key', true)
@@ -91,6 +92,16 @@ class InteractiveKey extends HtmlContent {
       if (this.hoverBox) this.hoverBox.hide()
     })
   }
+  draw () {
+    super.draw()
+
+    // Straight borders render slightly thinner-looking than SVG path strokes, make them match visually
+    const borderWidth = this.ui.settings.lineWidth + (this.contentProperties.targetType === 'type' ? 2 : 0)
+
+    this.d3Icon
+      .style('border-top-width', `${borderWidth}px`)
+  }
 }
+
 
 module.exports = InteractiveKey
