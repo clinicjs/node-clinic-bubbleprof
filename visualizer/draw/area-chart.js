@@ -210,6 +210,7 @@ class AreaChart extends HtmlContent {
         if (layoutNode) {
           this.topmostUI.highlightNode(layoutNode)
         }
+        this.ui.highlightColour('type', d.key.split('_')[0])
       })
       .on('mouseout', () => {
         if (this.parentContent.constructor.name === 'HoverBox') return
@@ -226,6 +227,7 @@ class AreaChart extends HtmlContent {
         if (targetUI !== this.ui) {
           this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
         }
+        this.ui.highlightColour('type', null)
       })
       .on('mousemove', () => {
         this.showSlice(d3.event)
