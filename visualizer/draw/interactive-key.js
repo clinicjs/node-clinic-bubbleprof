@@ -54,7 +54,6 @@ class InteractiveKey extends HtmlContent {
       htmlContent
     } = this.contentProperties
 
-    const eventName = `highlight${targetType.charAt(0).toUpperCase()}${targetType.slice(1)}`
     const targetClass = `${targetType}-${name}`
 
     this.d3Icon = this.d3Element.append('svg')
@@ -75,7 +74,7 @@ class InteractiveKey extends HtmlContent {
     this.d3Element.classed('interactive-key', true)
 
     this.d3Element.on('mouseover', () => {
-      this.ui.emit(eventName, this.contentProperties.name)
+      this.ui.highlightColour(targetType, this.contentProperties.name)
 
       if (this.hoverBox) {
         this.hoverBox.d3TitleBlock.classed(targetClass, true)
@@ -94,7 +93,7 @@ class InteractiveKey extends HtmlContent {
       }
     })
     this.d3Element.on('mouseout', () => {
-      this.ui.emit(eventName, null)
+      this.ui.highlightColour(targetType, null)
       if (this.collapsedContent) this.collapsedContent.collapseClose()
       if (this.hoverBox) this.hoverBox.hide()
     })
@@ -102,12 +101,12 @@ class InteractiveKey extends HtmlContent {
     this.hoverBox.initializeElements()
     if (this.hoverBox) {
       this.hoverBox.d3Element.on('mouseover', () => {
-        this.ui.emit(eventName, this.contentProperties.name)
+        this.ui.highlightColour(targetType, this.contentProperties.name)
       })
     }
     if (this.hoverBox) {
       this.hoverBox.d3Element.on('mouseout', () => {
-        this.ui.emit(eventName, null)
+        this.ui.highlightColour(targetType, null)
       })
     }
   }
