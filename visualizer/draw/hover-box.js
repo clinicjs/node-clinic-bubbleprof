@@ -203,7 +203,7 @@ class HoverBox extends HtmlContent {
     const nodeType = layoutNode.node.constructor.name
     const dataNode = nodeType === 'ShortcutNode' ? layoutNode.node.shortcutTo : layoutNode.node
 
-    this.d3Title.text('#' + layoutNode.id + ' ' + dataNode.name)
+    this.d3Title.text(dataNode.name)
 
     const percentage = dataNode.stats.overall / this.ui.dataSet.wallTime.profileDuration * 100
     const percentageFormatted = (percentage >= 100 ? '>99' : this.ui.formatNumber(percentage)) + '%'
