@@ -4,6 +4,8 @@ const net = require('net')
 const logger = require('./logger')
 
 onlisten(function (addr) {
+  // we do async activity below and we do not want that to pollute the
+  // analysis. we use the skipThis flag to opt out of collecting stats here.
   logger.skipThis = true
   this.destroy()
   const port = Buffer.from(addr.port + '')

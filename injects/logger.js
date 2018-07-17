@@ -25,7 +25,7 @@ const out = encoder.pipe(
   })
 )
 
-// log stack traces
+// log stack traces, export a flag to opt out of logging for internals
 exports.skipThis = false
 const skipAsyncIds = new Set()
 const hook = asyncHooks.createHook({
