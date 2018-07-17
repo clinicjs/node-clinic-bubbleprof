@@ -5,7 +5,7 @@
 Programmable interface to [clinic][12] bubbleprof
 
 ## License
-[MIT](https://tldrlegal.com/license/mit-license)
+[GPL 3.0](LICENSE)
 
 [0]: https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square
 [1]: https://nodejs.org/api/documentation.html#documentation_stability_index
