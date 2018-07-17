@@ -46,6 +46,7 @@ class InteractiveKey extends HtmlContent {
     if (!this.contentProperties.name) throw new Error('InteractiveKey requires contentProperties.name to be defined')
     if (!this.contentProperties.targetType) throw new Error('InteractiveKey requires contentProperties.targetType to be defined')
 
+    super.initializeElements()
     const {
       name,
       targetType,
@@ -55,8 +56,6 @@ class InteractiveKey extends HtmlContent {
 
     const eventName = `highlight${targetType.charAt(0).toUpperCase()}${targetType.slice(1)}`
     const targetClass = `${targetType}-${name}`
-
-    super.initializeElements()
 
     this.d3Icon = this.d3Element.append('svg')
       .style('width', '0px')
@@ -99,6 +98,18 @@ class InteractiveKey extends HtmlContent {
       if (this.collapsedContent) this.collapsedContent.collapseClose()
       if (this.hoverBox) this.hoverBox.hide()
     })
+
+    this.hoverBox.initializeElements()
+    if (this.hoverBox) {
+      this.hoverBox.d3Element.on('mouseover', () => {
+        this.ui.emit(eventName, this.contentProperties.name)
+      })
+    }
+    if (this.hoverBox) {
+      this.hoverBox.d3Element.on('mouseout', () => {
+        this.ui.emit(eventName, null)
+      })
+    }
   }
 
   draw () {
