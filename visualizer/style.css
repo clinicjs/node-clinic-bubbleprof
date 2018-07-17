@@ -753,15 +753,19 @@ svg.bubbleprof.complete-fade-out {
   width: 40px;
   height: 40px;
   background: var(--pure-black);
-  background-image: var(--down-cyan-chevron-arrow);
-  background-size: cover;
-  transform: rotate(270deg);
   z-index: 20;
   position: absolute;
-  padding: 2px 11px;
+  padding: 2px 10px;
   line-height: 32px;
-  font-size: 28px;
   cursor: pointer;
+  color: var(--cyan);
+}
+
+#node-link .back-btn:before {
+  content: '⤾';
+  display: block;
+  font-size: 21px;
+  font-weight: bold;
 }
 
 #node-link .back-btn.hidden {
@@ -1329,6 +1333,9 @@ body:not(.initialized):after {
   }
   #header .hover-box.use-vertical-arrow .vertical-arrow {
     border-width: 6px;
+  }
+  #node-link .back-btn {
+    left: 8px;
   }
 }
 
