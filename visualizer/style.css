@@ -294,6 +294,13 @@ main {
   stroke-width: var(--party-width);
 }
 
+#header .interactive-key.grey-out label {
+  color: var(--primary-grey);
+}
+
+#header .interactive-key.grey-out .interactive-key-icon {
+  display: none;
+}
 
 #header .hover-box {
   display: flex;
