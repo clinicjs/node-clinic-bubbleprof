@@ -54,7 +54,7 @@ Will consume the data file specified by `dataFilename`, this data file will be p
 `bubbleprof.visualize` will then output a standalone HTML file to `outputFilename`. When completed the callback will be called with no extra arguments, except a possible error.
 
 ## License
-[Apache 2.0](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
+[GPL 3.0](LICENSE)
 
 [0]: https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square
 [1]: https://nodejs.org/api/documentation.html#documentation_stability_index
