@@ -232,6 +232,12 @@ class AggregateNode extends DataNode {
       apply(this.stats.rawTotals.async.between + this.stats.rawTotals.sync, 'within')
     }
   }
+  applyDecimalsToDataSet () {
+    const totalTime = this.stats.rawTotals.sync + this.stats.rawTotals.async.between
+    this.dataSet.setDecimal(totalTime, 'type', this.type)
+    this.dataSet.setDecimal(totalTime, 'typeCategory', this.typeCategory)
+    this.dataSet.setDecimal(totalTime, 'party', this.mark.get('party'))
+  }
   getDecimalsArray (classification, position) {
     return [[this[classification], 1]]
   }

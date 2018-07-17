@@ -58,8 +58,16 @@ class InteractiveKey extends HtmlContent {
 
     super.initializeElements()
 
-    this.d3Icon = this.d3Element.append('span')
+    this.d3Icon = this.d3Element.append('svg')
+      .style('width', '0px')
+      .classed('interactive-key-icon', true)
+      .classed('bubbleprof', true)
+
+    this.d3IconPath = this.d3Icon
+      .append('path')
+      .classed('line-segment', true)
       .classed(`${targetType}-icon`, true)
+      .classed(targetClass, true)
 
     this.d3Label = this.d3Element.append('label')
       .html(label)
@@ -92,14 +100,28 @@ class InteractiveKey extends HtmlContent {
       if (this.hoverBox) this.hoverBox.hide()
     })
   }
+
   draw () {
+    const {
+      name,
+      targetType
+    } = this.contentProperties
+
     super.draw()
 
-    // Straight borders render slightly thinner-looking than SVG path strokes, make them match visually
-    const borderWidth = this.ui.settings.lineWidth + (this.contentProperties.targetType === 'type' ? 2 : 0)
+    const classification = targetType === 'type' ? 'typeCategory' : targetType
+    const decimal = this.ui.dataSet.getDecimal(classification, name)
+
+    const iconWidth = 3 + decimal * 30
 
     this.d3Icon
-      .style('border-top-width', `${borderWidth}px`)
+      .style('width', `${iconWidth}px`)
+      .classed('hidden', false)
+
+    this.d3IconPath
+      .attr('d', `M 0 4 L ${iconWidth} 4`)
+
+    this.d3Element.classed('grey-out', !decimal)
   }
 }
 

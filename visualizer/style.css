@@ -8,7 +8,7 @@ html {
   --banner-logo-color: rgba(255, 255, 255, 0.87);
 
 /* Matches --banner-bg-color when overlaid over --main-bg-color */
-  --translucent-match-banner: rgba(212, 224, 255, 0.08);
+  --node-background: rgba(212, 224, 255, 0.08);
   --highlight-bg-color: rgba(212, 224, 255, 0.3);
 
   --nearform-color: rgb(237,24,40);
@@ -53,7 +53,9 @@ html {
 
   /* !important is needed on applying these to override the stroke-width style set from js line width settings */
   --highlighted-type-width: 7px;
-  --highlighted-area-width: 5px;
+  --type-width: 4px;
+  --highlighted-party-width: 5px;
+  --party-width: 2px;
 
   /* Define animation variables */
   --transition-duration: 0.8s;
@@ -70,7 +72,7 @@ html.light-theme {
 
   --banner-bg-color: rgb(214, 214, 214);
 
-  --translucent-match-banner: rgba(0, 0, 0, 0.12);
+  --node-background: rgb(255, 255, 255);
   --highlight-bg-color: rgba(0, 0, 0, 0.3);
 
   --max-contrast: rgb(0, 0, 0);
@@ -260,8 +262,10 @@ main {
 #header .interactive-key {
   display: inline-block;
   margin: 0 3px;
-  padding: 2px 2px 4px 2px;
+  padding: 2px 4px 3px 2px;
   border-bottom: 1px solid transparent;
+  background: var(--node-background);
+  border-radius: 10px;
 }
 
 #header .interactive-key label {
@@ -269,6 +273,21 @@ main {
   display: inline-block;
   vertical-align: middle;
 }
+
+#header .interactive-key .interactive-key-icon {
+  display: inline-block;
+  height: 7px;
+  margin: 0 4px;
+}
+
+#header .interactive-key .interactive-key-icon .type-icon {
+  stroke-width: var(--type-width);
+}
+
+#header .interactive-key .interactive-key-icon .party-icon {
+  stroke-width: var(--party-width);
+}
+
 
 #header .hover-box {
   display: flex;
@@ -318,6 +337,7 @@ main {
   right: 0;
   background: var(--main-bg-translucent)
   border-radius: 6px;
+  margin-top: 1px;
 }
 
 #header .help-link-block .help-link {
@@ -385,17 +405,6 @@ main {
   }
 }
 
-.type-icon,
-.party-icon {
-  display: inline-block;
-  vertical-align: middle;
-  /* width and colour are set in js and type/party-specific CSS */
-  border-top-style: solid;
-  width: 11px;
-  margin: 4px;
-  height: 1px;
-}
-
 body[data-highlight-party='user'] #header .interactive-key.party-user,
 body[data-highlight-party='external'] #header .interactive-key.party-external,
 body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore,
@@ -410,14 +419,14 @@ body[data-highlight-type='other'] #header .interactive-key.type-other {
 body[data-highlight-party='user'] #header .interactive-key.party-user .party-icon,
 body[data-highlight-party='external'] #header .interactive-key.party-external .party-icon,
 body[data-highlight-party='nodecore'] #header .interactive-key.party-nodecore .party-icon {
-  border-top-width: var(--highlighted-area-width) !important;
+  stroke-width: var(--highlighted-party-width) !important;
 }
 body[data-highlight-type='files-streams'] #header .interactive-key.type-files-streams .type-icon,
 body[data-highlight-type='networks'] #header .interactive-key.type-networks .type-icon,
 body[data-highlight-type='crypto'] #header .interactive-key.type-crypto .type-icon,
 body[data-highlight-type='timing-promises'] #header .interactive-key.type-timing-promises .type-icon,
 body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon {
-  border-top-width: var(--highlighted-type-width) !important;
+  stroke-width: var(--highlighted-type-width) !important;
 }
 
 /* Footer */
@@ -644,8 +653,10 @@ svg.bubbleprof .node-group {
 }
 
 svg.bubbleprof .outer-path {
-  fill: var(--translucent-match-banner);
-  stroke: none;
+  fill: var(--node-background);
+  stroke-width: 0.5px;
+  stroke: var(--shortcut-stroke);
+  paint-order: stroke fill;
 }
 
 svg.bubbleprof .outer-path.selected-node {
@@ -692,9 +703,6 @@ svg.bubbleprof .node-group .upper-label {
 
 svg.bubbleprof .node-group.shortcut .outer-path {
   fill: var(--translucent-reverse);
-  stroke-width: 1px;
-  stroke: var(--shortcut-stroke);
-  paint-order: stroke fill;
 }
 
 svg.bubbleprof .node-group.shortcut .name-label {
@@ -887,7 +895,7 @@ body[data-highlight-party='user'] #node-link svg:not(:hover) .party-user,
 body[data-highlight-party='external'] #node-link svg:not(:hover) .party-external,
 body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-nodecore,
 body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
-  stroke-width: var(--highlighted-area-width) !important;
+  stroke-width: var(--highlighted-party-width) !important;
   stroke-linecap: round;
 }
 
@@ -1173,7 +1181,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   stroke: var(--type-colour-1);
   stroke-dasharray: var(--dasharray-dashed)
 }
-.type-files-streams .type-icon,
 .type-files-streams.by-variable {
   border-color: var(--type-colour-1);
 }
@@ -1182,7 +1189,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   stroke: var(--type-colour-2);
   stroke-dasharray: var(--dasharray-solid)
 }
-.type-networks .type-icon,
 .type-networks.by-variable {
   border-color: var(--type-colour-2);
 }
@@ -1191,7 +1197,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   stroke: var(--type-colour-3);
   stroke-dasharray: var(--dasharray-solid)
 }
-.type-crypto .type-icon,
 .type-crypto.by-variable {
   border-color: var(--type-colour-3);
 }
@@ -1200,7 +1205,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   stroke: var(--type-colour-4);
   stroke-dasharray: var(--dasharray-dashed)
 }
-.type-timing-promises .type-icon,
 .type-timing-promises.by-variable {
   border-color: var(--type-colour-4);
 }
@@ -1209,7 +1213,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   stroke: var(--type-colour-5);
   stroke-dasharray: var(--dasharray-dashed)
 }
-.type-other .type-icon,
 .type-other.by-variable {
   border-color: var(--type-colour-5);
 }

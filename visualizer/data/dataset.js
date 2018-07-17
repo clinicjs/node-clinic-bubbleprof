@@ -1,7 +1,10 @@
 'use strict'
 
 const { AllCallbackEvents } = require('./callback-event.js')
-const { validateKey } = require('../validation.js')
+const {
+  validateKey,
+  validateNumber
+} = require('../validation.js')
 const { ClusterNode } = require('./data-node.js')
 
 class DataSet {
@@ -21,6 +24,14 @@ class DataSet {
     this.settings = settings
 
     this.wallTime = new WallTime(this.settings.wallTimeSlices)
+    this.decimals = {
+      type: new Map(),
+      typeCategory: new Map(),
+      party: new Map()
+    }
+    // Note: raw totals do not take overlaps (simulataneous delays) into account, therefore will be thousands of times greater than total runtime.
+    // Use for calculating approximate decimals attributable to types only. Not for reporting to user.
+    this.rawTotalTime = 0
 
     // Array of CallbackEvents is temporary for calculating stats on other nodes
     this.callbackEvents = new AllCallbackEvents(this.wallTime) // CallbackEvents are created and pushed within SourceNode constructor
@@ -57,7 +68,21 @@ class DataSet {
     this.callbackEvents = null
   }
   calculateDecimals () {
-    this.aggregateNodes.forEach(aggregateNode => aggregateNode.applyDecimalsToCluster())
+    this.aggregateNodes.forEach(aggregateNode => {
+      aggregateNode.applyDecimalsToCluster()
+      aggregateNode.applyDecimalsToDataSet()
+    })
+  }
+  setDecimal (num, classification, label) {
+    const decimalsMap = this.decimals[classification]
+    const newValue = decimalsMap.has(label) ? decimalsMap.get(label) + num : num
+    decimalsMap.set(label, validateNumber(newValue, `Setting DataSet decimal for ${classification} "${label}"`))
+    this.rawTotalTime += num
+  }
+  getDecimal (classification, label) {
+    const num = this.decimals[classification].get(label)
+    const description = `Getting DataSet decimal for ${classification} "${label}"`
+    return (!num || this.rawTotalTime === 0) ? 0 : validateNumber(num / this.rawTotalTime, description)
   }
 }
 
