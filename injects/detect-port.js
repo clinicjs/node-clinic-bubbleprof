@@ -1,14 +1,17 @@
 const onlisten = require('on-net-listen')
 const fs = require('fs')
 const net = require('net')
+const logger = require('./logger')
 
 onlisten(function (addr) {
+  logger.skipThis = true
   this.destroy()
   const port = Buffer.from(addr.port + '')
   fs.writeSync(3, port, 0, port.length)
   signal(3, function () {
     process.emit('beforeExit')
   })
+  logger.skipThis = false
 })
 
 function signal (fd, cb) {

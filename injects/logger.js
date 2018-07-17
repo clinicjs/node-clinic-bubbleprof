@@ -26,23 +26,23 @@ const out = encoder.pipe(
 )
 
 // log stack traces
-let skipThis = false
+exports.skipThis = false
 const skipAsyncIds = new Set()
 const hook = asyncHooks.createHook({
   init (asyncId, type, triggerAsyncId) {
     // Save the asyncId such nested async operations can be skiped later.
-    if (skipThis) return skipAsyncIds.add(asyncId)
+    if (exports.skipThis) return skipAsyncIds.add(asyncId)
     // This is a nested async operations, skip this and track futher nested
     // async operations.
     if (skipAsyncIds.has(triggerAsyncId)) return skipAsyncIds.add(asyncId)
 
     // Track async events that comes from this async operation
-    skipThis = true
+    exports.skipThis = true
     encoder.write({
       asyncId: asyncId,
       frames: stackTrace(2)
     })
-    skipThis = false
+    exports.skipThis = false
   },
 
   destroy (asyncId) {
@@ -61,8 +61,8 @@ process.once('beforeExit', function () {
 })
 
 // NOTE: Workaround until https://github.com/nodejs/node/issues/18476 is solved
-skipThis = true
+exports.skipThis = true
 process.on('SIGINT', function () {
   if (process.listenerCount('SIGINT') === 1) process.emit('beforeExit')
 })
-skipThis = false
+exports.skipThis = false
