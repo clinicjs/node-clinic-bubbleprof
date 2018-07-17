@@ -1,32 +1,33 @@
 html {
   /* Define colors */
   --main-bg-color: rgb(27, 30, 39);
-  --overlay-bg-color: rgba(55, 61, 79, 0.94);
   --main-bg-translucent: rgba(27, 30, 39, 0.94);
+  --overlay-bg-color: rgba(55, 61, 79, 0.94);
 
   --banner-bg-color: rgb(41, 45, 57);
   --banner-logo-color: rgba(255, 255, 255, 0.87);
 
 /* Matches --banner-bg-color when overlaid over --main-bg-color */
-  --lighten-bg-color: rgba(212, 224, 255, 0.08);
+  --translucent-match-banner: rgba(212, 224, 255, 0.08);
   --highlight-bg-color: rgba(212, 224, 255, 0.3);
 
-  --nearform-red: rgb(237,24,40);
-  --nearform-grey: rgb(121,122,124);
+  --nearform-color: rgb(237,24,40);
 
+  --primary-grey: rgb(121,122,124);
   --grey-highlight: rgb(191,192,194);
 
-  --pure-white: rgb(255, 255, 255);
-  --pure-black: rgb(0, 0, 0);
-  --translucent-black: rgba(0, 0, 0, 0.86);
+  --max-contrast: rgb(255, 255, 255);
+  --reverse-contrast: rgb(0, 0, 0);
+  --translucent-reverse: rgba(0, 0, 0, 0.86);
 
-  --cyan-bright: rgb(166, 228, 255);
+  --cyan-strong: rgb(166, 228, 255);
   --cyan-highlight: rgb(96, 147, 208);
   --cyan: rgb(63, 125, 198);
+  --heading-on-cyan: rgb(255, 255, 255);
 
-  --party-colour-1: var(--cyan-bright);
+  --party-colour-1: var(--cyan-strong);
   --party-colour-2: var(--cyan);
-  --party-colour-3: var(--nearform-grey);
+  --party-colour-3: var(--primary-grey);
 
   --type-colour-1: rgb(173, 102, 71); /* Rusty orange */
   --type-colour-2: rgb(0, 209, 168); /* Pale green */
@@ -34,9 +35,13 @@ html {
   --type-colour-4: rgb(102, 69, 181); /* Deep purple */
   --type-colour-5: rgb(252, 255, 123); /* Pale yellow */
 
+  --shortcut-stroke: transparent;
+
   /* Define simple SVG icons */
   --down-white-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(255,255,255)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
   --down-cyan-chevron-arrow: url('data:image/svg+xml;utf8,<svg fill="rgb(63,125,198)" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>');
+
+  --small-chevron: var(--down-white-chevron-arrow);
 
   /* Define text sizes */
   --main-text-size: 10pt;
@@ -48,6 +53,30 @@ html {
 
   /* Define animation variables */
   --transition-duration: 0.8s;
+}
+
+html.light-theme {
+  --main-bg-color: rgb(239, 239, 239);
+  --main-bg-translucent: rgba(239, 239, 239, 0.94);
+  --overlay-bg-color: rgba(209, 211, 218, 0.94);
+
+  --banner-bg-color: rgb(214, 214, 214);
+
+  --translucent-match-banner: rgba(0, 0, 0, 0.12);
+  --highlight-bg-color: rgba(0, 0, 0, 0.3);
+
+  --max-contrast: rgb(0, 0, 0);
+  --reverse-contrast: rgb(255, 255, 255);
+  --translucent-reverse: rgba(255, 255, 255, 0.86);
+
+  --primary-grey: rgb(114,114,114);
+  --grey-highlight: rgb(64,65,61);
+
+  --cyan-strong: rgb(0, 27, 74);
+
+  --shortcut-stroke: var(--primary-grey);
+
+  --small-chevron: var(--down-cyan-chevron-arrow);
 }
 
 /* Main layout */
@@ -131,12 +160,15 @@ a.external-link:after {
   position: relative;
 }
 
-#banner svg {
+#banner #main-logo svg {
   fill: var(--banner-logo-color);
   margin-left: 12px;
+  stroke: var(--shortcut-stroke);
+  stroke-width: 4px;
+  paint-order: stroke fill;
 }
 
-#banner a:last-child svg {
+#banner #company-logo svg {
   position: absolute;
   height: 40px;
   right: 28px;
@@ -205,7 +237,7 @@ main {
   display: inline-block;
   margin-top: 3px;
   padding: 3px 6px;
-  background-color: var(--pure-black);
+  background-color: var(--reverse-contrast);
 }
 
 #header .breadcrumb:hover {
@@ -225,7 +257,7 @@ main {
 }
 
 #header .interactive-key label {
-  color: var(--pure-white);
+  color: var(--max-contrast);
   display: inline-block;
   vertical-align: middle;
 }
@@ -249,7 +281,7 @@ main {
 }
 
 #header .hover-box .collapse-control {
-  color: var(--pure-white);
+  color: var(--max-contrast);
   cursor: pointer;
 }
 
@@ -295,15 +327,15 @@ main {
 /* unvisited link only */
 #header .help-link-block .help-link:link {
   animation-name: pulseLink;
-  color: var(--pure-white);
+  color: var(--max-contrast);
   background-color: var(--banner-bg-color);
 }
 
 #header .help-link-block .help-link:link:after {
   animation-name: pulseIcon;
-  color: var(--pure-white);
-  border-left-color: var(--pure-white);
-  border-bottom-color: var(--pure-white);
+  color: var(--max-contrast);
+  border-left-color: var(--max-contrast);
+  border-bottom-color: var(--max-contrast);
 }
 
 #header .help-link-block .help-link:link,
@@ -417,7 +449,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   font-size: 14pt;
   font-variant: all-small-caps;
   font-weight: bold;
-  color: var(--pure-white);
+  color: var(--heading-on-cyan);
   line-height: 64px;
 }
 
@@ -449,7 +481,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 #frames-panel {
   margin: 18px 0;
   padding: 0px 28px;
-  color: var(--pure-white);
+  color: var(--max-contrast);
   font-size: var(--main-text-size);
 }
 
@@ -488,7 +520,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 #frames-panel .this-node > .sub-collapse-control:focus,
 #frames-panel .user > .sub-collapse-control:hover,
 #frames-panel .user > .sub-collapse-control:focus {
-  color: var(--cyan-bright);
+  color: var(--cyan-strong);
 }
 
 #frames-panel .sub-collapse-control:hover,
@@ -514,7 +546,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 }
 
 #frames-panel .frame-group .delays .figure {
-  color: var(--pure-white);
+  color: var(--max-contrast);
 }
 
 #frames-panel .frame-group.node-frame-group {
@@ -523,7 +555,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
 
 #frames-panel .node-frame-group .frame-group,
 #frames-panel .frame-group .delays {
-  border-left: 1px solid var(--nearform-grey);
+  border-left: 1px solid var(--primary-grey);
   margin-left: 3px;
   padding-left: 15px;
 }
@@ -602,7 +634,7 @@ svg.bubbleprof .node-group {
 }
 
 svg.bubbleprof .outer-path {
-  fill: var(--lighten-bg-color);
+  fill: var(--translucent-match-banner);
   stroke: none;
 }
 
@@ -649,7 +681,10 @@ svg.bubbleprof .node-group .upper-label {
 }
 
 svg.bubbleprof .node-group.shortcut .outer-path {
-  fill: var(--translucent-black);
+  fill: var(--translucent-reverse);
+  stroke-width: 1px;
+  stroke: var(--shortcut-stroke);
+  paint-order: stroke fill;
 }
 
 svg.bubbleprof .node-group.shortcut .name-label {
@@ -736,7 +771,7 @@ svg.bubbleprof.complete-fade-out {
   top: 8px;
   right: 8px;
   height: 40px;
-  background: var(--pure-black);
+  background: var(--reverse-contrast);
   color: var(--cyan);
   z-index: 20;
   position: absolute;
@@ -752,7 +787,7 @@ svg.bubbleprof.complete-fade-out {
   left: 30px;
   width: 40px;
   height: 40px;
-  background: var(--pure-black);
+  background: var(--reverse-contrast);
   z-index: 20;
   position: absolute;
   padding: 2px 10px;
@@ -780,12 +815,12 @@ svg.bubbleprof.complete-fade-out {
   padding: 0 24px 0 16px;
   border-left: 1px solid var(--cyan);
   font-size: var(--main-text-size);
-  color: var(--nearform-grey);
+  color: var(--primary-grey);
 }
 
 #side-bar .side-bar-item .collapse-control {
   cursor: pointer;
-  color: var(--pure-white);
+  color: var(--max-contrast);
   border-bottom: 1px solid var(--cyan);
   position: relative;
   padding: 8px 16px 8px 8px;
@@ -796,7 +831,7 @@ svg.bubbleprof.complete-fade-out {
 #frames-panel .sub-collapse-control .arrow {
   height: 14px;
   width: 16px;
-  background-image: var(--down-white-chevron-arrow);
+  background-image: var(--small-chevron);
   background-size: cover;
   transform: scaleY(-1);
 }
@@ -834,7 +869,7 @@ svg.bubbleprof.complete-fade-out {
 
 body.spiderweb-layout svg.bubbleprof .link-inner {
   /* TODO: visible only in spiderweb layout */
-  stroke: var(--pure-black);
+  stroke: var(--reverse-contrast);
   opacity: 0.5;
 }
 
@@ -869,7 +904,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 }
 
 .area-chart .slice-highlight {
-  background: var(--cyan-bright);
+  background: var(--cyan-strong);
   opacity: 0.2;
   position: absolute;
   z-index: 1;
@@ -885,7 +920,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 }
 
 .area-chart .hover-box strong {
-  color: var(--pure-white);
+  color: var(--max-contrast);
 }
 
 .area-chart .hover-box .vertical-arrow {
@@ -912,8 +947,8 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 .hover-box {
   position: absolute;
   width: 320px;
-  background-color: var(--translucent-black);
-  color: var(--nearform-grey);
+  background-color: var(--translucent-reverse);
+  color: var(--primary-grey);
   margin-left: 6px;
   z-index: 25;
   margin-top: -26px;
@@ -944,13 +979,13 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 }
 
 .hover-box:not(.horizontal-flip) .title-block:before {
-  border-right-color: var(--pure-black);
+  border-right-color: var(--reverse-contrast);
   margin-left: -18px;
   left: 0;
 }
 
 .hover-box.horizontal-flip .title-block:before {
-  border-left-color: var(--pure-black);
+  border-left-color: var(--reverse-contrast);
   margin-right: -18px;
   right: 0;
 }
@@ -958,7 +993,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 .hover-box.off-bottom .time-block {
   bottom: 100%;
   position: absolute;
-  background: var(--pure-black);
+  background: var(--reverse-contrast);
   border-bottom: 2px solid var(--main-bg-color);
 }
 
@@ -979,7 +1014,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 .hover-box h2 {
   margin: 0;
   font-size: 13pt;
-  color: var(--pure-white);
+  color: var(--max-contrast);
   font-weight: bold;
 }
 
@@ -1015,14 +1050,14 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 }
 
 .hover-box.use-vertical-arrow:not(.off-bottom) > .vertical-arrow {
-  border-bottom-color: var(--pure-black);
+  border-bottom-color: var(--reverse-contrast);
   border-top: none;
   top: 0;
   margin-top: -9px;
 }
 
 .hover-box.use-vertical-arrow.off-bottom > .vertical-arrow {
-  border-top-color: var(--pure-black);
+  border-top-color: var(--reverse-contrast);
   border-bottom: none;
   bottom: 0;
   margin-bottom: -9px;
@@ -1043,7 +1078,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 }
 
 .lookup .lookup-input.default-text {
-  color: var(--nearform-grey);
+  color: var(--primary-grey);
 }
 
 .lookup .lookup-suggestions {
@@ -1055,7 +1090,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 
 .lookup .results-count {
   background: var(--overlay-bg-color);
-  color: var(--pure-white);
+  color: var(--max-contrast);
   padding: 8px 24px;
   list-style: none;
   font-size: var(--main-text-size);
@@ -1064,7 +1099,7 @@ body[data-highlight-party='nodecore'] #node-link svg:not(:hover) .party-root {
 .lookup .lookup-suggestions .suggestion {
   margin: 1px 0;
   padding: 8px 4px;
-  background: var(--pure-black);
+  background: var(--reverse-contrast);
   color: var(--cyan);
   list-style: none;
   font-size: 8pt;
@@ -1206,16 +1241,16 @@ svg.area-chart-svg .area-path.filtered {
 }
 
 .hover-box .area-chart {
-  background: var(--pure-black);
+  background: var(--reverse-contrast);
   opacity: 1;
 }
 
 .area-chart .x-axis .tick text {
-  fill: var(--nearform-grey);
+  fill: var(--primary-grey);
 }
 
 .area-chart .x-axis .tick line {
-  stroke: var(--nearform-grey);
+  stroke: var(--primary-grey);
 }
 
 .hover-box .area-chart .x-axis .tick line {
@@ -1252,10 +1287,10 @@ body:not(.initialized):before,
   content: "";
   border-radius: 50%;
   display: block;
-  border-left: 1px solid var(--nearform-grey);
-  border-right: 1px solid var(--nearform-grey);
-  border-top: 4px solid var(--nearform-red);
-  border-bottom: 4px solid var(--nearform-red);
+  border-left: 1px solid var(--primary-grey);
+  border-right: 1px solid var(--primary-grey);
+  border-top: 4px solid var(--nearform-color);
+  border-bottom: 4px solid var(--nearform-color);
   transform: translateZ(0);
   animation: loading 1.6s infinite linear;
 }
@@ -1265,7 +1300,7 @@ body:not(.initialized):after,
   font-size: 14pt;
   font-variant: all-small-caps;
   font-weight: bold;
-  color: var(--nearform-red);
+  color: var(--nearform-color);
   text-align: center;
 
   display: block;
