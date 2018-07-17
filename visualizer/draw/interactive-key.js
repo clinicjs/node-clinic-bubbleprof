@@ -123,7 +123,7 @@ class InteractiveKey extends HtmlContent {
     const classification = targetType === 'type' ? 'typeCategory' : targetType
     const decimal = this.ui.dataSet.getDecimal(classification, name)
 
-    const iconWidth = 3 + decimal * 30
+    const iconWidth = 4 + decimal * 40
 
     this.d3Icon
       .style('width', `${iconWidth}px`)
