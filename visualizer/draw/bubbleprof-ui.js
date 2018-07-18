@@ -53,11 +53,15 @@ class BubbleprofUI extends EventEmitter {
 
     if (this.originalUI === this) {
       const nodeLinkSection = this.getNodeLinkSection()
-      this.backBtn = nodeLinkSection.addContent(undefined, { classNames: 'back-btn' })
+      this.backBtn = nodeLinkSection.addContent(undefined, {
+        hidden: true,
+        classNames: 'back-btn'
+      })
       history.push(this)
       this.on('navigation', ({ to }) => {
         history.push(to)
-        this.backBtn.d3Element.classed('hidden', history.length < 2)
+        this.backBtn.isHidden = history.length < 2
+        this.backBtn.draw()
       })
     }
   }
