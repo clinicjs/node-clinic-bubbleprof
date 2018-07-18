@@ -130,7 +130,7 @@ class InteractiveKey extends HtmlContent {
     this.d3IconPath
       .attr('d', `M 0 4 L ${iconWidth} 4`)
 
-    this.d3Element.classed('grey-out', !decimal)
+    this.d3Element.classed('grey-out', decimal === null)
   }
 }
 

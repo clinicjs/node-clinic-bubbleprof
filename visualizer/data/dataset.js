@@ -80,6 +80,8 @@ class DataSet {
     this.rawTotalTime += num
   }
   getDecimal (classification, label) {
+    if (!this.decimals[classification].has(label)) return null
+
     const num = this.decimals[classification].get(label)
     const description = `Getting DataSet decimal for ${classification} "${label}"`
     return (!num || this.rawTotalTime === 0) ? 0 : validateNumber(num / this.rawTotalTime, description)
