@@ -4,6 +4,10 @@ const fakeJson = require('./visualizer-util/fakedata.json')
 const DataSet = require('../visualizer/data/dataset.js')
 const acmeairJson = require('./visualizer-util/sampledata-acmeair.json')
 
+function round4dp (num) {
+  return typeof num === 'number' ? Number(num.toFixed(4)) : num
+}
+
 test('Visualizer dataset - fake json', function (t) {
   const dataSet = loadData({ debugMode: true }, fakeJson)
 
@@ -46,8 +50,40 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
   t.equals(dataSet.wallTime.profileStart, 6783474.641)
   t.equals(dataSet.wallTime.profileEnd, 6786498.31)
   dataSet.processData()
-  t.equals(dataSet.wallTime.profileDuration.toFixed(4), '3023.6690')
-  t.equals(dataSet.wallTime.msPerSlice.toFixed(4), '30.2367')
+  t.equals(round4dp(dataSet.wallTime.profileDuration), 3023.6690)
+  t.equals(round4dp(dataSet.wallTime.msPerSlice), 30.2367)
+
+  // todo - unify variable and class names with UI labels
+  const typeDecimals = [
+    dataSet.getDecimal('typeCategory', 'networks'),
+    dataSet.getDecimal('typeCategory', 'files-streams'),
+    dataSet.getDecimal('typeCategory', 'crypto'),
+    dataSet.getDecimal('typeCategory', 'timing-promises'),
+    dataSet.getDecimal('typeCategory', 'other')
+  ]
+  t.equals(round4dp(typeDecimals[0]), 0.282)
+  t.equals(round4dp(typeDecimals[1]), 0.0006)
+  t.equals(round4dp(typeDecimals[2]), 0)
+  t.equals(round4dp(typeDecimals[3]), 0.0507)
+  t.equals(round4dp(typeDecimals[4]), 0)
+  t.equals(round4dp(typeDecimals.reduce((accum, num) => accum + num, 0)), 1)
+  t.equals(dataSet.decimals.typeCategory.size, 5)
+
+  const partyDecimals = [
+    dataSet.getDecimal('party', 'user'),
+    dataSet.getDecimal('party', 'external'),
+    dataSet.getDecimal('party', 'nodecore'),
+    dataSet.getDecimal('party', 'root')
+  ]
+  t.equals(round4dp(partyDecimals[0]), 0.0989)
+  t.equals(round4dp(partyDecimals[1]), 0.2276)
+  t.equals(round4dp(partyDecimals[2]), 0.0068)
+  t.equals(round4dp(partyDecimals[3]), 0)
+  t.equals(round4dp(partyDecimals.reduce((accum, num) => accum + num, 0)), 1)
+  t.equals(dataSet.decimals.party.size, 4)
+
+  t.equals(dataSet.getDecimal('typeCategory', 'some-key-not-in-map'), null)
+  t.equals(dataSet.getDecimal('party', 'some-key-not-in-map'), null)
 
   t.end()
 })
