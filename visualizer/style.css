@@ -25,15 +25,15 @@ html {
   --cyan: rgb(63, 125, 198);
   --heading-on-cyan: rgb(255, 255, 255);
 
-  --party-colour-1: var(--cyan-strong);
+  --party-colour-1: var(--max-contrast);
   --party-colour-2: var(--cyan);
   --party-colour-3: var(--primary-grey);
 
-  --type-colour-1: rgb(173, 102, 71); /* Rusty orange */
-  --type-colour-2: rgb(0, 209, 168); /* Pale green */
-  --type-colour-3: rgb(211, 166, 255); /* Pale lilac */
-  --type-colour-4: rgb(102, 69, 181); /* Deep purple */
-  --type-colour-5: rgb(252, 255, 123); /* Pale yellow */
+  --type-colour-1: rgb(173, 91, 35); /* Rusty orange */
+  --type-colour-2: rgb(20, 255, 195); /* Pale green */
+  --type-colour-3: rgb(255, 152, 253); /* Pinkish lilac */
+  --type-colour-4: rgb(89, 0, 208); /* Deep violet */
+  --type-colour-5: rgb(255, 242, 0); /* Rich yellow */
 
   --shortcut-stroke: transparent;
 
@@ -90,8 +90,6 @@ html.light-theme {
   --shortcut-stroke: var(--primary-grey);
 
   --small-chevron: var(--down-cyan-chevron-arrow);
-
-  --type-colour-5: rgb(252, 255, 0); /* Richer yellow */
 }
 
 /* Main layout */
@@ -1219,7 +1217,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
 .type-crypto,
 .type-crypto .by-variable {
   stroke: var(--type-colour-3);
-  stroke-dasharray: var(--dasharray-solid)
+  stroke-dasharray: var(--dasharray-dashed)
 }
 .type-crypto.by-variable {
   border-color: var(--type-colour-3);
@@ -1227,7 +1225,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
 .type-timing-promises,
 .type-timing-promises .by-variable {
   stroke: var(--type-colour-4);
-  stroke-dasharray: var(--dasharray-dashed)
+  stroke-dasharray: var(--dasharray-solid)
 }
 .type-timing-promises.by-variable {
   border-color: var(--type-colour-4);
