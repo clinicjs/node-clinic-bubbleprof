@@ -55,9 +55,9 @@ html {
   --eye-icon-total-width: 27px;
 
   /* !important is needed on applying these to override the stroke-width style set from js line width settings */
-  --highlighted-type-width: 7px;
+  --highlighted-type-width: 6px;
   --type-width: 4px;
-  --highlighted-party-width: 5px;
+  --highlighted-party-width: 4px;
   --party-width: 2px;
 
   /* Define animation variables */
