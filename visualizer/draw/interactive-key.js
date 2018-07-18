@@ -50,8 +50,7 @@ class InteractiveKey extends HtmlContent {
     const {
       name,
       targetType,
-      label,
-      htmlContent
+      label
     } = this.contentProperties
 
     const targetClass = `${targetType}-${name}`
@@ -134,6 +133,5 @@ class InteractiveKey extends HtmlContent {
     this.d3Element.classed('grey-out', !decimal)
   }
 }
-
 
 module.exports = InteractiveKey
