@@ -70,14 +70,20 @@ class DataSet {
   calculateDecimals () {
     this.aggregateNodes.forEach(aggregateNode => {
       aggregateNode.applyDecimalsToCluster()
-      aggregateNode.applyDecimalsToDataSet()
+      this.applyDecimals(aggregateNode)
     })
+  }
+  applyDecimals (aggregateNode) {
+    const totalTime = aggregateNode.stats.rawTotals.sync + aggregateNode.stats.rawTotals.async.between
+    this.setDecimal(totalTime, 'type', aggregateNode.type)
+    this.setDecimal(totalTime, 'typeCategory', aggregateNode.typeCategory)
+    this.setDecimal(totalTime, 'party', aggregateNode.mark.get('party'))
+    this.rawTotalTime += totalTime
   }
   setDecimal (num, classification, label) {
     const decimalsMap = this.decimals[classification]
     const newValue = decimalsMap.has(label) ? decimalsMap.get(label) + num : num
     decimalsMap.set(label, validateNumber(newValue, `Setting DataSet decimal for ${classification} "${label}"`))
-    this.rawTotalTime += num
   }
   getDecimal (classification, label) {
     if (!this.decimals[classification].has(label)) return null

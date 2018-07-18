@@ -121,7 +121,8 @@ class InteractiveKey extends HtmlContent {
     const classification = targetType === 'type' ? 'typeCategory' : targetType
     const decimal = this.ui.dataSet.getDecimal(classification, name)
 
-    const iconWidth = 4 + decimal * 40
+    // Give key items a minimum 4px width so colour and texture is visible, then up to ~18px based on relative size
+    const iconWidth = 4 + decimal * 14
 
     this.d3Icon
       .style('width', `${iconWidth}px`)

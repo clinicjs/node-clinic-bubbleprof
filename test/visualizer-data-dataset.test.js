@@ -61,10 +61,10 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
     dataSet.getDecimal('typeCategory', 'timing-promises'),
     dataSet.getDecimal('typeCategory', 'other')
   ]
-  t.equals(round4dp(typeDecimals[0]), 0.282)
-  t.equals(round4dp(typeDecimals[1]), 0.0006)
+  t.equals(round4dp(typeDecimals[0]), 0.8461)
+  t.equals(round4dp(typeDecimals[1]), 0.0017)
   t.equals(round4dp(typeDecimals[2]), 0)
-  t.equals(round4dp(typeDecimals[3]), 0.0507)
+  t.equals(round4dp(typeDecimals[3]), 0.1521)
   t.equals(round4dp(typeDecimals[4]), 0)
   t.equals(round4dp(typeDecimals.reduce((accum, num) => accum + num, 0)), 1)
   t.equals(dataSet.decimals.typeCategory.size, 5)
@@ -75,9 +75,9 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
     dataSet.getDecimal('party', 'nodecore'),
     dataSet.getDecimal('party', 'root')
   ]
-  t.equals(round4dp(partyDecimals[0]), 0.0989)
-  t.equals(round4dp(partyDecimals[1]), 0.2276)
-  t.equals(round4dp(partyDecimals[2]), 0.0068)
+  t.equals(round4dp(partyDecimals[0]), 0.2968)
+  t.equals(round4dp(partyDecimals[1]), 0.6829)
+  t.equals(round4dp(partyDecimals[2]), 0.0203)
   t.equals(round4dp(partyDecimals[3]), 0)
   t.equals(round4dp(partyDecimals.reduce((accum, num) => accum + num, 0)), 1)
   t.equals(dataSet.decimals.party.size, 4)
