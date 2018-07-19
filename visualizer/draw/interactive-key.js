@@ -46,28 +46,34 @@ class InteractiveKey extends HtmlContent {
     if (!this.contentProperties.name) throw new Error('InteractiveKey requires contentProperties.name to be defined')
     if (!this.contentProperties.targetType) throw new Error('InteractiveKey requires contentProperties.targetType to be defined')
 
+    super.initializeElements()
     const {
       name,
       targetType,
-      label,
-      htmlContent
+      label
     } = this.contentProperties
 
-    const eventName = `highlight${targetType.charAt(0).toUpperCase()}${targetType.slice(1)}`
     const targetClass = `${targetType}-${name}`
 
-    if (!htmlContent) {
-      this.contentProperties.htmlContent = `
-        <span style="border-width: ${this.ui.settings.lineWidth}px;" class="${targetType}-icon"></span><label>${label}</label>
-      `
-    }
-    super.initializeElements()
+    this.d3Icon = this.d3Element.append('svg')
+      .style('width', '0px')
+      .classed('interactive-key-icon', true)
+      .classed('bubbleprof', true)
+
+    this.d3IconPath = this.d3Icon
+      .append('path')
+      .classed('line-segment', true)
+      .classed(`${targetType}-icon`, true)
+      .classed(targetClass, true)
+
+    this.d3Label = this.d3Element.append('label')
+      .html(label)
 
     this.d3Element.classed(targetClass, true)
     this.d3Element.classed('interactive-key', true)
 
     this.d3Element.on('mouseover', () => {
-      this.ui.emit(eventName, this.contentProperties.name)
+      this.ui.highlightColour(targetType, this.contentProperties.name)
 
       if (this.hoverBox) {
         this.hoverBox.d3TitleBlock.classed(targetClass, true)
@@ -86,10 +92,46 @@ class InteractiveKey extends HtmlContent {
       }
     })
     this.d3Element.on('mouseout', () => {
-      this.ui.emit(eventName, null)
+      this.ui.highlightColour(targetType, null)
       if (this.collapsedContent) this.collapsedContent.collapseClose()
       if (this.hoverBox) this.hoverBox.hide()
     })
+
+    this.hoverBox.initializeElements()
+    if (this.hoverBox) {
+      this.hoverBox.d3Element.on('mouseover', () => {
+        this.ui.highlightColour(targetType, this.contentProperties.name)
+      })
+    }
+    if (this.hoverBox) {
+      this.hoverBox.d3Element.on('mouseout', () => {
+        this.ui.highlightColour(targetType, null)
+      })
+    }
+  }
+
+  draw () {
+    const {
+      name,
+      targetType
+    } = this.contentProperties
+
+    super.draw()
+
+    const classification = targetType === 'type' ? 'typeCategory' : targetType
+    const decimal = this.ui.dataSet.getDecimal(classification, name)
+
+    // Give key items a minimum 4px width so colour and texture is visible, then up to ~18px based on relative size
+    const iconWidth = 4 + decimal * 14
+
+    this.d3Icon
+      .style('width', `${iconWidth}px`)
+      .classed('hidden', false)
+
+    this.d3IconPath
+      .attr('d', `M 0 4 L ${iconWidth} 4`)
+
+    this.d3Element.classed('grey-out', decimal === null)
   }
 }
 

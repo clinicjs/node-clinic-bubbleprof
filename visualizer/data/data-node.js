@@ -224,7 +224,6 @@ class AggregateNode extends DataNode {
       this.clusterNode.setDecimal(time, 'typeCategory', betweenOrWithin, this.typeCategory)
       this.clusterNode.setDecimal(time, 'party', betweenOrWithin, this.mark.get('party'))
     }
-
     if (this.isBetweenClusters) {
       apply(this.stats.rawTotals.async.between, 'between')
       apply(this.stats.rawTotals.sync, 'within')
