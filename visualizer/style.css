@@ -359,11 +359,11 @@ main {
   right: 25px;
   background: var(--main-bg-translucent)
   border-radius: 6px;
-  margin-top: 1px;
+  margin-top: 4px;
 }
 
 #header .help-link-block .help-link {
-  padding: 3px;
+  padding: 2px 3px;
   display: block;
   font-weight: bold;
   text-decoration: none;
@@ -1445,6 +1445,7 @@ body:not(.initialized):after {
   }
   #header .help-link-block {
     top: 6px;
+    right: -3px;
   }
   #header .help-link-block .help-link:before {
     content: 'Help';
@@ -1463,6 +1464,10 @@ body:not(.initialized):after {
   }
   #header .highlight-bar {
     display: block;
+  }
+  #header .help-link-block {
+    top: 6px;
+    right: 4px;
   }
 }
 
