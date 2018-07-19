@@ -15,7 +15,9 @@ class HtmlContent {
       hidden: false,
       htmlElementType: 'div',
       htmlContent: '',
-      classNames: ''
+      classNames: '',
+      title: '',
+      eventHandler: null
     }
     this.contentProperties = Object.assign(defaultProperties, contentProperties)
     this.isHidden = this.contentProperties.hidden
@@ -78,7 +80,9 @@ class HtmlContent {
       htmlContent,
       htmlElementType,
       id,
-      classNames
+      classNames,
+      title,
+      eventHandler
     } = this.contentProperties
 
     const d3ParentElement = this.parentContent.d3ContentWrapper
@@ -105,8 +109,15 @@ class HtmlContent {
     if (this.loadingAnimation) this.loadingAnimation.initializeElements()
 
     if (id) this.d3Element.attr('id', id)
+    if (title) this.d3Element.attr('title', title)
     if (classNames) this.d3Element.classed(classNames, true)
     if (htmlContent && !skipContent) this.d3ContentWrapper.html(htmlContent)
+
+    if (eventHandler) {
+      this.d3Element.on(eventHandler.name, () => {
+        eventHandler.func()
+      })
+    }
 
     for (const id of this.contentIds) {
       this.content.get(id).initializeElements()

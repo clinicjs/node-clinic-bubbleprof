@@ -21,6 +21,7 @@ class HoverBox extends HtmlContent {
   }
 
   initializeElements () {
+    if (this.d3Element) return
     super.initializeElements(true) // Tells super not to add .htmlContent to default position
 
     this.d3Element.classed('hover-box', true)

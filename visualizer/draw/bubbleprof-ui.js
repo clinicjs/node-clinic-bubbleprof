@@ -410,6 +410,11 @@ class BubbleprofUI extends EventEmitter {
     this.emit('hover', layoutNode)
   }
 
+  highlightColour (targetType, label = null) {
+    const eventName = targetType === 'party' ? 'highlightParty' : 'highlightType'
+    this.originalUI.emit(eventName, label)
+  }
+
   outputFrames (aggregateNode, layoutNode = null) {
     if (layoutNode) {
       this.highlightNode(layoutNode)

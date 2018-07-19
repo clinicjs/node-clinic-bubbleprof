@@ -2,6 +2,7 @@
 
 const BubbleprofUI = require('./bubbleprof-ui.js')
 const staticKeyHtml = require('./static-key.js')
+const d3 = require('./d3-subset.js')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -20,16 +21,25 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
-    // Uncomment this and comment out the other line to test that the animation doesn't play when the page is visited
-    // TODO: remove this when https://clinicjs.org is live
-    // htmlContent: '<a class="help-link external-link" href="https://www.bbc.com/news" title="Test link to a visitable page"></a>'
     htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"></a>'
+  })
+
+  header.addContent(undefined, {
+    htmlElementType: 'a',
+    classNames: 'toggle-theme',
+    title: 'Toggle between light and dark themes',
+    eventHandler: {
+      name: 'click',
+      func: () => {
+        const d3Html = d3.select('html')
+        // Toggle light theme
+        d3Html.classed('light-theme', !d3Html.classed('light-theme'))
+      }
+    }
   })
 
   const breadcrumbBar = header.addContent(undefined, { classNames: 'header-bar breadcrumb-bar' })
   breadcrumbBar.addContent('BreadcrumbPanel', { classNames: 'panel', originalUI: ui })
-  // TODO: when adding full-screen and light theme
-  // const uiButtonsPanel = header.addContent(undefined, { classNames: 'panel' })
 
   partyKeyPanel.addContent('InteractiveKey', {
     relativeContainer: header,
