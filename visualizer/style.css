@@ -363,17 +363,15 @@ main {
 #header .help-link-block {
   position: absolute;
   right: 25px;
-  background: var(--main-bg-translucent)
-  border-radius: 6px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 #header .help-link-block .help-link {
-  padding: 2px 3px;
+  padding: 4px 6px;
   display: block;
   font-weight: bold;
   text-decoration: none;
-  outline: 4px solid var(--banner-bg-color);
+  outline: 2px solid var(--banner-bg-color);
 }
 
 #header .help-link-block .help-link:before {
