@@ -102,12 +102,18 @@ html, body {
 
 body {
   background: var(--main-bg-color);
-
   /* To resolve inconsistent browser issues:
    * - Chrome flashes an empty y scrollbar inconstently on some events in sublayouts
    * - Firefox adds an empty x scrollbar to sublayouts */
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+main#bubbleprof-main {
+  /* MS Edge has a weird display problem where it sometimes resets the body background to white
+   * particularly if dev tools or sometimes settings are open. Unrelated to light/dark theme.
+   * Bug also affects main if no additional selector is provided. Very strange browser bug. */
+  background: var(--main-bg-color);
 }
 
 /* Global Typography */
