@@ -400,20 +400,16 @@ main {
   animation-timing-function: ease-in-out;
 }
 
-
+/* :visited can't apply animation-name: none; so use !important to stop animation */
 #header .help-link-block .help-link:visited {
+  color: var(--cyan) !important;
   background-color: var(--main-bg-color) !important;
   outline-color: var(--main-bg-color) !important;
-  color: var(--cyan) !important;
-
-  /* :visited can't apply animation-name: none; */
 }
-
 #header .help-link-block .help-link:visited:after {
-    color: var(--cyan);
-    border-left-color: var(--cyan);
-    border-bottom-color: var(--cyan);
-  /* :visited can't apply animation-name: none; */
+  color: var(--cyan) !important;
+  border-left-color: var(--cyan) !important;
+  border-bottom-color: var(--cyan) !important;
 }
 
 @keyframes pulseLink {
