@@ -4,8 +4,19 @@ const BubbleprofUI = require('./bubbleprof-ui.js')
 const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
 
+const d3Html = d3.select('html')
+
+function addClassIfValueUnsupported (cssProperty, cssValue, d3TestElement) {
+  d3TestElement.style(cssProperty, cssValue)
+  d3Html.classed(`no-${cssProperty}-${cssValue}`, d3TestElement.style(cssProperty) !== cssValue)
+}
+
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
+
+  const d3TestDiv = d3Html.append('div')
+  addClassIfValueUnsupported('position', 'sticky', d3TestDiv)
+  d3TestDiv.remove()
 
   const sections = ['header', 'node-link', 'side-bar', 'footer']
   const ui = new BubbleprofUI(sections)
@@ -31,7 +42,6 @@ function drawOuterUI () {
     eventHandler: {
       name: 'click',
       func: () => {
-        const d3Html = d3.select('html')
         // Toggle light theme
         d3Html.classed('light-theme', !d3Html.classed('light-theme'))
       }
