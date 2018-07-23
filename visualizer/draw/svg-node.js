@@ -231,6 +231,9 @@ class SvgNode {
 
     const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${this.labelDegrees})`
     this.d3NameLabel.attr('transform', transformString)
+    if (!window.CSS.supports('dominant-baseline', 'middle')) {
+      this.d3NameLabel.attr('dy', 3)
+    }
   }
 
   drawNameLabel () {
@@ -242,6 +245,9 @@ class SvgNode {
     this.d3NameLabel.classed('smaller-label', false)
     this.d3NameLabel.classed('on-line-label', false)
     this.d3NameLabel.classed('in-circle-label', false)
+    if (!window.CSS.supports('dominant-baseline', 'middle')) {
+      this.d3NameLabel.attr('dy', 0)
+    }
 
     const nameLabel = formatNameLabel(this.layoutNode.node.name)
     const labelPlusTime = `${nameLabel}–${formatTimeLabel(this.layoutNode.node.stats.overall)}`
@@ -285,6 +291,9 @@ class SvgNode {
           this.d3NameLabel.classed('endpoint-label', true)
           this.d3NameLabel.classed('flipped-label', this.flipLabel)
           this.d3NameLabel.classed('smaller-label', this.drawType === 'tiny')
+          if (!window.CSS.supports('dominant-baseline', 'middle')) {
+            this.d3NameLabel.attr('dy', 3)
+          }
 
           const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
           this.d3NameLabel.attr('transform', transformString)
@@ -367,6 +376,9 @@ class SvgNode {
     this.d3TimeLabel.classed('in-circle-label', true)
     this.d3TimeLabel.classed('on-line-label', false)
     this.d3TimeLabel.classed('lower-label', true)
+    if (!window.CSS.supports('dominant-baseline', 'text-before-edge')) {
+      this.d3TimeLabel.attr('dy', 11)
+    }
   }
 
   drawOuterPath () {
