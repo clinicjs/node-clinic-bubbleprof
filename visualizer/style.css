@@ -742,6 +742,7 @@ svg.bubbleprof .node-group .inner-circle {
 
 svg.bubbleprof.fade-elements-in .outer-path,
 svg.bubbleprof.fade-elements-in .text-label,
+svg.bubbleprof.fade-elements-in .inner-circle,
 svg.bubbleprof.complete-fade-in {
   animation-duration: var(--transition-duration);
   animation-fill-mode: forwards;
@@ -751,6 +752,7 @@ svg.bubbleprof.complete-fade-in {
 
 svg.bubbleprof.fade-elements-out .outer-path,
 svg.bubbleprof.fade-elements-out .text-label,
+svg.bubbleprof.fade-elements-out .inner-circle,
 svg.bubbleprof.complete-fade-out {
   animation-duration: var(--transition-duration);
   animation-fill-mode: forwards;
