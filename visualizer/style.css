@@ -207,6 +207,9 @@ main {
   z-index: 11;
   background: var(--main-bg-color);
 }
+.no-position-sticky #header {
+  position: relative;
+}
 
 #header .header-bar {
   display: block;
@@ -654,6 +657,10 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   cursor: pointer;
   color: var(--cyan-highlight);
 }
+.no-position-sticky #side-bar .close,
+.no-position-sticky #footer .close {
+  position: relative;
+}
 
 /* View modes: 'maximised', 'fit', 'scroll'; */
 
@@ -662,6 +669,10 @@ body[data-view-mode='fit'] #node-link {
   top: var(--header-height);
   max-height: calc(100vh - var(--banner-height) - var(--header-height));
   min-height: calc(100vh - var(--banner-height) - var(--header-height));
+}
+.no-position-sticky body[data-view-mode='fit'] #node-link {
+  position: relative;
+  top: 0;
 }
 
 /* Node-link diagram and container */
