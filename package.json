@@ -1,5 +1,5 @@
 {
-  "name": "clinic-bubbleprof",
+  "name": "@nearform/bubbleprof",
   "description": "Programmable interface to clinic bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
   "version": "1.0.0",
