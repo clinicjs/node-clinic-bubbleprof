@@ -90,6 +90,8 @@ class SvgNodeDiagram {
     Promise.all(svgNodeAnimations).then(() => {
       this.ui.isAnimating = false
       if (onComplete) onComplete()
+    }, (err) => {
+      throw err
     })
   }
 
