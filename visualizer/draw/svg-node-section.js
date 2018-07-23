@@ -381,6 +381,13 @@ function addMissingADefs (arcString) {
   return unpackArcString(adjustedArcString)
 }
 
+function splitBySvgSeperator (substring) {
+  const byComma = substring.trim().split(',')
+
+  // MS Edge writes SVG seperated by spaces not commas e.g. 'M 1.23 4.56' not 'M 1.23,4.56'
+  return byComma.length > 1 ? byComma : byComma[0].split(' ')
+}
+
 function unpackArcString (initialString) {
   const arcDef = {}
   // Discard everything after the second M
@@ -390,15 +397,15 @@ function unpackArcString (initialString) {
   const splitByA = arcString.split('A')
   if (splitByA.length <= 1) return null
 
-  arcDef.M = splitByA[0].slice(1).split(',')
+  arcDef.M = splitBySvgSeperator(splitByA[0].slice(1))
 
   // The second A of a typical D3 arc where innerRadius === outerRadius retraces itself to the start
   // We can therefore discard it because it's invisible to the user and complicates animation
-  arcDef.A = splitByA[1].split(',')
+  arcDef.A = splitBySvgSeperator(splitByA[1])
 
   // Complete circles in D3 arcs are drawn as two outward semi-circles, then two retracing semi-circles
   // We keep the second semi-circle, and discard the redundant third and fourth retracing semi-circles
-  arcDef.A2 = splitByM.length === 3 && splitByA.length === 3 ? splitByA[2].split(',') : null
+  arcDef.A2 = splitByM.length === 3 && splitByA.length === 3 ? splitBySvgSeperator(splitByA[2]) : null
   return arcDef
 }
 
@@ -423,7 +430,7 @@ function tweenArcToLine (endArc, svgElement, ease, isExpanding) {
         const interpolated = d3.interpolateNumber(currentValue, endValue)(easedTime)
 
         for (const [label, value] of [['current', currentValue], ['end', endValue], ['interpolated', interpolated]]) {
-          validateNumber(value, `Interpolation ${key} ${index}, ${label} value: `)
+          validateNumber(value, `Interpolation ${key} ${index}, ${label} value`)
         }
         return interpolated
       }
