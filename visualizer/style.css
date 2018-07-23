@@ -716,6 +716,7 @@ svg.bubbleprof .node-group .time-label {
 }
 
 svg.bubbleprof .node-group .lower-label {
+  /* On browsers without dominant-baseline, e.g. MS Edge, JS applies dy attr */
   dominant-baseline: text-before-edge;
 }
 
