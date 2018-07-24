@@ -350,7 +350,7 @@ function adjustArcPath (arcString, svgElement) {
   } = svgElement.circleCentre
   const radians = getEllipseAngle(svgElement.svgNode.degrees)
 
-  const arcDef = unpackArcString(arcString) || addMissingADefs(arcString)
+  const arcDef = unpackArcString(arcString)
   if (!arcDef) return arcString
 
   // Add circle centre coords to path absolute coords so we don't need a transform
@@ -373,12 +373,18 @@ function adjustArcPath (arcString, svgElement) {
 }
 
 function addMissingADefs (arcString) {
-  // Very short arc segments can be drawn by D3 arcmakers as L or even M0,0Z
-  if (arcString === 'M0,0Z') return unpackArcString('M 0,0 A 0,0,0,0,1,0,0')
+  // Very short arc segments can be drawn by D3 arcmakers as a L line, or M[X],[Y]Z where X and Y are usually tiny or 0
+  // or in some cases with A 0 A 0 empty arcs
+  const splitByL = arcString.split('L')
+  if (splitByL.length > 1) {
+    const lastCharIndex = splitByL[1].length - 1
+    const endString = splitByL[1].charAt(lastCharIndex) === 'Z' ? splitByL[1].slice(0, lastCharIndex) : splitByL[1]
+    const adjustedArcString = `${splitByL[0]} A 0,0,0,0,1,${endString}`
+    return unpackArcString(adjustedArcString)
+  }
 
-  const splitString = arcString.split('L')
-  const adjustedArcString = `${splitString[0]} A 0,0,0,0,1,${splitString[1]}`
-  return unpackArcString(adjustedArcString)
+  const firstStringSection = arcString.split(/(?=[MLAZ])/)[0].trim()
+  return unpackArcString(`${firstStringSection} A 0,0,0,0,1,0,0`)
 }
 
 function splitBySvgSeperator (substring) {
@@ -388,29 +394,29 @@ function splitBySvgSeperator (substring) {
   return byComma.length > 1 ? byComma : byComma[0].split(' ')
 }
 
-function unpackArcString (initialString) {
-  const arcDef = {}
-  // Discard everything after the second M
-  const splitByM = initialString.split('M')
-  const arcString = `M${splitByM[1]}`
+function unpackArcString (initialString, alreadyFiltered = false) {
+  const zRemoved = initialString.charAt(initialString.length - 1) === 'Z' ? initialString.slice(0, initialString.length - 1) : initialString
+  const arcArray = zRemoved.split(/(?=[MA])/)
 
-  const splitByA = arcString.split('A')
-  if (splitByA.length <= 1) return null
+  const unfilteredArc = {
+    M: [],
+    A: []
+  }
+  arcArray.forEach(subStr => {
+    if (subStr.charAt(0) === 'M') unfilteredArc.M.push(splitBySvgSeperator(subStr.slice(1).trim()))
+    if (subStr.charAt(0) === 'A') unfilteredArc.A.push(splitBySvgSeperator(subStr.slice(1).trim()))
+  })
 
-  arcDef.M = splitBySvgSeperator(splitByA[0].slice(1))
-
-  // The second A of a typical D3 arc where innerRadius === outerRadius retraces itself to the start
-  // We can therefore discard it because it's invisible to the user and complicates animation
-  arcDef.A = splitBySvgSeperator(splitByA[1])
-
-  // Complete circles in D3 arcs are drawn as two outward semi-circles, then two retracing semi-circles
-  // We keep the second semi-circle, and discard the redundant third and fourth retracing semi-circles
-  arcDef.A2 = splitByM.length === 3 && splitByA.length === 3 ? splitBySvgSeperator(splitByA[2]) : null
-  return arcDef
+  const filteredArc = {
+    M: unfilteredArc.M[0],
+    A: unfilteredArc.A[0],
+    A2: unfilteredArc.A.length === (alreadyFiltered ? 2 : 4) ? unfilteredArc.A[1] : null
+  }
+  return filteredArc.A && filteredArc.A.length === 7 ? filteredArc : addMissingADefs(initialString)
 }
 
 function repackArcString (arcObject) {
-  const arcString = `M ${arcObject.M.join(',')} A ${arcObject.A.join(',')}`
+  const arcString = `M ${arcObject.M.join(',').trim()} A ${arcObject.A.join(',').trim()}`
   return arcObject.A2 ? arcString + ` A ${arcObject.A2.join(',')}` : arcString
 }
 
@@ -514,10 +520,11 @@ function tweenArcToArc (contractedArcDatum, contractedBubble, expandedBubble, ea
 
       const rawArcString = interpolatedArcMaker(interpolatedArcDatum)
       const adjustedArcString = adjustArcPath(rawArcString, interpolatedSvgElement)
-      const arcObject = unpackArcString(adjustedArcString)
-      removeA2FromPath(arcObject, interpolatedSvgElement)
-      const arcString = repackArcString(arcObject)
+      const arcObject = unpackArcString(adjustedArcString, true)
 
+      if (arcObject.A2) removeA2FromPath(arcObject, interpolatedSvgElement)
+
+      const arcString = repackArcString(arcObject)
       return arcString
     }
   }
