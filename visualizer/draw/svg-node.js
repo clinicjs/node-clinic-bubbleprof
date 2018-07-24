@@ -125,8 +125,7 @@ class SvgNode {
     } else {
       this.drawOuterPath()
       this.drawNameLabel()
-
-      if (this.drawType === 'labelInCircle') this.drawTimeLabel()
+      this.drawTimeLabel()
 
       this.asyncBetweenLines.draw()
       this.syncBubbles.draw()
@@ -232,11 +231,23 @@ class SvgNode {
 
     const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${this.labelDegrees})`
     this.d3NameLabel.attr('transform', transformString)
+    if (!window.CSS.supports('dominant-baseline', 'middle')) {
+      this.d3NameLabel.attr('dy', 3)
+    }
   }
 
   drawNameLabel () {
-    this.d3TimeLabel.classed('hidden', true)
+    // Set default class states so recalculations on redraw are always in default condition
     this.d3NameLabel.classed('hidden', false)
+    this.d3NameLabel.classed('upper-label', true)
+    this.d3NameLabel.classed('endpoint-label', false)
+    this.d3NameLabel.classed('flipped-label', false)
+    this.d3NameLabel.classed('smaller-label', false)
+    this.d3NameLabel.classed('on-line-label', false)
+    this.d3NameLabel.classed('in-circle-label', false)
+    if (!window.CSS.supports('dominant-baseline', 'middle')) {
+      this.d3NameLabel.attr('dy', 0)
+    }
 
     const nameLabel = formatNameLabel(this.layoutNode.node.name)
     const labelPlusTime = `${nameLabel}–${formatTimeLabel(this.layoutNode.node.stats.overall)}`
@@ -276,10 +287,13 @@ class SvgNode {
         const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge)
 
         if (textAfterTrimToEdge.length > textAfterTrim.length) {
-          this.d3NameLabel.classed('flipped-label', this.flipLabel)
-          this.d3NameLabel.classed('endpoint-label', true)
           this.d3NameLabel.classed('upper-label', false)
+          this.d3NameLabel.classed('endpoint-label', true)
+          this.d3NameLabel.classed('flipped-label', this.flipLabel)
           this.d3NameLabel.classed('smaller-label', this.drawType === 'tiny')
+          if (!window.CSS.supports('dominant-baseline', 'middle')) {
+            this.d3NameLabel.attr('dy', 3)
+          }
 
           const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
           this.d3NameLabel.attr('transform', transformString)
@@ -300,11 +314,7 @@ class SvgNode {
       return
     }
 
-    // Has space and is not a leaf / endpoint - position on line or circle
-    this.d3NameLabel.classed('upper-label', true)
-    this.d3NameLabel.classed('endpoint-label', false)
-    this.d3NameLabel.classed('smaller-label', false)
-    this.d3NameLabel.classed('flipped-label', false)
+    // If not returned yet, has space and is not a leaf/endpoint, so position on line or circle
 
     if (this.drawType === 'labelOnLine') {
       if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
@@ -326,8 +336,7 @@ class SvgNode {
       this.d3NameLabel.attr('transform', transformString)
 
       this.d3NameLabel.classed('on-line-label', true)
-    } else {
-      this.d3NameLabel.classed('on-line-label', false)
+      return
     }
 
     if (this.drawType === 'labelInCircle') {
@@ -347,12 +356,15 @@ class SvgNode {
       this.d3NameLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
       this.d3NameLabel.classed('in-circle-label', true)
-    } else {
-      this.d3NameLabel.classed('in-circle-label', false)
     }
   }
 
   drawTimeLabel () {
+    if (this.drawType !== 'labelInCircle') {
+      this.d3TimeLabel.classed('hidden', true)
+      return
+    }
+
     this.d3TimeLabel.classed('hidden', false)
     this.d3TimeLabel.text(formatTimeLabel(this.layoutNode.node.stats.overall))
 
@@ -364,6 +376,9 @@ class SvgNode {
     this.d3TimeLabel.classed('in-circle-label', true)
     this.d3TimeLabel.classed('on-line-label', false)
     this.d3TimeLabel.classed('lower-label', true)
+    if (!window.CSS.supports('dominant-baseline', 'text-before-edge')) {
+      this.d3TimeLabel.attr('dy', 11)
+    }
   }
 
   drawOuterPath () {
