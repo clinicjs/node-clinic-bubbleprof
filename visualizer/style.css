@@ -318,6 +318,14 @@ main {
   width: 255px;
   margin-left: -25px;
   margin-top: -12px;
+
+  /* Visual gap between label and hover box for neatness, without triggering mouseout */
+  border-top: 4px solid transparent;
+  background: none;
+}
+
+#header .hover-box .block {
+  background: var(--translucent-reverse);
 }
 
 #header .hover-box.hidden {
