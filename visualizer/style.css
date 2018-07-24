@@ -1062,6 +1062,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   font-size: 13pt;
   color: var(--max-contrast);
   font-weight: bold;
+  word-break: break-all;
 }
 
 .hover-box .click-message {
