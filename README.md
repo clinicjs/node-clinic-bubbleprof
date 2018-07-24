@@ -13,7 +13,7 @@ Node.js 8.10.0 and above
 ## Example
 
 ```js
-const ClinicBubbleprof = require('clinic-bubbleprof')
+const ClinicBubbleprof = require('@nearform/bubbleprof')
 const bubbleprof = new ClinicBubbleprof()
 
 bubbleprof.collect(['node', './path-to-script.js'], function (err, filepath) {
@@ -30,7 +30,7 @@ To get started with bubbleprof you might want to take a look at the [examples re
 ## Documentation
 
 ```js
-const ClinicBubbleprof = require('clinic-bubbleprof')
+const ClinicBubbleprof = require('@nearform/bubbleprof')
 const bubbleprof = new ClinicBubbleprof()
 ```
 
