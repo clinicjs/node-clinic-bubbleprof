@@ -8,6 +8,7 @@ class SvgNodeSection {
   constructor (parentContent, settings) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
+    this.layoutNode = parentContent.layoutNode
 
     const {
       dataPosition,
@@ -95,97 +96,132 @@ class SvgNodeElement {
     const dataNode = this.svgNode.layoutNode.node
     const contractedSvgNode = this.ui.parentUI.svgNodeDiagram.svgNodes.get(this.ui.layoutNode.id)
 
-    let nodeWasBetweenInParent
+    const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
+    const contractedSvgLineElement = contractedSvgNode.asyncBetweenLines[dataTypeKey]
+
+    const elementProperties = {
+      isExpanding,
+      contractedSvgNode,
+      parentBubble: contractedSvgNode.syncBubbles[dataTypeKey],
+      overallLength: contractedSvgNode.getLength(),
+      parentBetweenTime: contractedSvgNode.layoutNode.node.getBetweenTime(),
+      parentWithinTime: contractedSvgNode.layoutNode.node.getWithinTime(),
+      expandedOrigin: cloneXY(this.originPoint || this.circleCentre),
+      contractedOrigin: null,
+      nodeWasBetweenInParent: null
+    }
+
     // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
     if (this.constructor.name === 'SvgBubble') {
-      nodeWasBetweenInParent = false
+      elementProperties.nodeWasBetweenInParent = false
     } else {
       switch (dataNode.constructor.name) {
         case 'ShortcutNode':
           // Nothing to animate, so return and skip the rest of this method
           return
         case 'AggregateNode':
-          nodeWasBetweenInParent = dataNode.isBetweenClusters
+          elementProperties.nodeWasBetweenInParent = dataNode.isBetweenClusters
           break
         case 'ArtificialNode':
-          nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
+          elementProperties.nodeWasBetweenInParent = dataNode.contents.some(collapsedDataNode => collapsedDataNode.isBetweenClusters)
           break
         default:
           // Cluster nodes are between cluster nodes by definition
-          nodeWasBetweenInParent = true
+          elementProperties.nodeWasBetweenInParent = true
           break
       }
     }
-    const dataTypeKey = this.dataType === 'typeCategory' ? 'byType' : 'byParty'
 
-    const contractedSvgLineElement = contractedSvgNode.asyncBetweenLines[dataTypeKey]
-    const contractedOrigin = nodeWasBetweenInParent ? cloneXY(contractedSvgLineElement.originPoint) : defaultArcOrigin()
-    const expandedOrigin = cloneXY(this.originPoint || this.circleCentre)
+    elementProperties.contractedOrigin = elementProperties.nodeWasBetweenInParent ? cloneXY(contractedSvgLineElement.originPoint) : defaultArcOrigin()
 
-    const overallLength = contractedSvgNode.getLength()
-    const parentBetweenTime = contractedSvgNode.layoutNode.node.getBetweenTime()
-    const parentWithinTime = contractedSvgNode.layoutNode.node.getWithinTime()
+    const segmentAnimations = []
+    this.d3Shapes.each((segmentDatum, index, nodes) => {
+      const d3LineSegment = d3.select(nodes[index])
+
+      const segmentAnimator = new Promise((resolve) => {
+        this.animateSegment(segmentDatum, d3LineSegment, resolve, elementProperties)
+      }).catch((err) => {
+        err.message += `. For segment ${index}`
+        throw err
+      })
+      segmentAnimations.push(segmentAnimator)
+    })
+
+    svgNodeAnimations.push(Promise.all(segmentAnimations).then(() => {
+      // Apply completed state. e.g. if it is a complete circle, two semi-circle Arcs replace one 359 degree Arc
+      this.draw()
+    }, (err) => {
+      err.message += `. Animating ${this.dataType} ${this.constructor.name} for ${this.svgNode.layoutNode.id}. `
+      throw err
+    }))
+  }
+
+  animateSegment (segmentDatum, d3LineSegment, resolveSegment, elementProperties) {
+    const {
+      isExpanding,
+      contractedSvgNode,
+      parentBubble,
+      overallLength,
+      parentBetweenTime,
+      parentWithinTime,
+      expandedOrigin,
+      contractedOrigin,
+      nodeWasBetweenInParent
+    } = elementProperties
+
     const degrees = contractedSvgNode.degrees
 
-    const parentBubble = contractedSvgNode.syncBubbles[dataTypeKey]
+    const segmentDecimal = this.constructor.name === 'SvgBubble' ? segmentDatum.data[1] : segmentDatum[1]
+    const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'SvgBubble' ? 'getWithinTime' : 'getBetweenTime')]()
+    const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
+    const segmentDecimalOfParentTime = parentTime ? (nodeTime / parentTime) * segmentDecimal : 1
 
-    this.d3Shapes.each((segmentDatum, index, nodes) => {
-      svgNodeAnimations.push(new Promise((resolve, reject) => {
-        const d3LineSegment = d3.select(nodes[index])
+    let contractedPath
+    let arcDatum
+    if (nodeWasBetweenInParent) {
+      contractedPath = getLineUpdatingOrigin(contractedOrigin, degrees, overallLength * segmentDecimalOfParentTime)
+    } else {
+      const arcIncrement = getArcUpdatingAngle(contractedOrigin, segmentDecimalOfParentTime, parentBubble)
+      contractedPath = arcIncrement.arcString
+      arcDatum = arcIncrement.arcDatum
+    }
 
-        const segmentDecimal = this.constructor.name === 'SvgBubble' ? segmentDatum.data[1] : segmentDatum[1]
-        const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'SvgBubble' ? 'getWithinTime' : 'getBetweenTime')]()
-        const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
-        const segmentDecimalOfParentTime = parentTime ? (nodeTime / parentTime) * segmentDecimal : 1
+    let expandedPath
+    if (this.constructor.name === 'SvgBubble') {
+      const arcObject = unpackArcString(adjustArcPath(this.arcMaker(segmentDatum), this))
+      removeA2FromPath(arcObject, this)
+      expandedPath = repackArcString(arcObject)
+    } else {
+      expandedPath = getLineUpdatingOrigin(expandedOrigin, this.degrees, this.length * segmentDatum[1])
+    }
 
-        let contractedPath
-        let arcDatum
-        if (nodeWasBetweenInParent) {
-          contractedPath = getLineUpdatingOrigin(contractedOrigin, degrees, overallLength * segmentDecimalOfParentTime)
-        } else {
-          const arcIncrement = getArcUpdatingAngle(contractedOrigin, segmentDecimalOfParentTime, parentBubble)
-          contractedPath = arcIncrement.arcString
-          arcDatum = arcIncrement.arcDatum
-        }
+    const startPath = isExpanding ? contractedPath : expandedPath
+    const endPath = isExpanding ? expandedPath : contractedPath
 
-        let expandedPath
-        if (this.constructor.name === 'SvgBubble') {
-          const arcObject = unpackArcString(adjustArcPath(this.arcMaker(segmentDatum), this))
-          removeA2FromPath(arcObject, this)
-          expandedPath = repackArcString(arcObject)
-        } else {
-          expandedPath = getLineUpdatingOrigin(expandedOrigin, this.degrees, this.length * segmentDatum[1])
-        }
+    d3LineSegment.attr('d', startPath)
 
-        const startPath = isExpanding ? contractedPath : expandedPath
-        const endPath = isExpanding ? expandedPath : contractedPath
+    const d3Transition = d3LineSegment.transition()
+      .duration(this.ui.settings.animationDuration)
+      .on('end', () => {
+        resolveSegment(segmentDatum)
+      })
 
-        d3LineSegment.attr('d', startPath)
+    if (!nodeWasBetweenInParent && this.constructor.name === 'SvgLine') {
+      const endArc = unpackArcString(endPath)
+      if (endArc) {
+        d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
+        return
+      }
+    }
 
-        const d3Transition = d3LineSegment.transition()
-          .duration(this.ui.settings.animationDuration)
-          .on('end', () => {
-            resolve(segmentDatum)
-          })
+    if (this.constructor.name === 'SvgBubble') {
+      d3Transition.attrTween('d', tweenArcToArc(arcDatum, parentBubble, this, this.ui.settings.animationEasing, isExpanding))
+      return
+    }
 
-        if (!nodeWasBetweenInParent && this.constructor.name === 'SvgLine') {
-          const endArc = unpackArcString(endPath)
-          if (endArc) {
-            d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
-            return
-          }
-        }
-
-        if (this.constructor.name === 'SvgBubble') {
-          d3Transition.attrTween('d', tweenArcToArc(arcDatum, parentBubble, this, this.ui.settings.animationEasing, isExpanding))
-          return
-        }
-
-        d3Transition
-          .ease(this.ui.settings.animationEasing)
-          .attr('d', endPath)
-      }))
-    })
+    d3Transition
+      .ease(this.ui.settings.animationEasing)
+      .attr('d', endPath)
   }
 }
 
