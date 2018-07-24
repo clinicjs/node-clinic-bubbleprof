@@ -102,12 +102,18 @@ html, body {
 
 body {
   background: var(--main-bg-color);
-
   /* To resolve inconsistent browser issues:
    * - Chrome flashes an empty y scrollbar inconstently on some events in sublayouts
    * - Firefox adds an empty x scrollbar to sublayouts */
   overflow-y: scroll;
   overflow-x: hidden;
+}
+
+main#bubbleprof-main {
+  /* MS Edge has a weird display problem where it sometimes resets the body background to white
+   * particularly if dev tools or sometimes settings are open. Unrelated to light/dark theme.
+   * Bug also affects main if no additional selector is provided. Very strange browser bug. */
+  background: var(--main-bg-color);
 }
 
 /* Global Typography */
@@ -362,17 +368,15 @@ main {
 #header .help-link-block {
   position: absolute;
   right: 25px;
-  background: var(--main-bg-translucent)
-  border-radius: 6px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 #header .help-link-block .help-link {
-  padding: 2px 3px;
+  padding: 4px 6px;
   display: block;
   font-weight: bold;
   text-decoration: none;
-  outline: 4px solid var(--banner-bg-color);
+  outline: 2px solid var(--banner-bg-color);
 }
 
 #header .help-link-block .help-link:before {
@@ -401,20 +405,16 @@ main {
   animation-timing-function: ease-in-out;
 }
 
-
+/* :visited can't apply animation-name: none; so use !important to stop animation */
 #header .help-link-block .help-link:visited {
+  color: var(--cyan) !important;
   background-color: var(--main-bg-color) !important;
   outline-color: var(--main-bg-color) !important;
-  color: var(--cyan) !important;
-
-  /* :visited can't apply animation-name: none; */
 }
-
 #header .help-link-block .help-link:visited:after {
-    color: var(--cyan);
-    border-left-color: var(--cyan);
-    border-bottom-color: var(--cyan);
-  /* :visited can't apply animation-name: none; */
+  color: var(--cyan) !important;
+  border-left-color: var(--cyan) !important;
+  border-bottom-color: var(--cyan) !important;
 }
 
 @keyframes pulseLink {
@@ -733,6 +733,7 @@ svg.bubbleprof .node-group .time-label {
 }
 
 svg.bubbleprof .node-group .lower-label {
+  /* On browsers without dominant-baseline, e.g. MS Edge, JS applies dy attr */
   dominant-baseline: text-before-edge;
 }
 
@@ -759,6 +760,7 @@ svg.bubbleprof .node-group .inner-circle {
 
 svg.bubbleprof.fade-elements-in .outer-path,
 svg.bubbleprof.fade-elements-in .text-label,
+svg.bubbleprof.fade-elements-in .inner-circle,
 svg.bubbleprof.complete-fade-in {
   animation-duration: var(--transition-duration);
   animation-fill-mode: forwards;
@@ -768,6 +770,7 @@ svg.bubbleprof.complete-fade-in {
 
 svg.bubbleprof.fade-elements-out .outer-path,
 svg.bubbleprof.fade-elements-out .text-label,
+svg.bubbleprof.fade-elements-out .inner-circle,
 svg.bubbleprof.complete-fade-out {
   animation-duration: var(--transition-duration);
   animation-fill-mode: forwards;
@@ -1076,6 +1079,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   font-size: 13pt;
   color: var(--max-contrast);
   font-weight: bold;
+  word-break: break-all;
 }
 
 .hover-box .click-message {
