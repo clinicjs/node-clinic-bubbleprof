@@ -326,6 +326,7 @@ main {
 
 #header .hover-box .block {
   background: var(--translucent-reverse);
+  cursor: default;
 }
 
 #header .hover-box.hidden {
@@ -1034,7 +1035,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
 }
 
 .hover-box .title-block {
-  cursor: pointer;
   position: relative;
 }
 
@@ -1133,6 +1133,10 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   border-bottom: none;
   bottom: 0;
   margin-bottom: -9px;
+}
+
+#node-link .hover-box .title-block {
+  cursor: pointer;
 }
 
 /* Lookup box for text-based searches */
