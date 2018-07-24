@@ -445,6 +445,7 @@ class BubbleprofUI extends EventEmitter {
     d3Body.attr('data-view-mode', this.settings.viewMode)
 
     this.mainContainer.d3Element = d3Main.size() ? d3Main : d3Body.append('main')
+      .attr('id', 'bubbleprof-main')
     this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
 
     // TODO: try replacing with .emit('initializeElements')
