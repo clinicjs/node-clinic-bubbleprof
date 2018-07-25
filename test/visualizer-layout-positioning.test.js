@@ -246,9 +246,14 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
+
+  const keys = [...layout.layoutNodes.keys()]
+  t.deepEqual([ 1, 'x2', 11, 'x', 5, 7, 9, 10, 12 ], keys)
+  t.deepEqual([ 4, 6 ], layout.layoutNodes.get('x').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([ 2, 3, 8 ], layout.layoutNodes.get('x2').collapsedNodes.map(layoutNode => layoutNode.id))
+
   // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 8].every(c => ('' + key).includes(c)))
-  t.ok(clumpId)
+  // const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 8].every(c => ('' + key).includes(c)))
   const positioning = layout.positioning
   positioning.formClumpPyramid()
 
@@ -257,10 +262,10 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
 
   const expectedClumpedTopology = [
     ['1.12', 50],
-    ['1.clump:C2,C3,C8.clump:C4,C6.5', 400],
-    ['1.clump:C2,C3,C8.clump:C4,C6.7', 250],
-    ['1.clump:C2,C3,C8.9.10', 200],
-    ['1.clump:C2,C3,C8.11', 100]
+    ['1.x2.x.5', 400],
+    ['1.x2.x.7', 250],
+    ['1.x2.9.10', 200],
+    ['1.x2.11', 100]
   ]
   const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
   t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => `${layoutNode.id}`), expectedSortedIds)
@@ -281,19 +286,22 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   const dataSet = loadData({ debugMode: true }, mockTopology(topology))
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] })
   layout.processHierarchy({ collapseNodes: true })
-  // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 8, 12].every(c => ('' + key).includes(c)))
-  t.ok(clumpId)
+
+  const keys = [...layout.layoutNodes.keys()]
+  t.deepEqual([ 1, 'x3', 11, 'x', 5, 7, 9, 10 ], keys)
+  t.deepEqual([ 4, 6 ], layout.layoutNodes.get('x').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([ 2, 12, 3, 8 ], layout.layoutNodes.get('x3').collapsedNodes.map(layoutNode => layoutNode.id))
+
   const positioning = layout.positioning
   positioning.formClumpPyramid()
 
   t.deepEqual(positioning.order, [5, 7, 10, 11])
 
   const expectedClumpedTopology = [
-    ['1.clump:C2,C3,C8,C12.clump:C4,C6.5', 401],
-    ['1.clump:C2,C3,C8,C12.clump:C4,C6.7', 250],
-    ['1.clump:C2,C3,C8,C12.9.10', 200],
-    ['1.clump:C2,C3,C8,C12.11', 100]
+    ['1.x3.x.5', 401],
+    ['1.x3.x.7', 250],
+    ['1.x3.9.10', 200],
+    ['1.x3.11', 100]
   ]
 
   const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
