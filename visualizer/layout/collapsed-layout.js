@@ -7,6 +7,8 @@ const _ = {
 const { ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 
+const { uniqueMapKey } = require('../validation.js')
+
 class CollapsedLayout {
   constructor (layout) {
     this.uncollapsedLayout = layout
@@ -171,7 +173,9 @@ class CollapsedLayout {
     const squashNodes = squashNode.collapsedNodes ? [...squashNode.collapsedNodes] : [squashNode]
 
     const collapsedNodes = hostNodes.concat(squashNodes).sort(this.uncollapsedLayout.getLayoutNodeSorter())
-    const collapsed = new CollapsedLayoutNode(collapsedNodes, parent, children)
+
+    const collapsedId = uniqueMapKey('x', this.layoutNodes, '')
+    const collapsed = new CollapsedLayoutNode(collapsedId, collapsedNodes, parent, children)
 
     // Update refs
     ejectLayoutNode(parent, hostNode)

@@ -36,19 +36,19 @@ function validateNumber (num, targetDescription = '', conditions = {}) {
   return num
 }
 
-function uniqueMapKey (key, map) {
+function uniqueMapKey (key, map, separator) {
   const test = (key) => !map.has(key)
-  return incrementKeyUntilUnique(key, 0, test)
+  return incrementKeyUntilUnique(key, 0, test, separator)
 }
 
-function uniqueObjectKey (key, object) {
+function uniqueObjectKey (key, object, separator) {
   const test = (key) => typeof object[key] === 'undefined'
-  return incrementKeyUntilUnique(key, 0, test)
+  return incrementKeyUntilUnique(key, 0, test, separator)
 }
 
-function incrementKeyUntilUnique (key, counter, test) {
-  const testKey = counter ? `${key}_${counter}` : key
-  return test(testKey) ? testKey : incrementKeyUntilUnique(key, counter + 1, test)
+function incrementKeyUntilUnique (key, counter, test, separator = '_') {
+  const testKey = counter ? `${key}${separator}${counter}` : key
+  return test(testKey) ? testKey : incrementKeyUntilUnique(key, counter + 1, test, separator)
 }
 
 module.exports = {
