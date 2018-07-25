@@ -18,7 +18,8 @@ class Layout {
       svgWidth: 750,
       svgHeight: 750,
       shortcutLength: 60,
-      allowStretch: true
+      allowStretch: true,
+      debugMode: false
     }
     this.settings = Object.assign(defaultSettings, settings)
     this.initialInput = {
