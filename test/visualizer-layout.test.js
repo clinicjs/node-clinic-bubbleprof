@@ -27,20 +27,24 @@ function toTypeId (layoutNode) {
   return layoutNode.node.constructor.name + '-' + layoutNode.id
 }
 
-const settings = {
+const dataSettings = {
+  debugMode: true
+}
+
+const settings = Object.assign({
   svgWidth: 1000,
   svgHeight: 1000,
   labelMinimumSpace: 0,
   lineWidth: 0,
   svgDistanceFromEdge: 30,
   collapseNodes: true
-}
+}, dataSettings)
 
 test('Visualizer layout - builds sublayout from connection', function (t) {
   const topology = [
     ['1.2.3.4.5', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const initialDataNodes = [...dataSet.clusterNodes.values()]
   const uncollapsedSettings = Object.assign({ collapseNodes: false }, settings)
   const initialLayout = new Layout({ dataNodes: initialDataNodes }, uncollapsedSettings)
@@ -62,7 +66,7 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   const topology = [
     ['1.2.3.4.5', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   const layout = new Layout({ dataNodes }, settings)
@@ -86,7 +90,7 @@ test('Visualizer layout - collapse - does not collapse shortcut nodes', function
     ['1.2.4', 1],
     ['1.2.5', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const initialDataNodes = [...dataSet.clusterNodes.values()]
   const initialLayout = new Layout({ dataNodes: initialDataNodes }, settings)
   initialLayout.processHierarchy()
@@ -104,7 +108,7 @@ test('Visualizer layout - collapse - merges shortcuts pointing to the same view'
     ['1.2.3.6.7', 1],
     ['1.2.3.8.9', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const initialDataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(2).stats.async.between = 100 // make 2 long
   dataSet.clusterNodes.get(3).stats.async.between = 100 // make 3 long
@@ -131,7 +135,7 @@ test('Visualizer layout - collapse - collapses vertically with break (except roo
   const topology = [
     ['1.2.3.4.5.6.7.8.9', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   dataSet.clusterNodes.get(5).stats.async.between = 100 // make 5 long
@@ -156,7 +160,7 @@ test('Visualizer layout - collapse - collapses vertically until minimum count th
     ['1.2.3.4.5', 1],
     ['1.2.3.4.6', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1000 // make root long
   const layout = new Layout({ dataNodes }, settings)
@@ -187,7 +191,7 @@ test('Visualizer layout - collapse - collapses horizontally', function (t) {
     ['1.2.5.6', 100],
     ['1.2.7.8', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(2).stats.async.between = 100 // make 2 long
   dataSet.clusterNodes.get(5).stats.async.between = 100 // make 5 long
@@ -217,7 +221,7 @@ test('Visualizer layout - collapse - collapses both horizontally and vertically 
     ['1.2.3.4.5', 100],
     ['1.2.6.7.8', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   const layout = new Layout({ dataNodes }, settings)
@@ -245,7 +249,7 @@ test('Visualizer layout - collapse - vertically collapses subset with missing ro
     ['1.2.3.4.5.6', 100],
     ['1.7.8.9.10', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   dataSet.clusterNodes.get(9).stats.async.within = 100 // make 9 long
   const subset = [2, 3, 4, 5, 6, 7, 8, 9, 10].map(nodeId => dataSet.clusterNodes.get(nodeId))
   const layout = new Layout({ dataNodes: subset }, settings)
@@ -277,7 +281,7 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
     ['1.2.3.4.5', 100],
     ['1.2.6.7.8', 100]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   dataSet.clusterNodes.get(7).stats.async.between = 100 // make 7 long
   const subset = [1, 2, 3, 4, 6, 7].map(nodeId => dataSet.clusterNodes.get(nodeId))
@@ -317,7 +321,7 @@ test('Visualizer layout - collapse - complex example', function (t) {
     ['1.3.10.11', 1],
     ['1.3.10.12.13', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const dataNodes = [...dataSet.clusterNodes.values()]
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   dataSet.clusterNodes.get(2).stats.async.within = 100 // make 2 long
