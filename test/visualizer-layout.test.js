@@ -75,7 +75,7 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => x', 'x => 4', '4 => 5', '5 => '])
+  t.deepEqual(actualAfter, ['1 => x1', 'x1 => 4', '4 => 5', '5 => '])
 
   t.end()
 })
@@ -114,14 +114,14 @@ test('Visualizer layout - collapse - merges shortcuts pointing to the same view'
   const initialLayout = new Layout({ dataNodes: initialDataNodes }, settings)
   initialLayout.processHierarchy()
   let toValidLink = createLinkValidator(initialLayout)
-  t.deepEqual([...initialLayout.layoutNodes.values()].map(toTypeId), ['ClusterNode-1', 'ClusterNode-2', 'ClusterNode-3', 'ArtificialNode-x1', 'ClusterNode-5', 'ClusterNode-7', 'ClusterNode-9'])
-  t.deepEqual([...initialLayout.layoutNodes.values()].map(toValidLink), ['1 => 2', '2 => 3', '3 => x1', 'x1 => 5;7;9', '5 => ', '7 => ', '9 => '])
+  t.deepEqual([...initialLayout.layoutNodes.values()].map(toTypeId), ['ClusterNode-1', 'ClusterNode-2', 'ClusterNode-3', 'ArtificialNode-x2', 'ClusterNode-5', 'ClusterNode-7', 'ClusterNode-9'])
+  t.deepEqual([...initialLayout.layoutNodes.values()].map(toValidLink), ['1 => 2', '2 => 3', '3 => x2', 'x2 => 5;7;9', '5 => ', '7 => ', '9 => '])
   const traversedLayoutNode = initialLayout.layoutNodes.get(3)
   const traversedLayout = initialLayout.createSubLayout(traversedLayoutNode, settings)
   traversedLayout.processHierarchy()
   toValidLink = createLinkValidator(traversedLayout)
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-shortcut:2', 'AggregateNode-3', 'ShortcutNode-shortcut:x1'])
-  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['shortcut:2 => 3', '3 => shortcut:x1', 'shortcut:x1 => '])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-shortcut:2', 'AggregateNode-3', 'ShortcutNode-shortcut:x2'])
+  t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['shortcut:2 => 3', '3 => shortcut:x2', 'shortcut:x2 => '])
 
   t.end()
 })
@@ -145,7 +145,7 @@ test('Visualizer layout - collapse - collapses vertically with break (except roo
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => x1', 'x1 => 4', '4 => 5', '5 => x', 'x => 8', '8 => 9', '9 => '])
+  t.deepEqual(actualAfter, ['1 => x2', 'x2 => 4', '4 => 5', '5 => x1', 'x1 => 8', '8 => 9', '9 => '])
 
   t.end()
 })
@@ -169,7 +169,7 @@ test('Visualizer layout - collapse - collapses vertically until minimum count th
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => 2', '2 => x', 'x => '])
+  t.deepEqual(actualAfter, ['1 => 2', '2 => x1', 'x1 => '])
 
   t.end()
 })
@@ -201,7 +201,7 @@ test('Visualizer layout - collapse - collapses horizontally', function (t) {
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => 2', '2 => x;5', 'x => 4;8', '4 => ', '8 => ', '5 => 6', '6 => '])
+  t.deepEqual(actualAfter, ['1 => 2', '2 => x1;5', 'x1 => 4;8', '4 => ', '8 => ', '5 => 6', '6 => '])
 
   t.end()
 })
@@ -230,7 +230,7 @@ test('Visualizer layout - collapse - collapses both horizontally and vertically 
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => x1', 'x1 => 4;7', '4 => 5', '5 => ', '7 => 8', '8 => '])
+  t.deepEqual(actualAfter, ['1 => x2', 'x2 => 4;7', '4 => 5', '5 => ', '7 => 8', '8 => '])
 
   t.end()
 })
@@ -262,8 +262,8 @@ test('Visualizer layout - collapse - vertically collapses subset with missing ro
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   const sortedAfter = layout.getSortedLayoutNodes().map(toValidLink)
-  t.deepEqual(actualAfter, ['2 => x', 'x => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
-  t.deepEqual(sortedAfter, ['2 => x', '7 => 8', 'x => 5', '8 => 9', '5 => 6', '9 => 10', '6 => ', '10 => '])
+  t.deepEqual(actualAfter, ['2 => x1', 'x1 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
+  t.deepEqual(sortedAfter, ['2 => x1', '7 => 8', 'x1 => 5', '8 => 9', '5 => 6', '9 => 10', '6 => ', '10 => '])
 
   t.end()
 })
@@ -291,7 +291,7 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => 2', '2 => x1', 'x1 => 7', '7 => '])
+  t.deepEqual(actualAfter, ['1 => 2', '2 => x2', 'x2 => 7', '7 => '])
 
   t.end()
 })
@@ -333,7 +333,7 @@ test('Visualizer layout - collapse - complex example', function (t) {
   layout.processBetweenData()
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
-  t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => x2;10', 'x2 => ', '10 => x1', 'x1 => '])
+  t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => x3;10', 'x3 => ', '10 => x2', 'x2 => '])
 
   t.end()
 })

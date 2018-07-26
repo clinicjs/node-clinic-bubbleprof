@@ -174,7 +174,7 @@ class CollapsedLayout {
 
     const collapsedNodes = hostNodes.concat(squashNodes).sort(this.uncollapsedLayout.getLayoutNodeSorter())
 
-    const collapsedId = uniqueMapKey('x', this.layoutNodes, '')
+    const collapsedId = uniqueMapKey('x', this.layoutNodes, '', 1)
     const collapsed = new CollapsedLayoutNode(collapsedId, collapsedNodes, parent, children)
 
     // Update refs
