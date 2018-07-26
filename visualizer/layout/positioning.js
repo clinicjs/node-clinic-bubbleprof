@@ -19,8 +19,9 @@ class Positioning {
     this.order = clumpPyramid.order
   }
   placeNodes () {
-    this.nodeAllocation = new NodeAllocation(this.layout, this.layoutNodes)
-    this.nodeAllocation.process()
+    const nodeAllocation = new NodeAllocation(this.layout, this.layoutNodes)
+    nodeAllocation.process()
+    if (this.layout.settings.debugMode) this.nodeAllocation = nodeAllocation
   }
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
