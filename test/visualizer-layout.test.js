@@ -126,6 +126,7 @@ test('Visualizer layout - collapse - merges shortcuts pointing to the same view'
   toValidLink = createLinkValidator(traversedLayout)
   t.deepEqual([...traversedLayout.layoutNodes.values()].map(toTypeId), ['ShortcutNode-shortcut:2', 'AggregateNode-3', 'ShortcutNode-shortcut:x2'])
   t.deepEqual([...traversedLayout.layoutNodes.values()].map(toValidLink), ['shortcut:2 => 3', '3 => shortcut:x2', 'shortcut:x2 => '])
+  t.ok(initialLayout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
 })
@@ -235,6 +236,7 @@ test('Visualizer layout - collapse - collapses both horizontally and vertically 
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => x2', 'x2 => 4;7', '4 => 5', '5 => ', '7 => 8', '8 => '])
+  t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
 })
@@ -296,6 +298,7 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => x2', 'x2 => 7', '7 => '])
+  t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
 })
@@ -338,6 +341,7 @@ test('Visualizer layout - collapse - complex example', function (t) {
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => x3;10', 'x3 => ', '10 => x2', 'x2 => '])
+  t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
 })

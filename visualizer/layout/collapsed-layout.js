@@ -18,6 +18,9 @@ class CollapsedLayout {
     this.scale = layout.scale
     this.minimumNodes = 3
 
+    // If debugging, expose one pool of ejected node IDs that is added to each time this class is initialized
+    if (layout.settings.debugMode && !layout.ejectedLayoutNodeIds) layout.ejectedLayoutNodeIds = []
+
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
     // e.g. we could attach .topNodes or some iterator to Layout instances
     this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
@@ -179,8 +182,13 @@ class CollapsedLayout {
 
     // Update refs
     ejectLayoutNode(parent, hostNode)
+    if (this.uncollapsedLayout.settings.debugMode) this.uncollapsedLayout.ejectedLayoutNodeIds.push(hostNode.id)
+
     ejectLayoutNode(parent, squashNode)
+    if (this.uncollapsedLayout.settings.debugMode) this.uncollapsedLayout.ejectedLayoutNodeIds.push(squashNode.id)
+
     insertLayoutNode(this.layoutNodes, parent, collapsed)
+
     // Update indices
     this.layoutNodes.set(collapsed.id, collapsed)
     this.layoutNodes.delete(hostNode.id)

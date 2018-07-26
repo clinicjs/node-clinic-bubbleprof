@@ -272,6 +272,8 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
   t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => `${layoutNode.id}`), expectedSortedIds)
 
+  t.ok(layout.ejectedLayoutNodeIds.includes('x2'))
+
   t.end()
 })
 
@@ -308,6 +310,9 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
 
   const expectedSortedIds = topologyToSortedIds(expectedClumpedTopology, false)
   t.deepEqual(layout.getSortedLayoutNodes().map(layoutNode => `${layoutNode.id}`), expectedSortedIds)
+
+  t.ok(layout.ejectedLayoutNodeIds.includes('x2'))
+  t.ok(layout.ejectedLayoutNodeIds.includes('x3'))
 
   t.end()
 })
