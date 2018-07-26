@@ -10,7 +10,12 @@ const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
 const svgWidth = 1000
 const svgHeight = 1000
-const settings = {
+
+const dataSettings = {
+  debugMode: true
+}
+
+const settings = Object.assign({
   svgWidth,
   svgHeight,
   labelMinimumSpace: 0,
@@ -18,7 +23,7 @@ const settings = {
   svgDistanceFromEdge: 30,
   allowStretch: true,
   collapseNodes: false
-}
+}, dataSettings)
 
 test('Visualizer layout - scale - calculates prescale based on longest', function (t) {
   const topology = [
@@ -26,7 +31,7 @@ test('Visualizer layout - scale - calculates prescale based on longest', functio
     ['1.5', svgHeight / 2],
     ['1.2.6', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.ok(layout.scale.prescaleFactor < 2.00 && layout.scale.prescaleFactor > 1.99)
@@ -38,7 +43,7 @@ test('Visualizer layout - scale - calculates scalable line length', function (t)
   const topology = [
     ['1.2', svgHeight]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.ok(isNumber(layout.scale.scaleFactor))
@@ -52,7 +57,7 @@ test('Visualizer layout - scale - calculates scalable circle radius based on len
   const topology = [
     ['1.2', svgHeight]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.ok(isNumber(layout.scale.scaleFactor))
@@ -67,7 +72,7 @@ test('Visualizer layout - scale - demagnifies large shortest', function (t) {
     ['1.2', svgWidth],
     ['1.3', svgWidth * 0.9]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'shortest')
@@ -80,7 +85,7 @@ test('Visualizer layout - scale - demagnifies large longest and stretches height
   const topology = [
     ['1.2.3.4.5.6.7', svgHeight * 3]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
@@ -94,7 +99,7 @@ test('Visualizer layout - scale - folds small layouts', function (t) {
   const topology = [
     ['1.2', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   const nodesCount = 2
@@ -110,7 +115,7 @@ test('Visualizer layout - scale - constrained longest superseeds other weights',
     ['1.6', svgWidth * 1.51],
     ['1.7', svgWidth * 1.5]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
 
@@ -130,7 +135,7 @@ test('Visualizer layout - scale - constrained longest superseeds other weights (
     ['1.6', svgWidth * 0.5],
     ['1.7', svgWidth * 0.5]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
 
@@ -147,7 +152,7 @@ test('Visualizer layout - scale - demagnifies large diameter (width)', function 
   const topology = [
     ['1.2.3.4.5', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.layoutNodes.get(2).stem.raw.ownDiameter = svgWidth
   layout.updateScale()
@@ -161,7 +166,7 @@ test('Visualizer layout - scale - demagnifies large diameter (height)', function
   const topology = [
     ['1.2.3.4.5.6.7', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const inputHeight = (250 + 30 + 30) * (1 / 1.5)
   const layout = generateLayout(dataSet, Object.assign({}, settings, { svgHeight: inputHeight }))
   layout.layoutNodes.get(2).stem.raw.ownDiameter = 500
@@ -178,7 +183,7 @@ test('Visualizer layout - scale - demagnifies large q50', function (t) {
     ['1.2', (svgWidth / 0.71) + 10],
     ['1.4', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'q50 1-1-sqrt(2) triangle')
@@ -194,7 +199,7 @@ test('Visualizer layout - scale - demagnifies large q25', function (t) {
     ['1.4', (svgWidth / 0.8) + 10],
     ['1.5', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'q25 4-3-5 triangle')
@@ -211,7 +216,7 @@ test('Visualizer layout - scale - demagnifies large q75', function (t) {
     ['1.4', 1],
     ['1.6', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'q75 3-4-5 triangle')
@@ -224,7 +229,7 @@ test('Visualizer layout - scale - magnifies tiny longest', function (t) {
   const topology = [
     ['1.2.3.4.5', svgHeight / 2]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
@@ -245,9 +250,9 @@ test('Visualizer layout - scale - can handle subsets', function (t) {
     ['1.2.3.4.5.18', svgWidth * 0.34]
   ]
 
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const subset = [...dataSet.clusterNodes.values()].filter(node => node.id !== 1 && node.id !== 2)
-  const layout = new Layout({ dataNodes: subset })
+  const layout = new Layout({ dataNodes: subset }, dataSettings)
   layout.generate()
 
   t.ok(layout.scale.scaleFactor < 0.33 && layout.scale.scaleFactor > 0.32)
@@ -259,7 +264,7 @@ test('Visualizer layout - scale - demagnifies when absolutes exceed available sp
   const topology = [
     ['1.2.3.4.5.6.7.8.9.10.11', 1]
   ]
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, { svgWidth: 100, svgHeight: 100, svgDistanceFromEdge: 5, labelMinimumSpace: 20, lineWidth: 30, collapseNodes: false })
   layout.updateScale()
   t.equal(layout.scale.decisiveWeight.category, 'longest')
@@ -276,7 +281,7 @@ test('Visualizer layout - scale - can handle zero-sized nodes', function (t) {
     ['1.4', 1]
   ]
 
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.layoutNodes.get(1).stem.raw.ownDiameter = 0
   layout.layoutNodes.get(2).stem.lengths.scalable = 0
@@ -294,7 +299,7 @@ test('Visualizer layout - scale - can handle zero-sized views', function (t) {
     ['1.4', 0]
   ]
 
-  const dataSet = loadData({ debugMode: true }, mockTopology(topology))
+  const dataSet = loadData(dataSettings, mockTopology(topology))
   const layout = generateLayout(dataSet, settings)
   layout.layoutNodes.get(1).stem.raw.ownDiameter = 0
   layout.layoutNodes.get(2).stem.lengths.scalable = 0

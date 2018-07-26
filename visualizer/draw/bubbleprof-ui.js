@@ -85,6 +85,8 @@ class BubbleprofUI extends EventEmitter {
 
   getSettingsForLayout () {
     const settings = {}
+    if (this.dataSet && this.dataSet.settings.debugMode) settings.debugMode = true
+
     switch (this.settings.viewMode) {
       case 'fit':
       case 'maximised':
