@@ -80,6 +80,7 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => x1', 'x1 => 4', '4 => 5', '5 => '])
+  t.deepEqual([ 2, 3 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
 
   t.end()
 })
@@ -151,6 +152,8 @@ test('Visualizer layout - collapse - collapses vertically with break (except roo
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => x2', 'x2 => 4', '4 => 5', '5 => x1', 'x1 => 8', '8 => 9', '9 => '])
+  t.deepEqual([ 6, 7 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([ 2, 3 ], layout.layoutNodes.get('x2').collapsedNodes.map(layoutNode => layoutNode.id))
 
   t.end()
 })
@@ -175,6 +178,7 @@ test('Visualizer layout - collapse - collapses vertically until minimum count th
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => x1', 'x1 => '])
+  t.deepEqual([ 3, 4, 5, 6 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
 
   t.end()
 })
@@ -207,6 +211,7 @@ test('Visualizer layout - collapse - collapses horizontally', function (t) {
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => x1;5', 'x1 => 4;8', '4 => ', '8 => ', '5 => 6', '6 => '])
+  t.deepEqual([ 3, 7 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
 
   t.end()
 })
@@ -236,6 +241,8 @@ test('Visualizer layout - collapse - collapses both horizontally and vertically 
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => x2', 'x2 => 4;7', '4 => 5', '5 => ', '7 => 8', '8 => '])
+  t.deepEqual([ 2, 3, 6 ], layout.layoutNodes.get('x2').collapsedNodes.map(layoutNode => layoutNode.id))
+
   t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
@@ -270,6 +277,7 @@ test('Visualizer layout - collapse - vertically collapses subset with missing ro
   const sortedAfter = layout.getSortedLayoutNodes().map(toValidLink)
   t.deepEqual(actualAfter, ['2 => x1', 'x1 => 5', '5 => 6', '6 => ', '7 => 8', '8 => 9', '9 => 10', '10 => '])
   t.deepEqual(sortedAfter, ['2 => x1', '7 => 8', 'x1 => 5', '8 => 9', '5 => 6', '9 => 10', '6 => ', '10 => '])
+  t.deepEqual([ 3, 4 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
 
   t.end()
 })
@@ -286,7 +294,7 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
   const dataSet = loadData(dataSettings, mockTopology(topology))
   dataSet.clusterNodes.get(1).stats.async.within = 1 // make root short
   dataSet.clusterNodes.get(7).stats.async.between = 100 // make 7 long
-  const subset = [1, 2, 3, 4, 6, 7].map(nodeId => dataSet.clusterNodes.get(nodeId))
+  const subset = [1, 2, 3, 4, 6, 7].map(nodeId => dataSet.clusterNodes.get(nodeId)) // drop 5 and 8
   const layout = new Layout({ dataNodes: subset }, settings)
   layout.processBetweenData()
   layout.updateScale()
@@ -298,6 +306,7 @@ test('Visualizer layout - collapse - collapses subset both vertically and horizo
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2', '2 => x2', 'x2 => 7', '7 => '])
+  t.deepEqual([ 3, 6, 4 ], layout.layoutNodes.get('x2').collapsedNodes.map(layoutNode => layoutNode.id))
   t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
@@ -341,6 +350,9 @@ test('Visualizer layout - collapse - complex example', function (t) {
   layout.updateScale()
   const actualAfter = [...layout.layoutNodes.values()].map(toValidLink)
   t.deepEqual(actualAfter, ['1 => 2;3', '2 => ', '3 => x3;10', 'x3 => ', '10 => x2', 'x2 => '])
+  t.deepEqual([ 11, 12, 13 ], layout.layoutNodes.get('x2').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([ 4, 5, 7, 6, 8, 9 ], layout.layoutNodes.get('x3').collapsedNodes.map(layoutNode => layoutNode.id))
+
   t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
 
   t.end()
