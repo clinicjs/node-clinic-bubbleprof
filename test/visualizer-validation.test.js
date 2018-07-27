@@ -79,6 +79,12 @@ test('Visualizer validation - uniqueMapKey', function (t) {
   t.equals(uniqueMapKey(objectKey, testMap), '[object Object]_1')
   t.equals(uniqueMapKey(objectKey2, testMap), objectKey2)
 
+  t.equals(uniqueMapKey('a', testMap, '', 1), 'a1')
+  t.equals(uniqueMapKey('b', testMap, '_', 1), 'b_2')
+  t.equals(uniqueMapKey('b', testMap, '_', 2), 'b_2')
+  t.equals(uniqueMapKey('b', testMap, '_', 3), 'b_3')
+  t.equals(uniqueMapKey('c', testMap, '--', 1), 'c--1')
+
   testMap.set(uniqueMapKey('a', testMap), 6)
   t.equals(uniqueMapKey('a', testMap), 'a_2')
 
@@ -99,6 +105,12 @@ test('Visualizer validation - uniqueObjectKey', function (t) {
   t.equals(uniqueObjectKey('a', testObject), 'a_1')
   t.equals(uniqueObjectKey('b', testObject), 'b_2')
   t.equals(uniqueObjectKey(99, testObject), '99_1')
+
+  t.equals(uniqueObjectKey('a', testObject, '', 1), 'a1')
+  t.equals(uniqueObjectKey('b', testObject, '_', 1), 'b_2')
+  t.equals(uniqueObjectKey('b', testObject, '_', 2), 'b_2')
+  t.equals(uniqueObjectKey('b', testObject, '_', 3), 'b_3')
+  t.equals(uniqueObjectKey('c', testObject, '--', 1), 'c--1')
 
   testObject[uniqueObjectKey('a', testObject)] = 5
   t.equals(uniqueObjectKey('a', testObject), 'a_2')

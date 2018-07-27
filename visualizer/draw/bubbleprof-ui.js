@@ -360,43 +360,39 @@ class BubbleprofUI extends EventEmitter {
   }
 
   generateCollapsedNodeHash (uiWithinCollapsedNode) {
-    let hash = `l${uiWithinCollapsedNode.layoutNode.id}|`
+    let hashString = uiWithinCollapsedNode.layoutNode.id
     const appendParentNode = (parentUI) => {
-      if (!parentUI.layoutNode) {
-        hash += 'm'
-      } else {
+      if (parentUI.layoutNode) {
         const dataNode = parentUI.layoutNode.node
         switch (dataNode.constructor.name) {
           case 'ClusterNode':
-            hash += 'c' + dataNode.clusterId
+            hashString += '-c' + dataNode.clusterId
             break
           case 'ArtificialNode':
-            hash += `l${parentUI.layoutNode.id}|`
+            hashString += `-${parentUI.layoutNode.id}`
             appendParentNode(parentUI.parentUI)
             break
         }
       }
     }
     appendParentNode(uiWithinCollapsedNode.parentUI)
-    return hash
+    return hashString
   }
 
   parseCollapsedNodeHash () {
-    const nodeIds = window.location.hash.slice(1).split('|')
-    const lastNodeId = nodeIds.pop()
-    let targetUI
-    if (lastNodeId === 'm') {
-      targetUI = this
-    } else {
-      const clusterId = parseInt(lastNodeId.slice(1))
-      const clusterNode = this.dataSet.clusterNodes.get(clusterId)
-      targetUI = this.jumpToNode(clusterNode)
-    }
+    const nodeIds = window.location.hash.slice(1).split('-')
+    let targetUI = this
 
     for (var i = nodeIds.length - 1; i >= 0; i--) {
-      const layoutNodeId = nodeIds[i].slice(1)
-      const layoutNode = targetUI.layout.layoutNodes.get(layoutNodeId)
-      targetUI = targetUI.selectNode(layoutNode)
+      const nodeId = nodeIds[i]
+      if (nodeId.charAt(0) === 'x') {
+        const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
+        targetUI = targetUI.selectNode(layoutNode)
+      } else {
+        const clusterId = parseInt(nodeId.slice(1))
+        const clusterNode = this.dataSet.clusterNodes.get(clusterId)
+        targetUI = targetUI.jumpToNode(clusterNode)
+      }
     }
     this.emit('navigation', { from: this, to: targetUI })
   }
@@ -584,7 +580,7 @@ class BubbleprofUI extends EventEmitter {
             const uiWithinCluster = this.jumpToNode(clusterNode)
             this.emit('navigation', { from: this, to: uiWithinCluster })
             break
-          case 'l':
+          case 'x':
             this.parseCollapsedNodeHash(window.location.hash)
             break
         }

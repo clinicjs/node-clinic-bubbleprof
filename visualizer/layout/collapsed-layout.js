@@ -7,6 +7,8 @@ const _ = {
 const { ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 
+const { uniqueMapKey } = require('../validation.js')
+
 class CollapsedLayout {
   constructor (layout) {
     this.uncollapsedLayout = layout
@@ -15,6 +17,9 @@ class CollapsedLayout {
     this.layoutNodes = new Map([...layout.layoutNodes])
     this.scale = layout.scale
     this.minimumNodes = 3
+
+    // If debugging, expose one pool of ejected node IDs that is added to each time this class is initialized
+    if (layout.settings.debugMode && !layout.ejectedLayoutNodeIds) layout.ejectedLayoutNodeIds = []
 
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
     // e.g. we could attach .topNodes or some iterator to Layout instances
@@ -171,12 +176,19 @@ class CollapsedLayout {
     const squashNodes = squashNode.collapsedNodes ? [...squashNode.collapsedNodes] : [squashNode]
 
     const collapsedNodes = hostNodes.concat(squashNodes).sort(this.uncollapsedLayout.getLayoutNodeSorter())
-    const collapsed = new CollapsedLayoutNode(collapsedNodes, parent, children)
+
+    const collapsedId = uniqueMapKey('x', this.layoutNodes, '', 1)
+    const collapsed = new CollapsedLayoutNode(collapsedId, collapsedNodes, parent, children)
 
     // Update refs
     ejectLayoutNode(parent, hostNode)
+    if (this.uncollapsedLayout.settings.debugMode) this.uncollapsedLayout.ejectedLayoutNodeIds.push(hostNode.id)
+
     ejectLayoutNode(parent, squashNode)
+    if (this.uncollapsedLayout.settings.debugMode) this.uncollapsedLayout.ejectedLayoutNodeIds.push(squashNode.id)
+
     insertLayoutNode(this.layoutNodes, parent, collapsed)
+
     // Update indices
     this.layoutNodes.set(collapsed.id, collapsed)
     this.layoutNodes.delete(hostNode.id)

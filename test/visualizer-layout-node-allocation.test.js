@@ -293,9 +293,12 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
-  // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 4, 7].every(c => ('' + key).includes(c)))
-  t.ok(clumpId)
+
+  const keys = [...layout.layoutNodes.keys()]
+  const clumpId = 'x1'
+  t.deepEqual([ 1, 2, 3, 'x1', 5, 6, 8, 9, 10, 11 ], keys)
+  t.deepEqual([ 4, 7 ], layout.layoutNodes.get(clumpId).collapsedNodes.map(layoutNode => layoutNode.id))
+
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
 
@@ -353,9 +356,13 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, settings)
   t.ok(layout)
   layout.processHierarchy({ collapseNodes: true })
-  // Arbitrary Map order being issue here
-  const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 4, 7].every(c => ('' + key).includes(c)))
-  t.ok(clumpId)
+
+  const keys = [...layout.layoutNodes.keys()]
+  const firstClumpId = 'x1'
+  t.deepEqual([ 1, 'x4', 5, 6, 'x1', 9, 11 ], keys)
+  t.deepEqual([ 8, 10 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([ 2, 3, 4, 7 ], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
+
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
 
@@ -383,18 +390,18 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
   t.equal(positionById[1].x.toFixed(0), (layout.settings.svgWidth / 2).toFixed(0))
   t.equal(positionById[1].y.toFixed(0), (layout.settings.svgDistanceFromEdge + layout.layoutNodes.get(1).stem.scaled.ownDiameter).toFixed(0))
 
-  t.ok(positionById[11].y > positionById[clumpId].y)
-  t.ok(positionById[11].x < positionById[clumpId].x)
+  t.ok(positionById[11].y > positionById[firstClumpId].y)
+  t.ok(positionById[11].x < positionById[firstClumpId].x)
   t.ok(distanceById[11] < scaledStemById[11].ownBetween * 1.01)
   t.ok(distanceById[11] > scaledStemById[11].ownBetween * 0.99)
 
-  t.ok(positionById[9].y > positionById[clumpId].y)
-  t.ok(positionById[9].x < positionById[clumpId].x)
+  t.ok(positionById[9].y > positionById[firstClumpId].y)
+  t.ok(positionById[9].x < positionById[firstClumpId].x)
   t.ok(distanceById[9] < scaledStemById[9].ownBetween * 1.01)
   t.ok(distanceById[9] > scaledStemById[9].ownBetween * 0.99)
 
-  t.ok(positionById[6].y > positionById[clumpId].y)
-  t.ok(positionById[6].x > positionById[clumpId].x)
+  t.ok(positionById[6].y > positionById[firstClumpId].y)
+  t.ok(positionById[6].x > positionById[firstClumpId].x)
   t.ok(distanceById[6] < scaledStemById[6].ownBetween * 1.01)
   t.ok(distanceById[6] > scaledStemById[6].ownBetween * 0.99)
 
