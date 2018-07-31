@@ -61,10 +61,10 @@ class CollapsedLayoutNode {
       const party = node.mark.get('party')
       nodesByParty[party === 'root' ? 'nodecore' : party].push(node)
     }
-
-    this.node.name = this.getCollapsedName(nodesByParty, dataNodes)
+    const nodesByPriority = this.getNodesByPriority(nodesByParty, dataNodes)
+    this.node.name = this.getCollapsedName(nodesByPriority)
   }
-  getCollapsedName (nodesByParty, dataNodes) {
+  getNodesByPriority (nodesByParty, dataNodes) {
     // Get the two most 'interesting' names from the collapsed set
     // Prioritise userland > external > nodecore, and boost relatively large nodes
     nodesByParty.user.sort(sortNodesByLargestTime)
@@ -98,14 +98,16 @@ class CollapsedLayoutNode {
       dedupe[node.id] = true
       return true
     })
-
+    return nodesByPriority
+  }
+  getCollapsedName (nodesByPriority) {
     let name = `${truncateName(nodesByPriority[0].name)}`
     let index = 1
     while (name.length < 24 && nodesByPriority[index]) {
       name += ` & ${truncateName(nodesByPriority[index].name)}`
       index++
     }
-    return dataNodes.length > index ? name + ' & …' : name
+    return nodesByPriority.length > index ? name + ' & …' : name
   }
   getBetweenTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
