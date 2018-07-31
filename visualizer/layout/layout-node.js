@@ -55,7 +55,6 @@ class CollapsedLayoutNode {
         }, node, dataNodes)
       }
       if (node.nodes) this.node.applyAggregateNodes(node.nodes)
-      this.node.applyMark(node.mark)
       this.node.aggregateStats(node)
       this.applyDecimals(node)
       const party = node.mark.get('party')
@@ -63,6 +62,7 @@ class CollapsedLayoutNode {
     }
     const nodesByPriority = this.getNodesByPriority(nodesByParty, dataNodes)
     this.node.name = this.getCollapsedName(nodesByPriority)
+    this.node.mark = nodesByPriority[0].mark
   }
   getNodesByPriority (nodesByParty, dataNodes) {
     // Get the two most 'interesting' names from the collapsed set

@@ -380,9 +380,6 @@ class ArtificialNode extends ClusterNode {
       if (!this.mark) this.mark = aggregateNode.mark
     }
   }
-  applyMark (mark) {
-    if (!this.mark) this.mark = mark
-  }
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
   }
