@@ -46,6 +46,7 @@ class DataNode {
   getBetweenTime () { return this.stats.async.between }
   getAsyncTime () { return this.stats.async.between + this.stats.async.within }
   getSyncTime () { return this.stats.sync }
+  getTotalTime () { return this.stats.overall }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
