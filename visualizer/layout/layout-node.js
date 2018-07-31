@@ -141,7 +141,8 @@ function sortNodesByLargestTime (a, b) {
 }
 function truncateName (name) {
   const splitName = name.split(/(?=[+&>])/)
-  const newName = splitName[0].trim()
+  let newName = splitName[0].trim()
+  if (newName === '...') newName = splitName[1].slice(1).trim()
   return splitName.length > 1 ? newName + '…' : newName
 }
 
