@@ -14,6 +14,11 @@ const layoutSettings = {
   lineWidth: 2.5,
   labelMinimumSpace: 14
 }
+const stretchableSettings = Object.assign({}, layoutSettings, {
+  allowStretch: true
+})
+// absolute gaps between nodes, in px
+const lineExtras = (layoutSettings.lineWidth + layoutSettings.labelMinimumSpace * 2)
 
 test('Visualizer - layer - dataset is healthy', function (t) {
   const dataSet = new DataSet({data: clusterNodesArray})
@@ -51,7 +56,7 @@ test('Visualizer - layer - layout is healthy on init', function (t) {
   // Ensure custom settings get applied over defaults as expected
   t.deepEqual(layout.settings, Object.assign({}, layout.settings, layoutSettings))
 
-  t.equal(layout.layoutNodes.get('A').parent, undefined)
+  t.equal(layout.layoutNodes.get('A').parent, null)
   t.deepEqual(layout.layoutNodes.get('A').children, ['B', 'C'])
   t.equal(layout.layoutNodes.get('B').parent.id, layout.layoutNodes.get('A').id)
   t.equal(layout.layoutNodes.get('C').parent.id, layout.layoutNodes.get('A').id)
@@ -72,7 +77,6 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   dataSet.processData()
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
 
-  const lineExtras = (2.5 + 14 + 14)
   const expected = {
     A: {},
     B: {},
@@ -237,12 +241,11 @@ test('Visualizer - layer - layout connections are healthy on processBetweenData'
 test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', function (t) {
   const dataSet = new DataSet({data: clusterNodesArray})
   dataSet.processData()
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, stretchableSettings)
 
   layout.processBetweenData()
   layout.updateScale()
 
-  const lineExtras = (2.5 + 14 + 14)
   const expectedScaleFactor = 25.7102
 
   t.deepEqual(layout.scale.scalesBySmallest.map(weight => [weight.category, weight.weight.toFixed(4)]), [
@@ -271,7 +274,7 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
 test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', function (t) {
   const dataSet = new DataSet({data: clusterNodesArray})
   dataSet.processData()
-  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
+  const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, stretchableSettings)
 
   layout.processBetweenData()
   layout.updateScale()
@@ -280,7 +283,6 @@ test('Visualizer - layer - layout stems are healthy on calculateScaleFactor', fu
   t.equal(layout.scale.prescaleFactor, layout.settings.svgHeight / APlusBPlusD)
   t.ok(layout.scale.prescaleFactor < 58 && layout.scale.prescaleFactor > 57)
 
-  const lineExtras = (2.5 + 14 + 14)
   const expectedScaleFactor = 25.7102
 
   t.equal(layout.layoutNodes.get('A').stem.scaled.ownBetween, lineExtras)

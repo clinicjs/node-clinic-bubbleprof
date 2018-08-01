@@ -15,17 +15,20 @@ class Scale {
   calculatePreScaleFactor () {
     this.layoutNodes = this.layout.layoutNodes
 
+    // Setting used in tests and for (legacy) scrollable fixed height layouts
+    const isStretchMode = this.layout.settings.allowStretch
+
     // Calculate the total fixed (absolute) pixel length gaps in the longest stem. For example, if a view initially
     // contains 1000 nodes and each node has a fixed gap of 10px, that's 10,000px we need to account for
     const toLongestAbsolute = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.absolute)
-    const longestAbsolute = [...this.layoutNodes.values()].reduce(toLongestAbsolute, 0)
+    const longestAbsolute = isStretchMode ? 0 : [...this.layoutNodes.values()].reduce(toLongestAbsolute, 0)
 
     // Extend the effective heights, lengths and thresholds used in calculations by that amount
     this.heightMultiplier = 1 + (longestAbsolute / this.layout.settings.svgHeight)
     const toLongest = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.scalable)
     const longest = [...this.layoutNodes.values()].reduce(toLongest, 0) + longestAbsolute
 
-    const scaleByHeight = this.layout.settings.svgHeight * this.heightMultiplier
+    const scaleByHeight = this.layout.settings.svgHeight * (isStretchMode ? 1 : this.heightMultiplier)
     this.prescaleFactor = scaleByHeight / (longest || 1)
   }
   calculateScaleFactor (collapsed = false) {
