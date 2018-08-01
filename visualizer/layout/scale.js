@@ -8,16 +8,31 @@ class Scale {
   constructor (layout) {
     this.layout = layout
     this.layoutNodes = null // set later
+    this.heightMultiplier = 1 // applied to calculations here, and to threshold in collapse-layout.js
   }
   // This simplified computation is necessary to ensure correct leaves order
   // when calculating the final scale factor
   calculatePreScaleFactor () {
     this.layoutNodes = this.layout.layoutNodes
+
+    // Calculate the total fixed (absolute) pixel length gaps in the longest stem. For example, if a view initially
+    // contains 1000 nodes and each node has a fixed gap of 10px, that's 10,000px we need to account for
+    const toLongestAbsolute = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.absolute)
+    const longestAbsolute = [...this.layoutNodes.values()].reduce(toLongestAbsolute, 0)
+
+    // Extend the effective heights, lengths and thresholds used in calculations by that amount
+    this.heightMultiplier = 1 + (longestAbsolute / this.layout.settings.svgHeight)
     const toLongest = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.scalable)
-    const longest = [...this.layoutNodes.values()].reduce(toLongest, 0)
-    this.prescaleFactor = this.layout.settings.svgHeight / (longest || 1)
+    const longest = [...this.layoutNodes.values()].reduce(toLongest, 0) + longestAbsolute
+
+    const scaleByHeight = this.layout.settings.svgHeight * this.heightMultiplier
+    this.prescaleFactor = scaleByHeight / (longest || 1)
   }
-  calculateScaleFactor () {
+  calculateScaleFactor (collapsed = false) {
+    // No need to apply the height multiplier after it increased the collapse threshold, squashing excessive nodes
+    const multiplier = collapsed ? 1 : this.heightMultiplier
+    const scaleByHeight = this.layout.settings.svgHeight * multiplier
+
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
     let leavesByShortest = pickLeavesByLongest(this.layoutNodes, this).reverse()
@@ -41,7 +56,7 @@ class Scale {
 
     // Reduces scrolling on tiny sublayouts. Only needed on scroll view mode
     const svgHeightAdjustment = nodesCount < 4 && allowStretch ? 0.2 * (nodesCount + 1) : 1
-    const svgHeight = this.layout.settings.svgHeight * svgHeightAdjustment
+    const svgHeight = scaleByHeight * svgHeightAdjustment
 
     const availableHeight = svgHeight - (svgDistanceFromEdge * 2)
     const availableWidth = (svgWidth / 2) - svgDistanceFromEdge
@@ -87,7 +102,8 @@ class Scale {
     // For collapsing nodes, we need a threshold that is independent of the SVG size so that
     // the same data gives the same number of visible nodes if presented in different sized SVG
     // 680 is based on common window sizes and tested to give reasonable collapsing
-    const sizeIndependentWeight = new ScaleWeight('size-independent', null, 680, longestStretched.scalableToContain, longestStretched.absoluteToContain)
+    const sizeIndependentHeight = 680 * multiplier
+    const sizeIndependentWeight = new ScaleWeight('size-independent', null, sizeIndependentHeight, longestStretched.scalableToContain, longestStretched.absoluteToContain)
     this.sizeIndependentScale = sizeIndependentWeight.weight
 
     const isLineTooLong = this.decisiveWeight === longestStretched

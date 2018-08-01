@@ -183,14 +183,14 @@ class Layout {
     if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
-      this.updateScale()
+      this.updateScale(true)
     }
   }
 
-  updateScale () {
+  updateScale (collapsed = false) {
     this.scale.calculatePreScaleFactor()
     this.updateStems()
-    this.scale.calculateScaleFactor()
+    this.scale.calculateScaleFactor(collapsed)
     this.updateStems()
   }
 
