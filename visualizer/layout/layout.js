@@ -188,7 +188,7 @@ class Layout {
   }
 
   updateScale (collapsed = false) {
-    this.scale.calculatePreScaleFactor()
+    this.scale.calculatePreScaleFactor(collapsed)
     this.updateStems()
     this.scale.calculateScaleFactor(collapsed)
     this.updateStems()

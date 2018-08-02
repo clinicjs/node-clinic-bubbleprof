@@ -9,11 +9,16 @@ class Scale {
     this.layout = layout
     this.layoutNodes = null // set later
     this.heightMultiplier = 1 // applied to calculations here, and to threshold in collapse-layout.js
+
+    // Use a static window height before node collapsing, so view contents are consistent regardless of window size etc
+    // 680 is based on common window sizes and tested to give reasonable collapsing
+    this.sizeIndependentHeight = 680
   }
   // This simplified computation is necessary to ensure correct leaves order
   // when calculating the final scale factor
-  calculatePreScaleFactor () {
+  calculatePreScaleFactor (collapsed = false) {
     this.layoutNodes = this.layout.layoutNodes
+    const scaleByHeight = this.getScaleHeight(collapsed)
 
     // Setting used in tests and for (legacy) scrollable fixed height layouts
     const isStretchMode = this.layout.settings.allowStretch
@@ -24,17 +29,16 @@ class Scale {
     const longestAbsolute = isStretchMode ? 0 : [...this.layoutNodes.values()].reduce(toLongestAbsolute, 0)
 
     // Extend the effective heights, lengths and thresholds used in calculations by that amount
-    this.heightMultiplier = 1 + (longestAbsolute / this.layout.settings.svgHeight)
+    this.heightMultiplier = 1 + (longestAbsolute / scaleByHeight)
     const toLongest = (longest, layoutNode) => Math.max(longest, layoutNode.stem.lengths.scalable)
     const longest = [...this.layoutNodes.values()].reduce(toLongest, 0) + longestAbsolute
 
-    const scaleByHeight = this.layout.settings.svgHeight * (isStretchMode ? 1 : this.heightMultiplier)
-    this.prescaleFactor = scaleByHeight / (longest || 1)
+    this.prescaleFactor = scaleByHeight * (isStretchMode ? 1 : this.heightMultiplier) / (longest || 1)
   }
   calculateScaleFactor (collapsed = false) {
     // No need to apply the height multiplier after it increased the collapse threshold, squashing excessive nodes
     const multiplier = collapsed ? 1 : this.heightMultiplier
-    const scaleByHeight = this.layout.settings.svgHeight * multiplier
+    const scaleByHeight = this.getScaleHeight(collapsed) * multiplier
 
     // Called after new Scale() because it reads stem length data based on logic
     // using the spacing/width settings and radiusFromCircumference()
@@ -102,10 +106,7 @@ class Scale {
     }
     this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
-    // For collapsing nodes, we need a threshold that is independent of the SVG size so that
-    // the same data gives the same number of visible nodes if presented in different sized SVG
-    // 680 is based on common window sizes and tested to give reasonable collapsing
-    const sizeIndependentHeight = 680 * multiplier
+    const sizeIndependentHeight = this.sizeIndependentHeight * multiplier
     const sizeIndependentWeight = new ScaleWeight('size-independent', null, sizeIndependentHeight, longestStretched.scalableToContain, longestStretched.absoluteToContain)
     this.sizeIndependentScale = sizeIndependentWeight.weight
 
@@ -113,6 +114,10 @@ class Scale {
     const isDiameterAboveHeight = this.decisiveWeight === diameterClamp && smallestSide === availableHeight
     const shouldStretchHeight = isLineTooLong || isDiameterAboveHeight
     this.finalSvgHeight = shouldStretchHeight ? stretchedHeight : svgHeight
+  }
+
+  getScaleHeight (collapsed) {
+    return collapsed || !this.layout.settings.collapseNodes ? this.layout.settings.svgHeight : this.sizeIndependentHeight
   }
 
   getLineLength (dataValue) {
