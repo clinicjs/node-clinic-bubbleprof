@@ -30,7 +30,7 @@ class LayoutNode {
 class CollapsedLayoutNode {
   constructor (collapsedId, layoutNodes, parent, children) {
     // layoutNodes should be an array sorted using layout.getLayoutNodeSorter()
-    const dataNodes = layoutNodes.map(layoutNode => layoutNode.node).sort(sortNodesByLargestTime)
+    const dataNodes = layoutNodes.map(layoutNode => layoutNode.node)
 
     // Collapsed ids are for uniqueness and human inspection; sort ids into a human-readable order
     this.id = collapsedId
@@ -38,12 +38,6 @@ class CollapsedLayoutNode {
     this.collapsedNodes = layoutNodes
     this.parent = parent
     this.children = children || []
-
-    const nodesByParty = {
-      user: [],
-      external: [],
-      nodecore: []
-    }
 
     for (let i = 0; i < layoutNodes.length; ++i) {
       const layoutNode = layoutNodes[i]
@@ -57,48 +51,15 @@ class CollapsedLayoutNode {
       if (node.nodes) this.node.applyAggregateNodes(node.nodes)
       this.node.aggregateStats(node)
       this.applyDecimals(node)
-      const party = node.mark.get('party')
-      nodesByParty[party === 'root' ? 'nodecore' : party].push(node)
     }
-    const nodesByPriority = this.getNodesByPriority(nodesByParty, dataNodes)
+    const nodesByPriority = this.getNodesByPriority(dataNodes)
     this.node.name = this.getCollapsedName(nodesByPriority)
     this.node.mark = nodesByPriority[0].mark
   }
-  getNodesByPriority (nodesByParty, dataNodes) {
-    // Get the two most 'interesting' names from the collapsed set
-    // Prioritise userland > external > nodecore, and boost relatively large nodes
-    nodesByParty.user.sort(sortNodesByLargestTime)
-    nodesByParty.external.sort(sortNodesByLargestTime)
-    nodesByParty.nodecore.sort(sortNodesByLargestTime)
-
-    const overallTime = this.getTotalTime()
-
-    const node0 = dataNodes[0]
-    const node0Time = node0.getTotalTime() / overallTime
-    const node0Party = node0.mark.get('party')
-
-    const dedupe = {}
-
-    const nodesByPriority = [
-      // Very large external or nodecore names push ahead of top userland (or external)
-      node0Time >= 0.5 && node0Party === 'external' ? node0 : null,
-      node0Time >= 0.6 && node0Party === 'nodecore' ? node0 : null,
-      nodesByParty.user[0],
-      nodesByParty.external[0],
-      nodesByParty.nodecore[0],
-      // Large external or nodecore names push out 2nd userland or external
-      node0Time > 0.25 && node0Time < 0.5 && node0Party === 'external' ? node0 : null,
-      node0Time > 0.3 && node0Time < 0.6 && node0Party === 'nodecore' ? node0 : null,
-      nodesByParty.user[1],
-      nodesByParty.external[1],
-      nodesByParty.nodecore[1]
-    ].filter(node => {
-      // remove undefined and duplicates
-      if (!node || dedupe[node.id]) return false
-      dedupe[node.id] = true
-      return true
+  getNodesByPriority (dataNodes) {
+    return dataNodes.sort((a, b) => {
+      return getWeightedNodeTime(b) - getWeightedNodeTime(a)
     })
-    return nodesByPriority
   }
   getCollapsedName (nodesByPriority) {
     let name = `${truncateName(nodesByPriority[0].name)}`
@@ -137,10 +98,18 @@ class CollapsedLayoutNode {
     this.node.aggregateDecimals(otherNode, 'party', 'within')
   }
 }
-
-function sortNodesByLargestTime (a, b) {
-  return b.getTotalTime() - a.getTotalTime()
+function getWeightedNodeTime (dataNode) {
+  const nodeTime = dataNode.getTotalTime()
+  switch (dataNode.mark.get('party')) {
+    case 'user':
+      return nodeTime
+    case 'external':
+      return nodeTime * 0.75
+    default: // nodecore and user
+      return nodeTime * 0.5
+  }
 }
+
 function truncateName (name) {
   const splitName = name.split(/(?=[+&>])/)
   let newName = splitName[0].trim()
