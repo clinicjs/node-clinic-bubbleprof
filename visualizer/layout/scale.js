@@ -116,8 +116,46 @@ class Scale {
     this.finalSvgHeight = shouldStretchHeight ? stretchedHeight : svgHeight
   }
 
+  adjustScaleFactor (collapsed) {
+    if (!this.isCollapsePending(collapsed) && !this.layout.settings.allowStretch) {
+      const longest = pickLeavesByLongest(this.layoutNodes)[0].stem.lengths
+      const {
+        svgHeight,
+        svgDistanceFromEdge
+      } = this.layout.settings
+      // In some rare cases, there is a long chain of nodes just above the collapse threshold whose absolute values break the scale
+      if (longest.scaledTotal > svgHeight) {
+        const heightAvailable = svgHeight - (svgDistanceFromEdge * 2) - longest.absolute
+
+        if (heightAvailable <= 0) {
+          const times = []
+          this.layoutNodes.forEach(layoutNode => times.push(layoutNode.getTotalTime()))
+          times.sort((a, b) => b - a)
+          const maxTime = times[0]
+          const len = times.length
+          const medianTime = len % 2 && len > 1 ? (times[Math.floor(len / 2)] + times[Math.ceil(len / 2)]) / 2 : times[Math.floor(len / 2)]
+
+          // Let the largest item be up to 3px so it stands out; smaller if it's less than three times the median.
+          // This ensures that most items have tiny <1px width, to minimise overflow, but the largest ones still stand out, so the view is usable.
+          this.scaleFactor = Math.min(3, maxTime / medianTime) / maxTime
+          return true
+        }
+
+        // Store the modifier while applying it so it can be seen and inspected in debugging
+        this.decisiveWeight.modifier = heightAvailable / (longest.scaledTotal - longest.absolute)
+        this.scaleFactor = this.scaleFactor * this.decisiveWeight.modifier
+        return true
+      }
+    }
+    return false
+  }
+
+  isCollapsePending (collapsed) {
+    return !collapsed && this.layout.settings.collapseNodes
+  }
+
   getScaleHeight (collapsed) {
-    return collapsed || !this.layout.settings.collapseNodes ? this.layout.settings.svgHeight : this.sizeIndependentHeight
+    return !this.isCollapsePending(collapsed) ? this.layout.settings.svgHeight : this.sizeIndependentHeight
   }
 
   getLineLength (dataValue) {
@@ -134,6 +172,8 @@ class ScaleWeight {
   constructor (category, node, available, scalableToContain, absoluteToContain) {
     this.category = category
     this.node = node
+    this.modifier = false // this is set if this scale is used but a multiplication adjustment is needed
+
     this.available = available
     this.absoluteToContain = absoluteToContain
     this.scalableToContain = scalableToContain

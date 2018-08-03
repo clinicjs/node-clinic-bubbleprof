@@ -62,10 +62,10 @@ class Stem {
         rawTotal: absolute + scalable
       }
     }
-    if (this.layout.scale.prescaleFactor) {
+    if (typeof this.layout.scale.prescaleFactor === 'number') {
       this.lengths.prescaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.prescaleFactor)
     }
-    if (this.layout.scale.scaleFactor) {
+    if (typeof this.layout.scale.scaleFactor === 'number') {
       const { settings, scale } = this.layout
       this.scaled = {
         ownBetween: (settings.labelMinimumSpace * 2) + settings.lineWidth + scale.getLineLength(this.raw.ownBetween),

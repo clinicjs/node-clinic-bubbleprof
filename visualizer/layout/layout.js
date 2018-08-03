@@ -192,6 +192,8 @@ class Layout {
     this.updateStems()
     this.scale.calculateScaleFactor(collapsed)
     this.updateStems()
+    const wasAdjusted = this.scale.adjustScaleFactor(collapsed)
+    if (wasAdjusted) this.updateStems()
   }
 
   updateStems () {
