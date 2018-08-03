@@ -312,3 +312,43 @@ test('Visualizer layout - scale - can handle zero-sized views', function (t) {
 
   t.end()
 })
+
+settings.allowStretch = false
+settings.labelMinimumSpace = 10
+settings.lineWidth = 10
+
+test('Visualizer layout - scale - calculation height always greater thans longest stem', function (t) {
+  function testLongNodeChains (topology) {
+    const dataSet = loadData(dataSettings, mockTopology(topology))
+    const layout = generateLayout(dataSet, settings)
+    layout.updateScale()
+
+    const largestSize = layout.scale.decisiveWeight.absoluteToContain + layout.scale.decisiveWeight.scalableToContain * layout.scale.scaleFactor
+    t.ok(layout.scale.finalSvgHeight > largestSize)
+  }
+
+  testLongNodeChains([
+    ['1.2', 100],
+    // Long chain of nodes: 1.3.4.5.6.7.8...2998.2999.3000
+    ['1.3.' + Array(2997).fill(4).map((num, index) => num + index).join('.'), 5]
+  ])
+
+  testLongNodeChains([
+    ['1.2', 100],
+    ['1.3.' + Array(397).fill(4).map((num, index) => num + index).join('.'), 5],
+    ['1.401.' + Array(399).fill(402).map((num, index) => num + index).join('.'), 5],
+    ['1.801.' + Array(399).fill(802).map((num, index) => num + index).join('.'), 5],
+    ['1.1201.' + Array(399).fill(1202).map((num, index) => num + index).join('.'), 5],
+    ['1.1601.' + Array(399).fill(1602).map((num, index) => num + index).join('.'), 5]
+  ])
+
+  /* TODO - fix error where this fails with error from arrayFlatten recursion being too deep
+  // Very slow test - keep it commented out and uncomment as a smoke test for very large profile issues
+  testLongNodeChains([
+    ['1.2', 100],
+    ['1.3.' + Array(9997).fill(4).map((num, index) => num + index).join('.'), 5]
+  ])
+  */
+
+  t.end()
+})

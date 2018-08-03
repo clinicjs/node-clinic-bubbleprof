@@ -50,25 +50,38 @@ class Layout {
     this.layoutNodes = new Map()
 
     const dataNodeById = new Map(dataNodes.map(node => [node.id, node]))
-    const createLayoutNode = (nodeId, parentLayoutNode) => {
-      const dataNode = dataNodeById.get(nodeId)
-      if (!dataNode || this.layoutNodes.has(dataNode.id)) return
 
-      const layoutNode = new LayoutNode(dataNode, parentLayoutNode)
-      this.layoutNodes.set(dataNode.id, layoutNode)
-
-      if (dataNode.isRoot) this.rootLayoutNode = this.layoutNodes.get(dataNode.id)
-
-      if (parentLayoutNode) parentLayoutNode.children.push(dataNode.id)
-      for (let i = 0; i < dataNode.children.length; ++i) {
-        const childNodeId = dataNode.children[i]
-        createLayoutNode(childNodeId, layoutNode)
+    const nodesByTreeOrder = dataNodes.filter(dataNode => !dataNode.parent).map(dataNode => {
+      return {
+        id: dataNode.id,
+        parent: null
       }
-    }
-    const topDataNodes = dataNodes.filter(dataNode => !dataNode.parent)
-    for (let i = 0; i < topDataNodes.length; ++i) {
-      const topDataNode = topDataNodes[i]
-      createLayoutNode(topDataNode.id)
+    })
+
+    // Traverse through the tree depth-first, without recursion because depths (initial chain lengths) are unbounded.
+    // For example, cluster nodes could contain aggregate node chains of any length before collapse logic applies.
+    while (nodesByTreeOrder.length) {
+      const {
+        id,
+        parent
+      } = nodesByTreeOrder.shift()
+
+      const dataNode = dataNodeById.get(id)
+      if (!dataNode || this.layoutNodes.has(id)) continue
+
+      const layoutNode = new LayoutNode(dataNode, parent)
+      this.layoutNodes.set(id, layoutNode)
+
+      if (dataNode.isRoot) this.rootLayoutNode = this.layoutNodes.get(id)
+      if (parent) parent.children.push(id)
+
+      // First children and their descendents first (iterate children backwards, queue each next in array)
+      for (let i = dataNode.children.length; i >= 0; i--) {
+        nodesByTreeOrder.unshift({
+          id: dataNode.children[i],
+          parent: layoutNode
+        })
+      }
     }
   }
 
@@ -170,15 +183,17 @@ class Layout {
     if (settings.collapseNodes) {
       this.collapseNodes()
       this.processBetweenData(true)
-      this.updateScale()
+      this.updateScale(true)
     }
   }
 
-  updateScale () {
-    this.scale.calculatePreScaleFactor()
+  updateScale (collapsed = false) {
+    this.scale.calculatePreScaleFactor(collapsed)
     this.updateStems()
-    this.scale.calculateScaleFactor()
+    this.scale.calculateScaleFactor(collapsed)
     this.updateStems()
+    const wasAdjusted = this.scale.adjustScaleFactor(collapsed)
+    if (wasAdjusted) this.updateStems()
   }
 
   updateStems () {

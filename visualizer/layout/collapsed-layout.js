@@ -18,6 +18,8 @@ class CollapsedLayout {
     this.scale = layout.scale
     this.minimumNodes = 3
 
+    this.collapseThreshold = 10 * this.scale.heightMultiplier
+
     // If debugging, expose one pool of ejected node IDs that is added to each time this class is initialized
     if (layout.settings.debugMode && !layout.ejectedLayoutNodeIds) layout.ejectedLayoutNodeIds = []
 
@@ -197,7 +199,7 @@ class CollapsedLayout {
     return collapsed
   }
   isBelowThreshold (layoutNode) {
-    return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < 10
+    return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < this.collapseThreshold
   }
   isCollapsible (layoutNode) {
     return layoutNode.collapsedNodes || this.isBelowThreshold(layoutNode)
