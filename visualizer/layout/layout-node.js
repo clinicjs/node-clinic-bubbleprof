@@ -82,13 +82,15 @@ class CollapsedLayoutNode {
     })
   }
   getCollapsedName (namesByPriority) {
-    let name = `${truncateName(namesByPriority[0].name)}`
-    let index = 1
-    while (name.length < 24 && namesByPriority[index]) {
-      name += ` & ${truncateName(namesByPriority[index].name)}`
+    let fullName = ''
+    let index = 0
+
+    while (fullName.length < 24 && namesByPriority[index]) {
+      if (index !== 0) fullName += ' & '
+      fullName += truncateName(namesByPriority[index].name, fullName)
       index++
     }
-    return namesByPriority.length > index ? name + ' & …' : name
+    return namesByPriority.length > index ? fullName + ' & …' : fullName
   }
   getBetweenTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
@@ -130,11 +132,28 @@ function getWeightedNameTime (nameData) {
   }
 }
 
-function truncateName (name) {
+function truncateName (name, fullName) {
   const splitName = name.split(/(?=[+&>])/)
-  let newName = splitName[0].trim()
-  if (newName === '...') newName = splitName[1].slice(1).trim()
-  return splitName.length > 1 ? newName + '…' : newName
+  const splitNameLength = splitName.length
+  if (splitNameLength === 1) return trimName(splitName[0])
+
+  // If there are multiple parts to a name, see if there's one that doesn't already appear in the name, e.g.
+  // if fullName = `hapi & ` name = `hapi > podium` then `hapi & ...podium & ...` beats `hapi & hapi... & ...`
+  for (let i = 0; i < splitNameLength; i++) {
+    const subName = trimName(splitName[i])
+
+    // Some names are like `... > someModule > anotherModule`
+    if ((subName) === '...') continue
+
+    const prefix = i === 0 ? '' : '...'
+    const suffix = i === splitNameLength - 1 ? '' : '...'
+    if (!fullName.includes(subName)) return `${prefix}${subName}${suffix}`
+  }
+  return trimName(splitName[0]) + '...'
+}
+
+function trimName (name) {
+  return name.replace(/([+&>])/g, '').trim()
 }
 
 module.exports = {
