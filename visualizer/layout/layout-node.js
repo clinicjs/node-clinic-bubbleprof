@@ -52,23 +52,43 @@ class CollapsedLayoutNode {
       this.node.aggregateStats(node)
       this.applyDecimals(node)
     }
-    const nodesByPriority = this.getNodesByPriority(dataNodes)
-    this.node.name = this.getCollapsedName(nodesByPriority)
-    this.node.mark = nodesByPriority[0].mark
+    const namesByPriority = this.getNamesByPriority(dataNodes)
+    this.node.name = this.getCollapsedName(namesByPriority)
+
+    // Create new mark to avoid modifying the mark of the node this was based on
+    this.node.mark = new Map().set('party', namesByPriority[0].party)
   }
-  getNodesByPriority (dataNodes) {
-    return dataNodes.sort((a, b) => {
-      return getWeightedNodeTime(b) - getWeightedNodeTime(a)
+  getNamesByPriority (dataNodes) {
+    // Where names appear multiple times, reduce down to one total for that name
+    const nodeNamesMap = dataNodes.reduce((namesMap, dataNode) => {
+      const party = dataNode.mark.get('party')
+      const time = dataNode.getTotalTime()
+      const key = dataNode.name + '---' + party
+
+      if (namesMap.has(key)) {
+        namesMap.get(key).total += time
+      } else {
+        namesMap.set(key, {
+          name: dataNode.name,
+          total: time,
+          party: party
+        })
+      }
+      return namesMap
+    }, new Map())
+
+    return [...nodeNamesMap.values()].sort((a, b) => {
+      return getWeightedNameTime(b) - getWeightedNameTime(a)
     })
   }
-  getCollapsedName (nodesByPriority) {
-    let name = `${truncateName(nodesByPriority[0].name)}`
+  getCollapsedName (namesByPriority) {
+    let name = `${truncateName(namesByPriority[0].name)}`
     let index = 1
-    while (name.length < 24 && nodesByPriority[index]) {
-      name += ` & ${truncateName(nodesByPriority[index].name)}`
+    while (name.length < 24 && namesByPriority[index]) {
+      name += ` & ${truncateName(namesByPriority[index].name)}`
       index++
     }
-    return nodesByPriority.length > index ? name + ' & …' : name
+    return namesByPriority.length > index ? name + ' & …' : name
   }
   getBetweenTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
@@ -98,15 +118,15 @@ class CollapsedLayoutNode {
     this.node.aggregateDecimals(otherNode, 'party', 'within')
   }
 }
-function getWeightedNodeTime (dataNode) {
-  const nodeTime = dataNode.getTotalTime()
-  switch (dataNode.mark.get('party')) {
+function getWeightedNameTime (nameData) {
+  const nameTime = nameData.total
+  switch (nameData.party) {
     case 'user':
-      return nodeTime
+      return nameTime
     case 'external':
-      return nodeTime * 0.75
+      return nameTime * 0.66
     default: // nodecore and user
-      return nodeTime * 0.5
+      return nameTime * 0.33
   }
 }
 
