@@ -46,6 +46,7 @@ class DataNode {
   getBetweenTime () { return this.stats.async.between }
   getAsyncTime () { return this.stats.async.between + this.stats.async.within }
   getSyncTime () { return this.stats.sync }
+  getTotalTime () { return this.stats.overall }
 
   getParentNode () {
     return this.dataSet.getByNodeType(this.constructor.name, this.parentId)
@@ -378,9 +379,6 @@ class ArtificialNode extends ClusterNode {
       this.nodes.set(aggregateId, aggregateNode)
       if (!this.mark) this.mark = aggregateNode.mark
     }
-  }
-  applyMark (mark) {
-    if (!this.mark) this.mark = mark
   }
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)

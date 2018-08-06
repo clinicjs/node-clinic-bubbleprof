@@ -3,6 +3,7 @@
 const test = require('tap').test
 const loadData = require('../visualizer/data/index.js')
 const Layout = require('../visualizer/layout/layout.js')
+const generateLayout = require('../visualizer/layout/index.js')
 
 const { mockTopology } = require('./visualizer-util/fake-topology.js')
 
@@ -354,6 +355,89 @@ test('Visualizer layout - collapse - complex example', function (t) {
   t.deepEqual([ 4, 5, 7, 6, 8, 9 ], layout.layoutNodes.get('x3').collapsedNodes.map(layoutNode => layoutNode.id))
 
   t.ok(layout.ejectedLayoutNodeIds.includes('x1'))
+
+  t.end()
+})
+
+test('Visualizer layout - collapse - naming', function (t) {
+  const topology = [
+    ['1.2', 200],
+    ['1.3', 2],
+    ['1.4', 2],
+    ['1.5', 2],
+    ['1.6', 3],
+    ['1.7', 3],
+    ['1.8', 3],
+    ['1.9', 200],
+    ['1.9.10', 200],
+    ['1.9.11', 200],
+    ['1.9.12', 200],
+    ['1.9.13', 200],
+    ['1.9.14', 200]
+  ]
+
+  let layout
+  const dataSet = loadData(dataSettings, mockTopology(topology))
+  const partiesById = {
+    3: 'user',
+    4: 'external',
+    5: 'nodecore',
+    6: 'user',
+    7: 'external',
+    8: 'nodecore'
+  }
+
+  function getNamedClusterNodes (dataSet, namesById) {
+    for (const [clusterId, clusterNode] of dataSet.clusterNodes) {
+      clusterNode.name = namesById[clusterId]
+      clusterNode.mark.set('party', partiesById[clusterId])
+    }
+    return dataSet
+  }
+
+  // Simple unique names
+  layout = generateLayout(getNamedClusterNodes(dataSet, {
+    3: 'a',
+    4: 'b',
+    5: 'c',
+    6: 'd',
+    7: 'e',
+    8: 'f'
+  }), settings)
+  t.equal(layout.layoutNodes.get('x1').node.name, 'd & a & e & b & f & c')
+
+  // Stop adding names if string is already over 24 chars
+  layout = generateLayout(getNamedClusterNodes(dataSet, {
+    3: 'aaaaaa',
+    4: 'bbbbbb',
+    5: 'cccccc',
+    6: 'dddddd',
+    7: 'eeeeee',
+    8: 'ffffff'
+  }), settings)
+  t.equal(layout.layoutNodes.get('x1').node.name, 'dddddd & aaaaaa & eeeeee & …')
+
+  // Combine duplicate names - lifts c off the bottom
+  layout = generateLayout(getNamedClusterNodes(dataSet, {
+    3: 'a',
+    4: 'b',
+    5: 'c',
+    6: 'd',
+    7: 'e',
+    8: 'c'
+  }), settings)
+  t.equal(layout.layoutNodes.get('x1').node.name, 'd & a & e & c & b')
+
+  // Pick first of multi part names unless it's already featured
+  layout = generateLayout(getNamedClusterNodes(dataSet, {
+    3: 'a > a > a',
+    4: 'b/e + bb',
+    5: 'c > c > c',
+    6: '... > d > d',
+    7: 'b/e + ee',
+    8: 'c > c > c'
+  }), settings)
+  t.equal(layout.layoutNodes.get('x1').node.name, '…d… & a… & b/e… & c… & …bb')
 
   t.end()
 })
