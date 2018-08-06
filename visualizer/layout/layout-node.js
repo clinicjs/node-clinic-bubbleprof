@@ -142,14 +142,16 @@ function truncateName (name, fullName) {
   for (let i = 0; i < splitNameLength; i++) {
     const subName = trimName(splitName[i])
 
-    // Some names are like `... > someModule > anotherModule`
+    // Some names are like `... > someModule > anotherModule` from analysis branch
+    // - Filter out '...' from analysis for main diagram (show in hover only).
+    // - Add '…' to indicate contraction in draw branch, and don't filter it out.
     if ((subName) === '...') continue
 
-    const prefix = i === 0 ? '' : '...'
-    const suffix = i === splitNameLength - 1 ? '' : '...'
+    const prefix = i === 0 ? '' : '…'
+    const suffix = i === splitNameLength - 1 ? '' : '…'
     if (!fullName.includes(subName)) return `${prefix}${subName}${suffix}`
   }
-  return trimName(splitName[0]) + '...'
+  return trimName(splitName[0]) + '…'
 }
 
 function trimName (name) {
