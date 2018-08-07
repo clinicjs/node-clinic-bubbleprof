@@ -123,7 +123,7 @@ class CollapsedLayout {
       const child = children[i]
       const belowThreshold = this.isBelowThreshold(child)
       this.collapseHorizontally(child)
-      if (this.layoutNodes.size === this.minimumNodes) {
+      if (this.countNonShortcutNodes() <= this.minimumNodes) {
         break
       }
       if (belowThreshold) {
@@ -141,7 +141,7 @@ class CollapsedLayout {
       const child = children[i]
       const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
       const collapsedChild = this.collapseVertically(child)
-      if (this.layoutNodes.size === this.minimumNodes) {
+      if (this.countNonShortcutNodes() <= this.minimumNodes) {
         break
       }
       if (belowThreshold && !this.topLayoutNodes.has(layoutNode)) {
@@ -197,6 +197,13 @@ class CollapsedLayout {
     this.layoutNodes.delete(squashNode.id)
 
     return collapsed
+  }
+  countNonShortcutNodes () {
+    let shortcutCount = 0
+    this.layoutNodes.forEach(layoutNode => {
+      if (layoutNode.node.constructor.name === 'ShortcutNode') shortcutCount++
+    })
+    return this.layoutNodes.size - shortcutCount
   }
   isBelowThreshold (layoutNode) {
     return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < this.collapseThreshold
