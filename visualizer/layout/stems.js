@@ -48,13 +48,7 @@ class Stem {
   }
   update () {
     if (!this.lengths) {
-      const {
-        labelMinimumSpace,
-        lineWidth,
-        shortcutLength
-      } = this.layout.settings
-
-      const absolute = ((labelMinimumSpace * 2) + lineWidth) * this.ancestors.ids.length + shortcutLength * this.shortcutsInStem
+      const absolute = this.getAbsoluteLength()
       const scalable = this.ancestors.totalBetween + this.ancestors.totalDiameter + this.raw.ownBetween + this.raw.ownDiameter
       this.lengths = {
         absolute: validateNumber(absolute, this.getValidationMessage()),
@@ -73,6 +67,14 @@ class Stem {
       }
       this.lengths.scaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.scaleFactor)
     }
+  }
+  getAbsoluteLength (stemLength = this.ancestors.ids.length) {
+    const {
+      labelMinimumSpace,
+      lineWidth,
+      shortcutLength
+    } = this.layout.settings
+    return ((labelMinimumSpace * 2) + lineWidth) * stemLength + shortcutLength * this.shortcutsInStem
   }
   getValidationMessage () {
     return `for stem with:
