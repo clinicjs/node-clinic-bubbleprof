@@ -139,19 +139,16 @@ class CollapsedLayout {
     let combined
     for (let i = 0; i < children.length; ++i) {
       const child = children[i]
-      const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
+      const hostNode = combined || layoutNode
       const collapsedChild = this.collapseVertically(child)
-      if (this.countNonShortcutNodes() <= this.minimumNodes) {
-        break
-      }
-      if (belowThreshold && !this.topLayoutNodes.has(layoutNode)) {
-        const hostNode = combined || layoutNode
-        const squashNode = collapsedChild || child
-        // Do not vertically-collapse children which have at least one long grandchild
-        const longGrandChild = squashNode.children.map(childId => this.layoutNodes.get(childId)).find(child => !this.isCollapsible(child))
-        if (longGrandChild) {
-          continue
-        }
+
+      if (this.topLayoutNodes.has(layoutNode)) continue
+
+      const squashNode = collapsedChild || child
+      const isCollapsible = this.isVerticallyCollapsible(child, hostNode, squashNode)
+      if (isCollapsible) {
+        if (isCollapsible === 'abort') break
+
         // combineLayoutNodes() can cancel itself and return nothing; if so, keep previous value of combined
         combined = this.combineLayoutNodes(hostNode, squashNode) || combined
       }
@@ -211,6 +208,20 @@ class CollapsedLayout {
   }
   isCollapsible (layoutNode) {
     return layoutNode.collapsedNodes || this.isBelowThreshold(layoutNode)
+  }
+  isVerticallyCollapsible (child, hostNode, squashNode) {
+    if (this.countNonShortcutNodes() <= this.minimumNodes) {
+      return 'abort' // Can't squash beyond this point so we can tell calling function to stop
+    }
+
+    const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
+    if (!belowThreshold) return false
+
+    // Do not vertically-collapse children which have at least one long grandchild
+    const longGrandChild = squashNode.children.map(childId => this.layoutNodes.get(childId)).find(child => !this.isCollapsible(child))
+    if (longGrandChild) return false
+
+    return true
   }
 }
 
