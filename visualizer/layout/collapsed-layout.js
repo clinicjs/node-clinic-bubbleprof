@@ -152,7 +152,8 @@ class CollapsedLayout {
         if (longGrandChild) {
           continue
         }
-        combined = this.combineLayoutNodes(hostNode, squashNode)
+        // combineLayoutNodes() can cancel itself and return nothing; if so, keep previous value of combined
+        combined = this.combineLayoutNodes(hostNode, squashNode) || combined
       }
     }
     return combined
