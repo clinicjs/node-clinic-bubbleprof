@@ -128,7 +128,7 @@ class CollapsedLayout {
       }
       if (belowThreshold) {
         if (combined || prevTiny) {
-          combined = this.combinelayoutNodes(combined || prevTiny, child)
+          combined = this.combineLayoutNodes(combined || prevTiny, child)
         }
         prevTiny = child
       }
@@ -152,12 +152,12 @@ class CollapsedLayout {
         if (longGrandChild) {
           continue
         }
-        combined = this.combinelayoutNodes(hostNode, squashNode)
+        combined = this.combineLayoutNodes(hostNode, squashNode)
       }
     }
     return combined
   }
-  combinelayoutNodes (hostNode, squashNode) {
+  combineLayoutNodes (hostNode, squashNode) {
     if ([hostNode.node.constructor.name, squashNode.node.constructor.name].includes('ShortcutNode')) {
       return
     }
