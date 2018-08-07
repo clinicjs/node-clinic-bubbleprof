@@ -9,10 +9,6 @@ class Scale {
     this.layout = layout
     this.layoutNodes = null // set later
     this.heightMultiplier = 1 // applied to calculations here, and to threshold in collapse-layout.js
-
-    // Use a static window height before node collapsing, so view contents are consistent regardless of window size etc
-    // 680 is based on common window sizes and tested to give reasonable collapsing
-    this.sizeIndependentHeight = 680
   }
   // This simplified computation is necessary to ensure correct leaves order
   // when calculating the final scale factor
@@ -106,7 +102,7 @@ class Scale {
     }
     this.scaleFactor = validateNumber(this.decisiveWeight.weight)
 
-    const sizeIndependentHeight = this.sizeIndependentHeight * multiplier
+    const sizeIndependentHeight = this.layout.settings.sizeIndependentHeight * multiplier
     const sizeIndependentWeight = new ScaleWeight('size-independent', null, sizeIndependentHeight, longestStretched.scalableToContain, longestStretched.absoluteToContain)
     this.sizeIndependentScale = sizeIndependentWeight.weight
 
@@ -155,7 +151,7 @@ class Scale {
   }
 
   getScaleHeight (collapsed) {
-    return !this.isCollapsePending(collapsed) ? this.layout.settings.svgHeight : this.sizeIndependentHeight
+    return !this.isCollapsePending(collapsed) ? this.layout.settings.svgHeight : this.layout.settings.sizeIndependentHeight
   }
 
   getLineLength (dataValue) {
