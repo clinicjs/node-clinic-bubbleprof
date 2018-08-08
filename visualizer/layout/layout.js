@@ -234,6 +234,7 @@ class Layout {
   collapseNodes () {
     const collapsedLayout = new CollapsedLayout(this)
     this.layoutNodes = collapsedLayout.layoutNodes
+    if (this.settings.debugMode) this.collapsedLayout = collapsedLayout
   }
 
   getLayoutNodeSorter () {

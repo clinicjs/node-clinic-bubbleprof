@@ -359,5 +359,15 @@ test('Visualizer layout - scale - calculation height always greater thans longes
   ])
   */
 
+  // Test interaction with node collapsing - ensure collapse threshold is adjusted when scale alone can't fit
+  settings.collapseNodes = true
+  const layoutAdjustedThreshold = testLongNodeChains([
+    // Everything tiny so initially almost nothing can be collapsed
+    ['1.2.3.4.5', 1],
+    // Long enough chain that absolute total exceeds svgHeight
+    ['1.6' + Array(26).fill(7).map((num, index) => num + index).join('.'), 1]
+  ])
+  t.equals(layoutAdjustedThreshold.collapsedLayout.collapseThreshold.toFixed(2), '26.10')
+
   t.end()
 })
