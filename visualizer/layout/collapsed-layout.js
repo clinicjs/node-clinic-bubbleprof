@@ -45,19 +45,18 @@ class CollapsedLayout {
     this.layoutNodes = newLayoutNodes
   }
   setCollapseThreshold (settings, multiplier = 1) {
-    // Set an initial value to try out
+    // Set an initial value based on settings then test it
     this.collapseThreshold = settings.initialCollapseThreshold * multiplier
     const availableHeight = settings.sizeIndependentHeight
 
     pickLeavesByLongest(this.layoutNodes).forEach(layoutNode => {
       let isCollapsible
 
-      // Begin loop only if this stem's absolute total doesn't fit in the available space
-      let continueLoop = layoutNode.stem.lengths.absolute > availableHeight
-      while (continueLoop) {
-        // Loop will increase collapse threshold until this stem fits
+      // Begin loop if this stem's absolute total doesn't fit in the available space
+      let absoluteExceedsHeight = layoutNode.stem.lengths.absolute > availableHeight
+      while (absoluteExceedsHeight) {
+        // Loop increases collapse threshold until this stem fits
         const ancestorIds = layoutNode.stem.ancestors.ids
-        continueLoop = false
         let stemLengthAfterCollapse = 0
 
         // This should be impossible - but in case some bug is introduced, a warning and break is better than an infinite loop
@@ -73,7 +72,8 @@ class CollapsedLayout {
           const ancestorNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i])
 
           const childNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i + 1])
-          if (!childNode || this.topLayoutNodes.has(ancestorNode)) continue
+          const isMidpoint = childNode && !this.topLayoutNodes.has(ancestorNode)
+          if (!isMidpoint) continue
 
           isCollapsible = this.isVerticallyCollapsible(childNode, ancestorNode)
           if (isCollapsible === 'abort') break
@@ -84,11 +84,10 @@ class CollapsedLayout {
         if (isCollapsible === 'abort') break // Exit while loop too if it's not possible to collapse any further
 
         const stemAbsoluteAfterCollapse = layoutNode.stem.getAbsoluteLength(stemLengthAfterCollapse)
-        if (stemAbsoluteAfterCollapse > settings.sizeIndependentHeight) {
-          // Still doesn't fit - increase the collapse threshold and repeat
-          this.collapseThreshold = this.collapseThreshold * 1.05
-          continueLoop = true
-        }
+
+        // If this stem's absolute total still doesn't fit, increase the collapse threshold and loop until it does; else exit loop
+        absoluteExceedsHeight = stemAbsoluteAfterCollapse > settings.sizeIndependentHeight
+        if (absoluteExceedsHeight) this.collapseThreshold = this.collapseThreshold * 1.05
       }
     })
   }
