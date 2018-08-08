@@ -83,6 +83,13 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   t.deepEqual(actualAfter, ['1 => x1', 'x1 => 4', '4 => 5', '5 => '])
   t.deepEqual([ 2, 3 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
 
+  t.throws(() => {
+    const brokenLayout = new Layout({ dataNodes }, settings)
+    // Break the layout by giving a node a parent that isn't even in this layout
+    brokenLayout.layoutNodes.get(3).parent = layout.layoutNodes.get(2)
+    brokenLayout.generate()
+  }, new Error('Cannot combine nodes - clump/stem mismatch: 1=>2 + 3'))
+
   t.end()
 })
 
