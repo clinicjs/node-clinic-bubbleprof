@@ -60,8 +60,9 @@ class CollapsedLayout {
         continueLoop = false
         let stemLengthAfterCollapse = 0
 
+        // This should be impossible - but in case some bug is introduced, a warning and break is better than an infinite loop
+        /* istanbul ignore next */
         if (this.collapseThreshold / multiplier > availableHeight) {
-          // This should be impossible - but in case some bug is introduced, a warning is better than an infinite loop
           const details = `LayoutNode ${layoutNode.id}'s ${ancestorIds.length}-length stem won't collapse to fit ${availableHeight}px.`
           console.warn(`Infinite loop prevented. ${details}`)
           break
