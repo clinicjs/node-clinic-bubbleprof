@@ -439,12 +439,13 @@ test('Visualizer layout - collapse - naming', function (t) {
   layout = generateLayout(getNamedClusterNodes(dataSet, {
     3: 'a > a > a',
     4: 'b/e + bb',
-    5: 'c > c > c',
+    5: 'a > b > d',
     6: '... > d > d',
     7: 'b/e + ee',
-    8: 'c > c > c'
+    8: 'a > b > d'
   }), settings)
-  t.equal(layout.layoutNodes.get('x1').node.name, '…d… & a… & b/e… & c… & …bb')
+  // a… appears twice because everything in 'a > b > d' was already in the name, so falls back to [0]
+  t.equal(layout.layoutNodes.get('x1').node.name, '…d… & a… & b/e… & a… & …bb')
 
   t.end()
 })
