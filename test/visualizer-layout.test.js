@@ -83,6 +83,13 @@ test('Visualizer layout - collapse - collapses vertically (except root and Ps)',
   t.deepEqual(actualAfter, ['1 => x1', 'x1 => 4', '4 => 5', '5 => '])
   t.deepEqual([ 2, 3 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
 
+  t.throws(() => {
+    const brokenLayout = new Layout({ dataNodes }, settings)
+    // Break the layout by giving a node a parent that isn't even in this layout
+    brokenLayout.layoutNodes.get(3).parent = layout.layoutNodes.get(2)
+    brokenLayout.generate()
+  }, new Error('Cannot combine nodes - clump/stem mismatch: 1=>2 + 3'))
+
   t.end()
 })
 
@@ -432,12 +439,13 @@ test('Visualizer layout - collapse - naming', function (t) {
   layout = generateLayout(getNamedClusterNodes(dataSet, {
     3: 'a > a > a',
     4: 'b/e + bb',
-    5: 'c > c > c',
+    5: 'a > b > d',
     6: '... > d > d',
     7: 'b/e + ee',
-    8: 'c > c > c'
+    8: 'a > b > d'
   }), settings)
-  t.equal(layout.layoutNodes.get('x1').node.name, '…d… & a… & b/e… & c… & …bb')
+  // a… appears twice because everything in 'a > b > d' was already in the name, so falls back to [0]
+  t.equal(layout.layoutNodes.get('x1').node.name, '…d… & a… & b/e… & a… & …bb')
 
   t.end()
 })

@@ -6,7 +6,7 @@ const _ = {
 
 const { ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
-
+const { pickLeavesByLongest } = require('./stems.js')
 const { uniqueMapKey } = require('../validation.js')
 
 class CollapsedLayout {
@@ -18,14 +18,14 @@ class CollapsedLayout {
     this.scale = layout.scale
     this.minimumNodes = 3
 
-    this.collapseThreshold = 10 * this.scale.heightMultiplier
-
     // If debugging, expose one pool of ejected node IDs that is added to each time this class is initialized
     if (layout.settings.debugMode && !layout.ejectedLayoutNodeIds) layout.ejectedLayoutNodeIds = []
 
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
     // e.g. we could attach .topNodes or some iterator to Layout instances
     this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
+
+    this.setCollapseThreshold(layout.settings, this.scale.heightMultiplier)
 
     let topNodesIterator = this.topLayoutNodes.values()
     for (let i = 0; i < this.topLayoutNodes.size; ++i) {
@@ -43,6 +43,53 @@ class CollapsedLayout {
       this.indexLayoutNode(newLayoutNodes, topNode)
     }
     this.layoutNodes = newLayoutNodes
+  }
+  setCollapseThreshold (settings, multiplier = 1) {
+    // Set an initial value based on settings then test it
+    this.collapseThreshold = settings.initialCollapseThreshold * multiplier
+    const availableHeight = settings.sizeIndependentHeight
+
+    pickLeavesByLongest(this.layoutNodes).forEach(layoutNode => {
+      let isCollapsible
+
+      // Begin loop if this stem's absolute total doesn't fit in the available space
+      let absoluteExceedsHeight = layoutNode.stem.lengths.absolute > availableHeight
+      while (absoluteExceedsHeight) {
+        // Loop increases collapse threshold until this stem fits
+        const ancestorIds = layoutNode.stem.ancestors.ids
+        let stemLengthAfterCollapse = 0
+
+        // This should be impossible - but in case some bug is introduced, a warning and break is better than an infinite loop
+        /* istanbul ignore next */
+        if (this.collapseThreshold / multiplier > availableHeight) {
+          const details = `LayoutNode ${layoutNode.id}'s ${ancestorIds.length}-length stem won't collapse to fit ${availableHeight}px.`
+          console.warn(`Infinite loop prevented. ${details}`)
+          break
+        }
+
+        // Iterate backwards through ancestors i.e. from furthest ancestor first
+        for (let i = layoutNode.stem.ancestors.ids.length - 1; i >= 0; i--) {
+          const ancestorNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i])
+
+          const childNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i + 1])
+          const isMidpoint = childNode && !this.topLayoutNodes.has(ancestorNode)
+          if (!isMidpoint) continue
+
+          isCollapsible = this.isVerticallyCollapsible(childNode, ancestorNode)
+          if (isCollapsible === 'abort') break
+          if (!isCollapsible) {
+            stemLengthAfterCollapse += 1
+          }
+        }
+        if (isCollapsible === 'abort') break // Exit while loop too if it's not possible to collapse any further
+
+        const stemAbsoluteAfterCollapse = layoutNode.stem.getAbsoluteLength(stemLengthAfterCollapse)
+
+        // If this stem's absolute total still doesn't fit, increase the collapse threshold and loop until it does; else exit loop
+        absoluteExceedsHeight = stemAbsoluteAfterCollapse > settings.sizeIndependentHeight
+        if (absoluteExceedsHeight) this.collapseThreshold = this.collapseThreshold * 1.05
+      }
+    })
   }
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
@@ -139,19 +186,16 @@ class CollapsedLayout {
     let combined
     for (let i = 0; i < children.length; ++i) {
       const child = children[i]
-      const belowThreshold = child.collapsedNodes || this.isBelowThreshold(child)
+      const hostNode = combined || layoutNode
       const collapsedChild = this.collapseVertically(child)
-      if (this.countNonShortcutNodes() <= this.minimumNodes) {
-        break
-      }
-      if (belowThreshold && !this.topLayoutNodes.has(layoutNode)) {
-        const hostNode = combined || layoutNode
-        const squashNode = collapsedChild || child
-        // Do not vertically-collapse children which have at least one long grandchild
-        const longGrandChild = squashNode.children.map(childId => this.layoutNodes.get(childId)).find(child => !this.isCollapsible(child))
-        if (longGrandChild) {
-          continue
-        }
+
+      if (this.topLayoutNodes.has(layoutNode)) continue
+
+      const squashNode = collapsedChild || child
+      const isCollapsible = this.isVerticallyCollapsible(child, hostNode, squashNode)
+      if (isCollapsible) {
+        if (isCollapsible === 'abort') break
+
         // combineLayoutNodes() can cancel itself and return nothing; if so, keep previous value of combined
         combined = this.combineLayoutNodes(hostNode, squashNode) || combined
       }
@@ -211,6 +255,20 @@ class CollapsedLayout {
   }
   isCollapsible (layoutNode) {
     return layoutNode.collapsedNodes || this.isBelowThreshold(layoutNode)
+  }
+  isVerticallyCollapsible (childNode, hostNode, squashNode = childNode) {
+    if (this.countNonShortcutNodes() <= this.minimumNodes) {
+      return 'abort' // Can't squash beyond this point so we can tell calling function to stop
+    }
+
+    const belowThreshold = childNode.collapsedNodes || this.isBelowThreshold(childNode)
+    if (!belowThreshold) return false
+
+    // Do not vertically-collapse children which have at least one long grandchild
+    const longGrandChild = squashNode.children.map(childId => this.layoutNodes.get(childId)).find(child => !this.isCollapsible(child))
+    if (longGrandChild) return false
+
+    return true
   }
 }
 

@@ -325,6 +325,7 @@ test('Visualizer layout - scale - calculation height always greater thans longes
 
     const largestSize = layout.scale.decisiveWeight.absoluteToContain + layout.scale.decisiveWeight.scalableToContain * layout.scale.scaleFactor
     t.ok(layout.scale.finalSvgHeight > largestSize)
+    return layout
   }
 
   testLongNodeChains([
@@ -342,6 +343,14 @@ test('Visualizer layout - scale - calculation height always greater thans longes
     ['1.1601.' + Array(399).fill(1602).map((num, index) => num + index).join('.'), 5]
   ])
 
+  const layoutWithScaleModifier = testLongNodeChains([
+    // Small so scale factor is quite mild and scaledTotal can exceed svgHeight
+    ['1.2', 20],
+    // Just long enough to have an absolute just below the amount that fits in svgHeight
+    ['1.3.' + Array(20).fill(4).map((num, index) => num + index).join('.'), 5]
+  ])
+  t.equals(layoutWithScaleModifier.scale.decisiveWeight.modifier.toFixed(2), '0.57')
+
   /* TODO - fix error where this fails with error from arrayFlatten recursion being too deep
   // Very slow test - keep it commented out and uncomment as a smoke test for very large profile issues
   testLongNodeChains([
@@ -349,6 +358,16 @@ test('Visualizer layout - scale - calculation height always greater thans longes
     ['1.3.' + Array(9997).fill(4).map((num, index) => num + index).join('.'), 5]
   ])
   */
+
+  // Test interaction with node collapsing - ensure collapse threshold is adjusted when scale alone can't fit
+  settings.collapseNodes = true
+  const layoutAdjustedThreshold = testLongNodeChains([
+    // Everything tiny so initially almost nothing can be collapsed
+    ['1.2.3.4.5', 1],
+    // Long enough chain that absolute total exceeds svgHeight
+    ['1.6' + Array(26).fill(7).map((num, index) => num + index).join('.'), 1]
+  ])
+  t.equals(layoutAdjustedThreshold.collapsedLayout.collapseThreshold.toFixed(2), '26.10')
 
   t.end()
 })

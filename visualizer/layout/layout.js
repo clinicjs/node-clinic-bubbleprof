@@ -19,6 +19,11 @@ class Layout {
       svgHeight: 750,
       shortcutLength: 60,
       allowStretch: true,
+
+      // A static window height is used for node collapsing, so view contents are consistent regardless of window size etc
+      // 680 is based on common window sizes and tested to give reasonable collapsing
+      sizeIndependentHeight: 680,
+      initialCollapseThreshold: 10,
       debugMode: false
     }
     this.settings = Object.assign(defaultSettings, settings)
@@ -229,6 +234,7 @@ class Layout {
   collapseNodes () {
     const collapsedLayout = new CollapsedLayout(this)
     this.layoutNodes = collapsedLayout.layoutNodes
+    if (this.settings.debugMode) this.collapsedLayout = collapsedLayout
   }
 
   getLayoutNodeSorter () {
