@@ -1,6 +1,9 @@
 'use strict'
 const stream = require('stream')
 const RawEvent = require('./raw-event.js')
+const v8 = require('v8')
+
+const HEAP_MAX = v8.getHeapStatistics().heap_size_limit
 
 class JoinAsRawEvent extends stream.Readable {
   constructor (stackTrace, traceEvent) {
@@ -11,6 +14,8 @@ class JoinAsRawEvent extends stream.Readable {
     this._stackTrace = stackTrace
     this._stackTraceAsyncId = 0
     this._stackTraceEnded = false
+    this._reads = 0
+    this._destroyed = false
 
     this._traceEvent = traceEvent
     this._traceEventAsyncId = 0
@@ -44,6 +49,7 @@ class JoinAsRawEvent extends stream.Readable {
   }
 
   _maybeEnded () {
+    if (this._destroyed) return
     if (this._stackTraceEnded && this._traceEventEnded) {
       this.push(null)
     } else if (this._awaitRead) {
@@ -54,7 +60,18 @@ class JoinAsRawEvent extends stream.Readable {
   }
 
   _read (size) {
+    if (this._destroyed) return
+
     this._awaitRead = true
+    this._reads++
+
+    if ((this._reads & 4095) === 0 && !hasFreeMemory()) {
+      this._destroyed = true
+      this.push(null)
+      this._stackTrace.destroy()
+      this._traceEvent.destroy()
+      return
+    }
 
     // the asyncId's are approximatively incrementing. Descide what
     // stream to read from by selecting the one where the asyncId is lowest
@@ -85,4 +102,10 @@ class JoinAsRawEvent extends stream.Readable {
     }
   }
 }
+
 module.exports = JoinAsRawEvent
+
+function hasFreeMemory () {
+  const used = process.memoryUsage().heapTotal / HEAP_MAX
+  return used < 0.5
+}
