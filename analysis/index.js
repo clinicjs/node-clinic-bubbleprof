@@ -45,6 +45,9 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analy
     traceEventReader.pipe(new WrapAsTraceEvent())
   )
 
+  // Forward the truncate event so we can handle it in the UI and show a warning
+    .on('truncate', () => analysisStream.emit('truncate'))
+
   // SourceNode:
   // Combine the joined events into SourceNode's that combines all the data
   // for the same asyncId.
@@ -142,7 +145,13 @@ class Stringify extends stream.Transform {
 
     this._sep = '\n'
     this._analysis = analysis
+    this._warnings = []
+    this.on('warning', this._onwarning)
     this.push('{"data":[')
+  }
+
+  _onwarning (msg) {
+    this._warnings.push(msg)
   }
 
   _transform (data, enc, cb) {
@@ -154,7 +163,8 @@ class Stringify extends stream.Transform {
   _flush (cb) {
     const httpRequests = JSON.stringify(this._analysis.httpRequests)
     const runtime = JSON.stringify(this._analysis.runtime)
-    this.push(`],"httpRequests":${httpRequests},"runtime":${runtime}}`)
+    const warnings = JSON.stringify(this._warnings)
+    this.push(`],"httpRequests":${httpRequests},"runtime":${runtime},"warnings":${warnings}}`)
     cb()
   }
 }
@@ -168,8 +178,11 @@ function analysis (systemInfoReader, stackTraceReader, traceEventReader, opts) {
     result.start(systemInfo, stackTraceReader, traceEventReader)
   }))
 
-  if (opts && opts.stringify) return result.pipe(new Stringify(result))
-  return result
+  const stream = opts && opts.stringify ? result.pipe(new Stringify(result)) : result
+
+  result.on('truncate', () => stream.emit('warning', 'Truncating input data due to memory constraits'))
+
+  return stream
 }
 
 module.exports = analysis
