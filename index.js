@@ -121,6 +121,8 @@ class ClinicBubbleprof extends events.EventEmitter {
     const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
     const clinicFaviconBase64 = fs.createReadStream(clinicFaviconPath)
 
+    dataFile.on('warning', msg => this.emit('warning', msg))
+
     // create script-file stream
     const b = browserify({
       'basedir': __dirname,
