@@ -302,3 +302,43 @@ test('Raw Event - fast end event', function (t) {
   })
   setImmediate(() => join.read())
 })
+
+test('Raw Event - truncates when low on memory', function (t) {
+  var stackAsyncId = 1
+  var traceAsyncId = 1
+  var ticks = 0
+
+  const datas = []
+
+  const stackTrace = new stream.Readable({
+    objectMode: true,
+    read () {
+      this.push(new StackTrace({ asyncId: stackAsyncId++, frames: [] }))
+    }
+  })
+
+  const traceEvent = new stream.Readable({
+    objectMode: true,
+    read () {
+      this.push(new TraceEvent({
+        asyncId: traceAsyncId++,
+        timestamp: ticks++,
+        event: 'init',
+        type: 'custom',
+        triggerAsyncId: 0,
+        executionAsyncId: 0
+      }))
+    }
+  })
+
+  const join = new JoinAsRawEvent(stackTrace, traceEvent)
+
+  join.on('data', function (data) {
+    // keep the data around similar to the analysis to trigger
+    // high mem usage
+    datas.push(data)
+  })
+  join.on('truncate', function () {
+    t.end()
+  })
+})
