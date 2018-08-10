@@ -65,6 +65,7 @@ class JoinAsRawEvent extends stream.Readable {
     this._awaitRead = true
     this._reads++
 
+    /* istanbul ignore next */
     if ((this._reads & 4095) === 0 && !hasFreeMemory()) {
       this._destroyed = true
       this.emit('truncate')
