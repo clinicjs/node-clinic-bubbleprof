@@ -1,5 +1,5 @@
 # node-clinic-bubbleprof
-[![npm version][npm-version]][npm-url] [![Stability Experimental][stability-experimental]][stability-docs] [![CircleCI build status][circleci-status]][circleci-url] [![Appveyor build status][appveyor-status]][appveyor-url]
+[![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![CircleCI build status][circleci-status]][circleci-url] [![Appveyor build status][appveyor-status]][appveyor-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
 Programmable interface to [clinic][clinic-url] bubbleprof
@@ -56,7 +56,7 @@ Will consume the data file specified by `dataFilename`, this data file will be p
 ## License
 [GPL 3.0](LICENSE)
 
-[stability-experimental]: https://img.shields.io/badge/stability-experimental-orange.svg?style=flat-square
+[stability-stable]: https://img.shields.io/badge/stability-stable-green.svg?style=flat-square
 [stability-docs]: https://nodejs.org/api/documentation.html#documentation_stability_index
 [npm-version]: https://img.shields.io/npm/v/@nearform/bubbleprof.svg?style=flat-square
 [npm-url]: https://www.npmjs.org/@nearform/bubbleprof
