@@ -200,6 +200,7 @@ test('Cluster Node - cluster.insertBarrierNode', function (t) {
   const clusterNodeForward = new ClusterNode(2, 1)
   clusterNodeForward.insertBarrierNode(barrierNodeCombined)
   clusterNodeForward.insertBarrierNode(barrierNodeWrapper)
+  clusterNodeForward.sort()
   t.strictDeepEqual(
     clusterNodeForward.nodes.map((aggregateNode) => aggregateNode.aggregateId),
     [2, 3, 6]
@@ -208,6 +209,7 @@ test('Cluster Node - cluster.insertBarrierNode', function (t) {
   const clusterNodeBackward = new ClusterNode(2, 1)
   clusterNodeBackward.insertBarrierNode(barrierNodeWrapper)
   clusterNodeBackward.insertBarrierNode(barrierNodeCombined)
+  clusterNodeBackward.sort()
   t.strictDeepEqual(
     clusterNodeBackward.nodes.map((aggregateNode) => aggregateNode.aggregateId),
     [2, 3, 6]

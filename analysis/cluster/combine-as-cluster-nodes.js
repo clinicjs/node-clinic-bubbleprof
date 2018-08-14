@@ -71,6 +71,7 @@ class CombineAsClusterNodes extends stream.Transform {
     const queue = [1] // root has barrierId = 1
     while (queue.length > 0) {
       const clusterNode = this._clusterNodeStroage.get(queue.shift())
+      clusterNode.sort()
       this.push(clusterNode)
 
       // Add children of the newly updated node to the queue
