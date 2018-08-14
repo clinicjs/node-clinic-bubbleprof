@@ -1,7 +1,6 @@
 'use strict'
 
 const stream = require('stream')
-const JSONStream = require('JSONStream')
 
 class TraceEvent {
   constructor (data) {
@@ -31,6 +30,51 @@ class TraceEvent {
   }
 }
 
+class JSONParser extends stream.Transform {
+  constructor () {
+    super({
+      readableObjectMode: true,
+      writableObjectMode: false
+    })
+
+    this._skip = '{"traceEvents":['.length
+    this._buffer = null
+  }
+
+  _transform (data, enc, cb) {
+    if (this._skip) {
+      if (data.length <= this._skip) {
+        this._skip -= data.length
+        return cb(null)
+      }
+      data = data.slice(this._skip)
+      this._skip = 0
+    }
+
+    const str = this._buffer ? this._buffer + data.toString() : data.toString()
+    this._buffer = null
+
+    var start = 0
+    var end = 0
+
+    while ((end = str.indexOf('}},', start)) > -1) {
+      const msg = JSON.parse(str.slice(start, end + 2))
+      start = end + 3
+      this.push(msg)
+    }
+
+    this._buffer = str.slice(start)
+
+    return cb()
+  }
+
+  _flush (cb) {
+    const msg = JSON.parse(this._buffer.slice(0, this._buffer.indexOf('}}') + 2))
+    this.push(msg)
+    cb(null)
+  }
+}
+
 class TraceEventDecoder extends stream.Transform {
   constructor () {
     super({
@@ -38,9 +82,9 @@ class TraceEventDecoder extends stream.Transform {
       writableObjectMode: false
     })
 
-    // JSONStream is synchronous so there is no need to think about
+    // JSONParser is synchronous so there is no need to think about
     // backpresure
-    this.parser = JSONStream.parse('traceEvents.*')
+    this.parser = new JSONParser()
     this.parser.on('data', (data) => {
       switch (data.ph) {
         case 'b':
