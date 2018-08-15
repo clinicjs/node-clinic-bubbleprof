@@ -11,9 +11,19 @@ class ClusterNode {
     this.nodes = []
     this.children = []
     this.name = null
+
+    this._lastSort = 0
+  }
+
+  sort () {
+    if (this.nodes.length === this._lastSort) return
+    this._lastSort = this.nodes.length
+    this.nodes.sort(cmp)
   }
 
   [util.inspect.custom] (depth, options) {
+    this.sort()
+
     const nestedOptions = Object.assign({}, options, {
       depth: depth === null ? null : depth - 1
     })
@@ -51,6 +61,8 @@ class ClusterNode {
   }
 
   toJSON () {
+    this.sort()
+
     return {
       clusterId: this.clusterId,
       parentClusterId: this.parentClusterId,
@@ -71,8 +83,11 @@ class ClusterNode {
   insertBarrierNode (barrierNode) {
     if ((barrierNode.isRoot || !barrierNode.isWrapper) && !this.name) this.name = barrierNode.name
     this.nodes.push(...barrierNode.nodes)
-    this.nodes.sort((a, b) => a.aggregateId - b.aggregateId)
   }
 }
 
 module.exports = ClusterNode
+
+function cmp (a, b) {
+  return a.aggregateId - b.aggregateId
+}
