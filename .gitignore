@@ -62,3 +62,6 @@ typings/
 
 # OSX filesystem meta
 .DS_Store
+
+# Visual studio code
+.vscode
