@@ -14,6 +14,7 @@ const getLoggingPaths = require('./collect/get-logging-paths.js')
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
+const minifyStream = require('minify-stream')
 
 class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
@@ -134,7 +135,9 @@ class ClinicBubbleprof extends events.EventEmitter {
       'file': fakeDataPath
     })
     b.add(scriptPath)
-    const scriptFile = b.bundle()
+    const scriptFile = b
+      .bundle()
+      .pipe(minifyStream({ sourceMap: false, mangle: false }))
     // create style-file stream
     const styleFile = fs.createReadStream(stylePath)
 
