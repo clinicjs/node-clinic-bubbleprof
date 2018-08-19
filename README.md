@@ -7,6 +7,8 @@ Programmable interface to [clinic][clinic-url] bubbleprof
 ![banner](logo.png)
 
 ## Supported node versions
+
+Node.js 10.0.0 and above
 Node.js 9.4.0 and above
 Node.js 8.10.0 and above
 
