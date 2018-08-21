@@ -135,9 +135,11 @@ class ClinicBubbleprof extends events.EventEmitter {
       'file': fakeDataPath
     })
     b.add(scriptPath)
-    const scriptFile = b
-      .bundle()
-      .pipe(minifyStream({ sourceMap: false, mangle: false }))
+    const scriptFile = b.bundle()
+
+    if (/\bnode-clinic\b/i.test(process.env.NODE_DEBUG)) {
+      scriptFile.pipe(minifyStream({ sourceMap: false, mangle: false }))
+    }
     // create style-file stream
     const styleFile = fs.createReadStream(stylePath)
 
