@@ -25,6 +25,7 @@
   "keywords": [],
   "license": "GPL-3.0-or-later",
   "dependencies": {
+    "@nearform/trace-events-parser": "^1.0.0",
     "array-flatten": "^1.1.1",
     "async": "^2.5.0",
     "brfs": "^2.0.0",
