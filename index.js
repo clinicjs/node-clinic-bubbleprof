@@ -20,7 +20,13 @@ class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
     super()
 
-    this.detectPort = !!settings.detectPort
+    const {
+      detectPort = false,
+      debug = false
+    } = settings
+
+    this.detectPort = detectPort
+    this.debug = debug
   }
 
   collect (args, callback) {
@@ -137,7 +143,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     b.add(scriptPath)
     const scriptFile = b.bundle()
 
-    if (/\bnode-clinic\b/i.test(process.env.NODE_DEBUG)) {
+    if (!this.debug) {
       scriptFile.pipe(minifyStream({ sourceMap: false, mangle: false }))
     }
     // create style-file stream

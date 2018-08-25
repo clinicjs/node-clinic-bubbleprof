@@ -37,7 +37,14 @@ const ClinicBubbleprof = require('@nearform/bubbleprof')
 const bubbleprof = new ClinicBubbleprof()
 ```
 
-### `bubbleprof.collect(args, callback)`
+### new ClinicBubbleprof([settings])
+
+* settings [`<Object>`][]
+  * detectPort [`<boolean>`][] **Default**: false
+  * debug [`<boolean>`][] If set to true, the generated html will not be minified.
+    **Default**: false
+
+#### `bubbleprof.collect(args, callback)`
 
 Starts a process by using:
 
@@ -62,12 +69,6 @@ produced by the sampler using `bubbleprof.collect`.
 `outputFilename`. When completed the callback will be called with no extra
 arguments, except a possible error.
 
-### Debug mode
-
-The file generated after processing the data is minified by default. For
-debugging purposes it is possible to deactivate this with the `NODE_DEBUG`
-environment variable by setting it to `node-clinic`.
-
 ## License
 [GPL 3.0](LICENSE)
 
@@ -83,3 +84,5 @@ environment variable by setting it to `node-clinic`.
 [clinic-url]: https://github.com/nearform/node-clinic
 [appveyor-status]: https://ci.appveyor.com/api/projects/status/vnqc76526mjf0sdh/branch/master?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/nearForm/node-clinic-bubbleprof/branch/master
+[`<Object>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
+[`<boolean>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type
