@@ -22,6 +22,8 @@ class TraceEvent {
     this.timestamp = data.ts / 1000 // convert to ms
     this.triggerAsyncId = null
     this.executionAsyncId = null
+    // The trace event format changed in Node 11.0.0. To support both, old and
+    // new versions of Node, this checks for both data formats.
     const args = data.args.data || data.args
     if (args.hasOwnProperty('triggerAsyncId')) {
       this.triggerAsyncId = args.triggerAsyncId
