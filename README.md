@@ -1,4 +1,7 @@
 # node-clinic-bubbleprof
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/nearform/node-clinic-bubbleprof.svg)](https://greenkeeper.io/)
+
 [![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![CircleCI build status][circleci-status]][circleci-url] [![Appveyor build status][appveyor-status]][appveyor-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
