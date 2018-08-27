@@ -96,19 +96,19 @@ function checkTreeStructure (t, sourceNodes) {
   t.strictEqual(aggregateNodeUnknownParent.aggregateId, 11)
 
   t.strictDeepEqual(aggregateNodeRoot.mark.toJSON(),
-                    ['root', null, null])
+    ['root', null, null])
   t.strictDeepEqual(aggregateNodeServer.mark.toJSON(),
-                    ['nodecore', 'net', 'server'])
+    ['nodecore', 'net', 'server'])
   t.strictDeepEqual(aggregateNodeSocket.mark.toJSON(),
-                    ['nodecore', 'net', 'onconnection'])
+    ['nodecore', 'net', 'onconnection'])
   t.strictDeepEqual(aggregateNodeHttpParser.mark.toJSON(),
-                    ['nodecore', 'net', 'onrequest'])
+    ['nodecore', 'net', 'onrequest'])
   t.strictDeepEqual(aggregateNodeReady.mark.toJSON(),
-                    ['nodecore', null, null])
+    ['nodecore', null, null])
   t.strictDeepEqual(aggregateNodeWriteWrap.mark.toJSON(),
-                    ['nodecore', null, null])
+    ['nodecore', null, null])
   t.strictDeepEqual(aggregateNodeUnknownParent.mark.toJSON(),
-                    ['user', null, null])
+    ['user', null, null])
 }
 
 test('Aggregate Node - mark http - tcp', function (t) {

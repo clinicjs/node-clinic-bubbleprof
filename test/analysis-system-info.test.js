@@ -13,7 +13,7 @@ test('Stack Trace - isExternal', function (t) {
   t.strictEqual(modules.moduleDirectory, '/node_modules/internal')
   t.strictEqual(modulesDeep.moduleDirectory, '/node_modules/internal')
   t.strictEqual(modulesPrivate.moduleDirectory,
-               '/node_modules/@private/internal')
+    '/node_modules/@private/internal')
 
   t.end()
 })

@@ -230,7 +230,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
   const sourceNodeA = new FakeSourceNode({
     asyncId: 2,
     frames: [
-     { fileName: 'fileName.js', isToplevel: true }
+      { fileName: 'fileName.js', isToplevel: true }
     ],
     type: 'CUSTOM',
     triggerAsyncId: 1,
@@ -243,7 +243,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
   const sourceNodeB = new FakeSourceNode({
     asyncId: 3,
     frames: [
-     { fileName: 'fileName.js', isToplevel: true }
+      { fileName: 'fileName.js', isToplevel: true }
     ],
     type: 'CUSTOM',
     triggerAsyncId: 1,
@@ -293,7 +293,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
   const sourceNodeA = new FakeSourceNode({
     asyncId: 2,
     frames: [
-     { fileName: 'fileName.js', isToplevel: true }
+      { fileName: 'fileName.js', isToplevel: true }
     ],
     type: 'CUSTOM',
     triggerAsyncId: 1,
@@ -306,7 +306,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
   const sourceNodeB = new FakeSourceNode({
     asyncId: 3,
     frames: [
-     { fileName: 'fileName.js', isToplevel: true }
+      { fileName: 'fileName.js', isToplevel: true }
     ],
     type: 'CUSTOM',
     triggerAsyncId: 1,

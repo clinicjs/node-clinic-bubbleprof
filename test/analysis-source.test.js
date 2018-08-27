@@ -13,7 +13,7 @@ test('Source Node - sourceNode.inspect', function (t) {
   const sourceNode = new FakeSourceNode({
     asyncId: 2,
     frames: [
-     { fileName: 'fileName.js' }
+      { fileName: 'fileName.js' }
     ],
     type: 'CUSTOM',
     triggerAsyncId: 1,
@@ -42,7 +42,7 @@ test('Source Node - sourceNode.toJSON', function (t) {
   const sourceNode = new FakeSourceNode({
     asyncId: 2,
     frames: [
-     { fileName: 'fileName.js' }
+      { fileName: 'fileName.js' }
     ],
     type: 'CUSTOM',
     triggerAsyncId: 1,
