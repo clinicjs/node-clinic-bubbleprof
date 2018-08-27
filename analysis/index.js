@@ -48,73 +48,73 @@ function analysisPipeline (systemInfo, stackTraceReader, traceEventReader, analy
   // Forward the truncate event so we can handle it in the UI and show a warning
     .on('truncate', () => analysisStream.emit('truncate'))
 
-  // SourceNode:
-  // Combine the joined events into SourceNode's that combines all the data
-  // for the same asyncId.
-  // * Changing of parent relationship should be done on this later.
-  // NOTE: The source node stream can be any order, so be careful about
-  //       order assumtions.
+    // SourceNode:
+    // Combine the joined events into SourceNode's that combines all the data
+    // for the same asyncId.
+    // * Changing of parent relationship should be done on this later.
+    // NOTE: The source node stream can be any order, so be careful about
+    //       order assumtions.
     .pipe(new CombineAsSourceNodes())
-  // Remove SourceNode's that are not relevant.
+    // Remove SourceNode's that are not relevant.
     .pipe(new FilterSourceNodes())
-  // Restructure net. source nodes and the socket children.
+    // Restructure net. source nodes and the socket children.
     .pipe(new RestructureNetSourceNodes())
-  // Key each SourceNode with an identify hash.
+    // Key each SourceNode with an identify hash.
     .pipe(new IdentifySourceNodes())
-  // Analyse and find http request nodes
-  // We pass the stream instance as it populates the analysis digest
+    // Analyse and find http request nodes
+    // We pass the stream instance as it populates the analysis digest
     .pipe(new HTTPRequestNodes(analysisStream))
 
-  // AggregateNode:
-  // Aggregate SourceNode's that have the same asynchronous path.
-  // * Annotation related to the provider type or the stack should be done
-  //   one this layer.
-  // NOTE: The aggregate node stream is guaranteed to be in BFS order,
-  //       use this for your convenience. However, also avoid changing
-  //       the order.
+    // AggregateNode:
+    // Aggregate SourceNode's that have the same asynchronous path.
+    // * Annotation related to the provider type or the stack should be done
+    //   one this layer.
+    // NOTE: The aggregate node stream is guaranteed to be in BFS order,
+    //       use this for your convenience. However, also avoid changing
+    //       the order.
     .pipe(new CombineAsAggregateNodes())
-  // Mark {1,2,3}-party type
+    // Mark {1,2,3}-party type
     .pipe(new MarkPartyAggregateNodes(systemInfo))
-  // Mark external node_modules
+    // Mark external node_modules
     .pipe(new MarkModuleAggregateNodes(systemInfo))
-  // Mark HTTP server nodes
+    // Mark HTTP server nodes
     .pipe(new MarkHttpAggregateNodes())
-  // Name aggregate nodes
+    // Name aggregate nodes
     .pipe(new NameAggregateNodes(systemInfo))
 
-  // BarrierNode:
-  // Barriers are cut-off points in the aggregated tree. Initialize the tree
-  // with BarrierNodes that are just wrappers around AggregateNodes. These can
-  // then latter be merged together.
-  // Barriers are not clusters, they are constructed later in the pipeline.
-  // However, barriers provides a simple datastructure for creating clusters
-  // as they only combine direct children. They can be seen as a
-  // Finite-State-Machine.
-  // * Try to express as much of the clustering logic using barriers.
-  // NOTE: BFS ordering is maintained in the BarrierNodes too.
+    // BarrierNode:
+    // Barriers are cut-off points in the aggregated tree. Initialize the tree
+    // with BarrierNodes that are just wrappers around AggregateNodes. These can
+    // then latter be merged together.
+    // Barriers are not clusters, they are constructed later in the pipeline.
+    // However, barriers provides a simple datastructure for creating clusters
+    // as they only combine direct children. They can be seen as a
+    // Finite-State-Machine.
+    // * Try to express as much of the clustering logic using barriers.
+    // NOTE: BFS ordering is maintained in the BarrierNodes too.
     .pipe(new WrapAsBarrierNodes())
-  // Create barriers where the user callSite is the same
+    // Create barriers where the user callSite is the same
     .pipe(new MakeSynchronousBarrierNodes(systemInfo))
-  // Create barriers where one goes from user to external, or from external
-  // to user. External includes nodecore.
+    // Create barriers where one goes from user to external, or from external
+    // to user. External includes nodecore.
     .pipe(new MakeExternalBarrierNodes(systemInfo))
-  // Populates .name for each barrier node with a name corresponding
-  // to what the node represents. Fx, nodecore.http.server or external.my-module
+    // Populates .name for each barrier node with a name corresponding
+    // to what the node represents. Fx, nodecore.http.server or external.my-module
     .pipe(new NameBarrierNodes(systemInfo))
 
-  // ClusterNode:
-  // BarrierNodes that are not wrappers marks the beginning of a new
-  // ClusterNode. BarrierNodes that are just wrappers for an AggregateNode
-  // are merged into the same ClusterNode as its parent.
-  // * As it is hard to guarantee that certain AggregateNode patterns
-  //   will appear in the same cluster, post manipulation will likely involve
-  //   all cluster nodes. This makes manipulation rather difficult, so try
-  //   and express as much of the clustering logic using BarrierNodes.
-  //   If this is not possible, try and create the BarrierNodes such that
-  //   the AggregateNode pattern is guaranteed to be in the same cluster.
-  // NOTE: BFS ordering is maintained in the ClusterNodes too.
+    // ClusterNode:
+    // BarrierNodes that are not wrappers marks the beginning of a new
+    // ClusterNode. BarrierNodes that are just wrappers for an AggregateNode
+    // are merged into the same ClusterNode as its parent.
+    // * As it is hard to guarantee that certain AggregateNode patterns
+    //   will appear in the same cluster, post manipulation will likely involve
+    //   all cluster nodes. This makes manipulation rather difficult, so try
+    //   and express as much of the clustering logic using BarrierNodes.
+    //   If this is not possible, try and create the BarrierNodes such that
+    //   the AggregateNode pattern is guaranteed to be in the same cluster.
+    // NOTE: BFS ordering is maintained in the ClusterNodes too.
     .pipe(new CombineAsClusterNodes())
-  // Anonymise the stacks
+    // Anonymise the stacks
     .pipe(new AnonymiseClusterFrames(systemInfo))
 
   result.pipe(analysisStream)

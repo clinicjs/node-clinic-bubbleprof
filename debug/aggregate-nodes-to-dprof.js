@@ -34,9 +34,9 @@ class AggregateToDprof extends stream.Transform {
 
     // Calculate aggregated before and after times
     const before = [].concat(...node.sources.map((source) => source.before))
-                     .sort((a, b) => a - b)
+      .sort((a, b) => a - b)
     const after = [].concat(...node.sources.map((source) => source.after))
-                    .sort((a, b) => a - b)
+      .sort((a, b) => a - b)
 
     this._nodes.push({
       name: `${node.type} <${node.mark.format()}>`,
@@ -65,7 +65,7 @@ class AggregateToDprof extends stream.Transform {
 
   _flush (callback) {
     this.push(JSON.stringify({
-      version: '1.0.1',   // the version of dprof there generated this JSON file
+      version: '1.0.1', // the version of dprof there generated this JSON file
       total: this._offset(this._total), // execution time in nanoseconds
       root: {
         name: 'root',

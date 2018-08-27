@@ -290,7 +290,7 @@ test('Barrier Node - barrier.unwrapNode', function (t) {
   )
   t.throws(
     () => barrierNodeNotWrapper.unwrapNode(),
-     new Error('trying to unwrap non-wrap barrierNode: 2')
+    new Error('trying to unwrap non-wrap barrierNode: 2')
   )
   t.end()
 })

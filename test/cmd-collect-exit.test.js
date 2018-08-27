@@ -27,7 +27,7 @@ testNotWindows('cmd - collect - external SIGINT is relayed', function (t) {
     // Expect the WARNING output to be shown
     t.ok(output.stderr.toString().split('\n').length, 1)
     t.strictEqual(output.stdout.toString(),
-                  'listening for SIGINT\nSIGINT received\n')
+      'listening for SIGINT\nSIGINT received\n')
     t.end()
   })
 })
