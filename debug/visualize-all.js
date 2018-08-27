@@ -3,7 +3,7 @@
 const Tool = require('../')
 
 for (const file of process.argv.slice(2).map(trim)) {
-  const tool = new Tool()
+  const tool = new Tool({ debug: true })
 
   tool.visualize(
     file,

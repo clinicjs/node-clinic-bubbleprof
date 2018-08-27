@@ -10,8 +10,10 @@ Programmable interface to [clinic][clinic-url] bubbleprof
 ![banner](logo.png)
 
 ## Supported node versions
-Node.js 9.4.0 and above
-Node.js 8.10.0 and above
+
+* Node.js 10.0.0 and above
+* Node.js 9.4.0 and above
+* Node.js 8.10.0 and above
 
 ## Example
 
@@ -28,7 +30,8 @@ bubbleprof.collect(['node', './path-to-script.js'], function (err, filepath) {
 })
 ```
 
-To get started with bubbleprof you might want to take a look at the [examples repo](https://github.com/nearform/node-clinic-bubbleprof-examples).
+To get started with bubbleprof you might want to take a look at the [examples
+repo](https://github.com/nearform/node-clinic-bubbleprof-examples).
 
 ## Documentation
 
@@ -36,6 +39,13 @@ To get started with bubbleprof you might want to take a look at the [examples re
 const ClinicBubbleprof = require('@nearform/bubbleprof')
 const bubbleprof = new ClinicBubbleprof()
 ```
+
+### new ClinicBubbleprof([settings])
+
+* settings [`<Object>`][]
+  * detectPort [`<boolean>`][] **Default**: false
+  * debug [`<boolean>`][] If set to true, the generated html will not be minified.
+    **Default**: false
 
 #### `bubbleprof.collect(args, callback)`
 
@@ -46,15 +56,21 @@ const { spawn } = require('child_process')
 spawn(args[0], ['-r', 'sampler.js'].concat(args.slice(1)))
 ```
 
-The injected sampler will produce a file in the current working directory, with the process `PID` in its filename. The filepath relative to the current working directory will be the value in the callback.
+The injected sampler will produce a file in the current working directory, with
+the process `PID` in its filename. The filepath relative to the current working
+directory will be the value in the callback.
 
-stdout, stderr, and stdin will be relayed to the calling process. As will the `SIGINT` event.
+stdout, stderr, and stdin will be relayed to the calling process. As will the
+`SIGINT` event.
 
 #### `bubbleprof.visualize(dataFilename, outputFilename, callback)`
 
-Will consume the data file specified by `dataFilename`, this data file will be produced by the sampler using `bubbleprof.collect`.
+Will consume the data file specified by `dataFilename`, this data file will be
+produced by the sampler using `bubbleprof.collect`.
 
-`bubbleprof.visualize` will then output a standalone HTML file to `outputFilename`. When completed the callback will be called with no extra arguments, except a possible error.
+`bubbleprof.visualize` will then output a standalone HTML file to
+`outputFilename`. When completed the callback will be called with no extra
+arguments, except a possible error.
 
 ## License
 [GPL 3.0](LICENSE)
@@ -71,3 +87,5 @@ Will consume the data file specified by `dataFilename`, this data file will be p
 [clinic-url]: https://github.com/nearform/node-clinic
 [appveyor-status]: https://ci.appveyor.com/api/projects/status/vnqc76526mjf0sdh/branch/master?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/nearForm/node-clinic-bubbleprof/branch/master
+[`<Object>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
+[`<boolean>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type
