@@ -52,25 +52,7 @@ class BubbleprofUI extends EventEmitter {
     }
 
     if (this.originalUI === this) {
-      const nodeLinkSection = this.getNodeLinkSection()
-      this.backBtn = nodeLinkSection.addContent(undefined, {
-        hidden: true,
-        classNames: 'back-btn'
-      })
-      history.push(this)
-      this.on('navigation', ({ to, silent }) => {
-        history.push(to)
-        this.backBtn.isHidden = history.length < 2
-        this.backBtn.draw()
-
-        // Only update history if this navigation was not caused by history.
-        if (!silent) {
-          this.pushHistory(to.getHash())
-        }
-      })
-      this.on('setTopmostUI', (topMostUI) => {
-        this.topMostUI = topMostUI
-      })
+      this.setupHistory()
     }
   }
 
@@ -347,6 +329,28 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
+  setupHistory () {
+    const nodeLinkSection = this.getNodeLinkSection()
+    this.backBtn = nodeLinkSection.addContent(undefined, {
+      hidden: true,
+      classNames: 'back-btn'
+    })
+    history.push(this)
+    this.on('navigation', ({ to, silent }) => {
+      history.push(to)
+      this.backBtn.isHidden = history.length < 2
+      this.backBtn.draw()
+
+      // Only update history if this navigation was not caused by history.
+      if (!silent) {
+        this.pushHistory(to.getHash())
+      }
+    })
+    this.on('setTopmostUI', (topMostUI) => {
+      this.topMostUI = topMostUI
+    })
+  }
+
   pushHistory (hash) {
     window.history.pushState({ hash }, null, `#${hash || ''}`)
   }
@@ -369,6 +373,23 @@ class BubbleprofUI extends EventEmitter {
     }
     appendParentNode(uiWithinCollapsedNode.parentUI)
     return hashString
+  }
+
+  getHash () {
+    if (!this.layoutNode) {
+      return null
+    }
+
+    const dataNode = this.layoutNode.node
+    switch (dataNode.constructor.name) {
+      case 'ClusterNode':
+        return `c${dataNode.clusterId}`
+      case 'AggregateNode':
+        return `a${dataNode.aggregateId}`
+      case 'ArtificialNode':
+        return this.generateCollapsedNodeHash(this)
+    }
+    return null
   }
 
   parseCollapsedNodeHash () {
@@ -406,23 +427,6 @@ class BubbleprofUI extends EventEmitter {
         this.parseCollapsedNodeHash(window.location.hash)
         break
     }
-  }
-
-  getHash () {
-    if (!this.layoutNode) {
-      return null
-    }
-
-    const dataNode = this.layoutNode.node
-    switch (dataNode.constructor.name) {
-      case 'ClusterNode':
-        return `c${dataNode.clusterId}`
-      case 'AggregateNode':
-        return `a${dataNode.aggregateId}`
-      case 'ArtificialNode':
-        return this.generateCollapsedNodeHash(this)
-    }
-    return null
   }
 
   /**
