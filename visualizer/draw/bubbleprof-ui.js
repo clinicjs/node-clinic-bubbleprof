@@ -7,8 +7,6 @@ const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
 
-const history = []
-
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
     super()
@@ -335,24 +333,33 @@ class BubbleprofUI extends EventEmitter {
       hidden: true,
       classNames: 'back-btn'
     })
-    history.push(this)
-    this.on('navigation', ({ to, silent }) => {
-      history.push(to)
-      this.backBtn.isHidden = history.length < 2
-      this.backBtn.draw()
 
+    // Mark the current history entry (on page load) as the initial one.
+    // There is a `window.history.length` property, but it includes the entries
+    // _before_ the current page (eg. the github issue that linked to this
+    // visualization) so we can't use it here.
+    window.history.replaceState({ initial: true }, null, '')
+
+    this.on('navigation', ({ to, silent }) => {
       // Only update history if this navigation was not caused by history.
       if (!silent) {
         this.pushHistory(to.getHash())
       }
+
+      this.backBtn.isHidden = !this.hasHistoryEntries()
+      this.backBtn.draw()
     })
     this.on('setTopmostUI', (topMostUI) => {
       this.topMostUI = topMostUI
     })
   }
 
+  hasHistoryEntries () {
+    return window.history.state && !window.history.state.initial
+  }
+
   pushHistory (hash) {
-    window.history.pushState({ hash }, null, `#${hash || ''}`)
+    window.history.pushState({ hash, initial: false }, null, `#${hash || ''}`)
   }
 
   generateCollapsedNodeHash (uiWithinCollapsedNode) {
@@ -555,24 +562,13 @@ class BubbleprofUI extends EventEmitter {
   }
 
   stepBack (topMostUI) {
-    if (history.length < 2) {
+    if (!this.hasHistoryEntries()) {
       return
     }
     if (topMostUI.selectedDataNode) {
       return topMostUI.clearFrames()
     }
-    history.pop()
-    const lastUI = history[history.length - 1]
-    const lastLayoutNode = lastUI.layoutNode
-    this.backBtn.d3Element.classed('hidden', history.length < 2)
-
-    if (lastUI === this.originalUI) {
-      while (topMostUI.layoutNode) {
-        topMostUI = topMostUI.clearSublayout()
-      }
-      return
-    }
-    return topMostUI.jumpToNode(lastLayoutNode.node)
+    window.history.back()
   }
 
   setData (layout, dataSet) {
@@ -604,7 +600,9 @@ class BubbleprofUI extends EventEmitter {
     window.addEventListener('popstate', (event) => {
       const { hash } = event.state
       if (this.topMostUI) this.topMostUI.traverseUp(null, { silent: true })
-      this.parseHash(hash)
+      // If `hash` is nullish, we are navigating to the original UI,
+      // which we just did using traverseUp() above.
+      if (hash) this.parseHash(hash)
     })
   }
 
