@@ -58,10 +58,18 @@ class BubbleprofUI extends EventEmitter {
         classNames: 'back-btn'
       })
       history.push(this)
-      this.on('navigation', ({ to }) => {
+      this.on('navigation', ({ to, silent }) => {
         history.push(to)
         this.backBtn.isHidden = history.length < 2
         this.backBtn.draw()
+
+        // Only update history if this navigation was not caused by history.
+        if (!silent) {
+          this.pushHistory(to.getHash())
+        }
+      })
+      this.on('setTopmostUI', (topMostUI) => {
+        this.topMostUI = topMostUI
       })
     }
   }
@@ -196,23 +204,6 @@ class BubbleprofUI extends EventEmitter {
       } else {
         this.animate(false, onAnimationStep)
       }
-
-      if (this.parentUI.layoutNode) {
-        const dataNode = this.parentUI.layoutNode.node
-        switch (dataNode.constructor.name) {
-          case 'ClusterNode':
-            window.location.hash = 'c' + dataNode.clusterId
-            break
-          case 'AggregateNode':
-            window.location.hash = 'a' + dataNode.aggregateId
-            break
-          case 'ArtificialNode':
-            window.location.hash = this.generateCollapsedNodeHash(this.parentUI)
-            break
-        }
-      } else {
-        window.location.hash = ''
-      }
     }
 
     // Close the frames panel if it's open
@@ -270,7 +261,6 @@ class BubbleprofUI extends EventEmitter {
         return this
 
       case 'ClusterNode':
-        window.location.hash = 'c' + dataNode.clusterId
         if (dataNode.nodes.size === 1) {
           // If there's only one aggregateNode, just select it
           this.selectedDataNode = dataNode.nodes.values().next().value
@@ -285,7 +275,6 @@ class BubbleprofUI extends EventEmitter {
       case 'ArtificialNode':
         this.selectedDataNode = dataNode
         const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
-        window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
         return uiWithinCollapsedNode
     }
   }
@@ -294,7 +283,6 @@ class BubbleprofUI extends EventEmitter {
     const thisUI = this
     return () => {
       thisUI.outputFrames(dataNode, layoutNode)
-      window.location.hash = 'a' + dataNode.aggregateId
     }
   }
 
@@ -359,6 +347,10 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
+  pushHistory (hash) {
+    window.history.pushState({ hash }, null, `#${hash || ''}`)
+  }
+
   generateCollapsedNodeHash (uiWithinCollapsedNode) {
     let hashString = uiWithinCollapsedNode.layoutNode.id
     const appendParentNode = (parentUI) => {
@@ -394,7 +386,43 @@ class BubbleprofUI extends EventEmitter {
         targetUI = targetUI.jumpToNode(clusterNode)
       }
     }
-    this.emit('navigation', { from: this, to: targetUI })
+    this.emit('navigation', { from: this, to: targetUI, silent: true })
+  }
+
+  parseHash (hash) {
+    const id = parseInt(hash.slice(1))
+    switch (hash.charAt(0)) {
+      case 'a':
+        const aggregateNode = this.dataSet.aggregateNodes.get(id)
+        const uiWithinAggregate = this.jumpToNode(aggregateNode)
+        this.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
+        break
+      case 'c':
+        const clusterNode = this.dataSet.clusterNodes.get(id)
+        const uiWithinCluster = this.jumpToNode(clusterNode)
+        this.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
+        break
+      case 'x':
+        this.parseCollapsedNodeHash(window.location.hash)
+        break
+    }
+  }
+
+  getHash () {
+    if (!this.layoutNode) {
+      return null
+    }
+
+    const dataNode = this.layoutNode.node
+    switch (dataNode.constructor.name) {
+      case 'ClusterNode':
+        return `c${dataNode.clusterId}`
+      case 'AggregateNode':
+        return `a${dataNode.aggregateId}`
+      case 'ArtificialNode':
+        return this.generateCollapsedNodeHash(this)
+    }
+    return null
   }
 
   /**
@@ -492,14 +520,16 @@ class BubbleprofUI extends EventEmitter {
       })
   }
 
-  traverseUp (targetUI = null) {
+  // Clear sublayouts until the topmost layout is `targetUI`, or the original UI if no target is given.
+  // Pass `{ silent: true }` to avoid updating the hash when this is called in response to a history update.
+  traverseUp (targetUI = null, { silent = false } = {}) {
     let currentUI = this
     const animationQueue = []
     while (currentUI !== targetUI && currentUI.parentUI) {
       currentUI = currentUI.clearSublayout(animationQueue)
     }
     if (currentUI !== this) {
-      this.originalUI.emit('navigation', { from: this, to: currentUI })
+      this.originalUI.emit('navigation', { from: this, to: currentUI, silent })
       executeAnimationQueue(animationQueue)
     }
   }
@@ -508,19 +538,14 @@ class BubbleprofUI extends EventEmitter {
   // This does not record opening frames
   // This does record pressing ESC and close button
   initializeBackButton () {
-    let topMostUI = this
-    this.on('setTopmostUI', (newTopmostUI) => {
-      topMostUI = newTopmostUI
-    })
-
     this.backBtn.d3Element
       .classed('hidden', true)
-      .on('click', () => this.stepBack(topMostUI))
+      .on('click', () => this.stepBack(this.topMostUI))
 
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 8 && e.target.nodeName.toLowerCase() !== 'input') {
         // Backspace button
-        this.stepBack(topMostUI)
+        this.stepBack(this.topMostUI)
       }
     })
   }
@@ -568,24 +593,15 @@ class BubbleprofUI extends EventEmitter {
 
     if (window.location.hash) {
       setTimeout(() => {
-        const id = parseInt(window.location.hash.slice(2))
-        switch (window.location.hash.charAt(1)) {
-          case 'a':
-            const aggregateNode = this.dataSet.aggregateNodes.get(id)
-            const uiWithinAggregate = this.jumpToNode(aggregateNode)
-            this.emit('navigation', { from: this, to: uiWithinAggregate })
-            break
-          case 'c':
-            const clusterNode = this.dataSet.clusterNodes.get(id)
-            const uiWithinCluster = this.jumpToNode(clusterNode)
-            this.emit('navigation', { from: this, to: uiWithinCluster })
-            break
-          case 'x':
-            this.parseCollapsedNodeHash(window.location.hash)
-            break
-        }
+        this.parseHash(window.location.hash.slice(1))
       })
     }
+
+    window.addEventListener('popstate', (event) => {
+      const { hash } = event.state
+      if (this.topMostUI) this.topMostUI.traverseUp(null, { silent: true })
+      this.parseHash(hash)
+    })
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
