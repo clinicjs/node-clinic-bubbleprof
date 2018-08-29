@@ -551,22 +551,19 @@ class BubbleprofUI extends EventEmitter {
   initializeBackButton () {
     this.backBtn.d3Element
       .classed('hidden', true)
-      .on('click', () => this.stepBack(this.topMostUI))
+      .on('click', () => this.stepBack())
 
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 8 && e.target.nodeName.toLowerCase() !== 'input') {
         // Backspace button
-        this.stepBack(this.topMostUI)
+        this.stepBack()
       }
     })
   }
 
-  stepBack (topMostUI) {
+  stepBack () {
     if (!this.hasHistoryEntries()) {
       return
-    }
-    if (topMostUI.selectedDataNode) {
-      return topMostUI.clearFrames()
     }
     window.history.back()
   }
@@ -599,7 +596,13 @@ class BubbleprofUI extends EventEmitter {
 
     window.addEventListener('popstate', (event) => {
       const { hash } = event.state
-      if (this.topMostUI) this.topMostUI.traverseUp(null, { silent: true })
+      if (this.topMostUI) {
+        this.topMostUI.traverseUp(null, { silent: true })
+        // Close stack frames when moving away from their node.
+        if (this.topMostUI.selectedDataNode) {
+          this.topMostUI.clearFrames()
+        }
+      }
       // If `hash` is nullish, we are navigating to the original UI,
       // which we just did using traverseUp() above.
       if (hash) this.parseHash(hash)
