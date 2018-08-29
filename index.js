@@ -121,7 +121,7 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     // create dataFile
     const dataFile = analysis(
-      systemInfoReader, stackTraceReader, traceEventReader, {stringify: true}
+      systemInfoReader, stackTraceReader, traceEventReader, { stringify: true }
     )
     // add logos
     const logoFile = fs.createReadStream(logoPath)

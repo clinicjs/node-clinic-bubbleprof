@@ -8,7 +8,7 @@ const { FakeSourceNode } = require('./analysis-util')
 test('Source Node - http requests', function (t) {
   const nodeServerResponse = new FakeSourceNode({
     asyncId: 1,
-    frames: [{typeName: 'ServerResponse', functionName: 'end'}],
+    frames: [{ typeName: 'ServerResponse', functionName: 'end' }],
     type: 'TickObject',
     triggerAsyncId: 0,
     executionAsyncId: 0,
@@ -35,7 +35,7 @@ test('Source Node - http requests', function (t) {
     destroy: 2
   })
 
-  const digest = {runtime: 0, httpRequests: []}
+  const digest = { runtime: 0, httpRequests: [] }
   const stream = startpoint([nodeServerResponse, nodeNoStack, nodeTimer], { objectMode: true })
     .pipe(new HTTPRequestNodes(digest))
 

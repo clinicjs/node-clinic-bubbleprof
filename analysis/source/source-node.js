@@ -44,7 +44,7 @@ class SourceNode {
     return this.identifier && crypto.createHash('sha256').update(this.identifier).digest('hex')
   }
 
-  toJSON ({short} = {short: false}) {
+  toJSON ({ short } = { short: false }) {
     const json = {
       asyncId: this.asyncId,
       parentAsyncId: this.parentAsyncId,

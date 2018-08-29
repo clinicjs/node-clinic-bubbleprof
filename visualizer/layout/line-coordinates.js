@@ -87,18 +87,18 @@ class LineCoordinates {
     return { x: this.x1 + (vector.x * normalizedLength), y: this.y1 + (vector.y * normalizedLength) }
   }
 
-  static lineEndpoints ({length, radians, x1, y1}) {
+  static lineEndpoints ({ length, radians, x1, y1 }) {
     return {
       x2: x1 + length * Math.cos(radians),
       y2: y1 + length * Math.sin(radians)
     }
   }
 
-  static lineLengthFromXY ({x1, y1, x2, y2}) {
+  static lineLengthFromXY ({ x1, y1, x2, y2 }) {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
   }
 
-  static radiansFromXY ({x1, y1, x2, y2}) {
+  static radiansFromXY ({ x1, y1, x2, y2 }) {
     return Math.atan2(y2 - y1, x2 - x1)
   }
 

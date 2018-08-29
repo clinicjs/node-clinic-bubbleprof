@@ -161,9 +161,9 @@ function drawOuterUI () {
   const nodeLink = ui.sections.get('node-link')
   nodeLink.addLoadingAnimation()
 
-  const nodeLinkSVG = nodeLink.addContent('SvgContainer', {id: 'node-link-svg', svgBounds: {}})
+  const nodeLinkSVG = nodeLink.addContent('SvgContainer', { id: 'node-link-svg', svgBounds: {} })
 
-  nodeLink.addContent('HoverBox', {svg: nodeLinkSVG})
+  nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')

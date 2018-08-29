@@ -7,7 +7,7 @@ const { FakeAggregateNode, FakeSourceNode } = require('./analysis-util')
 
 test('Aggregate Node - aggregate.mark.format', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
-  t.strictDeepEqual(util.inspect(aggregateNode.mark, {depth: -1}), '<Mark>')
+  t.strictDeepEqual(util.inspect(aggregateNode.mark, { depth: -1 }), '<Mark>')
 
   t.strictDeepEqual(aggregateNode.mark.format(), 'null')
   aggregateNode.mark.set(0, 'party')
@@ -28,7 +28,7 @@ test('Aggregate Node - aggregate.mark.format', function (t) {
 
 test('Aggregate Node - aggregate.mark.inspect', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
-  t.strictDeepEqual(util.inspect(aggregateNode.mark, {depth: -1}), '<Mark>')
+  t.strictDeepEqual(util.inspect(aggregateNode.mark, { depth: -1 }), '<Mark>')
 
   t.strictDeepEqual(util.inspect(aggregateNode.mark), '<Mark null>')
   aggregateNode.mark.set(0, 'party')
@@ -139,7 +139,7 @@ test('Aggregate Node - aggregate.inspect', function (t) {
   )
 
   t.strictEqual(
-    util.inspect(aggregateNode, {depth: -1}),
+    util.inspect(aggregateNode, { depth: -1 }),
     '<AggregateNode>'
   )
 

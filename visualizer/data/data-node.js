@@ -100,10 +100,10 @@ class ClusterNode extends DataNode {
 
     // These contain decimals referring to the portion of a clusterNode's delay attributable to some label
     this.decimals = {
-      type: {between: new Map(), within: new Map()}, // Node async_hook types: 'HTTPPARSER', 'TickObject'...
+      type: { between: new Map(), within: new Map() }, // Node async_hook types: 'HTTPPARSER', 'TickObject'...
       // TODO: subTypeCategories stats
-      typeCategory: {between: new Map(), within: new Map()}, // Defined in .getAsyncTypeCategories() below
-      party: {between: new Map(), within: new Map()} // From .mark - 'user', 'module' or 'nodecore'
+      typeCategory: { between: new Map(), within: new Map() }, // Defined in .getAsyncTypeCategories() below
+      party: { between: new Map(), within: new Map() } // From .mark - 'user', 'module' or 'nodecore'
     }
 
     this.nodes = new Map()

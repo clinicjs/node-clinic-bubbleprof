@@ -98,7 +98,7 @@ class WallTime {
   constructor (slicesCount) {
     // Creates array of wall time slices, based on typical width of the chart they're to be drawn in, to be scalable
     this.slicesCount = slicesCount
-    this.slices = Array.from({length: this.slicesCount}, () => createWallTimeSlice())
+    this.slices = Array.from({ length: this.slicesCount }, () => createWallTimeSlice())
 
     // Set in callback-event.js AllCallbackEvents.add()
     this.profileStart = 0 // Timestamp of first .init
