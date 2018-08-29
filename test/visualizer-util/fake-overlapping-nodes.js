@@ -27,21 +27,21 @@ const dummyCallbackEvents = [
 ]
 
 const dummyClusterNodes = {
-  A: {nodes: ['root', 'a', 'b', 'c']},
-  B: {nodes: ['d', 'f', 'g'], parentClusterId: 'A'},
-  C: {nodes: ['e', 'h'], parentClusterId: 'A'}
+  A: { nodes: ['root', 'a', 'b', 'c'] },
+  B: { nodes: ['d', 'f', 'g'], parentClusterId: 'A' },
+  C: { nodes: ['e', 'h'], parentClusterId: 'A' }
 }
 
 const dummyAggregateNodes = {
-  root: {isRoot: true},
-  a: {parentAggregateId: 'root', type: 'ZLIB', mark: ['module', null, null]},
-  b: {parentAggregateId: 'root', type: 'GETADDRINFOREQWRAP', mark: ['nodecore', null, null]},
-  c: {parentAggregateId: 'a', type: 'UDPSENDWRAP', mark: ['nodecore', null, null]},
-  d: {parentAggregateId: 'c', type: 'PROCESSWRAP', mark: ['user', null, null]},
-  e: {parentAggregateId: 'b', type: 'someCustomType', mark: ['module', null, null]},
-  f: {parentAggregateId: 'd', type: 'FSEVENTWRAP', mark: ['module', null, null]},
-  g: {parentAggregateId: 'f', type: 'PROCESSWRAP', mark: ['nodecore', null, null]},
-  h: {parentAggregateId: 'a', type: 'ANOTHERCUSTOMTYPE', mark: ['user', null, null]}
+  root: { isRoot: true },
+  a: { parentAggregateId: 'root', type: 'ZLIB', mark: ['module', null, null] },
+  b: { parentAggregateId: 'root', type: 'GETADDRINFOREQWRAP', mark: ['nodecore', null, null] },
+  c: { parentAggregateId: 'a', type: 'UDPSENDWRAP', mark: ['nodecore', null, null] },
+  d: { parentAggregateId: 'c', type: 'PROCESSWRAP', mark: ['user', null, null] },
+  e: { parentAggregateId: 'b', type: 'someCustomType', mark: ['module', null, null] },
+  f: { parentAggregateId: 'd', type: 'FSEVENTWRAP', mark: ['module', null, null] },
+  g: { parentAggregateId: 'f', type: 'PROCESSWRAP', mark: ['nodecore', null, null] },
+  h: { parentAggregateId: 'a', type: 'ANOTHERCUSTOMTYPE', mark: ['user', null, null] }
 }
 
 /**

@@ -7,19 +7,19 @@ const {
 } = require('./fake-overlapping-nodes.js')
 
 const newAggregateNodes = {
-  i: {parentAggregateId: 'g'},
-  j: {parentAggregateId: 'i'},
-  k: {parentAggregateId: 'i'},
-  l: {parentAggregateId: 'j'},
-  m: {parentAggregateId: 'g'},
-  n: {parentAggregateId: 'm'}
+  i: { parentAggregateId: 'g' },
+  j: { parentAggregateId: 'i' },
+  k: { parentAggregateId: 'i' },
+  l: { parentAggregateId: 'j' },
+  m: { parentAggregateId: 'g' },
+  n: { parentAggregateId: 'm' }
 }
 Object.entries(newAggregateNodes).forEach(keyValue => aggregateNodes.set(keyValue[0], keyValue[1]))
 
 const newClusterNodes = {
-  D: {nodes: ['i', 'j', 'k', 'l'], parentClusterId: 'B'},
-  E: {nodes: ['m'], parentClusterId: 'B'},
-  F: {nodes: ['n'], parentClusterId: 'E'}
+  D: { nodes: ['i', 'j', 'k', 'l'], parentClusterId: 'B' },
+  E: { nodes: ['m'], parentClusterId: 'B' },
+  F: { nodes: ['n'], parentClusterId: 'E' }
 }
 Object.entries(newClusterNodes).forEach(keyValue => clusterNodes.set(keyValue[0], keyValue[1]))
 

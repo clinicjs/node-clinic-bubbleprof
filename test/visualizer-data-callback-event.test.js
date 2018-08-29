@@ -9,7 +9,7 @@ const {
 } = require('./visualizer-util/prepare-fake-nodes.js')
 
 // Create real DataSet from fake data
-const dataSet = new DataSet({data: fakeNodes}, { wallTimeSlices: 100 })
+const dataSet = new DataSet({ data: fakeNodes }, { wallTimeSlices: 100 })
 dataSet.processData()
 
 // Fake data prepared.

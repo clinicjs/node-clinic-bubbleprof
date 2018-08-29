@@ -148,8 +148,8 @@ class BubbleprofUI extends EventEmitter {
       sublayoutHtml.addCollapseControl()
       const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
-      const sublayoutSvg = sublayoutHtml.addContent('SvgContainer', {id: 'sublayout-svg', svgBounds: {}})
-      sublayoutHtml.addContent('HoverBox', {svg: sublayoutSvg})
+      const sublayoutSvg = sublayoutHtml.addContent('SvgContainer', { id: 'sublayout-svg', svgBounds: {} })
+      sublayoutHtml.addContent('HoverBox', { svg: sublayoutSvg })
 
       uiWithinSublayout.initializeElements()
 

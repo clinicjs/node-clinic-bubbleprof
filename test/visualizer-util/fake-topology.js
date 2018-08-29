@@ -65,7 +65,7 @@ function mockTopology (topology) {
       clusterNodes.set(id, clusterNode)
     }
   }
-  return {data: [...clusterNodes.values()]}
+  return { data: [...clusterNodes.values()] }
 }
 
 function topologyToSplitArrays (topology, numeric = true) {

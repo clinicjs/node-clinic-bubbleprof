@@ -19,7 +19,7 @@ function upsert (nodes, id) {
 
 class HTTPRequestNodes extends Transform {
   constructor (analysis) {
-    super({readableObjectMode: true, writableObjectMode: true})
+    super({ readableObjectMode: true, writableObjectMode: true })
     this._nodes = new Map()
     this._minTime = 0
     this._maxTime = 0

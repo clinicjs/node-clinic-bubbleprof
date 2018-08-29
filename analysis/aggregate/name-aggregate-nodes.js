@@ -2,7 +2,7 @@ const { Transform } = require('stream')
 
 class Name extends Transform {
   constructor (sysInfo) {
-    super({writableObjectMode: true, readableObjectMode: true})
+    super({ writableObjectMode: true, readableObjectMode: true })
     this.systemInfo = sysInfo
   }
 

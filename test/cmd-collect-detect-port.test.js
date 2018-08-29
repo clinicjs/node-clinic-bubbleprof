@@ -5,7 +5,7 @@ const http = require('http')
 const CollectAndRead = require('./collect-and-read.js')
 
 test('cmd - collect - detect server port', function (t) {
-  const cmd = new CollectAndRead({detectPort: true}, '-e', `
+  const cmd = new CollectAndRead({ detectPort: true }, '-e', `
     const http = require('http')
     http.createServer(onrequest).listen(0)
 
