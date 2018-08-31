@@ -399,7 +399,7 @@ class BubbleprofUI extends EventEmitter {
     return null
   }
 
-  parseCollapsedNodeHash (hash) {
+  jumpToCollapsedNodeHash (hash) {
     const nodeIds = hash.slice(1).split('-')
     let targetUI = this
     const animationQueue = []
@@ -418,7 +418,7 @@ class BubbleprofUI extends EventEmitter {
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
 
-  parseHash (hash) {
+  jumpToHash (hash) {
     const id = parseInt(hash.slice(1))
     switch (hash.charAt(0)) {
       case 'a':
@@ -432,7 +432,7 @@ class BubbleprofUI extends EventEmitter {
         this.originalUI.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
         break
       case 'x':
-        this.parseCollapsedNodeHash(window.location.hash)
+        this.jumpToCollapsedNodeHash(window.location.hash)
         break
     }
   }
@@ -591,7 +591,7 @@ class BubbleprofUI extends EventEmitter {
 
     if (window.location.hash) {
       setTimeout(() => {
-        this.parseHash(window.location.hash.slice(1))
+        this.jumpToHash(window.location.hash.slice(1))
       })
     }
 
@@ -605,7 +605,7 @@ class BubbleprofUI extends EventEmitter {
       }
 
       if (hash) {
-        this.topMostUI.parseHash(hash)
+        this.topMostUI.jumpToHash(hash)
       } else {
         // If we don't have a hash, we're navigating to the original UI.
         this.topMostUI.traverseUp(null, { silent: true })
