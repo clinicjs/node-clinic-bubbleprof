@@ -407,6 +407,17 @@ class BubbleprofUI extends EventEmitter {
     let targetUI = this
     const animationQueue = []
 
+    // If we have any cluster nodes, we jump to that below first, and then drill
+    // into that node for collapsed nodes.
+    // But if all the nodes in the path are collapsed nodes, we start searching
+    // from the original UI. This is because collapsed nodes are only known
+    // in their parent layout, not globally (like cluster nodes).
+    if (nodeIds[nodeIds.length - 1].charAt(0) === 'x') {
+      while (targetUI.parentUI) {
+        targetUI = targetUI.clearSublayout(animationQueue)
+      }
+    }
+
     console.group(`parseCollapsedNodeHash ${hash}`)
     for (var i = nodeIds.length - 1; i >= 0; i--) {
       const nodeId = nodeIds[i]
