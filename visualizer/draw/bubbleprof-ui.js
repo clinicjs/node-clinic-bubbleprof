@@ -402,16 +402,17 @@ class BubbleprofUI extends EventEmitter {
   parseCollapsedNodeHash (hash) {
     const nodeIds = hash.slice(1).split('-')
     let targetUI = this
+    const animationQueue = []
 
     for (var i = nodeIds.length - 1; i >= 0; i--) {
       const nodeId = nodeIds[i]
       if (nodeId.charAt(0) === 'x') {
         const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
-        targetUI = targetUI.selectNode(layoutNode)
+        targetUI = targetUI.selectNode(layoutNode, animationQueue)
       } else {
         const clusterId = parseInt(nodeId.slice(1))
         const clusterNode = this.dataSet.clusterNodes.get(clusterId)
-        targetUI = targetUI.jumpToNode(clusterNode)
+        targetUI = targetUI.jumpToNode(clusterNode, animationQueue)
       }
     }
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
