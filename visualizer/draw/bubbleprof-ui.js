@@ -399,8 +399,8 @@ class BubbleprofUI extends EventEmitter {
     return null
   }
 
-  parseCollapsedNodeHash () {
-    const nodeIds = window.location.hash.slice(1).split('-')
+  parseCollapsedNodeHash (hash) {
+    const nodeIds = hash.slice(1).split('-')
     let targetUI = this
 
     for (var i = nodeIds.length - 1; i >= 0; i--) {
@@ -414,7 +414,7 @@ class BubbleprofUI extends EventEmitter {
         targetUI = targetUI.jumpToNode(clusterNode)
       }
     }
-    this.emit('navigation', { from: this, to: targetUI, silent: true })
+    this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
 
   parseHash (hash) {
@@ -423,12 +423,12 @@ class BubbleprofUI extends EventEmitter {
       case 'a':
         const aggregateNode = this.dataSet.aggregateNodes.get(id)
         const uiWithinAggregate = this.jumpToNode(aggregateNode)
-        this.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
+        this.originalUI.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
         break
       case 'c':
         const clusterNode = this.dataSet.clusterNodes.get(id)
         const uiWithinCluster = this.jumpToNode(clusterNode)
-        this.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
+        this.originalUI.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
         break
       case 'x':
         this.parseCollapsedNodeHash(window.location.hash)
@@ -597,15 +597,18 @@ class BubbleprofUI extends EventEmitter {
     window.addEventListener('popstate', (event) => {
       const { hash } = event.state
       if (this.topMostUI) {
-        this.topMostUI.traverseUp(null, { silent: true })
         // Close stack frames when moving away from their node.
         if (this.topMostUI.selectedDataNode) {
           this.topMostUI.clearFrames()
         }
       }
-      // If `hash` is nullish, we are navigating to the original UI,
-      // which we just did using traverseUp() above.
-      if (hash) this.parseHash(hash)
+
+      if (hash) {
+        this.topMostUI.parseHash(hash)
+      } else {
+        // If we don't have a hash, we're navigating to the original UI.
+        this.topMostUI.traverseUp(null, { silent: true })
+      }
     })
   }
 
