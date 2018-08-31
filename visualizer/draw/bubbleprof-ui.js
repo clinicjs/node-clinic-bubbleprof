@@ -420,6 +420,7 @@ class BubbleprofUI extends EventEmitter {
         targetUI = targetUI.jumpToNode(clusterNode, animationQueue)
       }
     }
+    executeAnimationQueue(animationQueue)
     console.groupEnd()
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
