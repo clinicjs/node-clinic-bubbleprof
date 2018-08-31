@@ -222,6 +222,7 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node visible within current layout
   selectNode (layoutNode, animationQueue) {
+    console.log('selectNode', { from: this.layoutNode, to: layoutNode })
     const dataNode = layoutNode.node
     const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
     this.svgNodeDiagram.svgNodes.get(layoutNode.id).select()
@@ -268,6 +269,8 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node that may or may not be collapsed
   jumpToNode (dataNode, animationQueue = []) {
+    console.log('jumpToNode', { from: this.layoutNode, to: dataNode })
+
     if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
       executeAnimationQueue(animationQueue)
       return this
@@ -404,8 +407,10 @@ class BubbleprofUI extends EventEmitter {
     let targetUI = this
     const animationQueue = []
 
+    console.group(`parseCollapsedNodeHash ${hash}`)
     for (var i = nodeIds.length - 1; i >= 0; i--) {
       const nodeId = nodeIds[i]
+      console.log(nodeId, targetUI)
       if (nodeId.charAt(0) === 'x') {
         const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
         targetUI = targetUI.selectNode(layoutNode, animationQueue)
@@ -415,6 +420,7 @@ class BubbleprofUI extends EventEmitter {
         targetUI = targetUI.jumpToNode(clusterNode, animationQueue)
       }
     }
+    console.groupEnd()
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
 
