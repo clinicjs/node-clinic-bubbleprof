@@ -338,13 +338,6 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
-  createHistoryAnimationQueue () {
-    this.historyAnimationQueue = new AnimationQueue('history')
-    this.historyAnimationQueue.onComplete = () => {
-      this.historyAnimationQueue = null
-    }
-  }
-
   setupHistory () {
     // Mark the current history entry (on page load) as the initial one.
     // There is a `window.history.length` property, but it includes the entries
@@ -372,21 +365,26 @@ class BubbleprofUI extends EventEmitter {
       }
 
       // Prepare the jump we need to make.
-      let jump
-      if (hash) {
-        jump = () => this.topMostUI.jumpToHash(hash, this.historyAnimationQueue)
-      } else {
-        // If we don't have a hash, we're navigating to the original UI.
-        jump = () => this.topMostUI.traverseUp(null, {
-          silent: true,
-          animationQueue: this.historyAnimationQueue
-        })
+      const jump = () => {
+        this.historyAnimationQueue = new AnimationQueue('history')
+        this.historyAnimationQueue.onComplete = () => {
+          this.historyAnimationQueue = null
+        }
+
+        if (hash) {
+          this.topMostUI.jumpToHash(hash, this.historyAnimationQueue)
+        } else {
+          // If we don't have a hash, we're navigating to the original UI.
+          this.topMostUI.traverseUp(null, {
+            silent: true,
+            animationQueue: this.historyAnimationQueue
+          })
+        }
       }
 
       // If we have don't have a history animation queue, create one and jump
       // immediately.
       if (!this.historyAnimationQueue) {
-        this.createHistoryAnimationQueue()
         jump()
       } else {
         // If we have a history animation queue, that means we are
@@ -396,10 +394,7 @@ class BubbleprofUI extends EventEmitter {
         // start jumping to the final destination. If the user goes very far
         // back in the history, some in-between jumps will be skipped, but that
         // doesn't actually matter so long as the final state is correct.
-        this.historyAnimationQueue.onComplete = () => {
-          this.createHistoryAnimationQueue()
-          jump()
-        }
+        this.historyAnimationQueue.onComplete = jump
       }
     })
   }
