@@ -2,46 +2,84 @@ const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
 
 class SideBarDrag extends HtmlContent {
+  constructor (d3Container, contentProperties) {
+    super(d3Container, contentProperties)
+
+    this.topMostUI = this.ui
+    this.ui.on('setTopmostUI', (topMostUI) => {
+      this.topMostUI = topMostUI
+    })
+  }
+
   initializeElements () {
     super.initializeElements()
-
-    const { onDrag, onCommit } = this.contentProperties
 
     let lastPercent = 0
     this.d3DragBehaviour = d3.drag()
       .on('start', () => {
         lastPercent = this.getCurrentDragWidth({ x: 0 })
+        this.showRedrawing()
+        d3.select('body').style('cursor', 'ew-resize')
       })
       .on('drag', () => {
         const percent = this.getCurrentDragWidth(d3.event)
         if (percent !== lastPercent) {
-          onDrag(percent)
+          this.setNodeLinkWidth(percent)
         }
         lastPercent = percent
       })
       .on('end', () => {
         const percent = this.getCurrentDragWidth(d3.event)
         if (percent !== lastPercent) {
-          onDrag(percent)
+          this.setNodeLinkWidth(percent)
         }
         lastPercent = percent
-        onCommit(percent)
+
+        this.redrawLayout()
+        d3.select('body').style('cursor', null)
       })
 
     this.d3Element.call(this.d3DragBehaviour)
+  }
+
+  showRedrawing () {
+    this.topMostUI.getNodeLinkSection()
+      .d3Element.classed('redraw', true)
+  }
+
+  setNodeLinkWidth (percent) {
+    const sideBar = this.ui.sections.get('side-bar')
+    const nodeLink = this.ui.sections.get('node-link')
+    // FIXME this is probably a private API. Is this alright or should the sidebar be its own HtmlContent subclass so it can handle this internally?
+    const callbacksOverTime = sideBar.content.get('area-chart')
+
+    nodeLink.d3Element
+      .style('width', `${percent}%`)
+      .classed('redraw', true)
+    sideBar.d3Element.style('width', `${100 - percent}%`)
+    // newPercent / defaultPercent
+    // maintaining aspect ratio
+    callbacksOverTime.chartHeightScale = (100 - percent) / 25
+    callbacksOverTime.draw()
+  }
+
+  redrawLayout () {
+    this.topMostUI.redrawLayout()
+    this.topMostUI.getNodeLinkSection()
+      .d3Element.classed('redraw', false)
   }
 
   getCurrentDragWidth ({ x }) {
     const rect = this.d3Element.node()
       .getBoundingClientRect()
 
-    const left = 24 + rect.left
-    let px = left + x
-    const available = window.innerWidth
+    const leftOffset = 24 + rect.left
+    let pxSize = leftOffset + x
+    const pxAvailable = window.innerWidth
 
-    if (px < 250) px = 250
-    if (available - px < 250) px = available - 250
-    return Math.round(px / available * 100)
+    if (pxSize < 250) pxSize = 250
+    if (pxAvailable - pxSize < 250) pxSize = pxAvailable - 250
+    return Math.round(pxSize / pxAvailable * 100)
   }
 }
 

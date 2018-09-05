@@ -27,7 +27,7 @@ class AreaChart extends HtmlContent {
     this.key = 'AreaChart-' + this.parentContent.constructor.name
 
     this.pixelsPerSlice = 0
-    this.chartHeight = 70
+    this.chartHeightScale = 1
 
     this.areaMaker = d3.area()
       .x(d => this.xScale(d.data.time))
@@ -309,7 +309,10 @@ class AreaChart extends HtmlContent {
   }
   draw () {
     super.draw()
-    this.d3AreaChartSVG.style('height', this.chartHeight)
+
+    // TODO doing this after the getBoundingClientRect()
+    // call saves a reflow
+    this.d3AreaChartSVG.style('height', `${70 * this.chartHeightScale}px`)
 
     const {
       width,

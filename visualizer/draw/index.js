@@ -168,22 +168,7 @@ function drawOuterUI () {
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
   sideBar.addContent('SideBarDrag', {
-    classNames: 'side-bar-drag',
-    onDrag (percent) {
-      nodeLink.d3Element
-        .style('width', `${percent}%`)
-        .classed('redraw', true)
-      sideBar.d3Element.style('width', `${100 - percent}%`)
-      // defaultHeight * newPercent / defaultPercent
-      // maintaining aspect ratio
-      callbacksOverTime.chartHeight = `${70 * (100 - percent) / 25}px`
-      callbacksOverTime.draw()
-    },
-    onCommit (percent) {
-      // TODO doesn't rerender for some reason??
-      ui.redrawLayout()
-      nodeLink.d3Element.classed('redraw', false)
-    }
+    classNames: 'side-bar-drag'
   })
 
   sideBar.addCollapseControl(true, {
@@ -202,6 +187,7 @@ function drawOuterUI () {
   lookup.addLoadingAnimation({ hidden: true })
 
   const callbacksOverTime = sideBar.addContent('AreaChart', {
+    id: 'area-chart',
     classNames: 'side-bar-item'
   })
   callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
