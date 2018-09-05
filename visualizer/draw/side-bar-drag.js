@@ -5,31 +5,27 @@ class SideBarDrag extends HtmlContent {
   initializeElements () {
     super.initializeElements()
 
-    const {
-      dragOverlay,
-      dragIndicator,
-      onCommit
-    } = this.contentProperties
+    const { onDrag, onCommit } = this.contentProperties
 
+    let lastPercent = 0
     this.d3DragBehaviour = d3.drag()
       .on('start', () => {
-        dragOverlay.isHidden = false
-        dragOverlay.draw()
-        const percent = this.getCurrentDragWidth({ x: -16 })
-        dragIndicator.d3Element
-          .style('left', `${percent}%`)
-      })
-      .on('end', () => {
-        dragOverlay.isHidden = true
-        dragOverlay.draw()
-
-        const percent = this.getCurrentDragWidth(d3.event)
-        onCommit(percent)
+        lastPercent = this.getCurrentDragWidth({ x: 0 })
       })
       .on('drag', () => {
         const percent = this.getCurrentDragWidth(d3.event)
-        dragIndicator.d3Element
-          .style('left', `${percent}%`)
+        if (percent !== lastPercent) {
+          onDrag(percent)
+        }
+        lastPercent = percent
+      })
+      .on('end', () => {
+        const percent = this.getCurrentDragWidth(d3.event)
+        if (percent !== lastPercent) {
+          onDrag(percent)
+        }
+        lastPercent = percent
+        onCommit(percent)
       })
 
     this.d3Element.call(this.d3DragBehaviour)

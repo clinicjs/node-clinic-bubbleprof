@@ -7,7 +7,7 @@ const d3 = require('./d3-subset.js')
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
 
-  const sections = ['header', 'node-link', 'side-bar', 'side-bar-drag-indicator', 'footer']
+  const sections = ['header', 'node-link', 'side-bar', 'footer']
   const ui = new BubbleprofUI(sections)
 
   // Header
@@ -167,16 +167,9 @@ function drawOuterUI () {
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
-  const sideBarDragOverlay = ui.sections.get('side-bar-drag-indicator')
-  sideBarDragOverlay.isHidden = true
-  const sideBarDragIndicator = sideBarDragOverlay.addContent(undefined, {
-    classNames: 'side-bar-drag-indicator-bar'
-  })
   sideBar.addContent('SideBarDrag', {
-    dragOverlay: sideBarDragOverlay,
-    dragIndicator: sideBarDragIndicator,
     classNames: 'side-bar-drag',
-    onCommit (percent) {
+    onDrag (percent) {
       nodeLink.d3Element
         .style('width', `${percent}%`)
         .classed('redraw', true)
@@ -185,7 +178,8 @@ function drawOuterUI () {
       // maintaining aspect ratio
       callbacksOverTime.chartHeight = `${70 * (100 - percent) / 25}px`
       callbacksOverTime.draw()
-
+    },
+    onCommit (percent) {
       // TODO doesn't rerender for some reason??
       ui.redrawLayout()
       nodeLink.d3Element.classed('redraw', false)
