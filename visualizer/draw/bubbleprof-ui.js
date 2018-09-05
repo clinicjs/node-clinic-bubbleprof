@@ -671,9 +671,9 @@ class BubbleprofUI extends EventEmitter {
   }
 }
 
-let aqn = 0
+let defaultQueueNameId = 0
 class AnimationQueue {
-  constructor (name = `Queue #${aqn++}`) {
+  constructor (name = `Queue #${defaultQueueNameId++}`) {
     this.queue = []
     this.index = 0
     this.isExecuting = false
