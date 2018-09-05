@@ -700,7 +700,7 @@ class AnimationQueue {
     // overridable by users
   }
 
-  execute() {
+  execute () {
     console.log('execute animation queue', this.name)
     if (this.isExecuting) {
       return
