@@ -17,6 +17,8 @@ const d3 = Object.assign(
   require('d3-shape'),
   // d3.axisBottom
   require('d3-axis'),
+  // d3.drag
+  require('d3-drag'),
   // d3.easeCubicInOut
   require('d3-ease'),
   // d3.format
