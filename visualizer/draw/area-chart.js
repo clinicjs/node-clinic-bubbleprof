@@ -310,14 +310,8 @@ class AreaChart extends HtmlContent {
   draw () {
     super.draw()
 
-    // TODO doing this after the getBoundingClientRect()
-    // call saves a reflow
-    this.d3AreaChartSVG.style('height', `${70 * this.chartHeightScale}px`)
-
-    const {
-      width,
-      height
-    } = this.d3AreaChartSVG.node().getBoundingClientRect()
+    const { width } = this.d3AreaChartSVG.node().getBoundingClientRect()
+    const height = Math.round(70 * this.chartHeightScale)
     const margins = this.contentProperties.margins
 
     const usableHeight = height - margins.bottom - margins.top
@@ -326,6 +320,7 @@ class AreaChart extends HtmlContent {
     this.xScale.range([0, usableWidth])
     this.yScale.range([usableHeight, 0])
 
+    this.d3AreaChartSVG.style('height', `${height}px`)
     this.d3AreaPaths.attr('d', this.areaMaker)
 
     const xAxis = d3.axisBottom()
