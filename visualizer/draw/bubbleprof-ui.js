@@ -671,13 +671,13 @@ class BubbleprofUI extends EventEmitter {
   }
 }
 
-let defaultQueueNameId = 0
 class AnimationQueue {
-  constructor (name = `Queue #${defaultQueueNameId++}`) {
+  // The createdIn argument is helpful when debugging animations. Best to pass it!
+  constructor (createdIn) {
     this.queue = []
     this.index = 0
     this.isExecuting = false
-    this.name = name
+    this.createdIn = createdIn
   }
 
   push (animation) {
