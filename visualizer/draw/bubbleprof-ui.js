@@ -338,6 +338,13 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
+  createHistoryAnimationQueue () {
+    this.historyAnimationQueue = new AnimationQueue('history')
+    this.historyAnimationQueue.onComplete = () => {
+      this.historyAnimationQueue = null
+    }
+  }
+
   setupHistory () {
     // Mark the current history entry (on page load) as the initial one.
     // There is a `window.history.length` property, but it includes the entries
@@ -379,10 +386,7 @@ class BubbleprofUI extends EventEmitter {
       // If we have don't have a history animation queue, create one and jump
       // immediately.
       if (!this.historyAnimationQueue) {
-        this.historyAnimationQueue = new AnimationQueue('history')
-        this.historyAnimationQueue.onComplete = () => {
-          this.historyAnimationQueue = null
-        }
+        this.createHistoryAnimationQueue()
         jump()
       } else {
         // If we have a history animation queue, that means we are
@@ -393,7 +397,7 @@ class BubbleprofUI extends EventEmitter {
         // back in the history, some in-between jumps will be skipped, but that
         // doesn't actually matter so long as the final state is correct.
         this.historyAnimationQueue.onComplete = () => {
-          this.historyAnimationQueue = new AnimationQueue('history')
+          this.createHistoryAnimationQueue()
           jump()
         }
       }
