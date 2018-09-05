@@ -238,7 +238,7 @@ class BubbleprofUI extends EventEmitter {
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
         // Go up a level and start queuing animations, as shortcuts always point outside the node
-        if (!animationQueue) animationQueue = []
+        if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
         const uiParent = this.clearSublayout(animationQueue)
         const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
         return uiParent.jumpToNode(targetDataNode, animationQueue)
@@ -276,11 +276,11 @@ class BubbleprofUI extends EventEmitter {
   }
 
   // Selects a node that may or may not be collapsed
-  jumpToNode (dataNode, animationQueue = []) {
+  jumpToNode (dataNode, animationQueue = new AnimationQueue('jumpToNode')) {
     console.log('jumpToNode', { from: this.layoutNode, to: dataNode })
 
     if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
       return this
     }
     if (dataNode.clusterNode) {
@@ -296,7 +296,7 @@ class BubbleprofUI extends EventEmitter {
 
     if (layoutNode.node.uid === dataNode.uid) {
       const uiInsideNode = this.selectNode(layoutNode, animationQueue)
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
       return uiInsideNode
     } else {
       // dataNode is inside one or more levels of collapsedNode - recurse
@@ -313,7 +313,7 @@ class BubbleprofUI extends EventEmitter {
     const layoutNodeInView = layoutNodes.get(nodeId)
     if (layoutNodeInView && layoutNodeInView.node.uid === aggregateNode.uid) {
       const uiInsideNode = this.selectNode(layoutNodeInView)
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
       return uiInsideNode
     }
 
@@ -332,7 +332,7 @@ class BubbleprofUI extends EventEmitter {
       }
       currentUI = currentUI.selectNode(layoutNode, animationQueue)
       if (layoutNode.node.uid === aggregateNode.uid) {
-        executeAnimationQueue(animationQueue)
+        animationQueue.execute()
         return currentUI
       }
     }
@@ -364,11 +364,38 @@ class BubbleprofUI extends EventEmitter {
         }
       }
 
+      // Prepare the jump we need to make.
+      let jump
       if (hash) {
-        this.topMostUI.jumpToHash(hash)
+        jump = () => this.topMostUI.jumpToHash(hash, this.historyAnimationQueue)
       } else {
         // If we don't have a hash, we're navigating to the original UI.
-        this.topMostUI.traverseUp(null, { silent: true })
+        jump = () => this.topMostUI.traverseUp(null, {
+          silent: true,
+          animationQueue: this.historyAnimationQueue
+        })
+      }
+
+      // If we have don't have a history animation queue, create one and jump
+      // immediately.
+      if (!this.historyAnimationQueue) {
+        this.historyAnimationQueue = new AnimationQueue('history')
+        this.historyAnimationQueue.onComplete = () => {
+          this.historyAnimationQueue = null
+        }
+        jump()
+      } else {
+        // If we have a history animation queue, that means we are
+        // already animating; we should wait for that animation to complete
+        // before jumping again.
+        // We can simply override the `onComplete` handler here to immediately
+        // start jumping to the final destination. If the user goes very far
+        // back in the history, some in-between jumps will be skipped, but that
+        // doesn't actually matter so long as the final state is correct.
+        this.historyAnimationQueue.onComplete = () => {
+          this.historyAnimationQueue = new AnimationQueue('history')
+          jump()
+        }
       }
     })
   }
@@ -418,10 +445,9 @@ class BubbleprofUI extends EventEmitter {
     return null
   }
 
-  jumpToCollapsedNodeHash (hash) {
+  jumpToCollapsedNodeHash (hash, animationQueue = new AnimationQueue('jumpToCollapsedNodeHash')) {
     const nodeIds = hash.slice(1).split('-')
     let targetUI = this
-    const animationQueue = []
 
     // If we have any cluster nodes, we jump to that below first, and then drill
     // into that node for collapsed nodes.
@@ -447,26 +473,26 @@ class BubbleprofUI extends EventEmitter {
         targetUI = targetUI.jumpToNode(clusterNode, animationQueue)
       }
     }
-    executeAnimationQueue(animationQueue)
+    animationQueue.execute()
     console.groupEnd()
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
 
-  jumpToHash (hash) {
+  jumpToHash (hash, animationQueue) {
     const id = parseInt(hash.slice(1))
     switch (hash.charAt(0)) {
       case 'a':
         const aggregateNode = this.dataSet.aggregateNodes.get(id)
-        const uiWithinAggregate = this.jumpToNode(aggregateNode)
+        const uiWithinAggregate = this.jumpToNode(aggregateNode, animationQueue)
         this.originalUI.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
         break
       case 'c':
         const clusterNode = this.dataSet.clusterNodes.get(id)
-        const uiWithinCluster = this.jumpToNode(clusterNode)
+        const uiWithinCluster = this.jumpToNode(clusterNode, animationQueue)
         this.originalUI.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
         break
       case 'x':
-        this.jumpToCollapsedNodeHash(window.location.hash)
+        this.jumpToCollapsedNodeHash(window.location.hash, animationQueue)
         break
     }
   }
@@ -568,15 +594,19 @@ class BubbleprofUI extends EventEmitter {
 
   // Clear sublayouts until the topmost layout is `targetUI`, or the original UI if no target is given.
   // Pass `{ silent: true }` to avoid updating the hash when this is called in response to a history update.
-  traverseUp (targetUI = null, { silent = false } = {}) {
+  traverseUp (targetUI = null, options = {}) {
+    const {
+      silent = false,
+      animationQueue = new AnimationQueue('traverseUp')
+    } = options
+
     let currentUI = this
-    const animationQueue = []
     while (currentUI !== targetUI && currentUI.parentUI) {
       currentUI = currentUI.clearSublayout(animationQueue)
     }
     if (currentUI !== this) {
       this.originalUI.emit('navigation', { from: this, to: currentUI, silent })
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
     }
   }
 
@@ -648,30 +678,68 @@ class BubbleprofUI extends EventEmitter {
   }
 }
 
-function executeAnimationQueue (animationQueue, index = 0) {
-  if (animationQueue.length <= index) return
-
-  if (index === 0) {
-    animationQueue.forEach(item => item.ui.getNodeLinkSection().d3Element.classed('pending-animation', true))
+let aqn = 0
+class AnimationQueue {
+  constructor (name = `Queue #${aqn++}`) {
+    this.queue = []
+    this.index = 0
+    this.isExecuting = false
+    this.name = name
   }
 
-  const {
-    ui,
-    isExpanding,
-    onAnimationStep
-  } = animationQueue[index]
+  push (animation) {
+    this.queue.push(animation)
+    if (this.isExecuting) this.markUIPending(animation)
+  }
 
-  index++
+  markUIPending (item) {
+    item.ui.getNodeLinkSection().d3Element.classed('pending-animation', true)
+  }
 
-  ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
-  ui.animate(isExpanding, () => {
-    if (onAnimationStep) onAnimationStep()
-    if (animationQueue.length > index) {
-      executeAnimationQueue(animationQueue, index)
-    } else {
-      if (animationQueue.onComplete) animationQueue.onComplete()
+  onComplete () {
+    // overridable by users
+  }
+
+  execute() {
+    console.log('execute animation queue', this.name)
+    if (this.isExecuting) {
+      return
     }
-  })
+    this.executeNext()
+  }
+
+  hasMoreAnimations () {
+    return this.queue.length > this.index
+  }
+
+  executeNext () {
+    if (!this.hasMoreAnimations()) {
+      this.isExecuting = false
+      this.onComplete()
+      console.log('completed animation queue', this.name)
+      return
+    }
+
+    this.isExecuting = true
+    if (this.index === 0) {
+      this.queue.forEach(item => this.markUIPending(item))
+    }
+
+    const {
+      ui,
+      isExpanding,
+      onAnimationStep
+    } = this.queue[this.index]
+
+    console.log('stepping animation queue', this.name, this.index)
+    this.index++
+
+    ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
+    ui.animate(isExpanding, () => {
+      if (onAnimationStep) onAnimationStep()
+      this.executeNext()
+    })
+  }
 }
 
 module.exports = BubbleprofUI
