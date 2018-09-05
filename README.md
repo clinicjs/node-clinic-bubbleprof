@@ -5,7 +5,7 @@
 [![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![CircleCI build status][circleci-status]][circleci-url] [![Appveyor build status][appveyor-status]][appveyor-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
-Programmable interface to [clinic][clinic-url] bubbleprof
+Programmable interface to [clinic][clinic-url] bubbleprof. Learn more about clinic: https://clinicjs.org/
 
 ![banner](logo.png)
 
