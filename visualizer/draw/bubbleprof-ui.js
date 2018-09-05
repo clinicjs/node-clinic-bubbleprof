@@ -230,7 +230,6 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node visible within current layout
   selectNode (layoutNode, animationQueue) {
-    console.log('selectNode', { from: this.layoutNode, to: layoutNode })
     const dataNode = layoutNode.node
     const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
     this.svgNodeDiagram.svgNodes.get(layoutNode.id).select()
@@ -277,8 +276,6 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node that may or may not be collapsed
   jumpToNode (dataNode, animationQueue = new AnimationQueue('jumpToNode')) {
-    console.log('jumpToNode', { from: this.layoutNode, to: dataNode })
-
     if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
       animationQueue.execute()
       return this
@@ -459,10 +456,8 @@ class BubbleprofUI extends EventEmitter {
       }
     }
 
-    console.group(`parseCollapsedNodeHash ${hash}`)
     for (var i = nodeIds.length - 1; i >= 0; i--) {
       const nodeId = nodeIds[i]
-      console.log(nodeId, targetUI)
       if (nodeId.charAt(0) === 'x') {
         const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
         targetUI = targetUI.selectNode(layoutNode, animationQueue)
@@ -473,7 +468,6 @@ class BubbleprofUI extends EventEmitter {
       }
     }
     animationQueue.execute()
-    console.groupEnd()
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
 
@@ -700,7 +694,6 @@ class AnimationQueue {
   }
 
   execute () {
-    console.log('execute animation queue', this.name)
     if (this.isExecuting) {
       return
     }
@@ -715,7 +708,6 @@ class AnimationQueue {
     if (!this.hasMoreAnimations()) {
       this.isExecuting = false
       this.onComplete()
-      console.log('completed animation queue', this.name)
       return
     }
 
@@ -730,7 +722,6 @@ class AnimationQueue {
       onAnimationStep
     } = this.queue[this.index]
 
-    console.log('stepping animation queue', this.name, this.index)
     this.index++
 
     ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
