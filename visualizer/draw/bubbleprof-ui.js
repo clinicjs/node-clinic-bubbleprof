@@ -50,7 +50,15 @@ class BubbleprofUI extends EventEmitter {
     }
 
     if (this.originalUI === this) {
-      this.setupHistory()
+      const nodeLinkSection = this.getNodeLinkSection()
+      this.backBtn = nodeLinkSection.addContent(undefined, {
+        hidden: true,
+        classNames: 'back-btn'
+      })
+
+      this.on('setTopmostUI', (topMostUI) => {
+        this.topMostUI = topMostUI
+      })
     }
   }
 
@@ -331,17 +339,11 @@ class BubbleprofUI extends EventEmitter {
   }
 
   setupHistory () {
-    const nodeLinkSection = this.getNodeLinkSection()
-    this.backBtn = nodeLinkSection.addContent(undefined, {
-      hidden: true,
-      classNames: 'back-btn'
-    })
-
     // Mark the current history entry (on page load) as the initial one.
     // There is a `window.history.length` property, but it includes the entries
     // _before_ the current page (eg. the github issue that linked to this
     // visualization) so we can't use it here.
-    window.history.replaceState({ initial: true }, null, '')
+    window.history.replaceState({ initial: true }, null, window.location.hash || '')
 
     this.on('navigation', ({ to, silent }) => {
       // Only update history if this navigation was not caused by history.
@@ -352,8 +354,22 @@ class BubbleprofUI extends EventEmitter {
       this.backBtn.isHidden = !this.hasHistoryEntries()
       this.backBtn.draw()
     })
-    this.on('setTopmostUI', (topMostUI) => {
-      this.topMostUI = topMostUI
+
+    window.addEventListener('popstate', (event) => {
+      const { hash } = event.state
+      if (this.topMostUI) {
+        // Close stack frames when moving away from their node.
+        if (this.topMostUI.selectedDataNode) {
+          this.topMostUI.clearFrames()
+        }
+      }
+
+      if (hash) {
+        this.topMostUI.jumpToHash(hash)
+      } else {
+        // If we don't have a hash, we're navigating to the original UI.
+        this.topMostUI.traverseUp(null, { silent: true })
+      }
     })
   }
 
@@ -613,22 +629,7 @@ class BubbleprofUI extends EventEmitter {
       })
     }
 
-    window.addEventListener('popstate', (event) => {
-      const { hash } = event.state
-      if (this.topMostUI) {
-        // Close stack frames when moving away from their node.
-        if (this.topMostUI.selectedDataNode) {
-          this.topMostUI.clearFrames()
-        }
-      }
-
-      if (hash) {
-        this.topMostUI.jumpToHash(hash)
-      } else {
-        // If we don't have a hash, we're navigating to the original UI.
-        this.topMostUI.traverseUp(null, { silent: true })
-      }
-    })
+    this.setupHistory()
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
