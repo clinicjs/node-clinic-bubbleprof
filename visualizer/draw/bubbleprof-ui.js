@@ -370,7 +370,11 @@ class BubbleprofUI extends EventEmitter {
     // There is a `window.history.length` property, but it includes the entries
     // _before_ the current page (eg. the github issue that linked to this
     // visualization) so we can't use it here.
-    window.history.replaceState({ initial: true }, null, window.location.hash || '')
+    const hash = window.location.hash || ''
+    window.history.replaceState({
+      initial: true,
+      hash: hash.slice(1)
+    }, null, hash)
 
     this.on('navigation', ({ to, silent }) => {
       // Only update history if this navigation was not caused by history.
@@ -383,7 +387,7 @@ class BubbleprofUI extends EventEmitter {
     })
 
     window.addEventListener('popstate', (event) => {
-      const { hash } = event.state
+      const hash = event.state ? event.state.hash : ''
       if (this.topMostUI) {
         // Close stack frames when moving away from their node.
         if (this.topMostUI.selectedDataNode) {
@@ -665,7 +669,9 @@ class BubbleprofUI extends EventEmitter {
 
     if (window.location.hash) {
       setTimeout(() => {
-        this.jumpToHash(window.location.hash.slice(1))
+        this.queueAnimation('initial', (animationQueue) => {
+          this.jumpToHash(window.location.hash.slice(1), animationQueue)
+        })
       })
     }
 
