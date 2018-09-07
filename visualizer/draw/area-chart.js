@@ -19,6 +19,7 @@ class AreaChart extends HtmlContent {
       }
     }, contentProperties))
 
+    this.initialized = false
     this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
@@ -51,6 +52,7 @@ class AreaChart extends HtmlContent {
         })
       }
 
+      this.createPathsForLayout()
       this.draw()
     })
   }
@@ -150,17 +152,22 @@ class AreaChart extends HtmlContent {
     }
   }
   initializeFromData () {
-    // Same behaviour on mouse movements off coloured area as on
-    this.d3AreaChartSVG.on('mousemove', () => {
-      this.showSlice(d3.event)
-    })
+    if (!this.initialized) {
+      // These actions aren't redone when data changes, but must be done after data was set
+      this.initialized = true
 
-    this.d3ContentWrapper.on('mouseleave', () => {
-      this.hoverBox.hide()
-      this.d3SliceHighlight.classed('hidden', true)
-    })
+      // Same behaviour on mouse movements off coloured area as on
+      this.d3AreaChartSVG.on('mousemove', () => {
+        this.showSlice(d3.event)
+      })
 
+      this.d3ContentWrapper.on('mouseleave', () => {
+        this.hoverBox.hide()
+        this.d3SliceHighlight.classed('hidden', true)
+      })
+    }
     if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
+    if (!this.d3AreaPaths) this.createPathsForLayout()
   }
   createPathsForLayout () {
     if (this.d3AreaPaths) this.d3AreaPaths.remove()
@@ -237,7 +244,10 @@ class AreaChart extends HtmlContent {
   applyLayoutNode (layoutNode = null) {
     const redraw = layoutNode !== this.layoutNode
     this.layoutNode = layoutNode
-    if (redraw) this.draw()
+    if (redraw) {
+      this.createPathsForLayout()
+      this.draw()
+    }
   }
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
@@ -294,8 +304,6 @@ class AreaChart extends HtmlContent {
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
   draw () {
-    this.createPathsForLayout()
-
     super.draw()
     const {
       width,
