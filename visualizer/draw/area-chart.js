@@ -19,6 +19,7 @@ class AreaChart extends HtmlContent {
       }
     }, contentProperties))
 
+    this.initialized = false
     this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
@@ -151,16 +152,20 @@ class AreaChart extends HtmlContent {
     }
   }
   initializeFromData () {
-    // Same behaviour on mouse movements off coloured area as on
-    this.d3AreaChartSVG.on('mousemove', () => {
-      this.showSlice(d3.event)
-    })
+    if (!this.initialized) {
+      // These actions aren't redone when data changes, but must be done after data was set
+      this.initialized = true
 
-    this.d3ContentWrapper.on('mouseleave', () => {
-      this.hoverBox.hide()
-      this.d3SliceHighlight.classed('hidden', true)
-    })
+      // Same behaviour on mouse movements off coloured area as on
+      this.d3AreaChartSVG.on('mousemove', () => {
+        this.showSlice(d3.event)
+      })
 
+      this.d3ContentWrapper.on('mouseleave', () => {
+        this.hoverBox.hide()
+        this.d3SliceHighlight.classed('hidden', true)
+      })
+    }
     if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
     if (!this.d3AreaPaths) this.createPathsForLayout()
   }
