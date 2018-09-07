@@ -51,6 +51,7 @@ class AreaChart extends HtmlContent {
         })
       }
 
+      this.createPathsForLayout()
       this.draw()
     })
   }
@@ -161,6 +162,7 @@ class AreaChart extends HtmlContent {
     })
 
     if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
+    if (!this.d3AreaPaths) this.createPathsForLayout()
   }
   createPathsForLayout () {
     if (this.d3AreaPaths) this.d3AreaPaths.remove()
@@ -294,8 +296,6 @@ class AreaChart extends HtmlContent {
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
   draw () {
-    this.createPathsForLayout()
-
     super.draw()
     const {
       width,
