@@ -372,10 +372,14 @@ class BubbleprofUI extends EventEmitter {
           this.topMostUI.jumpToHash(hash, this.historyAnimationQueue)
         } else {
           // If we don't have a hash, we're navigating to the original UI.
-          this.topMostUI.traverseUp(null, {
+          const targetUI = this.topMostUI.traverseUp(null, {
             silent: true,
             animationQueue: this.historyAnimationQueue
           })
+          if (targetUI === this) {
+            // Didn't queue any animations, just execute so onComplete() is called
+            this.historyAnimationQueue.execute()
+          }
         }
       }
 
@@ -601,6 +605,7 @@ class BubbleprofUI extends EventEmitter {
       this.originalUI.emit('navigation', { from: this, to: currentUI, silent })
       animationQueue.execute()
     }
+    return currentUI
   }
 
   // Back button goes back in user navigation one step at a time
