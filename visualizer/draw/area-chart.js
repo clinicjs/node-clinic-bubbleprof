@@ -220,14 +220,17 @@ class AreaChart extends HtmlContent {
         const layoutNodeId = extractLayoutNodeId(d.key)
         if (!layoutNodeId) return
 
-        this.topmostUI.highlightNode(null)
+        this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
+          this.topmostUI.highlightNode(null)
 
-        const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-        const targetUI = this.topmostUI.selectNode(layoutNode)
-        if (targetUI !== this.ui) {
-          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-        }
-        this.ui.highlightColour('type', null)
+          const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+          const targetUI = this.topmostUI.selectNode(layoutNode, animationQueue)
+          if (targetUI !== this.ui) {
+            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+          }
+          this.ui.highlightColour('type', null)
+          animationQueue.execute()
+        })
       })
       .on('mousemove', () => {
         this.showSlice(d3.event)

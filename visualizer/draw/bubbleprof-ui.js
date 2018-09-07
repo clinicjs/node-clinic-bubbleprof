@@ -335,6 +335,26 @@ class BubbleprofUI extends EventEmitter {
     }
   }
 
+  queueAnimation (name, callback) {
+    const ui = this.originalUI
+
+    const executeAnimation = () => {
+      ui.currentAnimationQueue = new AnimationQueue(name)
+      ui.currentAnimationQueue.onComplete = () => {
+        ui.currentAnimationQueue = null
+      }
+      callback(ui.currentAnimationQueue)
+    }
+
+    if (ui.currentAnimationQueue) {
+      console.log('new animation', name, 'queue')
+      ui.currentAnimationQueue.onComplete = executeAnimation
+    } else {
+      console.log('new animation', name, 'execute')
+      executeAnimation()
+    }
+  }
+
   setupHistory () {
     // Mark the current history entry (on page load) as the initial one.
     // There is a `window.history.length` property, but it includes the entries
@@ -362,43 +382,21 @@ class BubbleprofUI extends EventEmitter {
       }
 
       // Prepare the jump we need to make.
-      const jump = () => {
-        this.historyAnimationQueue = new AnimationQueue('history')
-        this.historyAnimationQueue.onComplete = () => {
-          this.historyAnimationQueue = null
-        }
-
+      this.queueAnimation('history', (animationQueue) => {
         if (hash) {
-          this.topMostUI.jumpToHash(hash, this.historyAnimationQueue)
+          this.topMostUI.jumpToHash(hash, animationQueue)
         } else {
           // If we don't have a hash, we're navigating to the original UI.
           const targetUI = this.topMostUI.traverseUp(null, {
             silent: true,
-            animationQueue: this.historyAnimationQueue
+            animationQueue
           })
           if (targetUI === this) {
             // Didn't queue any animations, just execute so onComplete() is called
-            this.historyAnimationQueue.execute()
+            animationQueue.execute()
           }
         }
-      }
-
-      // If we have don't have a history animation queue, create one and jump
-      // immediately.
-      if (!this.historyAnimationQueue) {
-        console.log('history', 'jump')
-        jump()
-      } else {
-        console.log('history', 'queue')
-        // If we have a history animation queue, that means we are
-        // already animating; we should wait for that animation to complete
-        // before jumping again.
-        // We can simply override the `onComplete` handler here to immediately
-        // start jumping to the final destination. If the user goes very far
-        // back in the history, some in-between jumps will be skipped, but that
-        // doesn't actually matter so long as the final state is correct.
-        this.historyAnimationQueue.onComplete = jump
-      }
+      })
     })
   }
 
@@ -587,7 +585,9 @@ class BubbleprofUI extends EventEmitter {
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
-        this.traverseUp()
+        this.queueAnimation('close', (animationQueue) => {
+          this.traverseUp(null, { animationQueue })
+        })
       })
   }
 

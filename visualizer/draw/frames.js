@@ -140,8 +140,10 @@ class Frames extends HtmlContent {
                 this.topmostUI.highlightNode(null)
               })
               .on('click', () => {
-                const targetUI = this.topmostUI.jumpToNode(frame.dataNode)
-                this.topmostUI.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+                this.topmostUI.queueAnimation('jumpToFrame', (animationQueue) => {
+                  const targetUI = this.topmostUI.jumpToNode(frame.dataNode, animationQueue)
+                  this.topmostUI.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+                })
               })
           }
 

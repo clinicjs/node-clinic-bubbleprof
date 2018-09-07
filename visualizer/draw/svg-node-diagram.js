@@ -61,10 +61,13 @@ class SvgNodeDiagram {
       .on('mouseleave', () => this.ui.highlightNode(null))
       .on('click', (layoutNode) => {
         d3.event.stopPropagation()
-        const targetUI = this.ui.selectNode(layoutNode)
-        if (targetUI !== this.ui) {
-          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-        }
+        this.ui.queueAnimation('selectGraphNode', (animationQueue) => {
+          const targetUI = this.ui.selectNode(layoutNode, animationQueue)
+          if (targetUI !== this.ui) {
+            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+          }
+          animationQueue.execute()
+        })
       })
   }
 
