@@ -346,19 +346,17 @@ class BubbleprofUI extends EventEmitter {
   queueAnimation (name, callback) {
     const ui = this.originalUI
 
-    const clearAnimation = () => {
-      ui.currentAnimationQueue = null
-    }
     const executeAnimation = () => {
       ui.currentAnimationQueue = new AnimationQueue(name)
-      ui.currentAnimationQueue.on('complete', clearAnimation)
+      ui.currentAnimationQueue.next = () => {
+        ui.currentAnimationQueue = null
+      }
       callback(ui.currentAnimationQueue)
     }
 
     if (ui.currentAnimationQueue) {
       console.log('new animation', name, 'queue after', ui.currentAnimationQueue.createdIn)
-      ui.currentAnimationQueue.removeListener('complete', clearAnimation)
-      ui.currentAnimationQueue.on('complete', executeAnimation)
+      ui.currentAnimationQueue.next = executeAnimation
     } else {
       console.log('new animation', name, 'execute')
       executeAnimation()
@@ -705,6 +703,10 @@ class AnimationQueue extends EventEmitter {
     this.createdIn = createdIn
   }
 
+  // Used by BubbleprofUI to chain animations.
+  // This will be replaced by a function that kicks off the next animation queue.
+  next () {}
+
   push (animation) {
     this.queue.push(animation)
     if (this.isExecuting) this.markUIPending(animation)
@@ -730,6 +732,7 @@ class AnimationQueue extends EventEmitter {
       console.log('animation', this.createdIn, 'onComplete')
       this.isExecuting = false
       this.emit('complete')
+      this.next()
       return
     }
 
