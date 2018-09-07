@@ -239,7 +239,10 @@ class AreaChart extends HtmlContent {
   applyLayoutNode (layoutNode = null) {
     const redraw = layoutNode !== this.layoutNode
     this.layoutNode = layoutNode
-    if (redraw) this.draw()
+    if (redraw) {
+      this.createPathsForLayout()
+      this.draw()
+    }
   }
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
