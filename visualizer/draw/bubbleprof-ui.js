@@ -386,8 +386,10 @@ class BubbleprofUI extends EventEmitter {
       // If we have don't have a history animation queue, create one and jump
       // immediately.
       if (!this.historyAnimationQueue) {
+        console.log('history', 'jump')
         jump()
       } else {
+        console.log('history', 'queue')
         // If we have a history animation queue, that means we are
         // already animating; we should wait for that animation to complete
         // before jumping again.
@@ -711,6 +713,7 @@ class AnimationQueue {
 
   executeNext () {
     if (!this.hasMoreAnimations()) {
+      console.log('animation', this.createdIn, 'onComplete')
       this.isExecuting = false
       this.onComplete()
       return
@@ -718,8 +721,11 @@ class AnimationQueue {
 
     this.isExecuting = true
     if (this.index === 0) {
+      console.log('animation', this.createdIn, 'start')
       this.queue.forEach(item => this.markUIPending(item))
     }
+
+    console.log('animation', this.createdIn, 'step', this.index)
 
     const {
       ui,
