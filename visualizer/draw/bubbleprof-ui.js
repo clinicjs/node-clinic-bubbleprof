@@ -245,7 +245,11 @@ class BubbleprofUI extends EventEmitter {
       case 'AggregateNode':
         this.selectedDataNode = dataNode
         const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
-        animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
+        if (animationQueue) {
+          animationQueue.on('complete', selectAggregate)
+        } else {
+          selectAggregate()
+        }
         return this
 
       case 'ClusterNode':
@@ -253,7 +257,11 @@ class BubbleprofUI extends EventEmitter {
           // If there's only one aggregateNode, just select it
           this.selectedDataNode = dataNode.nodes.values().next().value
           const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
-          animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
+          if (animationQueue) {
+            animationQueue.on('complete', selectAggregate)
+          } else {
+            selectAggregate()
+          }
           return this
         } else {
           this.selectedDataNode = dataNode
@@ -338,17 +346,19 @@ class BubbleprofUI extends EventEmitter {
   queueAnimation (name, callback) {
     const ui = this.originalUI
 
+    const clearAnimation = () => {
+      ui.currentAnimationQueue = null
+    }
     const executeAnimation = () => {
       ui.currentAnimationQueue = new AnimationQueue(name)
-      ui.currentAnimationQueue.onComplete = () => {
-        ui.currentAnimationQueue = null
-      }
+      ui.currentAnimationQueue.on('complete', clearAnimation)
       callback(ui.currentAnimationQueue)
     }
 
     if (ui.currentAnimationQueue) {
-      console.log('new animation', name, 'queue')
-      ui.currentAnimationQueue.onComplete = executeAnimation
+      console.log('new animation', name, 'queue after', ui.currentAnimationQueue.createdIn)
+      ui.currentAnimationQueue.removeListener('complete', clearAnimation)
+      ui.currentAnimationQueue.on('complete', executeAnimation)
     } else {
       console.log('new animation', name, 'execute')
       executeAnimation()
@@ -392,7 +402,7 @@ class BubbleprofUI extends EventEmitter {
             animationQueue
           })
           if (targetUI === this) {
-            // Didn't queue any animations, just execute so onComplete() is called
+            // Didn't queue any animations, just execute so 'complete' is emitted
             animationQueue.execute()
           }
         }
@@ -678,9 +688,11 @@ class BubbleprofUI extends EventEmitter {
   }
 }
 
-class AnimationQueue {
+class AnimationQueue extends EventEmitter {
   // The createdIn argument is helpful when debugging animations. Best to pass it!
   constructor (createdIn) {
+    super()
+
     this.queue = []
     this.index = 0
     this.isExecuting = false
@@ -694,10 +706,6 @@ class AnimationQueue {
 
   markUIPending (item) {
     item.ui.getNodeLinkSection().d3Element.classed('pending-animation', true)
-  }
-
-  onComplete () {
-    // overridable by users
   }
 
   execute () {
@@ -715,7 +723,7 @@ class AnimationQueue {
     if (!this.hasMoreAnimations()) {
       console.log('animation', this.createdIn, 'onComplete')
       this.isExecuting = false
-      this.onComplete()
+      this.emit('complete')
       return
     }
 

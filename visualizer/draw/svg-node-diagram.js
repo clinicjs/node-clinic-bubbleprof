@@ -9,8 +9,6 @@ class SvgNodeDiagram {
     this.svgContainer = svgContainer
     this.ui = svgContainer.ui
 
-    this.onAnimationComplete = []
-
     this.svgNodes = new Map()
 
     this.ui.on('initializeFromData', () => {
