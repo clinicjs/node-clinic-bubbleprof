@@ -8,6 +8,7 @@ const pump = require('pump')
 const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
 const browserify = require('browserify')
+const envify = require('loose-envify/custom')
 const streamTemplate = require('stream-template')
 const joinTrace = require('node-trace-log-join')
 const getLoggingPaths = require('./collect/get-logging-paths.js')
@@ -134,10 +135,11 @@ class ClinicBubbleprof extends events.EventEmitter {
     // create script-file stream
     const b = browserify({
       'basedir': __dirname,
-      // 'debug': true,
+      'debug': this.debug,
       'noParse': [fakeDataPath]
     })
     b.transform('brfs')
+    b.transform(envify({ DEBUG_MODE: this.debug }))
     b.require(dataFile, {
       'file': fakeDataPath
     })

@@ -11,7 +11,9 @@ setTimeout(() => {
   const loadData = require('./data/index.js')
   const generateLayout = require('./layout/index.js')
 
-  const dataSet = loadData({ debugMode: false })
+  const dataSet = loadData({
+    debugMode: process.env.DEBUG_MODE
+  })
   if (dataSet.settings.debugMode) {
     window.data = dataSet
     console.log('data is exposed on window.data')
