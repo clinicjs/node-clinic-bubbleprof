@@ -355,10 +355,8 @@ class BubbleprofUI extends EventEmitter {
     }
 
     if (ui.currentAnimationQueue) {
-      console.log('new animation', name, 'queue after', ui.currentAnimationQueue.createdIn)
       ui.currentAnimationQueue.next = executeAnimation
     } else {
-      console.log('new animation', name, 'execute')
       executeAnimation()
     }
   }
@@ -729,7 +727,6 @@ class AnimationQueue extends EventEmitter {
 
   executeNext () {
     if (!this.hasMoreAnimations()) {
-      console.log('animation', this.createdIn, 'onComplete')
       this.isExecuting = false
       this.emit('complete')
       this.next()
@@ -738,11 +735,8 @@ class AnimationQueue extends EventEmitter {
 
     this.isExecuting = true
     if (this.index === 0) {
-      console.log('animation', this.createdIn, 'start')
       this.queue.forEach(item => this.markUIPending(item))
     }
-
-    console.log('animation', this.createdIn, 'step', this.index)
 
     const {
       ui,
