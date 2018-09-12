@@ -180,7 +180,7 @@ function analysis (systemInfoReader, stackTraceReader, traceEventReader, opts) {
 
   const stream = opts && opts.stringify ? result.pipe(new Stringify(result)) : result
 
-  result.on('truncate', () => stream.emit('warning', 'Truncating input data due to memory constraits'))
+  result.on('truncate', () => stream.emit('warning', 'Truncating input data due to memory constrains'))
 
   return stream
 }
