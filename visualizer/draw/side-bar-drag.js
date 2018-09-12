@@ -86,7 +86,7 @@ class SideBarDrag extends HtmlContent {
     let pxSize = leftOffset + x
     const pxAvailable = window.innerWidth
 
-    if (pxSize < 250) pxSize = 250
+    if (pxSize < 400) pxSize = 400
     if (pxAvailable - pxSize < 250) pxSize = pxAvailable - 250
     return Math.round(pxSize / pxAvailable * 100)
   }
