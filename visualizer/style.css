@@ -692,6 +692,10 @@ body[data-view-mode='fit'] #node-link {
 
 /* Node-link diagram and container */
 
+svg.bubbleprof {
+  min-width: 0;
+}
+
 svg.bubbleprof .line-segment {
   fill: none;
 }
