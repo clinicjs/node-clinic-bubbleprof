@@ -75,7 +75,7 @@ class JoinAsRawEvent extends stream.Readable {
       return
     }
 
-    // the asyncId's are approximatively incrementing. Descide what
+    // the asyncId's are approximately incrementing. Decide what
     // stream to read from by selecting the one where the asyncId is lowest
     if (this._traceEventEnded || (
       this._stackTraceAsyncId < this._traceEventAsyncId && !this._stackTraceEnded
