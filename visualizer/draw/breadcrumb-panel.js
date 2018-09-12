@@ -64,9 +64,16 @@ class BreadcrumbPanel extends HtmlContent {
     }
   }
   traverseUp (targetUI) {
-    if (this.topmostUI !== targetUI) {
-      this.topmostUI.traverseUp(targetUI)
-    }
+    this.topmostUI.queueAnimation('breadcrumb', (animationQueue) => {
+      if (this.topmostUI !== targetUI) {
+        const currentUI = this.topmostUI.traverseUp(targetUI, { animationQueue })
+        if (this.topmostUI !== currentUI) {
+          return
+        }
+      }
+      // Didn't animate, kick the queue
+      animationQueue.execute()
+    })
   }
 }
 

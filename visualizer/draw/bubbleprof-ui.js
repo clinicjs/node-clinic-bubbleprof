@@ -7,8 +7,6 @@ const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
 
-const history = []
-
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
     super()
@@ -57,11 +55,9 @@ class BubbleprofUI extends EventEmitter {
         hidden: true,
         classNames: 'back-btn'
       })
-      history.push(this)
-      this.on('navigation', ({ to }) => {
-        history.push(to)
-        this.backBtn.isHidden = history.length < 2
-        this.backBtn.draw()
+
+      this.on('setTopmostUI', (topMostUI) => {
+        this.topMostUI = topMostUI
       })
     }
   }
@@ -196,23 +192,6 @@ class BubbleprofUI extends EventEmitter {
       } else {
         this.animate(false, onAnimationStep)
       }
-
-      if (this.parentUI.layoutNode) {
-        const dataNode = this.parentUI.layoutNode.node
-        switch (dataNode.constructor.name) {
-          case 'ClusterNode':
-            window.location.hash = 'c' + dataNode.clusterId
-            break
-          case 'AggregateNode':
-            window.location.hash = 'a' + dataNode.aggregateId
-            break
-          case 'ArtificialNode':
-            window.location.hash = this.generateCollapsedNodeHash(this.parentUI)
-            break
-        }
-      } else {
-        window.location.hash = ''
-      }
     }
 
     // Close the frames panel if it's open
@@ -258,7 +237,7 @@ class BubbleprofUI extends EventEmitter {
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
         // Go up a level and start queuing animations, as shortcuts always point outside the node
-        if (!animationQueue) animationQueue = []
+        if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
         const uiParent = this.clearSublayout(animationQueue)
         const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
         return uiParent.jumpToNode(targetDataNode, animationQueue)
@@ -266,16 +245,23 @@ class BubbleprofUI extends EventEmitter {
       case 'AggregateNode':
         this.selectedDataNode = dataNode
         const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
-        animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
+        if (animationQueue) {
+          animationQueue.on('complete', selectAggregate)
+        } else {
+          selectAggregate()
+        }
         return this
 
       case 'ClusterNode':
-        window.location.hash = 'c' + dataNode.clusterId
         if (dataNode.nodes.size === 1) {
           // If there's only one aggregateNode, just select it
           this.selectedDataNode = dataNode.nodes.values().next().value
           const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
-          animationQueue ? (animationQueue.onComplete = selectAggregate) : selectAggregate()
+          if (animationQueue) {
+            animationQueue.on('complete', selectAggregate)
+          } else {
+            selectAggregate()
+          }
           return this
         } else {
           this.selectedDataNode = dataNode
@@ -285,7 +271,6 @@ class BubbleprofUI extends EventEmitter {
       case 'ArtificialNode':
         this.selectedDataNode = dataNode
         const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
-        window.location.hash = this.generateCollapsedNodeHash(uiWithinCollapsedNode)
         return uiWithinCollapsedNode
     }
   }
@@ -294,14 +279,13 @@ class BubbleprofUI extends EventEmitter {
     const thisUI = this
     return () => {
       thisUI.outputFrames(dataNode, layoutNode)
-      window.location.hash = 'a' + dataNode.aggregateId
     }
   }
 
   // Selects a node that may or may not be collapsed
-  jumpToNode (dataNode, animationQueue = []) {
+  jumpToNode (dataNode, animationQueue = new AnimationQueue('jumpToNode')) {
     if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
       return this
     }
     if (dataNode.clusterNode) {
@@ -317,7 +301,7 @@ class BubbleprofUI extends EventEmitter {
 
     if (layoutNode.node.uid === dataNode.uid) {
       const uiInsideNode = this.selectNode(layoutNode, animationQueue)
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
       return uiInsideNode
     } else {
       // dataNode is inside one or more levels of collapsedNode - recurse
@@ -334,7 +318,7 @@ class BubbleprofUI extends EventEmitter {
     const layoutNodeInView = layoutNodes.get(nodeId)
     if (layoutNodeInView && layoutNodeInView.node.uid === aggregateNode.uid) {
       const uiInsideNode = this.selectNode(layoutNodeInView)
-      executeAnimationQueue(animationQueue)
+      animationQueue.execute()
       return uiInsideNode
     }
 
@@ -353,10 +337,85 @@ class BubbleprofUI extends EventEmitter {
       }
       currentUI = currentUI.selectNode(layoutNode, animationQueue)
       if (layoutNode.node.uid === aggregateNode.uid) {
-        executeAnimationQueue(animationQueue)
+        animationQueue.execute()
         return currentUI
       }
     }
+  }
+
+  queueAnimation (name, callback) {
+    const ui = this.originalUI
+
+    const executeAnimation = () => {
+      ui.currentAnimationQueue = new AnimationQueue(name)
+      ui.currentAnimationQueue.next = () => {
+        ui.currentAnimationQueue = null
+      }
+      callback(ui.currentAnimationQueue)
+    }
+
+    if (ui.currentAnimationQueue) {
+      ui.currentAnimationQueue.next = executeAnimation
+    } else {
+      executeAnimation()
+    }
+  }
+
+  setupHistory () {
+    // Mark the current history entry (on page load) as the initial one.
+    // There is a `window.history.length` property, but it includes the entries
+    // _before_ the current page (eg. the github issue that linked to this
+    // visualization) so we can't use it here.
+    const hash = window.location.hash || ''
+    window.history.replaceState({
+      initial: true,
+      hash: hash.slice(1)
+    }, null, hash)
+
+    this.on('navigation', ({ to, silent }) => {
+      // Only update history if this navigation was not caused by history.
+      if (!silent) {
+        this.pushHistory(to.getHash())
+      }
+
+      this.backBtn.isHidden = !this.hasHistoryEntries()
+      this.backBtn.draw()
+    })
+
+    window.addEventListener('popstate', (event) => {
+      const hash = event.state ? event.state.hash : ''
+      if (this.topMostUI) {
+        // Close stack frames when moving away from their node.
+        if (this.topMostUI.selectedDataNode) {
+          this.topMostUI.clearFrames()
+        }
+      }
+
+      // Prepare the jump we need to make.
+      this.queueAnimation('history', (animationQueue) => {
+        if (hash) {
+          this.topMostUI.jumpToHash(hash, animationQueue)
+        } else {
+          // If we don't have a hash, we're navigating to the original UI.
+          const targetUI = this.topMostUI.traverseUp(null, {
+            silent: true,
+            animationQueue
+          })
+          if (targetUI === this) {
+            // Didn't queue any animations, just execute so 'complete' is emitted
+            animationQueue.execute()
+          }
+        }
+      })
+    })
+  }
+
+  hasHistoryEntries () {
+    return window.history.state && !window.history.state.initial
+  }
+
+  pushHistory (hash) {
+    window.history.pushState({ hash, initial: false }, null, `#${hash || ''}`)
   }
 
   generateCollapsedNodeHash (uiWithinCollapsedNode) {
@@ -379,22 +438,70 @@ class BubbleprofUI extends EventEmitter {
     return hashString
   }
 
-  parseCollapsedNodeHash () {
-    const nodeIds = window.location.hash.slice(1).split('-')
+  getHash () {
+    if (!this.layoutNode) {
+      return null
+    }
+
+    const dataNode = this.layoutNode.node
+    switch (dataNode.constructor.name) {
+      case 'ClusterNode':
+        return `c${dataNode.clusterId}`
+      case 'AggregateNode':
+        return `a${dataNode.aggregateId}`
+      case 'ArtificialNode':
+        return this.generateCollapsedNodeHash(this)
+    }
+    return null
+  }
+
+  jumpToCollapsedNodeHash (hash, animationQueue = new AnimationQueue('jumpToCollapsedNodeHash')) {
+    const nodeIds = hash.slice(1).split('-')
     let targetUI = this
+
+    // If we have any cluster nodes, we jump to that below first, and then drill
+    // into that node for collapsed nodes.
+    // But if all the nodes in the path are collapsed nodes, we start searching
+    // from the original UI. This is because collapsed nodes are only known
+    // in their parent layout, not globally (like cluster nodes).
+    if (nodeIds[nodeIds.length - 1].charAt(0) === 'x') {
+      while (targetUI.parentUI) {
+        targetUI = targetUI.clearSublayout(animationQueue)
+      }
+    }
 
     for (var i = nodeIds.length - 1; i >= 0; i--) {
       const nodeId = nodeIds[i]
       if (nodeId.charAt(0) === 'x') {
         const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
-        targetUI = targetUI.selectNode(layoutNode)
+        targetUI = targetUI.selectNode(layoutNode, animationQueue)
       } else {
         const clusterId = parseInt(nodeId.slice(1))
         const clusterNode = this.dataSet.clusterNodes.get(clusterId)
-        targetUI = targetUI.jumpToNode(clusterNode)
+        targetUI = targetUI.jumpToNode(clusterNode, animationQueue)
       }
     }
-    this.emit('navigation', { from: this, to: targetUI })
+    animationQueue.execute()
+    this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
+  }
+
+  jumpToHash (hash, animationQueue) {
+    const id = parseInt(hash.slice(1))
+    switch (hash.charAt(0)) {
+      case 'a':
+        const aggregateNode = this.dataSet.aggregateNodes.get(id)
+        const uiWithinAggregate = this.jumpToNode(aggregateNode, animationQueue)
+        this.originalUI.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
+        break
+      case 'c':
+        const clusterNode = this.dataSet.clusterNodes.get(id)
+        const uiWithinCluster = this.jumpToNode(clusterNode, animationQueue)
+        this.originalUI.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
+        break
+      case 'x':
+        this.jumpToCollapsedNodeHash(window.location.hash, animationQueue)
+        break
+    }
   }
 
   /**
@@ -488,62 +595,52 @@ class BubbleprofUI extends EventEmitter {
     closeBtn.d3Element
       .property('textContent', '×')
       .on('click', () => {
-        this.traverseUp()
+        this.queueAnimation('close', (animationQueue) => {
+          this.traverseUp(null, { animationQueue })
+        })
       })
   }
 
-  traverseUp (targetUI = null) {
+  // Clear sublayouts until the topmost layout is `targetUI`, or the original UI if no target is given.
+  // Pass `{ silent: true }` to avoid updating the hash when this is called in response to a history update.
+  traverseUp (targetUI = null, options = {}) {
+    const {
+      silent = false,
+      animationQueue = new AnimationQueue('traverseUp')
+    } = options
+
     let currentUI = this
-    const animationQueue = []
     while (currentUI !== targetUI && currentUI.parentUI) {
       currentUI = currentUI.clearSublayout(animationQueue)
     }
     if (currentUI !== this) {
-      this.originalUI.emit('navigation', { from: this, to: currentUI })
-      executeAnimationQueue(animationQueue)
+      this.originalUI.emit('navigation', { from: this, to: currentUI, silent })
+      animationQueue.execute()
     }
+    return currentUI
   }
 
   // Back button goes back in user navigation one step at a time
   // This does not record opening frames
   // This does record pressing ESC and close button
   initializeBackButton () {
-    let topMostUI = this
-    this.on('setTopmostUI', (newTopmostUI) => {
-      topMostUI = newTopmostUI
-    })
-
     this.backBtn.d3Element
       .classed('hidden', true)
-      .on('click', () => this.stepBack(topMostUI))
+      .on('click', () => this.stepBack())
 
     document.addEventListener('keydown', (e) => {
       if (e.keyCode === 8 && e.target.nodeName.toLowerCase() !== 'input') {
         // Backspace button
-        this.stepBack(topMostUI)
+        this.stepBack()
       }
     })
   }
 
-  stepBack (topMostUI) {
-    if (history.length < 2) {
+  stepBack () {
+    if (!this.hasHistoryEntries()) {
       return
     }
-    if (topMostUI.selectedDataNode) {
-      return topMostUI.clearFrames()
-    }
-    history.pop()
-    const lastUI = history[history.length - 1]
-    const lastLayoutNode = lastUI.layoutNode
-    this.backBtn.d3Element.classed('hidden', history.length < 2)
-
-    if (lastUI === this.originalUI) {
-      while (topMostUI.layoutNode) {
-        topMostUI = topMostUI.clearSublayout()
-      }
-      return
-    }
-    return topMostUI.jumpToNode(lastLayoutNode.node)
+    window.history.back()
   }
 
   setData (layout, dataSet) {
@@ -568,24 +665,13 @@ class BubbleprofUI extends EventEmitter {
 
     if (window.location.hash) {
       setTimeout(() => {
-        const id = parseInt(window.location.hash.slice(2))
-        switch (window.location.hash.charAt(1)) {
-          case 'a':
-            const aggregateNode = this.dataSet.aggregateNodes.get(id)
-            const uiWithinAggregate = this.jumpToNode(aggregateNode)
-            this.emit('navigation', { from: this, to: uiWithinAggregate })
-            break
-          case 'c':
-            const clusterNode = this.dataSet.clusterNodes.get(id)
-            const uiWithinCluster = this.jumpToNode(clusterNode)
-            this.emit('navigation', { from: this, to: uiWithinCluster })
-            break
-          case 'x':
-            this.parseCollapsedNodeHash(window.location.hash)
-            break
-        }
+        this.queueAnimation('initial', (animationQueue) => {
+          this.jumpToHash(window.location.hash.slice(1), animationQueue)
+        })
       })
     }
+
+    this.setupHistory()
   }
 
   // For all UI item instances, keep updates and changes to DOM elements in draw() method
@@ -604,30 +690,68 @@ class BubbleprofUI extends EventEmitter {
   }
 }
 
-function executeAnimationQueue (animationQueue, index = 0) {
-  if (animationQueue.length <= index) return
+class AnimationQueue extends EventEmitter {
+  // The createdIn argument is helpful when debugging animations. Best to pass it!
+  constructor (createdIn) {
+    super()
 
-  if (index === 0) {
-    animationQueue.forEach(item => item.ui.getNodeLinkSection().d3Element.classed('pending-animation', true))
+    this.queue = []
+    this.index = 0
+    this.isExecuting = false
+    this.createdIn = createdIn
   }
 
-  const {
-    ui,
-    isExpanding,
-    onAnimationStep
-  } = animationQueue[index]
+  // Used by BubbleprofUI to chain animations.
+  // This will be replaced by a function that kicks off the next animation queue.
+  next () {}
 
-  index++
+  push (animation) {
+    this.queue.push(animation)
+    if (this.isExecuting) this.markUIPending(animation)
+  }
 
-  ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
-  ui.animate(isExpanding, () => {
-    if (onAnimationStep) onAnimationStep()
-    if (animationQueue.length > index) {
-      executeAnimationQueue(animationQueue, index)
-    } else {
-      if (animationQueue.onComplete) animationQueue.onComplete()
+  markUIPending (item) {
+    item.ui.getNodeLinkSection().d3Element.classed('pending-animation', true)
+  }
+
+  execute () {
+    if (this.isExecuting) {
+      return
     }
-  })
+    this.executeNext()
+  }
+
+  hasMoreAnimations () {
+    return this.queue.length > this.index
+  }
+
+  executeNext () {
+    if (!this.hasMoreAnimations()) {
+      this.isExecuting = false
+      this.emit('complete')
+      this.next()
+      return
+    }
+
+    this.isExecuting = true
+    if (this.index === 0) {
+      this.queue.forEach(item => this.markUIPending(item))
+    }
+
+    const {
+      ui,
+      isExpanding,
+      onAnimationStep
+    } = this.queue[this.index]
+
+    this.index++
+
+    ui.getNodeLinkSection().d3Element.classed('pending-animation', false)
+    ui.animate(isExpanding, () => {
+      if (onAnimationStep) onAnimationStep()
+      this.executeNext()
+    })
+  }
 }
 
 module.exports = BubbleprofUI
