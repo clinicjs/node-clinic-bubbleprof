@@ -42,9 +42,10 @@ class SideBarDrag extends HtmlContent {
     this.d3Element.call(this.d3DragBehaviour)
   }
 
-  showRedrawing () {
-    this.topMostUI.getNodeLinkSection()
-      .d3Element.classed('redraw', true)
+  showRedrawing (show = true) {
+    // 'redraw' class must be set on root UI
+    this.ui.getNodeLinkSection()
+      .d3Element.classed('redraw', show)
   }
 
   setNodeLinkWidth (percent) {
@@ -58,7 +59,6 @@ class SideBarDrag extends HtmlContent {
 
     nodeLink.d3Element
       .style('width', `${percent}%`)
-      .classed('redraw', true)
     framesPanel
       .style('width', `${percent}%`)
     sideBar.d3Element
@@ -74,8 +74,7 @@ class SideBarDrag extends HtmlContent {
 
   redrawLayout () {
     this.topMostUI.redrawLayout()
-    this.topMostUI.getNodeLinkSection()
-      .d3Element.classed('redraw', false)
+    this.showRedrawing(false)
   }
 
   getCurrentDragWidth ({ x }) {
