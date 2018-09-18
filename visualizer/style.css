@@ -1541,9 +1541,10 @@ body:not(.initialized):after {
     margin: 0;
   }
 
-  #side-bar,
   #node-link {
-    width: 100%;
+    /* Override any resizes made in landscape mode.
+     * By using !important here, we can also maintain the user's custom sizes if they go back into landscape. */
+    width: 100% !important;
   }
 
   body[data-view-mode='fit'] #node-link {
@@ -1570,12 +1571,14 @@ body:not(.initialized):after {
   }
 
   #footer .bar {
-    width: 100%;
+    /* !important to override resizes made in landscape mode */
+    width: 100% !important;
   }
 
   #footer,
   #side-bar {
-    width: 50%;
+    /* !important to override resizes made in landscape mode */
+    width: 50% !important;
     display: flex;
     flex-direction: column-reverse;
   }
@@ -1600,14 +1603,16 @@ body:not(.initialized):after {
 
   #footer-inner {
     position: relative;
-    width: 200%;
+    /* !important to override resizes made in landscape mode */
+    width: 200% !important;
     left: -100%;
   }
 
   #side-bar-inner {
     max-height: calc(50vh - var(--footer-height));
     overflow: auto;
-    width: 200%;
+    /* !important to override resizes made in landscape mode */
+    width: 200% !important;
     padding: 8px 24px;
     border-top: 1px solid var(--cyan);
     background: var(--main-bg-translucent);
@@ -1615,6 +1620,7 @@ body:not(.initialized):after {
 
   #side-bar .close {
     margin-right: -24px
+    overflow: hidden; /* ensure the text doesn't force a horizontal scrollbar */
   }
 
   .side-bar-item:first-of-type {
