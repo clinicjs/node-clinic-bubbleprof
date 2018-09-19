@@ -167,6 +167,10 @@ function drawOuterUI () {
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
+  sideBar.addContent('SideBarDrag', {
+    classNames: 'side-bar-drag'
+  })
+
   sideBar.addCollapseControl(true, {
     htmlContent: '<div class="text">Details</div><div class="arrow"></div>',
     classNames: 'bar',
@@ -183,6 +187,7 @@ function drawOuterUI () {
   lookup.addLoadingAnimation({ hidden: true })
 
   const callbacksOverTime = sideBar.addContent('AreaChart', {
+    id: 'area-chart',
     classNames: 'side-bar-item'
   })
   callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
