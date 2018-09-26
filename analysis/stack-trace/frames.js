@@ -38,11 +38,11 @@ class Frame {
     // evals and natives are not in nodecore
     if (this.isEval || this.isNative) return false
 
-    if (fileName.startsWith(`internal${systemInfo.pathSeperator}`)) {
+    if (fileName.startsWith(`internal${systemInfo.pathSeparator}`)) {
       return true
     }
 
-    return !fileName.includes(systemInfo.pathSeperator)
+    return !fileName.includes(systemInfo.pathSeparator)
   }
 
   getFileNameWithoutModuleDirectory (systemInfo) {
@@ -70,20 +70,20 @@ class Frame {
 
     // If the remaining path contains node_modules it is external
     return this.getFileNameWithoutModuleDirectory(systemInfo)
-      .split(systemInfo.pathSeperator)
+      .split(systemInfo.pathSeparator)
       .includes('node_modules')
   }
 
   anonymise (systemInfo) {
     if (this.isNodecore(systemInfo) || !this.fileName || this.fileName[0] === '.') return
-    const { relative } = (systemInfo.pathSeperator === '/' ? path.posix : path.win32)
+    const { relative } = (systemInfo.pathSeparator === '/' ? path.posix : path.win32)
     const rel = relative(systemInfo.mainDirectory, this.fileName)
     if (!rel || rel[0] === '.') this.fileName = rel
-    else this.fileName = '.' + systemInfo.pathSeperator + rel
+    else this.fileName = '.' + systemInfo.pathSeparator + rel
   }
 
   getModuleName (systemInfo) {
-    const filePath = this.fileName.split(systemInfo.pathSeperator)
+    const filePath = this.fileName.split(systemInfo.pathSeparator)
     if (!filePath.includes('node_modules')) return null
 
     // Find the last node_modules directory, and count how many were

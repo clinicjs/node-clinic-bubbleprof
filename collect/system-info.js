@@ -29,7 +29,7 @@ function systemInfo () {
       'TickObject', 'Timeout', 'Immediate',
       ...Object.keys(asyncWrap.Providers)
     ],
-    pathSeperator: require('path').sep,
+    pathSeparator: require('path').sep,
     mainDirectory: getMainDirectory()
   }
 }
