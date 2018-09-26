@@ -3,8 +3,10 @@
 class SystemInfo {
   constructor (data) {
     this.providers = new Set(data.providers)
-    this.pathSeparator = data.pathSeparator
     this.mainDirectory = data.mainDirectory
+
+    // Backwards compatibility with data collected in Bubbleprof <1.6.1, which contained a typo
+    this.pathSeparator = data.pathSeparator || data.pathSeperator
 
     // Compute self-module directory for the special case that the main script
     // itself is in a node_modules directory.
