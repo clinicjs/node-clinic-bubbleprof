@@ -10,7 +10,7 @@ class FakeSystemInfo extends SystemInfo {
         'TickObject', 'Timeout', 'Immediate',
         ...Object.keys(asyncWrap.Providers)
       ],
-      pathSeperator: '/',
+      pathSeparator: '/',
       mainDirectory: mainDirectory // test directory
     })
   }

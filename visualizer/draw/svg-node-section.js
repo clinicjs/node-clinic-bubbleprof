@@ -423,7 +423,7 @@ function addMissingADefs (arcString) {
   return unpackArcString(`${firstStringSection} A 0,0,0,0,1,0,0`)
 }
 
-function splitBySvgSeperator (substring) {
+function splitBySvgSeparator (substring) {
   const byComma = substring.trim().split(',')
 
   // MS Edge writes SVG seperated by spaces not commas e.g. 'M 1.23 4.56' not 'M 1.23,4.56'
@@ -439,8 +439,8 @@ function unpackArcString (initialString, alreadyFiltered = false) {
     A: []
   }
   arcArray.forEach(subStr => {
-    if (subStr.charAt(0) === 'M') unfilteredArc.M.push(splitBySvgSeperator(subStr.slice(1).trim()))
-    if (subStr.charAt(0) === 'A') unfilteredArc.A.push(splitBySvgSeperator(subStr.slice(1).trim()))
+    if (subStr.charAt(0) === 'M') unfilteredArc.M.push(splitBySvgSeparator(subStr.slice(1).trim()))
+    if (subStr.charAt(0) === 'A') unfilteredArc.A.push(splitBySvgSeparator(subStr.slice(1).trim()))
   })
 
   const filteredArc = {

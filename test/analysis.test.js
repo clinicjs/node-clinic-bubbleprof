@@ -65,7 +65,7 @@ function createInputStream (frames) {
   const systemInfoParsed = new FakeSystemInfo('/')
   const systemInfoData = [{
     providers: systemInfoParsed.providers,
-    pathSeperator: systemInfoParsed.pathSeperator,
+    pathSeparator: systemInfoParsed.pathSeparator,
     mainDirectory: systemInfoParsed.mainDirectory
   }]
 
