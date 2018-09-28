@@ -2,7 +2,7 @@
 
 const test = require('tap').test
 const path = require('path')
-const getLoggingPaths = require('../collect/get-logging-paths.js')
+const getLoggingPaths = require('@nearform/clinic-common/lib/get-logging-paths')('bubbleprof')
 
 test('Collect - logging path - identifier', function (t) {
   const paths = getLoggingPaths({ identifier: 1062 })
