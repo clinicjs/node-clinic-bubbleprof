@@ -1,7 +1,7 @@
 'use strict'
 const fs = require('fs')
 const analysis = require('../analysis/index.js')
-const getLoggingPaths = require('@nearform/clinic-common/lib/get-logging-paths')('bubbleprof')
+const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 const SystemInfoDecoder = require('../format/system-info-decoder.js')
 const StackTraceDecoder = require('../format/stack-trace-decoder.js')
 const TraceEventDecoder = require('../format/trace-event-decoder.js')
