@@ -5,7 +5,7 @@ const asyncHooks = require('async_hooks')
 const stackTrace = require('../collect/stack-trace.js')
 const systemInfo = require('../collect/system-info.js')
 const StackTraceEncoder = require('../format/stack-trace-encoder.js')
-const getLoggingPaths = require('../collect/get-logging-paths.js')
+const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 
 // create dirname
 const paths = getLoggingPaths({ identifier: process.pid })
