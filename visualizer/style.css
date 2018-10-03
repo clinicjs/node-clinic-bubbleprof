@@ -189,9 +189,9 @@ a.external-link:after {
 
 #banner #company-logo svg {
   position: absolute;
-  height: 40px;
-  right: 28px;
-  top: 13px;
+  height: 65px;
+  right: 0;
+  top: 0;
 }
 
 main {
