@@ -178,7 +178,6 @@ a.external-link:after {
   background: var(--banner-bg-color);
   position: relative;
   justify-content: space-between;
-  padding: 12px 0;
 }
 #banner #main-logo {
   margin-left: 12px;
