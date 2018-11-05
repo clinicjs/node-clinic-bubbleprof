@@ -9,9 +9,11 @@
     "ci-test": "tap test/*.test.js",
     "ci-cov": "tap --statements=98 test/*.test.js",
     "lint": "standard --fix | snazzy",
+    "visualize-watch": "node debug/visualize-watch.js",
     "visualize-all": "node debug/visualize-all.js"
   },
   "devDependencies": {
+    "chokidar": "^2.0.4",
     "cross-platform-sock": "^1.0.0",
     "express": "^4.16.2",
     "inspectpoint": "^0.2.2",
