@@ -177,18 +177,28 @@ a.external-link:after {
   height: var(--banner-height);
   background: var(--banner-bg-color);
   position: relative;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+#banner #main-logo {
+  margin-left: 12px;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+#banner #main-logo span{
+  color: var(--banner-logo-color);
+  font-weight: bold;
+  font-size: 23px;
 }
 
 #banner #main-logo svg {
-  fill: var(--banner-logo-color);
-  margin-left: 12px;
-  stroke: var(--shortcut-stroke);
-  stroke-width: 4px;
-  paint-order: stroke fill;
+  display: block;
+  height: 50px;
 }
 
 #banner #company-logo svg {
-  position: absolute;
+  display: block;
   height: 65px;
   right: 0;
   top: 0;
@@ -1472,10 +1482,7 @@ body:not(.initialized):after {
     font-size: 9pt;
     padding: 0;
   }
-  #banner svg {
-    margin: 0;
-    transform: scale(0.9);
-  }
+
   .breadcrumb-bar {
     padding-left: 7px;
   }
@@ -1517,13 +1524,11 @@ body:not(.initialized):after {
   }
 }
 
-@media only screen and (max-width: 380px){
-  #banner a:first-child {
-    margin-left: -20px;
+@media only screen and (max-width: 420px){
+  #banner #main-logo {
+    margin-left: 0px;
   }
-  #banner a:last-child svg {
-    right: 0;
-  }
+
 }
 
 @media screen and (orientation: landscape) {
