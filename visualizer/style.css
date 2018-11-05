@@ -194,6 +194,8 @@ a.external-link:after {
 #banner #main-logo svg {
   display: block;
   height: 50px;
+  width: auto;
+  margin-right: 12px;
 }
 
 #banner #company-logo svg {
@@ -1525,7 +1527,7 @@ body:not(.initialized):after {
 
 @media only screen and (max-width: 420px){
   #banner #main-logo {
-    margin-left: 0px;
+    margin-left: 4px;
   }
 
 }
