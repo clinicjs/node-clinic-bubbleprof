@@ -178,9 +178,9 @@ a.external-link:after {
   background: var(--banner-bg-color);
   position: relative;
   justify-content: space-between;
+  padding: 7px 18px;
 }
 #banner #main-logo {
-  margin-left: 12px;
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -193,16 +193,16 @@ a.external-link:after {
 
 #banner #main-logo svg {
   display: block;
-  height: 50px;
+  height: 51px;
   width: auto;
   margin-right: 12px;
 }
 
 #banner #company-logo svg {
   display: block;
-  height: 65px;
-  right: 0;
-  top: 0;
+  height: 21px;
+  width: auto;
+  
 }
 
 main {
@@ -1523,13 +1523,6 @@ body:not(.initialized):after {
     top: 6px;
     right: 4px;
   }
-}
-
-@media only screen and (max-width: 420px){
-  #banner #main-logo {
-    margin-left: 4px;
-  }
-
 }
 
 @media screen and (orientation: landscape) {
