@@ -177,21 +177,32 @@ a.external-link:after {
   height: var(--banner-height);
   background: var(--banner-bg-color);
   position: relative;
+  justify-content: space-between;
+  padding: 7px 18px;
+}
+#banner #main-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+#banner #main-logo span{
+  color: var(--banner-logo-color);
+  font-weight: bold;
+  font-size: 23px;
 }
 
 #banner #main-logo svg {
-  fill: var(--banner-logo-color);
-  margin-left: 12px;
-  stroke: var(--shortcut-stroke);
-  stroke-width: 4px;
-  paint-order: stroke fill;
+  display: block;
+  height: 51px;
+  width: auto;
+  margin-right: 12px;
 }
 
 #banner #company-logo svg {
-  position: absolute;
-  height: 65px;
-  right: 0;
-  top: 0;
+  display: block;
+  height: 21px;
+  width: auto;
+  
 }
 
 main {
@@ -1472,10 +1483,7 @@ body:not(.initialized):after {
     font-size: 9pt;
     padding: 0;
   }
-  #banner svg {
-    margin: 0;
-    transform: scale(0.9);
-  }
+
   .breadcrumb-bar {
     padding-left: 7px;
   }
@@ -1514,15 +1522,6 @@ body:not(.initialized):after {
   #header .help-link-block {
     top: 6px;
     right: 4px;
-  }
-}
-
-@media only screen and (max-width: 380px){
-  #banner a:first-child {
-    margin-left: -20px;
-  }
-  #banner a:last-child svg {
-    right: 0;
   }
 }
 

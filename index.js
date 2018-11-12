@@ -162,7 +162,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       <style>${styleFile}</style>
       <div id="banner">
         <a id="main-logo" href="https://github.com/nearform/node-clinic-bubbleprof" title="Clinic Bubbleprof on GitHub" target="_blank">
-          ${logoFile}
+          ${logoFile} <span>Bubbleprof</span>  
         </a>
         <a id="company-logo" href="https://nearform.com" title="nearForm" target="_blank">
           ${nearFormLogoFile}
