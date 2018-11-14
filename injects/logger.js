@@ -1,6 +1,7 @@
 'use strict'
 
 const fs = require('fs')
+const makeDir = require('mkdirp')
 const asyncHooks = require('async_hooks')
 const stackTrace = require('../collect/stack-trace.js')
 const systemInfo = require('../collect/system-info.js')
@@ -12,7 +13,7 @@ const paths = getLoggingPaths({
   path: process.env.NODE_CLINIC_BUBBLEPROF_DATA_PATH,
   identifier: process.pid
 })
-fs.mkdirSync(paths['/'])
+makeDir.sync(paths['/'])
 
 // write system file
 fs.writeFileSync(paths['/systeminfo'], JSON.stringify(systemInfo(), null, 2))
