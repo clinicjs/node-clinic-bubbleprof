@@ -48,6 +48,7 @@
     "lodash": "^4.14.0",
     "loose-envify": "^1.4.0",
     "minify-stream": "^1.2.0",
+    "mkdirp": "^0.5.1",
     "node-trace-log-join": "^1.0.0",
     "on-net-listen": "^1.0.0",
     "protocol-buffers": "^4.0.4",
