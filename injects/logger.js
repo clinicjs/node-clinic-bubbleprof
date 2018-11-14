@@ -8,7 +8,10 @@ const StackTraceEncoder = require('../format/stack-trace-encoder.js')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 
 // create dirname
-const paths = getLoggingPaths({ identifier: process.pid })
+const paths = getLoggingPaths({
+  path: process.env.NODE_CLINIC_BUBBLEPROF_DATA_PATH,
+  identifier: process.pid
+})
 fs.mkdirSync(paths['/'])
 
 // write system file

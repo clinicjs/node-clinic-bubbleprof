@@ -23,11 +23,13 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     const {
       detectPort = false,
-      debug = false
+      debug = false,
+      dest = null
     } = settings
 
     this.detectPort = detectPort
     this.debug = debug
+    this.path = dest
   }
 
   collect (args, callback) {
@@ -45,14 +47,20 @@ class ClinicBubbleprof extends events.EventEmitter {
       stdio.push('pipe')
     }
 
+    const customEnv = {
+      NODE_PATH: path.join(__dirname, 'injects'),
+      NODE_OPTIONS: logArgs.join(' ') + (
+        process.env.NODE_OPTIONS ? ' ' + process.env.NODE_OPTIONS : ''
+      )
+    }
+
+    if (this.path) {
+      customEnv.NODE_CLINIC_BUBBLEPROF_DATA_PATH = this.path
+    }
+
     const proc = spawn(args[0], args.slice(1), {
       stdio,
-      env: Object.assign({}, process.env, {
-        NODE_PATH: path.join(__dirname, 'injects'),
-        NODE_OPTIONS: logArgs.join(' ') + (
-          process.env.NODE_OPTIONS ? ' ' + process.env.NODE_OPTIONS : ''
-        )
-      })
+      env: Object.assign({}, process.env, customEnv)
     })
 
     if (this.detectPort) {
@@ -60,7 +68,10 @@ class ClinicBubbleprof extends events.EventEmitter {
     }
 
     // get filenames of logfiles
-    const paths = getLoggingPaths({ identifier: proc.pid })
+    const paths = getLoggingPaths({
+      path: this.path,
+      identifier: proc.pid
+    })
 
     // relay SIGINT to process
     process.once('SIGINT', function () {
