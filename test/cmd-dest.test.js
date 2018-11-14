@@ -8,7 +8,7 @@ test('cmd - test collect - custom output destination', (t) => {
 
   function cleanup (err, dirname) {
     t.ifError(err)
-    t.match(dirname, /^test-output-destination\/[0-9]+\.clinic-bubbleprof$/)
+    t.match(dirname, /^test-output-destination[\/\\][0-9]+\.clinic-bubbleprof$/)
 
     rimraf('test-output-destination', (err) => {
       t.ifError(err)
