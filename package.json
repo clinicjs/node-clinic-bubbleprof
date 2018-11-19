@@ -47,12 +47,12 @@
     "endpoint": "^0.4.5",
     "lodash": "^4.14.0",
     "loose-envify": "^1.4.0",
-    "minify-stream": "^1.2.0",
     "mkdirp": "^0.5.1",
     "node-trace-log-join": "^1.0.0",
     "on-net-listen": "^1.0.0",
     "protocol-buffers": "^4.0.4",
     "pump": "^3.0.0",
-    "stream-template": "0.0.10"
+    "stream-template": "0.0.10",
+    "terser": "^3.10.11"
   }
 }
