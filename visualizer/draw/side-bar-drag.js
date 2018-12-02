@@ -1,5 +1,6 @@
 const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
+const spinner = require('@nearform/clinic-common/spinner')
 
 class SideBarDrag extends HtmlContent {
   constructor (d3Container, contentProperties) {
@@ -14,14 +15,16 @@ class SideBarDrag extends HtmlContent {
   initializeElements () {
     super.initializeElements()
 
+    this.spinner = spinner.attachTo(this.ui.getNodeLinkSection().d3Element.node())
+
     let lastPercent = 0
     this.d3DragBehaviour = d3.drag()
       .on('start', () => {
         lastPercent = this.getCurrentDragWidth({ x: 0 })
-        this.showRedrawing()
         d3.select('body').style('cursor', 'ew-resize')
       })
       .on('drag', () => {
+        this.showRedrawing()
         const percent = this.getCurrentDragWidth(d3.event)
         if (percent !== lastPercent) {
           this.setNodeLinkWidth(percent)
@@ -43,9 +46,11 @@ class SideBarDrag extends HtmlContent {
   }
 
   showRedrawing (show = true) {
-    // 'redraw' class must be set on root UI
-    this.ui.getNodeLinkSection()
-      .d3Element.classed('redraw', show)
+    if (show) {
+      this.spinner.show('Redrawing...')
+    } else {
+      this.spinner.hide()
+    }
   }
 
   setNodeLinkWidth (percent) {

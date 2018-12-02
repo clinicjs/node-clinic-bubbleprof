@@ -1,3 +1,4 @@
+@import "@nearform/clinic-common/spinner/style.css";
 @import './draw/frames.css';
 @import './draw/banner.css';
 @import './draw/header.css';
@@ -10,6 +11,8 @@ html {
 
   --banner-bg-color: rgb(41, 45, 57);
   --banner-logo-color: rgba(255, 255, 255, 0.87);
+
+  --spinner-border-color: var(--cyan-highlight);
 
   /* Matches --banner-bg-color when overlaid over --main-bg-color */
   --node-background: rgba(212, 224, 255, 0.08);
@@ -833,6 +836,11 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   padding: 0;
   width: calc(100%);
   cursor: pointer;
+  max-height: 50vh;
+  overflow: auto;
+  background-color: var(--banner-bg-color);
+  position: absolute;
+  z-index: 9;
 }
 
 .lookup .results-count {
@@ -852,14 +860,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   font-size: 8pt;
   font-family: monospace;
   white-space: pre-wrap;
-}
-
-.lookup .loading-indicator {
-  margin: -24px 0 0 -62px;
-}
-
-.lookup.loading .loading-indicator {
-  display: block;
+  word-break: break-all;
 }
 
 /* Global classes linking styles to data properties */
@@ -1012,92 +1013,9 @@ svg.area-chart-svg .area-path.filtered {
   display: none;
 }
 
-/* Loading indicator based on https://projects.lukehaas.me/css-loaders/#load8
-   * Must * animate by transforms only, to keep animating when processor is busy */
-
-.loading-indicator,
-.loading-indicator:before,
-.loading-indicator:after,
-body:not(.initialized):before,
-body:not(.initialized):after {
-  width: 124px;
-  height: 120px;
-  position: absolute;
-  left: 50%;
-  margin: 80px 0 0 -60px;
-  z-index: 3;
-}
-
 body:not(.initialized) {
   position: relative;
   z-index: 3;
-}
-
-body:not(.initialized):before,
-.loading-indicator:before {
-  content: "";
-  border-radius: 50%;
-  display: block;
-  border-left: 1px solid var(--primary-grey);
-  border-right: 1px solid var(--primary-grey);
-  border-top: 4px solid var(--nearform-color);
-  border-bottom: 4px solid var(--nearform-color);
-  transform: translateZ(0);
-  animation: loading 1.6s infinite linear;
-}
-
-body:not(.initialized):after,
-.loading-indicator:after {
-  font-size: 14pt;
-  font-variant: all-small-caps;
-  font-weight: bold;
-  color: var(--nearform-color);
-  text-align: center;
-
-  display: block;
-  position: absolute;
-}
-
-.loading-indicator:after {
-  content: "Loading";
-  top: 50px;
-}
-
-body:not(.initialized):before {
-  top: var(--banner-height);
-}
-body:not(.initialized):after {
-  content: "Preparing file";
-  top: 115px;
-}
-
-#node-link .loading-indicator {
-  background: var(--main-bg-translucent);
-  width: 100%;
-  height: calc(100% + var(--header-height));
-  top: 0;
-  left: 0;
-  position: absolute;
-  margin: 0;
-}
-
-#node-link.redraw .loading-indicator {
-  display: block;
-}
-
-#node-link.redraw .loading-indicator:after {
-  content: "Redrawing";
-}
-
-@keyframes loading {
-  0% {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
 }
 
 @media only screen and (max-width: 910px){
@@ -1181,6 +1099,10 @@ body:not(.initialized):after {
 @media screen and (orientation: portrait) {
   .portrait-collapsed .collapsible-content-wrapper {
     display: none;
+  }
+
+  .lookup .lookup-suggestions {
+    max-height: 25vh;
   }
 
   #header {

@@ -1,5 +1,4 @@
 'use strict'
-
 const BubbleprofUI = require('./bubbleprof-ui.js')
 const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
@@ -159,7 +158,7 @@ function drawOuterUI () {
 
   // Main panel - nodelink diagram
   const nodeLink = ui.sections.get('node-link')
-  nodeLink.addLoadingAnimation()
+
 
   const nodeLinkSVG = nodeLink.addContent('SvgContainer', { id: 'node-link-svg', svgBounds: {} })
 
@@ -184,7 +183,6 @@ function drawOuterUI () {
     defaultText: 'Enter a file or function name'
   })
   lookup.addCollapseControl(true, { htmlContent: 'Search <span class="arrow"></span>' })
-  lookup.addLoadingAnimation({ hidden: true })
 
   const callbacksOverTime = sideBar.addContent('AreaChart', {
     id: 'area-chart',

@@ -6,6 +6,7 @@ const EventEmitter = require('events')
 const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
+const spinner = require('@nearform/clinic-common/spinner')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
@@ -591,21 +592,16 @@ class BubbleprofUI extends EventEmitter {
 
     const debounceTime = 300
     const nodeLinkSection = this.getNodeLinkSection()
+    const resizeSpinner = spinner.attachTo(nodeLinkSection.d3Element.node())
 
-    const onWindowResizeBegin = debounce(() => {
-      nodeLinkSection.d3Element.classed('redraw', true)
-
-      // Use a shorter time period than the trailing debounce to prevent getting stuck
-    }, debounceTime * 0.9, { leading: true })
-
-    const onWindowResizeEnd = debounce(() => {
+    const onWindowResize = debounce(() => {
       this.redrawLayout()
-      nodeLinkSection.d3Element.classed('redraw', false)
+      resizeSpinner.hide()
     }, debounceTime)
 
     window.addEventListener('resize', () => {
-      onWindowResizeBegin()
-      onWindowResizeEnd()
+      resizeSpinner.show('Redrawing...')
+      onWindowResize()
     })
 
     if (this.originalUI === this) {
