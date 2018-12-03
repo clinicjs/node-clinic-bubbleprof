@@ -104,7 +104,7 @@ test('stack trace - native', function (t) {
     frames = stackTrace()
   })
 
-  if (process.version.indexOf('v10') === 0 && process.version.indexOf('v8') === 0) {
+  if (process.version.indexOf('v10') === 0 || process.version.indexOf('v8') === 0) {
     t.strictDeepEqual(Object.assign({}, frames[1]), {
       functionName: 'sort',
       typeName: '',

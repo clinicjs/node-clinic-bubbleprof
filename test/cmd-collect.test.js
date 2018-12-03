@@ -74,7 +74,7 @@ test('collect command produces data files with content', function (t) {
         asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
-      if (process.version.indexOf('v10') >= 0 && process.version.indexOf('v8') >= 0) {
+      if (process.version.indexOf('v10') >= 0 || process.version.indexOf('v8') >= 0) {
         // Expect Timeout and TIMERWRAP to be there
         t.strictDeepEqual(
           asyncOperationTypes.sort(),
