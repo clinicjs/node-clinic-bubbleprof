@@ -74,11 +74,19 @@ test('collect command produces data files with content', function (t) {
         asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
-      // Expect Timeout and TIMERWRAP to be there
-      t.strictDeepEqual(
-        asyncOperationTypes.sort(),
-        ['TIMERWRAP', 'Timeout']
-      )
+      if (process.version.indexOf('v10') >= 0 && process.version.indexOf('v8') >= 0) {
+        // Expect Timeout and TIMERWRAP to be there
+        t.strictDeepEqual(
+          asyncOperationTypes.sort(),
+          ['TIMERWRAP', 'Timeout']
+        )
+      } else {
+        // Expect Timeout to be there
+        t.strictDeepEqual(
+          asyncOperationTypes.sort(),
+          ['Timeout']
+        )
+      }
 
       t.end()
     })

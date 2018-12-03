@@ -104,18 +104,33 @@ test('stack trace - native', function (t) {
     frames = stackTrace()
   })
 
-  t.strictDeepEqual(Object.assign({}, frames[1]), {
-    functionName: 'sort',
-    typeName: '',
-    isEval: false,
-    isConstructor: false,
-    isNative: true,
-    isToplevel: false,
-    evalOrigin: '',
-    fileName: 'native array.js',
-    lineNumber: 1,
-    columnNumber: 1
-  })
+  if (process.version.indexOf('v10') === 0 && process.version.indexOf('v8') === 0) {
+    t.strictDeepEqual(Object.assign({}, frames[1]), {
+      functionName: 'sort',
+      typeName: '',
+      isEval: false,
+      isConstructor: false,
+      isNative: true,
+      isToplevel: false,
+      evalOrigin: '',
+      fileName: 'native array.js',
+      lineNumber: 1,
+      columnNumber: 1
+    })
+  } else {
+    t.strictDeepEqual(Object.assign({}, frames[1]), {
+      functionName: 'sort',
+      typeName: 'Array',
+      isEval: false,
+      isConstructor: false,
+      isNative: false,
+      isToplevel: false,
+      evalOrigin: '',
+      fileName: '',
+      lineNumber: 0,
+      columnNumber: 0
+    })
+  }
 
   t.end()
 })
