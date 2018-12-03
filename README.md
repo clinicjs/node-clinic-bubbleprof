@@ -2,7 +2,7 @@
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/nearform/node-clinic-bubbleprof.svg)](https://greenkeeper.io/)
 
-[![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![CircleCI build status][circleci-status]][circleci-url] [![Appveyor build status][appveyor-status]][appveyor-url]
+[![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![azureCI build status][azureci-status]][azureci-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
 Programmable interface to [clinic][clinic-url] bubbleprof. Learn more about clinic: https://clinicjs.org/
@@ -81,14 +81,12 @@ arguments, except a possible error.
 [stability-docs]: https://nodejs.org/api/documentation.html#documentation_stability_index
 [npm-version]: https://img.shields.io/npm/v/@nearform/bubbleprof.svg?style=flat-square
 [npm-url]: https://www.npmjs.org/@nearform/bubbleprof
-[circleci-status]: https://circleci.com/gh/nearform/node-clinic-bubbleprof/tree/master.svg?style=shield&circle-token=82bfc179bd7ca96fd9183a66c40cefcfb93b07ea
-[circleci-url]: https://circleci.com/gh/nearform/node-clinic-bubbleprof
 [npm-downloads]: http://img.shields.io/npm/dm/@nearform/bubbleprof.svg?style=flat-square
 [lint-standard]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square
 [lint-standard-url]: https://github.com/feross/standard
 [clinic-url]: https://github.com/nearform/node-clinic
-[appveyor-status]: https://ci.appveyor.com/api/projects/status/vnqc76526mjf0sdh/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/nearForm/node-clinic-bubbleprof/branch/master
 [`<Object>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
 [`<boolean>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type
 [`<String>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String
+[azure-status]: https://dev.azure.com/node-clinic/node-clinic/_apis/build/status/nearform.node-clinic-bubbleprof
+[azure-url]: https://dev.azure.com/node-clinic/node-clinic/_apis/build/status/nearform.node-clinic-bubbleprof?branchName=master
