@@ -4,10 +4,10 @@
   "repository": "nearform/node-clinic-bubbleprof",
   "version": "1.8.0",
   "scripts": {
-    "test": "standard | snazzy && tap --no-cov test/*.test.js",
+    "test": "standard | snazzy && tap --no-cov --timeout=50 test/*.test.js",
     "ci-lint": "standard | snazzy",
-    "ci-test": "tap test/*.test.js",
-    "ci-cov": "tap --statements=98 test/*.test.js",
+    "ci-test": "tap --timeout=50 test/*.test.js",
+    "ci-cov": "tap --statements=98 --timeout=60 test/*.test.js",
     "lint": "standard --fix | snazzy",
     "visualize-watch": "node debug/visualize-watch.js",
     "visualize-all": "node debug/visualize-all.js"
