@@ -104,33 +104,39 @@ test('stack trace - native', function (t) {
     frames = stackTrace()
   })
 
-  if (process.version.indexOf('v10') === 0 || process.version.indexOf('v8') === 0) {
-    t.strictDeepEqual(Object.assign({}, frames[1]), {
-      functionName: 'sort',
-      typeName: '',
-      isEval: false,
-      isConstructor: false,
-      isNative: true,
-      isToplevel: false,
-      evalOrigin: '',
-      fileName: 'native array.js',
-      lineNumber: 1,
-      columnNumber: 1
-    })
-  } else {
-    t.strictDeepEqual(Object.assign({}, frames[1]), {
-      functionName: 'sort',
-      typeName: 'Array',
-      isEval: false,
-      isConstructor: false,
-      isNative: false,
-      isToplevel: false,
-      evalOrigin: '',
-      fileName: '',
-      lineNumber: 0,
-      columnNumber: 0
-    })
+  const v8VersionParts = process.versions.v8.split('.')
+  const isTorqueSortVersion = parseInt(v8VersionParts[0], 10) >= 7
+
+  const expectedTorque = {
+    functionName: 'sort',
+    typeName: 'Array',
+    isEval: false,
+    isConstructor: false,
+    isNative: false,
+    isToplevel: false,
+    evalOrigin: '',
+    fileName: '',
+    lineNumber: 0,
+    columnNumber: 0
   }
+
+  const expectedNative = {
+    functionName: 'sort',
+    typeName: '',
+    isEval: false,
+    isConstructor: false,
+    isNative: true,
+    isToplevel: false,
+    evalOrigin: '',
+    fileName: 'native array.js',
+    lineNumber: 1,
+    columnNumber: 1
+  }
+
+  t.strictDeepEqual(
+    Object.assign({}, frames[1]),
+    isTorqueSortVersion ? expectedTorque : expectedNative
+  )
 
   t.end()
 })

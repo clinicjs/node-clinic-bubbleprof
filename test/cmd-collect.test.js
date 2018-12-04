@@ -74,19 +74,15 @@ test('collect command produces data files with content', function (t) {
         asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
-      if (process.version.indexOf('v10') >= 0 || process.version.indexOf('v8') >= 0) {
-        // Expect Timeout and TIMERWRAP to be there
-        t.strictDeepEqual(
-          asyncOperationTypes.sort(),
-          ['TIMERWRAP', 'Timeout']
-        )
-      } else {
-        // Expect Timeout to be there
-        t.strictDeepEqual(
-          asyncOperationTypes.sort(),
-          ['Timeout']
-        )
-      }
+      const majorVersion = parseInt(process.version.match(/^v(\d+)\./)[1], 10)
+      // Expect Timeout and TIMERWRAP to be there in Node 10.x and below
+      const oldExpected = ['TIMERWRAP', 'Timeout']
+      // TIMERWRAP was removed in Node 11: https://github.com/nodejs/node/pull/20894
+      const newExpected = ['Timeout']
+      t.strictDeepEqual(
+        asyncOperationTypes.sort(),
+        majorVersion >= 11 ? newExpected : oldExpected
+      )
 
       t.end()
     })
