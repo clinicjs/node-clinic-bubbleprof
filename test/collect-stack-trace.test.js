@@ -104,7 +104,23 @@ test('stack trace - native', function (t) {
     frames = stackTrace()
   })
 
-  t.strictDeepEqual(Object.assign({}, frames[1]), {
+  const v8VersionParts = process.versions.v8.split('.')
+  const isTorqueSortVersion = parseInt(v8VersionParts[0], 10) >= 7
+
+  const expectedTorque = {
+    functionName: 'sort',
+    typeName: 'Array',
+    isEval: false,
+    isConstructor: false,
+    isNative: false,
+    isToplevel: false,
+    evalOrigin: '',
+    fileName: '',
+    lineNumber: 0,
+    columnNumber: 0
+  }
+
+  const expectedNative = {
     functionName: 'sort',
     typeName: '',
     isEval: false,
@@ -115,7 +131,12 @@ test('stack trace - native', function (t) {
     fileName: 'native array.js',
     lineNumber: 1,
     columnNumber: 1
-  })
+  }
+
+  t.strictDeepEqual(
+    Object.assign({}, frames[1]),
+    isTorqueSortVersion ? expectedTorque : expectedNative
+  )
 
   t.end()
 })
