@@ -161,14 +161,13 @@
 }
 
 #header .toggle-theme {
-  /* height: 16px;
+  height: 16px;
   width: calc(var(--eye-icon-total-width) - 6px);
-  background-size: cover;
-  background-image: var(--eye-icon);
-  display: inline-block; */
+  font-size: 24px;
   cursor: pointer;
   float: right;
-  margin: 3px 4px 0 2px;
+  margin: 0px 4px 0 2px;
+  color: var(--grey-highlight);
 }
 
 #header .help-link-block {
@@ -183,10 +182,10 @@
   font-weight: bold;
   text-decoration: none;
   outline: 2px solid var(--banner-bg-color);
+  display: flex;
 }
-
-#header .help-link-block .help-link:before {
-  content: 'How to use this';
+#header .help-link-block .help-link span{
+  margin-right: 0.3em;
 }
 
 /* unvisited link only */
@@ -199,8 +198,8 @@
 #header .help-link-block .help-link:link:after {
   animation-name: pulseIcon;
   color: var(--max-contrast);
-  border-left-color: var(--max-contrast);
-  border-bottom-color: var(--max-contrast);
+  /* border-left-color: var(--max-contrast);
+  border-bottom-color: var(--max-contrast); */
 }
 
 #header .help-link-block .help-link:link,

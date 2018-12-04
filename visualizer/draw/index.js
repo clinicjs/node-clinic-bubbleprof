@@ -2,6 +2,8 @@
 const BubbleprofUI = require('./bubbleprof-ui.js')
 const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
+const eyeIcon = require('@nearform/clinic-common/icons/eye-show')
+const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -20,13 +22,14 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
-    htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"></a>'
+    htmlContent: `<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"><span>How to use this</span> ${extLinkIcon}</a>`
   })
 
   header.addContent(undefined, {
     htmlElementType: 'a',
     classNames: 'toggle-theme',
     title: 'Toggle between light and dark themes',
+    htmlContent: `${eyeIcon}`,
     eventHandler: {
       name: 'click',
       func: () => {
