@@ -16,7 +16,6 @@ const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 const minifyInline = require('./lib/minify-inline')
-var inlineSvg = require('browserify-inline-svg')
 
 const { promisify } = require('util')
 const readFile = promisify(require('fs').readFile)
