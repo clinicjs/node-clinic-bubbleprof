@@ -232,6 +232,8 @@ class BubbleprofUI extends EventEmitter {
   selectNode (layoutNode, animationQueue) {
     const dataNode = layoutNode.node
     const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
+    this.outputFrames(null) // Make sure no frames are being output, without changing selection
+
     this.svgNodeDiagram.svgNodes.get(layoutNode.id).select()
 
     switch (dataNode.constructor.name) {
