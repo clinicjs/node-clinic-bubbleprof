@@ -8,7 +8,13 @@ const xsock = require('cross-platform-sock')
 const sock = xsock(path.join(__dirname, '../test-server.sock'))
 const app = express()
 
-try { fs.unlinkSync(sock) } catch (err) {}
+try {
+  fs.unlinkSync(sock)
+} catch (err) {
+  if (err.code !== 'ENOENT') {
+    console.error('could not unlink test-server.sock:', err.stack)
+  }
+}
 const server = app.listen(sock)
 
 let connections = 0
