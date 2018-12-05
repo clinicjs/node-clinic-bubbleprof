@@ -94,6 +94,10 @@ class SvgNodeDiagram {
     })
   }
 
+  selectNodeById (id) {
+    this.svgNodes.get(id).select()
+  }
+
   deselectAll () {
     this.svgNodes.forEach(svgNode => svgNode.deselect())
   }
