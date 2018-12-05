@@ -82,7 +82,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       if (os.platform() !== 'win32') proc.kill('SIGINT')
     })
 
-    proc.once('exit', function (code, signal) {
+    proc.once('exit', (code, signal) => {
       // Windows exit code STATUS_CONTROL_C_EXIT 0xC000013A returns 3221225786
       // if not caught. See https://msdn.microsoft.com/en-us/library/cc704588.aspx
       /* istanbul ignore next: windows hack */
@@ -96,6 +96,8 @@ class ClinicBubbleprof extends events.EventEmitter {
           console.error(`process exited by signal ${signal}`)
         }
       }
+
+      this.emit('analysing')
 
       // create directory and move files to that directory
       joinTrace(
