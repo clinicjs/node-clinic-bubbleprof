@@ -1,11 +1,14 @@
 'use strict'
 
+const fs = require('fs')
 const path = require('path')
 const express = require('express')
 const xsock = require('cross-platform-sock')
 
 const sock = xsock(path.join(__dirname, '../test-server.sock'))
 const app = express()
+
+try { fs.unlinkSync(sock) } catch (err) {}
 const server = app.listen(sock)
 
 let connections = 0

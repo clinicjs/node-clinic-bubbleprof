@@ -19,4 +19,5 @@ const server = http.createServer(function request (req, res) {
   })
 })
 
+try { fs.unlinkSync(sock) } catch (err) {}
 server.listen(sock)
