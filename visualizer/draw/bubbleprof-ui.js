@@ -232,7 +232,9 @@ class BubbleprofUI extends EventEmitter {
   selectNode (layoutNode, animationQueue) {
     const dataNode = layoutNode.node
     const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
-    this.svgNodeDiagram.svgNodes.get(layoutNode.id).select()
+    this.outputFrames(null) // Make sure no frames are being output, without changing selection
+
+    this.svgNodeDiagram.selectNodeById(layoutNode.id)
 
     switch (dataNode.constructor.name) {
       case 'ShortcutNode':
