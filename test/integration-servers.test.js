@@ -30,7 +30,7 @@ function runServer (name, callback) {
   })
 }
 
-test('basis server aggregates HTTPPARSER', function (t) {
+test('basic server aggregates HTTPPARSER', function (t) {
   runServer('basic', function (err, nodes) {
     if (err) return t.ifError(err)
 
