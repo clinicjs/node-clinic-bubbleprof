@@ -1,5 +1,6 @@
 'use strict'
 
+const fs = require('fs')
 const path = require('path')
 const http = require('http')
 const xsock = require('cross-platform-sock')
@@ -16,4 +17,11 @@ const server = http.createServer(function (req, res) {
   }
 })
 
+try {
+  fs.unlinkSync(sock)
+} catch (err) {
+  if (err.code !== 'ENOENT') {
+    console.error('could not unlink test-server.sock:', err.stack)
+  }
+}
 server.listen(sock)

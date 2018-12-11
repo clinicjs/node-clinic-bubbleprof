@@ -19,4 +19,11 @@ const server = http.createServer(function request (req, res) {
   })
 })
 
+try {
+  fs.unlinkSync(sock)
+} catch (err) {
+  if (err.code !== 'ENOENT') {
+    console.error('could not unlink test-server.sock:', err.stack)
+  }
+}
 server.listen(sock)
