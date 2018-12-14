@@ -4,6 +4,7 @@ const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
 const eyeIcon = require('@nearform/clinic-common/icons/eye-show')
 const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
+const arrowUp = require('@nearform/clinic-common/icons/chevron-up')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -173,7 +174,7 @@ function drawOuterUI () {
   })
 
   sideBar.addCollapseControl(true, {
-    htmlContent: '<div class="text">Details</div><div class="arrow"></div>',
+    htmlContent: `<div class="text">Details</div>${arrowUp}`,
     classNames: 'bar',
     closeIcon: '×',
     collapseEvent: 'main-overlay',
@@ -184,27 +185,27 @@ function drawOuterUI () {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
   })
-  lookup.addCollapseControl(true, { htmlContent: 'Search <span class="arrow"></span>' })
+  lookup.addCollapseControl(true, { htmlContent: `Search ${arrowUp}` })
 
   const callbacksOverTime = sideBar.addContent('AreaChart', {
     id: 'area-chart',
     classNames: 'side-bar-item'
   })
-  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: `Async operations ${arrowUp}` })
 
   const key = sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
     htmlContent: staticKeyHtml
   })
-  key.addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
+  key.addCollapseControl(false, { htmlContent: `Key ${arrowUp}` })
 
   /* TODO: Add this when feature is implemented
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
-    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
+    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays ${arrowUp}' })
   */
 
   // Footer
-  const footerCollapseHTML = '<div class="text">Call stacks</div><div class="arrow"></div>'
+  const footerCollapseHTML = `<div class="text">Call stacks</div>${arrowUp}`
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,
