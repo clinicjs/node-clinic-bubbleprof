@@ -7,6 +7,8 @@ const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
 const spinner = require('@nearform/clinic-common/spinner')
+const closeIcon = require('@nearform/clinic-common/icons/close')
+const backIcon = require('@nearform/clinic-common/icons/circle-arrow-left')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
@@ -54,6 +56,7 @@ class BubbleprofUI extends EventEmitter {
       const nodeLinkSection = this.getNodeLinkSection()
       this.backBtn = nodeLinkSection.addContent(undefined, {
         hidden: true,
+        htmlContent: backIcon,
         classNames: 'back-btn'
       })
 
@@ -612,7 +615,7 @@ class BubbleprofUI extends EventEmitter {
   // Close button returns to the originalUI
   initializeCloseButton (closeBtn) {
     closeBtn.d3Element
-      .property('textContent', '×')
+      .html(closeIcon)
       .on('click', () => {
         this.queueAnimation('close', (animationQueue) => {
           this.traverseUp(null, { animationQueue })

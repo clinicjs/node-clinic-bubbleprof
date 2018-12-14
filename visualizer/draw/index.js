@@ -4,7 +4,8 @@ const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
 const eyeIcon = require('@nearform/clinic-common/icons/eye-show')
 const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
-const arrowUp = require('@nearform/clinic-common/icons/chevron-up')
+const arrowUpIcon = require('@nearform/clinic-common/icons/chevron-up')
+const closeIcon = require('@nearform/clinic-common/icons/close')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -174,9 +175,9 @@ function drawOuterUI () {
   })
 
   sideBar.addCollapseControl(true, {
-    htmlContent: `<div class="text">Details</div>${arrowUp}`,
+    htmlContent: `<div class="text">Details</div>${arrowUpIcon}`,
     classNames: 'bar',
-    closeIcon: '×',
+    closeIcon: closeIcon,
     collapseEvent: 'main-overlay',
     portraitOnly: true
   })
@@ -185,27 +186,27 @@ function drawOuterUI () {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
   })
-  lookup.addCollapseControl(true, { htmlContent: `Search ${arrowUp}` })
+  lookup.addCollapseControl(true, { htmlContent: `Search ${arrowUpIcon}` })
 
   const callbacksOverTime = sideBar.addContent('AreaChart', {
     id: 'area-chart',
     classNames: 'side-bar-item'
   })
-  callbacksOverTime.addCollapseControl(false, { htmlContent: `Async operations ${arrowUp}` })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: `Async operations ${arrowUpIcon}` })
 
   const key = sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
     htmlContent: staticKeyHtml
   })
-  key.addCollapseControl(false, { htmlContent: `Key ${arrowUp}` })
+  key.addCollapseControl(false, { htmlContent: `Key ${arrowUpIcon}` })
 
   /* TODO: Add this when feature is implemented
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
-    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays ${arrowUp}' })
+    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays ${arrowUpIcon}' })
   */
 
   // Footer
-  const footerCollapseHTML = `<div class="text">Call stacks</div>${arrowUp}`
+  const footerCollapseHTML = `<div class="text">Call stacks</div>${arrowUpIcon}`
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,

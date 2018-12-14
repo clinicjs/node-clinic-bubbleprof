@@ -260,10 +260,6 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   padding: 8px 0;
 }
 
-#footer .close:before {
-  content: '×';
-}
-
 #side-bar .close,
 #footer .close {
   width: 24px;
@@ -273,7 +269,7 @@ body[data-highlight-type='other'] #header .interactive-key.type-other .type-icon
   float: right;
   display: block;
   line-height: 14px;
-  font-size: 30px;
+  font-size: 20px;
   cursor: pointer;
   color: var(--cyan-highlight);
 }
@@ -452,19 +448,17 @@ svg.bubbleprof.complete-fade-out {
   display: block;
   top: 8px;
   right: 8px;
-  height: 40px;
   background: var(--reverse-contrast);
   color: var(--cyan);
   z-index: 20;
   position: absolute;
-  padding: 2px 11px;
-  line-height: 32px;
+  padding: 6px;
   font-size: 28px;
   cursor: pointer;
 }
 
 #node-link .back-btn {
-  display: block;
+  display: flex;
   top: 8px;
   left: 30px;
   width: 40px;
@@ -472,17 +466,14 @@ svg.bubbleprof.complete-fade-out {
   background: var(--reverse-contrast);
   z-index: 20;
   position: absolute;
-  padding: 2px 10px;
-  line-height: 32px;
   cursor: pointer;
   color: var(--cyan);
+  align-items: center;
+  justify-content: center;
 }
 
-#node-link .back-btn:before {
-  content: '⤾';
-  display: block;
-  font-size: 21px;
-  font-weight: bold;
+#node-link .back-btn .icon-img {
+  font-size: 28px;
 }
 
 #node-link .back-btn.hidden {
