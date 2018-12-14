@@ -169,7 +169,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     })
     b.add(scriptPath)
     let scriptFile = b.bundle()
-    
+
     // create style-file stream
     const processor = postcss([
       postcssImport()
@@ -182,7 +182,6 @@ class ClinicBubbleprof extends events.EventEmitter {
       .then((result) => {
         return result.css
       })
-
 
     // build output file
     const outputFile = streamTemplate`
