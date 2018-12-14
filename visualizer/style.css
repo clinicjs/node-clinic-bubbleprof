@@ -509,7 +509,9 @@ svg.bubbleprof.complete-fade-out {
   cursor: ew-resize;
 }
 
-.collapse-control {
+#side-bar .collapse-control,
+#footer .collapse-control,
+#header .collapse-control{
   cursor: pointer;
   color: var(--max-contrast);
   border-bottom: 1px solid var(--cyan);
@@ -1168,6 +1170,7 @@ body:not(.initialized) {
 
   #side-bar-inner {
     max-height: calc(50vh - var(--footer-height));
+    min-height: 35vh;
     overflow: auto;
     /* !important to override resizes made in landscape mode */
     width: 200% !important;
