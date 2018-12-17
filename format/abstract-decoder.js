@@ -17,6 +17,7 @@ class AbstractDecoder extends stream.Transform {
     this._bufferedLength = 0
     this._nextMessageLength = FRAME_PREFIX_SIZE
     this._awaitFramePrefix = true
+    this._warned = false
   }
 
   _transform (chunk, encoding, callback) {
@@ -44,9 +45,12 @@ class AbstractDecoder extends stream.Transform {
               msg
             )
           } catch (_) {
-            console.error('There was a decoding error with chunk (base64):')
-            console.error(chunk.toString('base64'))
-            console.error('Please open an issue on https://github.com/nearform/node-clinic-bubbleprof with the above output.')
+            if (!this._warned) {
+              console.error('There was a decoding error with chunk (base64):')
+              console.error(chunk.toString('base64'))
+              console.error('Please open an issue on https://github.com/nearform/node-clinic-bubbleprof with the above output.')
+              this._warned = true
+            }
           }
           chunk = chunk.slice(this._nextMessageLength)
           this._nextMessageLength = FRAME_PREFIX_SIZE
