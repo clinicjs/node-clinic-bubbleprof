@@ -45,7 +45,19 @@ class AbstractDecoder extends stream.Transform {
               msg
             )
           } catch (_) {
-            if (!this._warned) {
+            // Recover from the 16 bit truncation bug in the encoder
+            let recovered = false
+            for (let i = 1; i < 10; i++) {
+              try {
+                const msg = this._messageType.decode(chunk.slice(0, this._nextMessageLength + i * 65536))
+                this.push(msg)
+                this._nextMessageLength += i * 65536
+                recovered = true
+                break
+              } catch (_) {
+              }
+            }
+            if (!this._warned && !recovered) {
               console.error('There was a decoding error with chunk (base64):')
               console.error(chunk.toString('base64'))
               console.error('Please open an issue on https://github.com/nearform/node-clinic-bubbleprof with the above output.')
