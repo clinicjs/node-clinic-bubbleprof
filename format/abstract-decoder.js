@@ -2,7 +2,7 @@
 
 const stream = require('stream')
 
-const FRAME_PREFIX_SIZE = 2 // uint16 is 2 bytes
+const FRAME_PREFIX_SIZE = 4 // uint32 is 2 bytes
 
 class AbstractDecoder extends stream.Transform {
   constructor (messageType, options) {
@@ -34,7 +34,7 @@ class AbstractDecoder extends stream.Transform {
     while (chunk.length >= this._nextMessageLength) {
       switch (this._awaitFramePrefix) {
         case true:
-          this._nextMessageLength = chunk.readUInt16BE(0)
+          this._nextMessageLength = chunk.readUInt32BE(0)
           chunk = chunk.slice(FRAME_PREFIX_SIZE)
           this._awaitFramePrefix = false
           break

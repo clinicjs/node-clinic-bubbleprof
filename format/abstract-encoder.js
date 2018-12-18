@@ -2,7 +2,7 @@
 
 const stream = require('stream')
 
-const FRAME_PREFIX_SIZE = 2 // uint16 is 2 bytes
+const FRAME_PREFIX_SIZE = 4 // uint32 is 4 bytes
 
 class AbstractEncoder extends stream.Transform {
   constructor (messageType, options) {
@@ -18,7 +18,7 @@ class AbstractEncoder extends stream.Transform {
     const messageLength = this._messageType.encodingLength(message)
 
     const framedMessage = Buffer.alloc(messageLength + FRAME_PREFIX_SIZE)
-    framedMessage.writeUInt16BE(messageLength, 0)
+    framedMessage.writeUInt32BE(messageLength, 0)
     this._messageType.encode(message, framedMessage, FRAME_PREFIX_SIZE)
 
     callback(null, framedMessage)
