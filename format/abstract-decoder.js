@@ -3,6 +3,7 @@
 const stream = require('stream')
 
 const FRAME_PREFIX_SIZE = 2 // uint16 is 2 bytes
+const MAX_CHUNK_SIZE = 10 * 65536
 
 class AbstractDecoder extends stream.Transform {
   constructor (messageType, options) {
@@ -46,18 +47,11 @@ class AbstractDecoder extends stream.Transform {
             )
           } catch (_) {
             // Recover from the 16 bit truncation bug in the encoder
-            let recovered = false
-            for (let i = 1; i < 10; i++) {
-              try {
-                const msg = this._messageType.decode(chunk.slice(0, this._nextMessageLength + i * 65536))
-                this.push(msg)
-                this._nextMessageLength += i * 65536
-                recovered = true
-                break
-              } catch (_) {
-              }
+            if (chunk.length < MAX_CHUNK_SIZE) {
+              this._nextMessageLength += 65536
+              break
             }
-            if (!this._warned && !recovered) {
+            if (!this._warned) {
               console.error('There was a decoding error with chunk (base64):')
               console.error(chunk.toString('base64'))
               console.error('Please open an issue on https://github.com/nearform/node-clinic-bubbleprof with the above output.')
