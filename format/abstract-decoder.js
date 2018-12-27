@@ -2,7 +2,8 @@
 
 const stream = require('stream')
 
-const FRAME_PREFIX_SIZE = 4 // uint32 is 2 bytes
+const FRAME_PREFIX_SIZE = 4 // uint32 is 4 bytes
+const MAX_CHUNK_SIZE = 10 * 65536
 
 class AbstractDecoder extends stream.Transform {
   constructor (messageType, options) {
@@ -45,6 +46,11 @@ class AbstractDecoder extends stream.Transform {
               msg
             )
           } catch (_) {
+            // Recover from the 16 bit truncation bug in the encoder
+            if (chunk.length < MAX_CHUNK_SIZE) {
+              this._nextMessageLength += 65536
+              break
+            }
             if (!this._warned) {
               console.error('There was a decoding error with chunk (base64):')
               console.error(chunk.toString('base64'))
