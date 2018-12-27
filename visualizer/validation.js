@@ -36,28 +36,39 @@ function validateNumber (num, targetDescription = '', conditions = {}) {
   return num
 }
 
-const mapKeyCounters = {}
-function uniqueMapKey (key, map, separator, startingNum = 0) {
-  const test = (key) => !map.has(key)
-  const initialCounter = mapKeyCounters[key] || startingNum
-  const { uniqueKey, counter } = incrementKeyUntilUnique(key, initialCounter, test, separator)
-  mapKeyCounters[uniqueKey] = counter
-  return uniqueKey
+// Keep latest key increments in a weak map so they're specific to each object but allow GC
+const countersByObj = new WeakMap()
+
+const mapTest = (key, map) => !map.has(key)
+function uniqueMapKey (key, map, separator = '_', startingNum = 0) {
+  return getUniqueKey(key, map, mapTest, startingNum, separator)
 }
 
-const objectKeyCounters = {}
-function uniqueObjectKey (key, object, separator, startingNum = 0) {
-  const test = (key) => typeof object[key] === 'undefined'
-  const initialCounter = objectKeyCounters[key] || startingNum
-  const { uniqueKey, counter } = incrementKeyUntilUnique(key, initialCounter, test, separator)
-  objectKeyCounters[uniqueKey] = counter
-  return uniqueKey
+const objectTest = (key, object) => !object.hasOwnProperty(key)
+function uniqueObjectKey (key, object, separator = '_', startingNum = 0) {
+  return getUniqueKey(key, object, objectTest, startingNum, separator)
 }
 
-function incrementKeyUntilUnique (key, counter, test, separator = '_') {
-  const testKey = counter ? `${key}${separator}${counter}` : key
-  if (test(testKey)) return { uniqueKey: testKey, counter }
-  return incrementKeyUntilUnique(key, counter + 1, test, separator)
+function getUniqueKey (key, obj, test, startingNum, separator) {
+  let countersKeyed = countersByObj.get(obj)
+  if (!countersKeyed) {
+    countersKeyed = {}
+    countersByObj.set(obj, countersKeyed)
+  }
+
+  startingNum = Math.max(countersKeyed[key + separator] || 0, startingNum)
+  const result = incrementKeyUntilUnique(key, obj, test, startingNum, separator)
+  countersKeyed[key + separator] = result.counter
+  return result.testKey
+}
+
+function incrementKeyUntilUnique (key, obj, test, counter, separator) {
+  const testKey = counter ? ('' + key + separator + counter) : key
+  if (typeof key === 'object') console.log(key, counter, testKey, test(testKey, obj))
+  if (test(testKey, obj)) {
+    return { testKey, counter }
+  }
+  return incrementKeyUntilUnique(key, obj, test, counter + 1, separator)
 }
 
 module.exports = {

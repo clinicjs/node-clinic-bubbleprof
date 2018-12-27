@@ -76,8 +76,8 @@ test('Visualizer validation - uniqueMapKey', function (t) {
   t.equals(uniqueMapKey('a', testMap), 'a_1')
   t.equals(uniqueMapKey('b', testMap), 'b_2')
   t.equals(uniqueMapKey(99, testMap), '99_1')
-  t.equals(uniqueMapKey(objectKey, testMap), '[object Object]_1')
   t.equals(uniqueMapKey(objectKey2, testMap), objectKey2)
+  t.equals(uniqueMapKey(objectKey, testMap), '[object Object]_1')
 
   t.equals(uniqueMapKey('a', testMap, '', 1), 'a1')
   t.equals(uniqueMapKey('b', testMap, '_', 1), 'b_2')
