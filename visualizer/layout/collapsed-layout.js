@@ -15,6 +15,10 @@ class CollapsedLayout {
     // Shallow clone before modifying
     // TODO: revisit idempotency of this class - mutates each LayoutNode internally
     this.layoutNodes = new Map([...layout.layoutNodes])
+
+    const layoutNodesArray = [...this.layoutNodes.values()]
+    this.shortcutCount = layoutNodesArray.reduce((count, layoutNode) => count + (layoutNode.node.constructor.name === 'ShortcutNode' ? 1 : 0), 0)
+
     this.scale = layout.scale
     this.minimumNodes = 3
 
@@ -23,7 +27,7 @@ class CollapsedLayout {
 
     // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
     // e.g. we could attach .topNodes or some iterator to Layout instances
-    this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
+    this.topLayoutNodes = new Set(layoutNodesArray.filter(layoutNode => !layoutNode.parent))
 
     this.setCollapseThreshold(layout.settings, this.scale.heightMultiplier)
 
@@ -244,11 +248,10 @@ class CollapsedLayout {
     return collapsed
   }
   countNonShortcutNodes () {
-    let shortcutCount = 0
-    this.layoutNodes.forEach(layoutNode => {
-      if (layoutNode.node.constructor.name === 'ShortcutNode') shortcutCount++
-    })
-    return this.layoutNodes.size - shortcutCount
+    const total = this.layoutNodes.size
+    const nonShortcutCount = total - this.shortcutCount
+    if (nonShortcutCount <= 0) throw new Error(`${nonShortcutCount} non-shortcut nodes (${total} nodes, ${this.shortcutCount} shortcuts)`)
+    return nonShortcutCount
   }
   isBelowThreshold (layoutNode) {
     return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < this.collapseThreshold
