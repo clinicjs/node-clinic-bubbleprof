@@ -64,7 +64,6 @@ function getUniqueKey (key, obj, test, startingNum, separator) {
 
 function incrementKeyUntilUnique (key, obj, test, counter, separator) {
   const testKey = counter ? ('' + key + separator + counter) : key
-  if (typeof key === 'object') console.log(key, counter, testKey, test(testKey, obj))
   if (test(testKey, obj)) {
     return { testKey, counter }
   }
