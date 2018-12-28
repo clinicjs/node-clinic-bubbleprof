@@ -36,20 +36,46 @@ function validateNumber (num, targetDescription = '', conditions = {}) {
   return num
 }
 
-function uniqueMapKey (key, map, separator, startingNum = 0) {
-  const test = (key) => !map.has(key)
-  return incrementKeyUntilUnique(key, startingNum, test, separator)
+// Keep latest key increments in a weak map so they're specific to each object but allow GC
+const countersByObj = new WeakMap()
+
+const mapTest = (key, map) => !map.has(key)
+function uniqueMapKey (key, map, separator = '_', startingNum = 0) {
+  return getUniqueKey(key, map, mapTest, startingNum, separator)
 }
 
-function uniqueObjectKey (key, object, separator, startingNum = 0) {
-  const test = (key) => typeof object[key] === 'undefined'
-  return incrementKeyUntilUnique(key, startingNum, test, separator)
+const objectTest = (key, object) => !object.hasOwnProperty(key)
+function uniqueObjectKey (key, object, separator = '_', startingNum = 0) {
+  return getUniqueKey(key, object, objectTest, startingNum, separator)
 }
 
-function incrementKeyUntilUnique (key, counter, test, separator = '_', startAt = null) {
-  if (!key && startAt !== null) key = startAt
-  const testKey = counter ? `${key}${separator}${counter}` : key
-  return test(testKey) ? testKey : incrementKeyUntilUnique(key, counter + 1, test, separator)
+function getUniqueKey (key, obj, test, startingNum, separator) {
+  let countersKeyed = countersByObj.get(obj) || {}
+  if (!countersKeyed) {
+    countersKeyed = {}
+    countersByObj.set(obj, countersKeyed)
+  }
+
+  startingNum = Math.max(countersKeyed[key + separator] || 0, startingNum)
+  const result = incrementKeyUntilUnique(key, obj, test, startingNum, separator)
+  countersKeyed[key + separator] = result.counter
+  return result.testKey
+}
+
+function incrementKeyUntilUnique (key, obj, test, counter, separator) {
+  const testKey = counter ? ('' + key + separator + counter) : key
+  if (test(testKey, obj)) {
+    return { testKey, counter }
+  }
+  return incrementKeyUntilUnique(key, obj, test, counter + 1, separator)
+}
+
+function removeFromCounter (id, key, obj, separator = '_') {
+  const countersKeyed = countersByObj.get(obj)
+  if (countersKeyed && typeof countersKeyed[key + separator] === 'number') {
+    const counter = numberiseIfNumericString(id.replace(key + separator, ''))
+    if (isNumber(counter)) countersKeyed[key + separator] = counter - 1
+  }
 }
 
 module.exports = {
@@ -58,5 +84,6 @@ module.exports = {
   validateKey,
   validateNumber,
   uniqueMapKey,
-  uniqueObjectKey
+  uniqueObjectKey,
+  removeFromCounter
 }

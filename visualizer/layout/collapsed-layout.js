@@ -7,7 +7,7 @@ const _ = {
 const { ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 const { pickLeavesByLongest } = require('./stems.js')
-const { uniqueMapKey } = require('../validation.js')
+const { uniqueMapKey, removeFromCounter } = require('../validation.js')
 
 class CollapsedLayout {
   constructor (layout) {
@@ -15,15 +15,22 @@ class CollapsedLayout {
     // Shallow clone before modifying
     // TODO: revisit idempotency of this class - mutates each LayoutNode internally
     this.layoutNodes = new Map([...layout.layoutNodes])
+
     this.scale = layout.scale
     this.minimumNodes = 3
 
     // If debugging, expose one pool of ejected node IDs that is added to each time this class is initialized
     if (layout.settings.debugMode && !layout.ejectedLayoutNodeIds) layout.ejectedLayoutNodeIds = []
 
-    // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
-    // e.g. we could attach .topNodes or some iterator to Layout instances
-    this.topLayoutNodes = new Set([...this.layoutNodes.values()].filter(layoutNode => !layoutNode.parent))
+    const layoutNodesArray = [...this.layoutNodes.values()]
+    const layoutNodesCount = layoutNodesArray.length
+    this.shortcutCount = 0
+    this.topLayoutNodes = new Set()
+    for (let i = 0; i < layoutNodesCount; ++i) {
+      const layoutNode = layoutNodesArray[i]
+      if (layoutNode.node.constructor.name === 'ShortcutNode') this.shortcutCount++
+      if (!layoutNode.parent) this.topLayoutNodes.add(layoutNode)
+    }
 
     this.setCollapseThreshold(layout.settings, this.scale.heightMultiplier)
 
@@ -47,49 +54,54 @@ class CollapsedLayout {
   setCollapseThreshold (settings, multiplier = 1) {
     // Set an initial value based on settings then test it
     this.collapseThreshold = settings.initialCollapseThreshold * multiplier
+
+    const leaves = pickLeavesByLongest(this.layoutNodes)
+    const leavesCount = leaves.length
+    for (var i = 0; i < leavesCount; i++) {
+      this.testStemLength(leaves[i], settings, multiplier)
+    }
+  }
+  testStemLength (layoutNode, settings, multiplier) {
+    let isCollapsible
     const availableHeight = settings.sizeIndependentHeight
 
-    pickLeavesByLongest(this.layoutNodes).forEach(layoutNode => {
-      let isCollapsible
+    // Begin loop if this stem's absolute total doesn't fit in the available space
+    let absoluteExceedsHeight = layoutNode.stem.lengths.absolute > availableHeight
+    while (absoluteExceedsHeight) {
+      // Loop increases collapse threshold until this stem fits
+      const ancestorIds = layoutNode.stem.ancestors.ids
+      let stemLengthAfterCollapse = 0
 
-      // Begin loop if this stem's absolute total doesn't fit in the available space
-      let absoluteExceedsHeight = layoutNode.stem.lengths.absolute > availableHeight
-      while (absoluteExceedsHeight) {
-        // Loop increases collapse threshold until this stem fits
-        const ancestorIds = layoutNode.stem.ancestors.ids
-        let stemLengthAfterCollapse = 0
-
-        // This should be impossible - but in case some bug is introduced, a warning and break is better than an infinite loop
-        /* istanbul ignore next */
-        if (this.collapseThreshold / multiplier > availableHeight) {
-          const details = `LayoutNode ${layoutNode.id}'s ${ancestorIds.length}-length stem won't collapse to fit ${availableHeight}px.`
-          console.warn(`Infinite loop prevented. ${details}`)
-          break
-        }
-
-        // Iterate backwards through ancestors i.e. from furthest ancestor first
-        for (let i = layoutNode.stem.ancestors.ids.length - 1; i >= 0; i--) {
-          const ancestorNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i])
-
-          const childNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i + 1])
-          const isMidpoint = childNode && !this.topLayoutNodes.has(ancestorNode)
-          if (!isMidpoint) continue
-
-          isCollapsible = this.isVerticallyCollapsible(childNode, ancestorNode)
-          if (isCollapsible === 'abort') break
-          if (!isCollapsible) {
-            stemLengthAfterCollapse += 1
-          }
-        }
-        if (isCollapsible === 'abort') break // Exit while loop too if it's not possible to collapse any further
-
-        const stemAbsoluteAfterCollapse = layoutNode.stem.getAbsoluteLength(stemLengthAfterCollapse)
-
-        // If this stem's absolute total still doesn't fit, increase the collapse threshold and loop until it does; else exit loop
-        absoluteExceedsHeight = stemAbsoluteAfterCollapse > settings.sizeIndependentHeight
-        if (absoluteExceedsHeight) this.collapseThreshold = this.collapseThreshold * 1.05
+      // This should be impossible - but in case some bug is introduced, a warning and break is better than an infinite loop
+      /* istanbul ignore next */
+      if (this.collapseThreshold / multiplier > availableHeight) {
+        const details = `LayoutNode ${layoutNode.id}'s ${ancestorIds.length}-length stem won't collapse to fit ${availableHeight}px.`
+        console.warn(`Infinite loop prevented. ${details}`)
+        break
       }
-    })
+
+      // Iterate backwards through ancestors i.e. from furthest ancestor first
+      for (let i = layoutNode.stem.ancestors.ids.length - 1; i >= 0; i--) {
+        const ancestorNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i])
+
+        const childNode = this.layoutNodes.get(layoutNode.stem.ancestors.ids[i + 1])
+        const isMidpoint = childNode && !this.topLayoutNodes.has(ancestorNode)
+        if (!isMidpoint) continue
+
+        isCollapsible = this.isVerticallyCollapsible(childNode, ancestorNode)
+        if (isCollapsible === 'abort') break
+        if (!isCollapsible) {
+          stemLengthAfterCollapse += 1
+        }
+      }
+      if (isCollapsible === 'abort') break // Exit while loop too if it's not possible to collapse any further
+
+      const stemAbsoluteAfterCollapse = layoutNode.stem.getAbsoluteLength(stemLengthAfterCollapse)
+
+      // If this stem's absolute total still doesn't fit, increase the collapse threshold and loop until it does; else exit loop
+      absoluteExceedsHeight = stemAbsoluteAfterCollapse > settings.sizeIndependentHeight
+      if (absoluteExceedsHeight) this.collapseThreshold = this.collapseThreshold * 1.05
+    }
   }
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
@@ -243,12 +255,15 @@ class CollapsedLayout {
 
     return collapsed
   }
+  removeLayoutNode (id) {
+    this.layoutNodes.delete(id)
+    if (id.charAt(0) === 'x') removeFromCounter(id, 'x', this.layoutNodes, '')
+  }
   countNonShortcutNodes () {
-    let shortcutCount = 0
-    this.layoutNodes.forEach(layoutNode => {
-      if (layoutNode.node.constructor.name === 'ShortcutNode') shortcutCount++
-    })
-    return this.layoutNodes.size - shortcutCount
+    const total = this.layoutNodes.size
+    const nonShortcutCount = total - this.shortcutCount
+    if (nonShortcutCount <= 0) throw new Error(`${nonShortcutCount} non-shortcut nodes (${total} nodes, ${this.shortcutCount} shortcuts)`)
+    return nonShortcutCount
   }
   isBelowThreshold (layoutNode) {
     return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < this.collapseThreshold
