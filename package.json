@@ -2,7 +2,7 @@
   "name": "@nearform/bubbleprof",
   "description": "Programmable interface to clinic bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
-  "version": "1.9.6",
+  "version": "1.9.7",
   "scripts": {
     "test": "standard | snazzy && tap --no-cov --timeout=50 test/*.test.js",
     "ci-lint": "standard | snazzy",
