@@ -16,18 +16,21 @@ class CollapsedLayout {
     // TODO: revisit idempotency of this class - mutates each LayoutNode internally
     this.layoutNodes = new Map([...layout.layoutNodes])
 
-    const layoutNodesArray = [...this.layoutNodes.values()]
-    this.shortcutCount = layoutNodesArray.reduce((count, layoutNode) => count + (layoutNode.node.constructor.name === 'ShortcutNode' ? 1 : 0), 0)
-
     this.scale = layout.scale
     this.minimumNodes = 3
 
     // If debugging, expose one pool of ejected node IDs that is added to each time this class is initialized
     if (layout.settings.debugMode && !layout.ejectedLayoutNodeIds) layout.ejectedLayoutNodeIds = []
 
-    // TODO: stop relying on coincidental Map.keys() order (i.e. stuff would break when child occurs before parent)
-    // e.g. we could attach .topNodes or some iterator to Layout instances
-    this.topLayoutNodes = new Set(layoutNodesArray.filter(layoutNode => !layoutNode.parent))
+    const layoutNodesArray = [...this.layoutNodes.values()]
+    const layoutNodesCount = layoutNodesArray.length
+    this.shortcutCount = 0
+    this.topLayoutNodes = new Set()
+    for (let i = 0; i < layoutNodesCount; ++i) {
+      const layoutNode = layoutNodesArray[i]
+      if (layoutNode.node.constructor.name === 'ShortcutNode') this.shortcutCount++
+      if (!layoutNode.parent) this.topLayoutNodes.add(layoutNode)
+    }
 
     this.setCollapseThreshold(layout.settings, this.scale.heightMultiplier)
 
