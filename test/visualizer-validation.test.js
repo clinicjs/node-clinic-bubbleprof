@@ -98,7 +98,6 @@ test('Visualizer validation - uniqueMapKey', function (t) {
   t.ok(testMap.has('a_5'))
   t.notOk(testMap.has('a_6'))
 
-
   testMap.delete('a_3')
   removeFromCounter('a_3', testMap, 'a', '_')
   t.equals(uniqueMapKey('a', testMap), 'a_3')
