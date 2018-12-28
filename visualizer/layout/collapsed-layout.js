@@ -7,7 +7,7 @@ const _ = {
 const { ShortcutNode } = require('../data/data-node.js')
 const { LayoutNode, CollapsedLayoutNode } = require('./layout-node.js')
 const { pickLeavesByLongest } = require('./stems.js')
-const { uniqueMapKey } = require('../validation.js')
+const { uniqueMapKey, removeFromCounter } = require('../validation.js')
 
 class CollapsedLayout {
   constructor (layout) {
@@ -246,6 +246,10 @@ class CollapsedLayout {
     this.layoutNodes.delete(squashNode.id)
 
     return collapsed
+  }
+  removeLayoutNode (id) {
+    this.layoutNodes.delete(id)
+    if (id.charAt(0) === 'x') removeFromCounter(id, 'x', this.layoutNodes, '')
   }
   countNonShortcutNodes () {
     const total = this.layoutNodes.size

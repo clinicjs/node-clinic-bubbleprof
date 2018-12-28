@@ -7,7 +7,8 @@ const {
   validateKey,
   validateNumber,
   uniqueMapKey,
-  uniqueObjectKey
+  uniqueObjectKey,
+  removeFromCounter
 } = require('../visualizer/validation.js')
 
 test('Visualizer validation - isNumber', function (t) {
@@ -90,6 +91,20 @@ test('Visualizer validation - uniqueMapKey', function (t) {
 
   testMap.set(uniqueMapKey('a', testMap), 7)
   t.equals(uniqueMapKey('a', testMap), 'a_3')
+
+  testMap.set(uniqueMapKey('a', testMap), true)
+  testMap.set(uniqueMapKey('a', testMap), true)
+  testMap.set(uniqueMapKey('a', testMap), true)
+  t.ok(testMap.has('a_5'))
+  t.notOk(testMap.has('a_6'))
+
+
+  testMap.delete('a_3')
+  removeFromCounter('a_3', testMap, 'a', '_')
+  t.equals(uniqueMapKey('a', testMap), 'a_3')
+  testMap.set(uniqueMapKey('a', testMap), true)
+  t.equals(uniqueMapKey('a', testMap), 'a_6')
+
   t.end()
 })
 

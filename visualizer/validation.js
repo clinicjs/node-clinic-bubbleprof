@@ -50,7 +50,7 @@ function uniqueObjectKey (key, object, separator = '_', startingNum = 0) {
 }
 
 function getUniqueKey (key, obj, test, startingNum, separator) {
-  let countersKeyed = countersByObj.get(obj)
+  let countersKeyed = countersByObj.get(obj) || {}
   if (!countersKeyed) {
     countersKeyed = {}
     countersByObj.set(obj, countersKeyed)
@@ -71,11 +71,20 @@ function incrementKeyUntilUnique (key, obj, test, counter, separator) {
   return incrementKeyUntilUnique(key, obj, test, counter + 1, separator)
 }
 
+function removeFromCounter (id, key, obj, separator = '_') {
+  const countersKeyed = countersByObj.get(obj)
+  if (countersKeyed && typeof countersKeyed[key + separator] === 'number') {
+    const counter = numberiseIfNumericString(id.replace(key + separator, ''))
+    if (isNumber(counter)) countersKeyed[key + separator] = counter - 1
+  }
+}
+
 module.exports = {
   isNumber,
   numberiseIfNumericString,
   validateKey,
   validateNumber,
   uniqueMapKey,
-  uniqueObjectKey
+  uniqueObjectKey,
+  removeFromCounter
 }
