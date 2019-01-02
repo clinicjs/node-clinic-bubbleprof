@@ -4,7 +4,7 @@
   "repository": "nearform/node-clinic-bubbleprof",
   "version": "1.9.7",
   "engines": {
-    "node": "^11.0.0 || ^10.0.0 || >=8.11.1"
+    "node": "^11.0.0 || ^10.0.0 || ^8.11.1"
   },
   "scripts": {
     "test": "standard | snazzy && tap --no-cov --timeout=50 test/*.test.js",
