@@ -55,7 +55,7 @@ class Lookup extends HtmlContent {
     })
 
     this.d3Element.on('mouseout', () => {
-      this.clearLookup()
+      this.tryClearLookup()
     })
   }
 
@@ -76,16 +76,18 @@ class Lookup extends HtmlContent {
     // Try to clear after current event stack resolves (e.g. click on a suggestion)
     setTimeout(() => {
       // Arrow function to preserve `this` context
-      this.clearLookup()
+      this.tryClearLookup()
     })
   }
 
-  clearLookup () {
+  tryClearLookup () {
     // Only clear if the input doesn't have focus and the cursor isn't over any child of this element
     const hasHover = this.d3Element.selectAll(':hover').size()
     const hasFocus = this.d3LookupInput.node() === document.activeElement
-    if (hasHover || hasFocus) return
+    if (!hasHover && !hasFocus) this.clearLookup()
+  }
 
+  clearLookup () {
     this.d3Suggestions
       .classed('hidden', true)
       .selectAll('li').remove()
@@ -147,11 +149,13 @@ class Lookup extends HtmlContent {
         this.topmostUI.highlightNode(null)
       })
       .on('click', () => {
+        this.clearLookup()
         this.topmostUI.queueAnimation('searchFrame', (animationQueue) => {
-          const targetUI = this.topmostUI.jumpToNode(dataNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
+          this.topmostUI.jumpToNode(dataNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+          })
         })
       })
   }

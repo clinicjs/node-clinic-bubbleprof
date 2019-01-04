@@ -232,12 +232,13 @@ class AreaChart extends HtmlContent {
           this.topmostUI.highlightNode(null)
 
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-          const targetUI = this.topmostUI.selectNode(layoutNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
-          this.ui.highlightColour('type', null)
-          animationQueue.execute()
+          this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+            this.ui.highlightColour('type', null)
+            animationQueue.execute()
+          })
         })
       })
       .on('mousemove', () => {

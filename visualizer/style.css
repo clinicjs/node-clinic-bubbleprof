@@ -1442,6 +1442,14 @@ body:not(.initialized):after {
   content: "Redrawing";
 }
 
+#node-link .loading-indicator.apply-hash {
+  opacity: 0.8;
+}
+
+#node-link .loading-indicator.apply-hash:after {
+  content: "Applying hash";
+}
+
 @keyframes loading {
   0% {
     -webkit-transform: rotate(0deg);
