@@ -148,10 +148,11 @@ class Lookup extends HtmlContent {
       })
       .on('click', () => {
         this.topmostUI.queueAnimation('searchFrame', (animationQueue) => {
-          const targetUI = this.topmostUI.jumpToNode(dataNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
+          this.topmostUI.jumpToNode(dataNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+          })
         })
       })
   }

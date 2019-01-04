@@ -13,10 +13,20 @@ class HoverBox extends HtmlContent {
       fixedOrientation: null
     }, contentProperties))
     validateKey(this.contentProperties.type, ['node-link', 'tool-tip', 'static'])
-    if (this.contentProperties.type === 'node-link' && !this.contentProperties.svg) {
-      throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
-    }
+    if (this.contentProperties.type === 'node-link') {
+      if (!this.contentProperties.svg) throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
 
+      this.ui.on('selectNode', layoutNode => {
+        // Immediately change click message so if select is slow, it's clear something is happening
+        const newText = this.d3ClickMessage.text().replace('Click to expand', 'Expanding') + '...'
+        this.d3ClickMessage.text(newText)
+        this.d3Element.classed('is-loading', true)
+
+        // Force browser to redraw element before potentially slow ui.selectNode promise begins.
+        // Without this offsetHeight calc, the above changes intermittently don't show in time.
+        return this.d3Element.node.offsetHeight
+      })
+    }
     this.isHidden = true
   }
 
@@ -162,6 +172,7 @@ class HoverBox extends HtmlContent {
     super.draw()
 
     if (this.contentProperties.type === 'node-link') {
+      this.d3Element.classed('is-loading', false)
       if (this.layoutNode) this.nodeLinkDraw(this.layoutNode)
       return
     }
@@ -236,13 +247,14 @@ class HoverBox extends HtmlContent {
     }
     const clickHandler = () => {
       d3.event.stopPropagation()
-      this.ui.highlightNode(null)
       this.ui.queueAnimation('selectHoverBoxNode', (animationQueue) => {
-        const targetUI = this.ui.selectNode(layoutNode, animationQueue)
-        if (targetUI !== this.ui) {
-          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-        }
-        animationQueue.execute()
+        this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
+          this.ui.highlightNode(null)
+          if (targetUI !== this.ui) {
+            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+          }
+          animationQueue.execute()
+        })
       })
     }
     this.d3TitleBlock.on('click', clickHandler)
