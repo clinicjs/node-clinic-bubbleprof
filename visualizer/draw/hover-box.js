@@ -17,8 +17,8 @@ class HoverBox extends HtmlContent {
       if (!this.contentProperties.svg) throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
 
       this.ui.on('selectNode', layoutNode => {
-        if (!layoutNode || layoutNode.node.constructor.name === 'AggregateNode'
-          || layoutNode.node.constructor.name === 'ClusterNode' && layoutNode.node.nodes.size === 1) {
+        if (!layoutNode || layoutNode.node.constructor.name === 'AggregateNode' ||
+          (layoutNode.node.constructor.name === 'ClusterNode' && layoutNode.node.nodes.size === 1)) {
           // Don't display busy indicator if we'll just show frames, won't be cancelled by setTopmostUI
           return
         }

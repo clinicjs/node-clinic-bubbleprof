@@ -309,7 +309,8 @@ class BubbleprofUI extends EventEmitter {
     // If we can't find the node in this sublayout, step up one level and try again
     if (!layoutNode) {
       this.clearSublayout(animationQueue)
-      return await this.parentUI.jumpToNode(dataNode, animationQueue)
+      const targetUI = await this.parentUI.jumpToNode(dataNode, animationQueue)
+      return targetUI
     }
 
     if (layoutNode.node.uid === dataNode.uid) {
