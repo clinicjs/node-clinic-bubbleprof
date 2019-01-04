@@ -181,9 +181,18 @@ class LoadingAnimation extends HtmlContent {
     this.d3Element.classed('loading-indicator', true)
 
     this.ui.on('complete', () => {
-      this.isHidden = true
-      this.draw()
+      this.hide()
     })
+  }
+  show (className) {
+    this.isHidden = false
+    this.draw()
+    if (className) this.d3Element.classed(className, true)
+  }
+  hide (className) {
+    this.isHidden = true
+    this.draw()
+    if (className) this.d3Element.classed(className, false)
   }
 }
 

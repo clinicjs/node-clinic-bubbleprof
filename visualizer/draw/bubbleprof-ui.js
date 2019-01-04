@@ -470,6 +470,8 @@ class BubbleprofUI extends EventEmitter {
   }
 
   async jumpToCollapsedNodeHash (hash, animationQueue = new AnimationQueue('jumpToCollapsedNodeHash')) {
+    const nodeLink = this.sections.get('node-link')
+    nodeLink.loadingAnimation.show('apply-hash')
     const nodeIds = hash.slice(1).split('-')
     let targetUI = this
 
@@ -496,6 +498,9 @@ class BubbleprofUI extends EventEmitter {
       }
     }
 
+    animationQueue.on('complete', () => {
+      nodeLink.loadingAnimation.hide('apply-hash')
+    })
     animationQueue.execute()
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
