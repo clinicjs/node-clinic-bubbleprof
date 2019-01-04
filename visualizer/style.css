@@ -1064,22 +1064,11 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
 
 @keyframes loading-bar {
   0% {
-    transform-origin: 0 50%;
     transform: scale(0, 1);
-  }
-
-  80% {
-    transform-origin: 0 50%;
-    transform: scale(1, 1);
-  }
-
-  81% {
-    transform-origin: 100% 50%;
   }
 
   100% {
-    transform-origin: 100% 50%;
-    transform: scale(0, 1);
+    transform: scale(1, 1);
   }
 }
 
@@ -1091,7 +1080,9 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   height: 2px;
   width: 100%;
   background-color: var(--cyan);
-  animation: loading-bar 10s ease infinite;
+  transform: translateZ(0);
+  transform-origin: 0 50%;
+  animation: loading-bar 20s ease infinite;
 }
 
 .hover-box.horizontal-flip {
