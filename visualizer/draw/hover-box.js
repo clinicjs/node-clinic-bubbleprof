@@ -17,6 +17,12 @@ class HoverBox extends HtmlContent {
       if (!this.contentProperties.svg) throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
 
       this.ui.on('selectNode', layoutNode => {
+        if (!layoutNode || layoutNode.node.constructor.name === 'AggregateNode'
+          || layoutNode.node.constructor.name === 'ClusterNode' && layoutNode.node.nodes.size === 1) {
+          // Don't display busy indicator if we'll just show frames, won't be cancelled by setTopmostUI
+          return
+        }
+
         // Immediately change click message so if select is slow, it's clear something is happening
         const newText = this.d3ClickMessage.text().replace('Click to expand', 'Expanding') + '...'
         this.d3ClickMessage.text(newText)
@@ -25,6 +31,10 @@ class HoverBox extends HtmlContent {
         // Force browser to redraw element before potentially slow ui.selectNode promise begins.
         // Without this offsetHeight calc, the above changes intermittently don't show in time.
         return this.d3Element.node.offsetHeight
+      })
+
+      this.ui.on('setTopmostUI', () => {
+        this.d3Element.classed('is-loading', false)
       })
     }
     this.isHidden = true
@@ -172,7 +182,6 @@ class HoverBox extends HtmlContent {
     super.draw()
 
     if (this.contentProperties.type === 'node-link') {
-      this.d3Element.classed('is-loading', false)
       if (this.layoutNode) this.nodeLinkDraw(this.layoutNode)
       return
     }
