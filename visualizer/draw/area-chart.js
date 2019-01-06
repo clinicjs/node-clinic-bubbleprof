@@ -39,7 +39,12 @@ class AreaChart extends HtmlContent {
       .y1(d => this.yScale(d[1]))
 
     this.ui.on('setData', () => {
-      this.setData()
+      if (!this.d3AreaPaths) {
+        this.setData()
+      } else {
+        this.updateWidth()
+        this.draw()
+      }
     })
     this.ui.on('initializeFromData', () => {
       this.initializeFromData()

@@ -74,6 +74,7 @@ class SideBarDrag extends HtmlContent {
 
   redrawLayout () {
     this.topMostUI.redrawLayout()
+    this.topMostUI.originalUI.redrawLayout()
     this.showRedrawing(false)
   }
 
