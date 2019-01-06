@@ -24,9 +24,10 @@ class HoverBox extends HtmlContent {
         }
 
         // Immediately change click message so if select is slow, it's clear something is happening
+        this.d3TitleBlock.classed('is-loading', true)
+
         const newText = this.d3ClickMessage.text().replace('Click to expand', 'Expanding') + '...'
         this.d3ClickMessage.text(newText)
-        this.d3Element.classed('is-loading', true)
       })
 
       this.ui.on('selectNodeComplete', () => {
@@ -34,7 +35,7 @@ class HoverBox extends HtmlContent {
         newText = newText.replace('Expanding', 'Click to expand')
         newText = newText.replace('...', '')
         this.d3ClickMessage.text(newText)
-        this.d3Element.classed('is-loading', false)
+        this.d3TitleBlock.classed('is-loading', false)
       })
     }
     this.isHidden = true

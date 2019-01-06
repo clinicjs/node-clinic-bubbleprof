@@ -1076,7 +1076,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   }
 }
 
-.hover-box.is-loading .title-block:after {
+.hover-box .title-block:after {
   content: '';
   position: absolute;
   z-index: 1;
@@ -1086,12 +1086,19 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   width: 100%;
   background-color: var(--cyan);
   transform-origin: 0 50%;
-  animation: loading-bar 2s ease infinite;
+  transform: translate3d(0, 0, 0) scale(0, 1);
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease;
 }
 
-.hover-box.off-bottom.is-loading .title-block:after {
+.hover-box.off-bottom .title-block:after {
   top: auto;
   bottom: 100%;
+}
+
+.hover-box .is-loading.title-block:after {
+  animation-name: loading-bar;
 }
 
 .hover-box.horizontal-flip {
