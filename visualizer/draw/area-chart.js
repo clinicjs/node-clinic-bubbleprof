@@ -50,33 +50,30 @@ class AreaChart extends HtmlContent {
       this.initializeFromData()
     })
 
-//    if (this.key !== 'AreaChart-HoverBox') {
-      this.highlightedLayoutNode = null
+    this.highlightedLayoutNode = null
 
-      this.hoverListener = layoutNode => {
-        if (!this.d3AreaPaths || layoutNode === this.highlightedLayoutNode) return
-        this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
-        this.highlightedLayoutNode = layoutNode
-      }
+    this.hoverListener = layoutNode => {
+      if (!this.d3AreaPaths || layoutNode === this.highlightedLayoutNode) return
+      this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
+      this.highlightedLayoutNode = layoutNode
+    }
 
-      this.ui.on('setTopmostUI', topmostUI => {
-        if (this.topmostUI === topmostUI) return
-        // Remove listener from old topmostUI
-        this.topmostUI.removeListener('hover', this.hoverListener)
+    this.ui.on('setTopmostUI', topmostUI => {
+      if (this.topmostUI === topmostUI) return
+      // Remove listener from old topmostUI
+      this.topmostUI.removeListener('hover', this.hoverListener)
 
-        // Add listener to new one
-        this.topmostUI = topmostUI
-        this.topmostUI.on('hover', this.hoverListener)
+      // Add listener to new one
+      this.topmostUI = topmostUI
+      this.topmostUI.on('hover', this.hoverListener)
 
-        if (this.key === 'AreaChart-HoverBox') return
+      if (this.key === 'AreaChart-HoverBox') return
 
-        this.createPathsForLayout()
-        this.width = null
-//        this.applyLayoutNode(topmostUI.layoutNode)
-        this.updateWidth()
-        this.draw()
-      })
-//    }
+      this.createPathsForLayout()
+      this.width = null
+      this.updateWidth()
+      this.draw()
+    })
   }
   updateWidth () {
     this.widthToApply = this.key === 'AreaChart-HoverBox' ? 300 : this.d3AreaChartSVG.node().getBoundingClientRect().width
