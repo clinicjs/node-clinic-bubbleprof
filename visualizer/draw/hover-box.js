@@ -56,6 +56,7 @@ class HoverBox extends HtmlContent {
 
     this.ui.on('hover', layoutNode => {
       if (layoutNode) this.layoutNode = layoutNode
+      if (this.asyncOperationsChart) this.asyncOperationsChart.applyLayoutNode(layoutNode)
       this.changeVisibility(!!layoutNode)
     })
   }
@@ -192,8 +193,6 @@ class HoverBox extends HtmlContent {
     this.d3Element.on('mouseleave', () => {
       this.ui.highlightNode(null)
     })
-
-    this.asyncOperationsChart.applyLayoutNode(layoutNode)
 
     // Ensure off-bottom class is not applied before calculating if it's needed
     this.d3Element.classed('off-bottom', false)
