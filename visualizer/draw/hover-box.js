@@ -27,10 +27,6 @@ class HoverBox extends HtmlContent {
         const newText = this.d3ClickMessage.text().replace('Click to expand', 'Expanding') + '...'
         this.d3ClickMessage.text(newText)
         this.d3Element.classed('is-loading', true)
-
-        // Force browser to redraw element before potentially slow ui.selectNode promise begins.
-        // Without this offsetHeight calc, the above changes intermittently don't show in time.
-        return this.d3Element.node.offsetHeight
       })
 
       this.ui.on('selectNodeComplete', () => {
