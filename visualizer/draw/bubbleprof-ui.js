@@ -238,58 +238,59 @@ class BubbleprofUI extends EventEmitter {
     // The new layout generation below can be slow if >~1000 nodes, so make async
     // so that on-screen changes from emitting selectNode are shown to user first.
     return new Promise(resolve => window.requestAnimationFrame(() =>
-      // Needs two chained animation frames to execute _after_ DOM repaint
-      window.requestAnimationFrame(async () => {
-        const dataNode = layoutNode.node
-        const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
+      // Needs two chained animation frames to reliably execute _after_ DOM repaint
+      window.requestAnimationFrame(() => {
+        // On Firefox, animation doesn't show unless it has already started, so we need a moment's delay
+        setTimeout(async () => {
+          const dataNode = layoutNode.node
+          const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
 
-        switch (dataNode.constructor.name) {
-          case 'ShortcutNode':
-            // Go up a level and start queuing animations, as shortcuts always point outside the node
-            if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
-            const uiParent = this.clearSublayout(animationQueue)
-            const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
-            const targetUI = await uiParent.jumpToNode(targetDataNode, animationQueue)
-            resolve(targetUI)
-            break
+          switch (dataNode.constructor.name) {
+            case 'ShortcutNode':
+              // Go up a level and start queuing animations, as shortcuts always point outside the node
+              if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
+              const uiParent = this.clearSublayout(animationQueue)
+              const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
+              const targetUI = await uiParent.jumpToNode(targetDataNode, animationQueue)
+              resolve(targetUI)
+              break
 
-          case 'AggregateNode':
-            this.selectedDataNode = dataNode
-            const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
-            if (animationQueue) {
-              animationQueue.on('complete', selectAggregate)
-            } else {
-              selectAggregate()
-            }
-            resolve(this)
-            break
-
-          case 'ClusterNode':
-            if (dataNode.nodes.size === 1) {
-              // If there's only one aggregateNode, just select it
-              this.selectedDataNode = dataNode.nodes.values().next().value
-              const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
+            case 'AggregateNode':
+              this.selectedDataNode = dataNode
+              const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
               if (animationQueue) {
                 animationQueue.on('complete', selectAggregate)
               } else {
                 selectAggregate()
               }
               resolve(this)
-            } else {
-              this.selectedDataNode = dataNode
-              resolve(sameNode ? this : this.createSubLayout(layoutNode, animationQueue))
-            }
-            break
+              break
 
-          case 'ArtificialNode':
-            this.selectedDataNode = dataNode
-            const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
-            resolve(uiWithinCollapsedNode)
-            break
-        }
-        this.emit('selectNodeComplete')
-      // Using emit return value here seems to prevent some in-browser optimisation which otherwise allows
-      // the promise func to intermittently begin early, before the emit listener completes repaint.
+            case 'ClusterNode':
+              if (dataNode.nodes.size === 1) {
+                // If there's only one aggregateNode, just select it
+                this.selectedDataNode = dataNode.nodes.values().next().value
+                const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
+                if (animationQueue) {
+                  animationQueue.on('complete', selectAggregate)
+                } else {
+                  selectAggregate()
+                }
+                resolve(this)
+              } else {
+                this.selectedDataNode = dataNode
+                resolve(sameNode ? this : this.createSubLayout(layoutNode, animationQueue))
+              }
+              break
+
+            case 'ArtificialNode':
+              this.selectedDataNode = dataNode
+              const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
+              resolve(uiWithinCollapsedNode)
+              break
+          }
+          this.emit('selectNodeComplete')
+        }, 10)
       })
     ))
   }
