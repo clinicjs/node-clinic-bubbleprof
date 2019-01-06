@@ -33,11 +33,18 @@ class HoverBox extends HtmlContent {
         return this.d3Element.node.offsetHeight
       })
 
-      this.ui.on('setTopmostUI', () => {
+      this.ui.on('selectNodeComplete', () => {
+        let newText = this.d3ClickMessage.text()
+        newText = newText.replace('Expanding', 'Click to expand')
+        newText = newText.replace('...', '')
+        this.d3ClickMessage.text(newText)
         this.d3Element.classed('is-loading', false)
       })
     }
     this.isHidden = true
+
+    this.layoutNode = null
+    this.drawnLayoutNode = null
   }
 
   initializeElements () {
@@ -182,7 +189,10 @@ class HoverBox extends HtmlContent {
     super.draw()
 
     if (this.contentProperties.type === 'node-link') {
-      if (this.layoutNode) this.nodeLinkDraw(this.layoutNode)
+      if (this.layoutNode && this.layoutNode !== this.drawnLayoutNode) {
+        this.nodeLinkDraw(this.layoutNode)
+        this.drawnLayoutNode = this.layoutNode
+      }
       return
     }
 
