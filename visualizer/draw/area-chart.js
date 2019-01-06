@@ -34,29 +34,39 @@ class AreaChart extends HtmlContent {
       .y0(d => this.yScale(d[0]))
       .y1(d => this.yScale(d[1]))
 
-    this.listeningUIs = []
-
     this.ui.on('setData', () => {
       this.setData()
     })
     this.ui.on('initializeFromData', () => {
       this.initializeFromData()
     })
-    this.ui.on('setTopmostUI', topmostUI => {
-      this.topmostUI = topmostUI
 
-      if (!this.listeningUIs.includes(topmostUI)) {
-        this.listeningUIs.push(this.ui)
-        topmostUI.on('hover', layoutNode => {
-          if (!this.d3AreaPaths) return
-          this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
-        })
+    if (this.key !== 'AreaChart-HoverBox') {
+      this.highlightedLayoutNode = null
+
+      this.hoverListener = layoutNode => {
+        if (!this.d3AreaPaths || layoutNode === this.highlightedLayoutNode) return
+        this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
+        this.highlightedLayoutNode = layoutNode
       }
 
-      this.createPathsForLayout()
-      this.draw()
-    })
+      this.ui.on('setTopmostUI', topmostUI => {
+        if (this.key === 'AreaChart-HoverBox') return
+
+        // Remove listener from old topmostUI
+        this.topmostUI.removeListener('hover', this.hoverListener)
+
+        this.topmostUI = topmostUI
+
+        // Add listener to new one
+        this.topmostUI.on('hover', this.hoverListener)
+
+        this.createPathsForLayout()
+        this.draw()
+      })
+    }
   }
+
   getAggregateNode (id) {
     return this.ui.dataSet.aggregateNodes.get(id)
   }
@@ -232,12 +242,13 @@ class AreaChart extends HtmlContent {
           this.topmostUI.highlightNode(null)
 
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-          const targetUI = this.topmostUI.selectNode(layoutNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
-          this.ui.highlightColour('type', null)
-          animationQueue.execute()
+          this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+            this.ui.highlightColour('type', null)
+            animationQueue.execute()
+          })
         })
       })
       .on('mousemove', () => {
