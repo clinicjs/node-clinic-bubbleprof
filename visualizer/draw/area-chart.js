@@ -233,6 +233,7 @@ class AreaChart extends HtmlContent {
       .on('mouseout', () => {
         if (this.parentContent.constructor.name === 'HoverBox') return
         this.topmostUI.highlightNode(null)
+        this.ui.highlightColour('type', null)
       })
       .on('click', (d) => {
         const layoutNodeId = extractLayoutNodeId(d.key)
