@@ -29,33 +29,54 @@ class AreaChart extends HtmlContent {
     this.pixelsPerSlice = 0
     this.chartHeightScale = 1
 
+    this.layoutNode = null
+    this.layoutNodeToApply = null
+    this.widthToApply = null
+
     this.areaMaker = d3.area()
       .x(d => this.xScale(d.data.time))
       .y0(d => this.yScale(d[0]))
       .y1(d => this.yScale(d[1]))
 
-    this.listeningUIs = []
-
     this.ui.on('setData', () => {
-      this.setData()
+      if (!this.d3AreaPaths) {
+        this.setData()
+      } else {
+        this.updateWidth()
+        this.draw()
+      }
     })
     this.ui.on('initializeFromData', () => {
       this.initializeFromData()
     })
-    this.ui.on('setTopmostUI', topmostUI => {
-      this.topmostUI = topmostUI
 
-      if (!this.listeningUIs.includes(topmostUI)) {
-        this.listeningUIs.push(this.ui)
-        topmostUI.on('hover', layoutNode => {
-          if (!this.d3AreaPaths) return
-          this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
-        })
-      }
+    this.highlightedLayoutNode = null
+
+    this.hoverListener = layoutNode => {
+      if (!this.d3AreaPaths || layoutNode === this.highlightedLayoutNode) return
+      this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
+      this.highlightedLayoutNode = layoutNode
+    }
+
+    this.ui.on('setTopmostUI', topmostUI => {
+      if (this.topmostUI === topmostUI) return
+      // Remove listener from old topmostUI
+      this.topmostUI.removeListener('hover', this.hoverListener)
+
+      // Add listener to new one
+      this.topmostUI = topmostUI
+      this.topmostUI.on('hover', this.hoverListener)
+
+      if (this.key === 'AreaChart-HoverBox') return
 
       this.createPathsForLayout()
+      this.width = null
+      this.updateWidth()
       this.draw()
     })
+  }
+  updateWidth () {
+    this.widthToApply = this.key === 'AreaChart-HoverBox' ? 300 : this.d3AreaChartSVG.node().getBoundingClientRect().width
   }
   getAggregateNode (id) {
     return this.ui.dataSet.aggregateNodes.get(id)
@@ -169,11 +190,13 @@ class AreaChart extends HtmlContent {
     }
     if (this.contentProperties.static) this.d3LeadInText.html(this.getLeadInText())
     if (!this.d3AreaPaths) this.createPathsForLayout()
+    this.updateWidth()
   }
   createPathsForLayout () {
     if (this.d3AreaPaths) this.d3AreaPaths.remove()
 
     const nodeGroups = []
+
     let currentNodeGroup = applyAggregateIdToNodeGroup(this.aggregateIds[0], this.topmostUI, nodeGroups)
 
     const aggregateIdsCount = this.aggregateIds.length
@@ -207,7 +230,6 @@ class AreaChart extends HtmlContent {
       .enter()
       .append('path')
       .attr('class', d => `type-${d.key.split('_')[0]}`)
-      .classed('filtered', d => d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
       .classed('area-path-even', d => !(d.index % 2))
       .classed('area-path', true)
       .on('mouseover', (d) => {
@@ -223,6 +245,7 @@ class AreaChart extends HtmlContent {
       .on('mouseout', () => {
         if (this.parentContent.constructor.name === 'HoverBox') return
         this.topmostUI.highlightNode(null)
+        this.ui.highlightColour('type', null)
       })
       .on('click', (d) => {
         const layoutNodeId = extractLayoutNodeId(d.key)
@@ -232,26 +255,27 @@ class AreaChart extends HtmlContent {
           this.topmostUI.highlightNode(null)
 
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-          const targetUI = this.topmostUI.selectNode(layoutNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
-          this.ui.highlightColour('type', null)
-          animationQueue.execute()
+          this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+            this.ui.highlightColour('type', null)
+            animationQueue.execute()
+          })
         })
       })
       .on('mousemove', () => {
         this.showSlice(d3.event)
       })
+
+    if (!this.layoutNodeToApply) this.drawFiltering()
   }
 
   applyLayoutNode (layoutNode = null) {
-    const redraw = layoutNode !== this.layoutNode
-    this.layoutNode = layoutNode
-    if (redraw) {
-      this.createPathsForLayout()
-      this.draw()
+    if (layoutNode !== this.layoutNode) {
+      this.layoutNodeToApply = layoutNode
     }
+    this.updateWidth()
   }
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
@@ -307,10 +331,10 @@ class AreaChart extends HtmlContent {
     })
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
-  draw () {
-    super.draw()
 
-    const { width } = this.d3AreaChartSVG.node().getBoundingClientRect()
+  drawPathsToFit (width) {
+    this.width = width
+
     const height = Math.round(70 * this.chartHeightScale)
     const margins = this.contentProperties.margins
 
@@ -360,6 +384,24 @@ class AreaChart extends HtmlContent {
     this.d3SliceHighlight.style('height', usableHeight + 'px')
     this.d3SliceHighlight.style('top', margins.top + 'px')
   }
+
+  drawFiltering () {
+    this.d3AreaPaths.classed('filtered', d => d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
+  }
+
+  draw () {
+    super.draw()
+
+    if (this.layoutNodeToApply) {
+      this.layoutNode = this.layoutNodeToApply
+      this.layoutNodeToApply = null
+      this.drawFiltering()
+    }
+    if (this.widthToApply && this.widthToApply !== this.width) {
+      this.drawPathsToFit(this.widthToApply)
+    }
+    this.widthToApply = null
+  }
 }
 
 function applyAggregateIdToNodeGroup (aggregateId, ui, nodeGroups, nodeGroup) {
@@ -376,6 +418,7 @@ function extractLayoutNodeId (nodeGroupKey) {
   const rawId = nodeGroupKey.split('_')[1]
   if (rawId === 'absent') return null
   const layoutNodeId = numberiseIfNumericString(rawId)
+
   return layoutNodeId
 }
 
