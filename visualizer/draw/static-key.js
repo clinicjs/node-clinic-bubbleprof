@@ -1,4 +1,5 @@
 'use strict'
+const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
 
 const svgSample = `
   <svg class="key-item-image bubbleprof" style="width: 70px; height: 180px; display: block;">
@@ -35,7 +36,7 @@ const keyHtml = `
     <strong>Click on bubbles to explore deeper.</strong> When you reach groupings of only one async operation, call stacks are shown, allowing you to find the code behind the biggest delays.
   </p>
   <p>
-    See also the <a href="https://clinicjs.org/bubbleprof/walkthrough" class="external-link">walkthrough and guides on the ClinicJs website</a>.
+    See also the <a href="https://clinicjs.org/bubbleprof/walkthrough" class="external-link"><span>walkthrough and guides on the ClinicJs website</span> ${extLinkIcon}</a>.
   </p>
 `
 

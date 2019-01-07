@@ -17,6 +17,11 @@ const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 const minifyInline = require('./lib/minify-inline')
 
+const { promisify } = require('util')
+const readFile = promisify(require('fs').readFile)
+const postcss = require('postcss')
+const postcssImport = require('postcss-import')
+
 class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
     super()
@@ -166,7 +171,17 @@ class ClinicBubbleprof extends events.EventEmitter {
     let scriptFile = b.bundle()
 
     // create style-file stream
-    const styleFile = fs.createReadStream(stylePath)
+    const processor = postcss([
+      postcssImport()
+    ])
+    const styleFile = readFile(stylePath, 'utf8')
+      .then((css) => processor.process(css, {
+        from: stylePath,
+        map: this.debug ? { inline: true } : false
+      }))
+      .then((result) => {
+        return result.css
+      })
 
     // build output file
     const outputFile = streamTemplate`

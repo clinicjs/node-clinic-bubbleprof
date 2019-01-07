@@ -6,6 +6,9 @@ const EventEmitter = require('events')
 const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
+const spinner = require('@nearform/clinic-common/spinner')
+const closeIcon = require('@nearform/clinic-common/icons/close')
+const backIcon = require('@nearform/clinic-common/icons/circle-arrow-left')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
@@ -26,6 +29,7 @@ class BubbleprofUI extends EventEmitter {
     this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
     this.layoutNode = null // Is assigned if this is a sublayout with .layoutNode
+    this.resizeSpinner = null
 
     function getOriginalUI (parentUI) {
       return parentUI.parentUI ? getOriginalUI(parentUI.parentUI) : parentUI
@@ -53,6 +57,7 @@ class BubbleprofUI extends EventEmitter {
       const nodeLinkSection = this.getNodeLinkSection()
       this.backBtn = nodeLinkSection.addContent(undefined, {
         hidden: true,
+        htmlContent: backIcon,
         classNames: 'back-btn'
       })
 
@@ -591,21 +596,24 @@ class BubbleprofUI extends EventEmitter {
 
     const debounceTime = 300
     const nodeLinkSection = this.getNodeLinkSection()
+    if (!this.layoutNode) {
+      this.resizeSpinner = spinner.attachTo(nodeLinkSection.d3Element.node())
+    }
 
-    const onWindowResizeBegin = debounce(() => {
-      nodeLinkSection.d3Element.classed('redraw', true)
-
-      // Use a shorter time period than the trailing debounce to prevent getting stuck
-    }, debounceTime * 0.9, { leading: true })
-
-    const onWindowResizeEnd = debounce(() => {
+    const onWindowResize = debounce(() => {
       this.redrawLayout()
-      nodeLinkSection.d3Element.classed('redraw', false)
+
+      if (this.resizeSpinner) {
+        this.resizeSpinner.hide()
+      }
     }, debounceTime)
 
     window.addEventListener('resize', () => {
-      onWindowResizeBegin()
-      onWindowResizeEnd()
+      if (this.resizeSpinner) {
+        this.resizeSpinner.show('Redrawing...')
+      }
+
+      onWindowResize()
     })
 
     if (this.originalUI === this) {
@@ -616,7 +624,7 @@ class BubbleprofUI extends EventEmitter {
   // Close button returns to the originalUI
   initializeCloseButton (closeBtn) {
     closeBtn.d3Element
-      .property('textContent', '×')
+      .html(closeIcon)
       .on('click', () => {
         this.queueAnimation('close', (animationQueue) => {
           this.traverseUp(null, { animationQueue })

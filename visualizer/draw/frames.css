@@ -1,0 +1,117 @@
+#frames-panel {
+  margin: 18px 0;
+  padding: 0px 28px;
+  color: var(--max-contrast);
+  font-size: var(--main-text-size);
+}
+
+#frames-panel .heading {
+  margin: 12px 0;
+}
+
+#frames-panel .heading {
+  margin: 12px 0;
+}
+
+#frames-panel .jump-to-node {
+  display: block;
+  float: right;
+  font-weight: bold;
+  color: var(--cyan);
+  cursor: pointer;
+  margin-right: 32px;
+}
+
+#frames-panel .sub-collapse-control {
+  cursor: pointer;
+  color: var(--cyan);
+}
+
+#frames-panel .this-node > .sub-collapse-control {
+  font-weight: bold;
+  color: var(--cyan-highlight);
+}
+
+#frames-panel .user > .sub-collapse-control {
+  color: var(--cyan-highlight);
+}
+
+#frames-panel .this-node > .sub-collapse-control:hover,
+#frames-panel .this-node > .sub-collapse-control:focus,
+#frames-panel .user > .sub-collapse-control:hover,
+#frames-panel .user > .sub-collapse-control:focus {
+  color: var(--cyan-strong);
+}
+
+#frames-panel .sub-collapse-control:hover,
+#frames-panel .sub-collapse-control:focus,
+#frames-panel .jump-to-node:hover,
+#frames-panel .jump-to-node:focus {
+  color: var(--cyan-highlight);
+}
+
+#frames-panel .collapsed .frame-group .sub-collapse-control {
+  display: none;
+}
+
+#frames-panel .collapsed .frame-item {
+  display: none;
+}
+
+#frames-panel .frame-group .delays {
+  font-weight: normal;
+  color: var(--grey-highlight);
+  padding-bottom: 3px;
+  margin: 0;
+}
+
+#frames-panel .frame-group .delays .figure {
+  color: var(--max-contrast);
+}
+
+#frames-panel .frame-group.node-frame-group {
+  padding: 3px 0 0 3px;
+}
+
+#frames-panel .node-frame-group .frame-group,
+#frames-panel .frame-group .delays {
+  border-left: 1px solid var(--primary-grey);
+  margin-left: 3px;
+  padding-left: 15px;
+}
+
+#frames-panel .frame-group.collapsed .delays {
+  border-left: none;
+}
+
+#frames-panel .frame-group:not(.collapsed) .frame-group:last-child,
+#frames-panel pre.frame-item:last-child {
+  padding-bottom: 9px;
+}
+
+#frames-panel .frame-item {
+  margin: 0 0 0 4px;
+  padding: 4px 0;
+}
+
+#frames-panel pre.frame-item {
+  white-space: pre-wrap;
+  padding-left: 14px;
+}
+
+#frames-panel div.frame-item {
+  padding: 8px 20px;
+}
+
+#frames-panel .frame-group .frame-item {
+  border-left: solid 1px var(--cyan);
+}
+
+#frames-panel .collapsed .sub-collapse-control .arrow {
+  transform: rotate(90deg);
+}
+
+#frames-panel .sub-collapse-control .arrow {
+  display: inline-block;
+  margin: 0 6px -3px -3px;
+}

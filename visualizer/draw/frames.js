@@ -1,4 +1,5 @@
 'use strict'
+const closeIcon = require('@nearform/clinic-common/icons/close')
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
@@ -56,6 +57,7 @@ class Frames extends HtmlContent {
       this.firstDraw = false
       this.parentContent.d3ContentWrapper.insert('span', ':first-child')
         .classed('close', true)
+        .html(closeIcon)
         .on('click', () => {
           this.topmostUI.clearFrames()
           this.parentContent.collapseClose()

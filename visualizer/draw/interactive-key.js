@@ -1,4 +1,5 @@
 'use strict'
+const arrowUp = require('@nearform/clinic-common/icons/chevron-up')
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
@@ -37,7 +38,7 @@ class InteractiveKey extends HtmlContent {
       classNames: 'details-block block'
     })
     collapsedContent.addCollapseControl(true, {
-      htmlContent: this.contentProperties.collapseLabel || 'Details <span class="arrow"></span>'
+      htmlContent: this.contentProperties.collapseLabel || `Details ${arrowUp}`
     })
     return collapsedContent
   }
