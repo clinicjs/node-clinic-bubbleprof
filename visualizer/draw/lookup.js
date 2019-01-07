@@ -28,7 +28,7 @@ class Lookup extends HtmlContent {
   initializeElements () {
     super.initializeElements()
 
-    this.spinner = spinner.attachTo(document.querySelector('#side-bar-inner'))
+    this.spinner = spinner.attachTo(document.querySelector('#side-bar'))
     this.d3Element.classed('lookup', true)
 
     this.d3LookupInput = this.d3ContentWrapper.append('input')
