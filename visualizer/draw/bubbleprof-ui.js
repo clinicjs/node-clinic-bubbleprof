@@ -29,6 +29,7 @@ class BubbleprofUI extends EventEmitter {
     this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
     this.layoutNode = null // Is assigned if this is a sublayout with .layoutNode
+    this.resizeSpinner = null
 
     function getOriginalUI (parentUI) {
       return parentUI.parentUI ? getOriginalUI(parentUI.parentUI) : parentUI
@@ -595,15 +596,23 @@ class BubbleprofUI extends EventEmitter {
 
     const debounceTime = 300
     const nodeLinkSection = this.getNodeLinkSection()
-    const resizeSpinner = spinner.attachTo(nodeLinkSection.d3Element.node())
+    if (!this.layoutNode) {
+      this.resizeSpinner = spinner.attachTo(nodeLinkSection.d3Element.node())
+    }
 
     const onWindowResize = debounce(() => {
       this.redrawLayout()
-      resizeSpinner.hide()
+
+      if (this.resizeSpinner) {
+        this.resizeSpinner.hide()
+      }
     }, debounceTime)
 
     window.addEventListener('resize', () => {
-      resizeSpinner.show('Redrawing...')
+      if (this.resizeSpinner) {
+        this.resizeSpinner.show('Redrawing...')
+      }
+
       onWindowResize()
     })
 
