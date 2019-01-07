@@ -512,6 +512,10 @@ svg.bubbleprof.complete-fade-out {
   justify-content: space-between;
 }
 
+#footer .bar.collapse-control {
+  justify-content: flex-end;
+}
+
 .collapse-control .icon-img{
   font-size: 1.1em;
 }
@@ -540,7 +544,7 @@ svg.bubbleprof.complete-fade-out {
 }
 
 #side-bar .external-link {
-  display: inline-flex;  
+  display: inline-flex;
 }
 #side-bar .external-link svg{
   margin-left: 0.3em;
@@ -1138,11 +1142,11 @@ body:not(.initialized) {
     background: var(--cyan);
     border-right: 1px solid var(--main-bg-color);
   }
-  
+
   #footer .bar .icon-img {
     transform: rotate(0deg);
   }
-  
+
   #side-bar .bar .icon-img {
     color: var(--heading-on-cyan);
   }
