@@ -512,6 +512,7 @@ svg.bubbleprof.complete-fade-out {
   justify-content: space-between;
 }
 
+#side-bar .bar.collapse-control,
 #footer .bar.collapse-control {
   justify-content: flex-end;
 }
