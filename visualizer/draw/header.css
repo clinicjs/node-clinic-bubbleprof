@@ -5,15 +5,11 @@
   border-bottom: 1px solid var(--cyan);
   font-size: var(--main-text-size);
   height: var(--header-height);
+  position: relative;
   position: sticky;
   top: 0;
   z-index: 11;
   background: var(--main-bg-color);
-}
-@supports not (position: sticky) {
-  #header {
-    position: relative;
-  }
 }
 
 #header .header-bar {
