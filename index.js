@@ -9,18 +9,17 @@ const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
 const browserify = require('browserify')
 const envify = require('loose-envify/custom')
-const streamTemplate = require('stream-template')
 const joinTrace = require('node-trace-log-join')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 const minifyInline = require('./lib/minify-inline')
-
 const { promisify } = require('util')
 const readFile = promisify(require('fs').readFile)
 const postcss = require('postcss')
 const postcssImport = require('postcss-import')
+const mainTemplate = require('@nearform/clinic-common/templates/main')
 
 class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
@@ -184,23 +183,18 @@ class ClinicBubbleprof extends events.EventEmitter {
       })
 
     // build output file
-    const outputFile = streamTemplate`
-      <!DOCTYPE html>
-      <meta charset="utf8">
-      <meta name="viewport" content="width=device-width">
-      <title>Clinic Bubbleprof</title>
-      <link rel="shortcut icon" type="image/png" href="${clinicFaviconBase64}">
-      <style>${styleFile}</style>
-      <div id="banner">
-        <a id="main-logo" href="https://github.com/nearform/node-clinic-bubbleprof" title="Clinic Bubbleprof on GitHub" target="_blank">
-          ${logoFile} <span>Bubbleprof</span>  
-        </a>
-        <a id="company-logo" href="https://nearform.com" title="nearForm" target="_blank">
-          ${nearFormLogoFile}
-        </a>
-      </div>
-      <script>${scriptFile}</script>
-    `
+    const outputFile = mainTemplate({
+      favicon: clinicFaviconBase64,
+      title: 'Clinic Bubbleprof',
+      styles: styleFile,
+      script: scriptFile,
+      headerLogoUrl: 'https://github.com/nearform/node-clinic-bubbleprof',
+      headerLogoTitle: 'Clinic Bubbleprof on GitHub',
+      headerLogo: logoFile,
+      headerText: 'Bubbleprof',
+      nearFormLogo: nearFormLogoFile,
+      uploadId: outputFilename.split('/').pop().split('.html').shift()
+    })
 
     pump(
       outputFile,
