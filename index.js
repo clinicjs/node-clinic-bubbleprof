@@ -7,18 +7,14 @@ const path = require('path')
 const pump = require('pump')
 const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
-const browserify = require('browserify')
-const envify = require('loose-envify/custom')
 const joinTrace = require('node-trace-log-join')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 const minifyInline = require('./lib/minify-inline')
-const { promisify } = require('util')
-const readFile = promisify(require('fs').readFile)
-const postcss = require('postcss')
-const postcssImport = require('postcss-import')
+const buildJs = require('@nearform/clinic-common/scripts/build-js')
+const buildCss = require('@nearform/clinic-common/scripts/build-css')
 const mainTemplate = require('@nearform/clinic-common/templates/main')
 
 class ClinicBubbleprof extends events.EventEmitter {
@@ -155,32 +151,22 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     dataFile.on('warning', msg => this.emit('warning', msg))
 
-    // create script-file stream
-    const b = browserify({
-      'basedir': __dirname,
-      'debug': this.debug,
-      'noParse': [fakeDataPath]
-    })
-    b.transform('brfs')
-    b.transform(envify({ DEBUG_MODE: this.debug }))
-    b.require(dataFile, {
-      'file': fakeDataPath
-    })
-    b.add(scriptPath)
-    let scriptFile = b.bundle()
-
-    // create style-file stream
-    const processor = postcss([
-      postcssImport()
-    ])
-    const styleFile = readFile(stylePath, 'utf8')
-      .then((css) => processor.process(css, {
-        from: stylePath,
-        map: this.debug ? { inline: true } : false
-      }))
-      .then((result) => {
-        return result.css
+    // build JS
+    let scriptFile = buildJs({
+      basedir: __dirname,
+      debug: this.debug,
+      fakeDataPath,
+      scriptPath,
+      beforeBundle: b => b.require(dataFile, {
+        file: fakeDataPath
       })
+    })
+
+    // build CSS
+    const styleFile = buildCss({
+      stylePath,
+      debug: this.debug
+    })
 
     // build output file
     const outputFile = mainTemplate({
