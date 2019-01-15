@@ -182,6 +182,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       uploadId: outputFilename.split('/').pop().split('.html').shift()
     })
 
+    // output file
     pump(
       outputFile,
       fs.createWriteStream(outputFilename),
