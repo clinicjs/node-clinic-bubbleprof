@@ -34,7 +34,6 @@
     "@nearform/trace-events-parser": "^1.0.4",
     "array-flatten": "^2.1.1",
     "async": "^2.5.0",
-    "brfs": "^2.0.0",
     "d3-axis": "^1.0.8",
     "d3-drag": "^1.2.3",
     "d3-ease": "^1.0.3",
