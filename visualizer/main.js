@@ -1,9 +1,19 @@
 'use strict'
 
 const drawOuterUI = require('./draw/index.js')
+const spinner = require('@nearform/clinic-common/spinner')
 const askBehaviours = require('@nearform/clinic-common/behaviours/ask')
+const loadFonts = require('@nearform/clinic-common/behaviours/font-loader')
+
+const fontSpinner = spinner.attachTo()
+
+fontSpinner.show()
 
 askBehaviours()
+
+loadFonts({
+  onLoad: fontSpinner.hide
+})
 
 // Currently no headless browser testing, only test browser-independent logic
 /* istanbul ignore next */
