@@ -157,6 +157,19 @@ a.external-link:visited {
   text-decoration: none;
 }
 
+/* Header */
+.is-loading-font .nc-header {
+  opacity: 0;
+}
+
+.ncb-font-spinner-container {
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
 
 main {
   display: flex;
