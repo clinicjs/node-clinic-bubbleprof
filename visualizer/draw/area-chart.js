@@ -68,7 +68,7 @@ class AreaChart extends HtmlContent {
       this.topmostUI = topmostUI
       this.topmostUI.on('hover', this.hoverListener)
 
-      if (this.key === 'AreaChart-HoverBox') return
+      if (this.isInHoverBox) return
 
       this.createPathsForLayout()
       this.width = null
