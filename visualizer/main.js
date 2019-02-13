@@ -1,6 +1,9 @@
 'use strict'
 
 const drawOuterUI = require('./draw/index.js')
+const askBehaviours = require('@nearform/clinic-common/behaviours/ask')
+
+askBehaviours()
 
 // Currently no headless browser testing, only test browser-independent logic
 /* istanbul ignore next */
