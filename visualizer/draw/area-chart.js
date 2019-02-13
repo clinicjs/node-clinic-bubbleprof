@@ -24,14 +24,15 @@ class AreaChart extends HtmlContent {
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
 
-    this.key = 'AreaChart-' + this.parentContent.constructor.name
+    this.isInHoverBox = this.parentContent.contentProperties.type === 'node-link'
+    this.key = 'AreaChart-' + this.isInHoverBox ? 'HoverBox' : 'SideBar'
 
     this.pixelsPerSlice = 0
     this.chartHeightScale = 1
 
     this.layoutNode = null
     this.layoutNodeToApply = null
-    this.widthToApply = null
+    this.widthToApply = this.isInHoverBox ? 300 : null
 
     this.areaMaker = d3.area()
       .x(d => this.xScale(d.data.time))
@@ -67,7 +68,7 @@ class AreaChart extends HtmlContent {
       this.topmostUI = topmostUI
       this.topmostUI.on('hover', this.hoverListener)
 
-      if (this.key === 'AreaChart-HoverBox') return
+      if (this.isInHoverBox) return
 
       this.createPathsForLayout()
       this.width = null
@@ -76,7 +77,8 @@ class AreaChart extends HtmlContent {
     })
   }
   updateWidth () {
-    this.widthToApply = this.key === 'AreaChart-HoverBox' ? 300 : this.d3AreaChartSVG.node().getBoundingClientRect().width
+    if (this.isInHoverBox) return
+    this.widthToApply = this.d3AreaChartSVG.node().getBoundingClientRect().width
   }
   getAggregateNode (id) {
     return this.ui.dataSet.aggregateNodes.get(id)
@@ -234,7 +236,7 @@ class AreaChart extends HtmlContent {
       .classed('area-path', true)
       .on('mouseover', (d) => {
         const layoutNodeId = extractLayoutNodeId(d.key)
-        if (!layoutNodeId || this.parentContent.constructor.name === 'HoverBox') return
+        if (!layoutNodeId || this.isInHoverBox) return
 
         const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
         if (layoutNode) {
@@ -243,7 +245,7 @@ class AreaChart extends HtmlContent {
         this.ui.highlightColour('type', d.key.split('_')[0])
       })
       .on('mouseout', () => {
-        if (this.parentContent.constructor.name === 'HoverBox') return
+        if (this.isInHoverBox) return
         this.topmostUI.highlightNode(null)
         this.ui.highlightColour('type', null)
       })
@@ -279,7 +281,7 @@ class AreaChart extends HtmlContent {
   }
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
-    const targetUI = this.parentContent.constructor.name === 'HoverBox' ? this.topmostUI : this.topmostUI.parentUI
+    const targetUI = this.isInHoverBox ? this.topmostUI : this.topmostUI.parentUI
     const layoutNode = targetUI.layout.findAggregateNode(aggregateNode)
     return (layoutNode === this.layoutNode)
   }
@@ -333,7 +335,7 @@ class AreaChart extends HtmlContent {
   }
 
   drawPathsToFit (width) {
-    this.width = width
+    if (width) this.width = width
 
     const height = Math.round(70 * this.chartHeightScale)
     const margins = this.contentProperties.margins
@@ -400,7 +402,7 @@ class AreaChart extends HtmlContent {
     if (this.widthToApply && this.widthToApply !== this.width) {
       this.drawPathsToFit(this.widthToApply)
     }
-    this.widthToApply = null
+    if (!this.isInHoverBox) this.widthToApply = null
   }
 }
 
