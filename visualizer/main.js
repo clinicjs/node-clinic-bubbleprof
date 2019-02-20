@@ -11,6 +11,7 @@ const fontSpinner = spinner.attachTo(document.querySelector('.ncb-font-spinner-c
 const drawUi = () => {
   fontSpinner.hide()
   document.body.classList.remove('is-loading-font')
+  document.body.classList.add('is-font-loaded')
 
   // Currently no headless browser testing, only test browser-independent logic
   /* istanbul ignore next */
