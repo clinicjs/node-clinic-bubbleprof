@@ -76,6 +76,46 @@ class AreaChart extends HtmlContent {
       this.draw()
     })
   }
+
+  getCSSVarValue(varName) {
+    return window.getComputedStyle(document.body).getPropertyValue(varName)
+  }
+
+  getCanvasAreaStyles(type, isEven=false, isHighlighted=false, notEmphasised=false, isFiltered=false) {
+    
+    const blendMode = isHighlighted ? 'screen' : 'normal' 
+    
+    // probably ok for this implementation - but this feels like it may affect frame rate and bebe accessing the DOM 
+    // a lot more than we want if there's smooth animation required - may consider hard coding the colours in JS
+    const colourIds = {
+      'type-files-streams': '--type-colour-1',
+      'type-networks':  '--type-colour-2',
+      'type-crypto': '--type-colour-3' ,
+      'type-timing-promises':'--type-colour-4',
+      'type-other':  '--type-colour-5',
+    }
+    
+    const fillColour = this.getCSSVarValue(colourIds[type] || 'type-other')
+    
+    let opacity = 0.8
+    if (isEven) opacity = 0.6
+    if (isHighlighted) opacity = 1
+    if (notEmphasised) opacity = 0.45
+    if (isFiltered) opacity = 0.14
+    
+    // #side-bar svg.area-chart-svg .area-path.filtered {
+    //   animation-name: mostly-fade-out;
+    // }
+
+    return {
+      fillColour, 
+      opacity,
+      blendMode
+
+    }
+
+  }
+
   updateWidth () {
     if (this.isInHoverBox) return
     this.widthToApply = this.d3AreaChartSVG.node().getBoundingClientRect().width
@@ -92,15 +132,26 @@ class AreaChart extends HtmlContent {
     this.d3ChartWrapper = this.d3ContentWrapper.append('div')
       .classed('area-chart', true)
 
+    this.d3CanvasPlotArea = this.d3ChartWrapper.append('canvas')
+      .style('position', 'absolute')
+      .style('top', 0)
+      .style('left', 0)
+      .classed('chart-inner', true)
+    console.log(this.d3CanvasPlotArea)
+      
+    this.canvasContext = this.d3CanvasPlotArea.node().getContext('2d')
+    
+
     this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
       .classed('area-chart-svg', true)
+
 
     this.d3ChartOuter = this.d3AreaChartSVG.append('g')
       .classed('chart-outer', true)
       .attr('transform', `translate(${margins.left}, ${margins.top})`)
 
-    this.d3ChartInner = this.d3ChartOuter.append('g')
-      .classed('chart-inner', true)
+    this.d3ChartInner = this.d3ChartOuter.append('custom:databind')
+      
 
     this.d3XAxisGroup = this.d3ChartOuter.append('g')
       .classed('axis-group', true)
@@ -227,48 +278,48 @@ class AreaChart extends HtmlContent {
 
     const stackedData = dataStacker(combinedDataArray)
 
-    this.d3AreaPaths = this.d3ChartInner.selectAll('.area-path')
+    this.d3AreaPaths = this.d3ChartInner.selectAll('path')
       .data(stackedData)
       .enter()
       .append('path')
-      .attr('class', d => `type-${d.key.split('_')[0]}`)
-      .classed('area-path-even', d => !(d.index % 2))
-      .classed('area-path', true)
-      .on('mouseover', (d) => {
-        const layoutNodeId = extractLayoutNodeId(d.key)
-        if (!layoutNodeId || this.isInHoverBox) return
+      // .attr('class', d => `type-${d.key.split('_')[0]}`)
+      // .classed('area-path-even', d => !(d.index % 2))
+      // .classed('area-path', true)
+      // .on('mouseover', (d) => {
+      //   const layoutNodeId = extractLayoutNodeId(d.key)
+      //   if (!layoutNodeId || this.isInHoverBox) return
 
-        const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-        if (layoutNode) {
-          this.topmostUI.highlightNode(layoutNode)
-        }
-        this.ui.highlightColour('type', d.key.split('_')[0])
-      })
-      .on('mouseout', () => {
-        if (this.isInHoverBox) return
-        this.topmostUI.highlightNode(null)
-        this.ui.highlightColour('type', null)
-      })
-      .on('click', (d) => {
-        const layoutNodeId = extractLayoutNodeId(d.key)
-        if (!layoutNodeId) return
+      //   const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+      //   if (layoutNode) {
+      //     this.topmostUI.highlightNode(layoutNode)
+      //   }
+      //   this.ui.highlightColour('type', d.key.split('_')[0])
+      // })
+      // .on('mouseout', () => {
+      //   if (this.isInHoverBox) return
+      //   this.topmostUI.highlightNode(null)
+      //   this.ui.highlightColour('type', null)
+      // })
+      // .on('click', (d) => {
+      //   const layoutNodeId = extractLayoutNodeId(d.key)
+      //   if (!layoutNodeId) return
 
-        this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
-          this.topmostUI.highlightNode(null)
+      //   this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
+      //     this.topmostUI.highlightNode(null)
 
-          const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-          this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
-            if (targetUI !== this.ui) {
-              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-            }
-            this.ui.highlightColour('type', null)
-            animationQueue.execute()
-          })
-        })
-      })
-      .on('mousemove', () => {
-        this.showSlice(d3.event)
-      })
+      //     const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+      //     this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
+      //       if (targetUI !== this.ui) {
+      //         this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+      //       }
+      //       this.ui.highlightColour('type', null)
+      //       animationQueue.execute()
+      //     })
+      //   })
+      // })
+      // .on('mousemove', () => {
+      //   this.showSlice(d3.event)
+      // })
 
     if (!this.layoutNodeToApply) this.drawFiltering()
   }
@@ -346,8 +397,12 @@ class AreaChart extends HtmlContent {
     this.xScale.range([0, usableWidth])
     this.yScale.range([usableHeight, 0])
 
-    this.d3AreaChartSVG.style('height', `${height}px`)
+    // this.d3ChartWrapper.style('height', `${height}px`)
     this.d3AreaPaths.attr('d', this.areaMaker)
+
+    this.d3CanvasPlotArea
+      .attr('width', width)
+      .attr('height', height)
 
     const xAxis = d3.axisBottom()
       .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
@@ -401,9 +456,28 @@ class AreaChart extends HtmlContent {
     }
     if (this.widthToApply && this.widthToApply !== this.width) {
       this.drawPathsToFit(this.widthToApply)
+      this.drawToCanvas()
     }
     if (!this.isInHoverBox) this.widthToApply = null
   }
+
+  drawToCanvas () {
+    this.canvasContext.clearRect(0,0,this.canvasContext.width, this.canvasContext.height)
+    this.d3ChartInner.selectAll('path').each((d,i) => {
+      
+      const cssId = `type-${d.key.split('_')[0]}`
+      const isEven = !(d.index % 2)
+      const {fillColour, opacity, blendMode} = this.getCanvasAreaStyles(cssId, isEven)
+      this.canvasContext.globaleCompositeOperation = blendMode
+      this.canvasContext.globalAlpha = opacity 
+
+      this.canvasContext.beginPath()
+      this.areaMaker.context(this.canvasContext)(d)
+      this.canvasContext.fillStyle = fillColour
+      this.canvasContext.fill()
+    })
+  }
+
 }
 
 function applyAggregateIdToNodeGroup (aggregateId, ui, nodeGroups, nodeGroup) {
