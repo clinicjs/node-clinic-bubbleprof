@@ -19,6 +19,8 @@ class AreaChart extends HtmlContent {
       }
     }, contentProperties))
 
+    this.cssVarValues = {}
+
     this.initialized = false
     this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
@@ -77,15 +79,24 @@ class AreaChart extends HtmlContent {
     })
   }
 
+  /**
+   * Get the value of a CSS variable
+   * @param {String} varName
+   */
   getCSSVarValue (varName) {
-    return window.getComputedStyle(document.body).getPropertyValue(varName)
+    if (!this.cssVarValues[varName]) {
+      this.cssVarValues[varName] = window.getComputedStyle(document.body).getPropertyValue(varName)
+    }
+    return this.cssVarValues[varName]
   }
 
+  /**
+   * Generic function to define the styles for the canvas based visualization
+   * For SVG we could do this with CSS - but for Canvas we don't have access to CSS
+   */
   getCanvasAreaStyles (type, isEven = false, isFiltered = false, isHighlighted = false, notEmphasised = false) {
     const blendMode = isHighlighted ? 'screen' : 'normal'
 
-    // probably ok for this implementation - but this feels like it may affect frame rate and bebe accessing the DOM
-    // a lot more than we want if there's smooth animation required - may consider hard coding the colours in JS
     const colourIds = {
       'type-files-streams': '--type-colour-1',
       'type-networks': '--type-colour-2',
@@ -100,10 +111,6 @@ class AreaChart extends HtmlContent {
     if (isHighlighted) opacity = 1
     if (notEmphasised) opacity = 0.45
     if (isFiltered) opacity = 0.14
-
-    // #side-bar svg.area-chart-svg .area-path.filtered {
-    //   animation-name: mostly-fade-out;
-    // }
 
     return {
       fillColour,
@@ -124,26 +131,28 @@ class AreaChart extends HtmlContent {
   initializeElements () {
     super.initializeElements()
     const margins = this.contentProperties.margins
-    this.dataContainer = d3.select(document.createElement('custom:dataContainer'))
+    this.dataContainer = d3.select(document.createElement('custom'))
 
     this.d3Element.classed('area-chart', true)
 
     this.d3ChartWrapper = this.d3ContentWrapper.append('div')
       .classed('area-chart', true)
-    console.log(margins)
+
+    // create canvas element and overlay it in position with the SVG chart area and axes
     this.d3CanvasPlotArea = this.d3ChartWrapper.append('canvas')
       .style('position', 'absolute')
       .style('top', `${margins.top}px`)
       .style('left', `${margins.left}px`)
       .classed('chart-inner', true)
-
     this.canvasContext = this.d3CanvasPlotArea.node().getContext('2d')
 
+    // we can't access individual nodes once rendered to the canvas - we are using a technique to map the nodes that
+    // are placed on the canvas to a unique colour - see: https://medium.freecodecamp.org/d3-and-canvas-in-3-steps-8505c8b27444
     this.hiddenMouseMapperCanvas = this.d3ChartWrapper.append('canvas')
       .style('display', 'none')
-
     this.hiddenMouseMapperCanvasContext = this.hiddenMouseMapperCanvas.node().getContext('2d')
 
+    // the colour mapped to node - see above
     this.colourToNode = {}
 
     this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
@@ -312,11 +321,14 @@ class AreaChart extends HtmlContent {
 
     const stackedData = dataStacker(combinedDataArray)
 
-    this.d3AreaPaths = this.dataContainer.selectAll('path')
+    this.d3AreaPaths = this.dataContainer.selectAll('custom.area')
       .data(stackedData)
       .enter()
-      .append('path')
-    // if (!this.layoutNodeToApply) this.drawFiltering()
+      .append('custom')
+      .attr('class', 'area')
+      .attr('cssId', d => `type-${d.key.split('_')[0]}`)
+      .attr('isEven', d => !(d.index % 2))
+      .attr('isFiltered', d => (d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))))
   }
 
   applyLayoutNode (layoutNode = null) {
@@ -377,13 +389,6 @@ class AreaChart extends HtmlContent {
       y: topOffset
     })
     this.hoverBox.d3Element.classed('off-bottom', true)
-  }
-
-  getHiddenMouseValues (event) {
-    const { offsetX, offsetY } = event
-    const col = this.hiddenMouseMapperCanvasContext.getImageData(offsetX, offsetY, 1, 1).data
-    console.log(col)
-    return this.colourToNode['rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')']
   }
 
   drawPathsToFit (width) {
@@ -464,15 +469,11 @@ class AreaChart extends HtmlContent {
 
   drawToCanvas (filtered = false) {
     this.canvasContext.clearRect(0, 0, this.d3CanvasPlotArea.attr('width'), this.d3CanvasPlotArea.attr('height'))
-    this.dataContainer.selectAll('path').each((d) => {
-      const cssId = `type-${d.key.split('_')[0]}`
-      const isEven = !(d.index % 2)
-      const isFiltered = filtered && (d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
-
-      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(cssId, isEven, isFiltered)
+    this.dataContainer.selectAll('custom.area').each((d, i, nodes) => {
+      const node = d3.select(nodes[i])
+      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), node.attr('isEven'), filtered && node.attr('isFiltered'))
       this.canvasContext.globaleCompositeOperation = blendMode
       this.canvasContext.globalAlpha = opacity
-
       this.canvasContext.beginPath()
       this.areaMaker.context(this.canvasContext)(d)
       this.canvasContext.fillStyle = fillColour
@@ -481,9 +482,15 @@ class AreaChart extends HtmlContent {
     this.drawToMouseClickCanvas()
   }
 
+  getHiddenMouseValues (event) {
+    const { offsetX, offsetY } = event
+    const col = this.hiddenMouseMapperCanvasContext.getImageData(offsetX, offsetY, 1, 1).data
+    return this.colourToNode['rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')']
+  }
+
   drawToMouseClickCanvas () {
     this.hiddenMouseMapperCanvasContext.clearRect(0, 0, this.hiddenMouseMapperCanvas.attr('width'), this.hiddenMouseMapperCanvas.attr('height'))
-    this.dataContainer.selectAll('path').each((d) => {
+    this.dataContainer.selectAll('custom.area').each((d) => {
       if (!d.hiddenCol) {
         d.hiddenCol = this.genColor()
         this.colourToNode[d.hiddenCol] = d
@@ -496,7 +503,6 @@ class AreaChart extends HtmlContent {
   }
 
   // Function to create new colours for the picking.
-
   genColor () {
     var ret = []
     if (this.hiddenMouseMapperNextColour < 16777215) {
