@@ -23,7 +23,7 @@ class AreaChart extends HtmlContent {
     this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
-
+    this.hiddenMouseMapperNextColour = 1
     this.isInHoverBox = this.parentContent.contentProperties.type === 'node-link'
     this.key = 'AreaChart-' + this.isInHoverBox ? 'HoverBox' : 'SideBar'
 
@@ -77,81 +77,81 @@ class AreaChart extends HtmlContent {
     })
   }
 
-  getCSSVarValue(varName) {
+  getCSSVarValue (varName) {
     return window.getComputedStyle(document.body).getPropertyValue(varName)
   }
 
-  getCanvasAreaStyles(type, isEven=false, isHighlighted=false, notEmphasised=false, isFiltered=false) {
-    
-    const blendMode = isHighlighted ? 'screen' : 'normal' 
-    
-    // probably ok for this implementation - but this feels like it may affect frame rate and bebe accessing the DOM 
+  getCanvasAreaStyles (type, isEven = false, isFiltered = false, isHighlighted = false, notEmphasised = false) {
+    const blendMode = isHighlighted ? 'screen' : 'normal'
+
+    // probably ok for this implementation - but this feels like it may affect frame rate and bebe accessing the DOM
     // a lot more than we want if there's smooth animation required - may consider hard coding the colours in JS
     const colourIds = {
       'type-files-streams': '--type-colour-1',
-      'type-networks':  '--type-colour-2',
-      'type-crypto': '--type-colour-3' ,
-      'type-timing-promises':'--type-colour-4',
-      'type-other':  '--type-colour-5',
+      'type-networks': '--type-colour-2',
+      'type-crypto': '--type-colour-3',
+      'type-timing-promises': '--type-colour-4',
+      'type-other': '--type-colour-5'
     }
-    
+
     const fillColour = this.getCSSVarValue(colourIds[type] || 'type-other')
-    
     let opacity = 0.8
     if (isEven) opacity = 0.6
     if (isHighlighted) opacity = 1
     if (notEmphasised) opacity = 0.45
     if (isFiltered) opacity = 0.14
-    
+
     // #side-bar svg.area-chart-svg .area-path.filtered {
     //   animation-name: mostly-fade-out;
     // }
 
     return {
-      fillColour, 
+      fillColour,
       opacity,
       blendMode
-
     }
-
   }
 
   updateWidth () {
     if (this.isInHoverBox) return
     this.widthToApply = this.d3AreaChartSVG.node().getBoundingClientRect().width
   }
+
   getAggregateNode (id) {
     return this.ui.dataSet.aggregateNodes.get(id)
   }
+
   initializeElements () {
     super.initializeElements()
     const margins = this.contentProperties.margins
+    this.dataContainer = d3.select(document.createElement('custom:dataContainer'))
 
     this.d3Element.classed('area-chart', true)
 
     this.d3ChartWrapper = this.d3ContentWrapper.append('div')
       .classed('area-chart', true)
-
+    console.log(margins)
     this.d3CanvasPlotArea = this.d3ChartWrapper.append('canvas')
       .style('position', 'absolute')
-      .style('top', 0)
-      .style('left', 0)
+      .style('top', `${margins.top}px`)
+      .style('left', `${margins.left}px`)
       .classed('chart-inner', true)
-    console.log(this.d3CanvasPlotArea)
-      
+
     this.canvasContext = this.d3CanvasPlotArea.node().getContext('2d')
-    
+
+    this.hiddenMouseMapperCanvas = this.d3ChartWrapper.append('canvas')
+      .style('display', 'none')
+
+    this.hiddenMouseMapperCanvasContext = this.hiddenMouseMapperCanvas.node().getContext('2d')
+
+    this.colourToNode = {}
 
     this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
       .classed('area-chart-svg', true)
 
-
     this.d3ChartOuter = this.d3AreaChartSVG.append('g')
       .classed('chart-outer', true)
       .attr('transform', `translate(${margins.left}, ${margins.top})`)
-
-    this.d3ChartInner = this.d3ChartOuter.append('custom:databind')
-      
 
     this.d3XAxisGroup = this.d3ChartOuter.append('g')
       .classed('axis-group', true)
@@ -171,6 +171,7 @@ class AreaChart extends HtmlContent {
     this.d3LeadInText = this.d3ChartWrapper.append('p')
       .classed('lead-in-text', true)
   }
+
   setData () {
     const {
       wallTime,
@@ -226,15 +227,49 @@ class AreaChart extends HtmlContent {
       this.draw()
     }
   }
+
   initializeFromData () {
     if (!this.initialized) {
       // These actions aren't redone when data changes, but must be done after data was set
       this.initialized = true
 
       // Same behaviour on mouse movements off coloured area as on
-      this.d3AreaChartSVG.on('mousemove', () => {
-        this.showSlice(d3.event)
-      })
+      this.d3AreaChartSVG
+        .on('mousemove', () => {
+          this.showSlice(d3.event)
+          const d = this.getHiddenMouseValues(d3.event)
+          if (!d) return
+          const layoutNodeId = extractLayoutNodeId(d.key)
+          if (!layoutNodeId || this.isInHoverBox) return
+
+          const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+          if (layoutNode) {
+            this.topmostUI.highlightNode(layoutNode)
+          }
+          this.ui.highlightColour('type', d.key.split('_')[0])
+        })
+        .on('mouseout', () => {
+          if (this.isInHoverBox) return
+          this.topmostUI.highlightNode(null)
+          this.ui.highlightColour('type', null)
+        })
+        .on('click', () => {
+          const d = this.getHiddenMouseValues(d3.event)
+          if (!d) return
+          const layoutNodeId = extractLayoutNodeId(d.key)
+          if (!layoutNodeId) return
+          this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
+            this.topmostUI.highlightNode(null)
+            const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+            this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
+              if (targetUI !== this.ui) {
+                this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+              }
+              this.ui.highlightColour('type', null)
+              animationQueue.execute()
+            })
+          })
+        })
 
       this.d3ContentWrapper.on('mouseleave', () => {
         this.hoverBox.hide()
@@ -245,11 +280,10 @@ class AreaChart extends HtmlContent {
     if (!this.d3AreaPaths) this.createPathsForLayout()
     this.updateWidth()
   }
+
   createPathsForLayout () {
     if (this.d3AreaPaths) this.d3AreaPaths.remove()
-
     const nodeGroups = []
-
     let currentNodeGroup = applyAggregateIdToNodeGroup(this.aggregateIds[0], this.topmostUI, nodeGroups)
 
     const aggregateIdsCount = this.aggregateIds.length
@@ -278,50 +312,11 @@ class AreaChart extends HtmlContent {
 
     const stackedData = dataStacker(combinedDataArray)
 
-    this.d3AreaPaths = this.d3ChartInner.selectAll('path')
+    this.d3AreaPaths = this.dataContainer.selectAll('path')
       .data(stackedData)
       .enter()
       .append('path')
-      // .attr('class', d => `type-${d.key.split('_')[0]}`)
-      // .classed('area-path-even', d => !(d.index % 2))
-      // .classed('area-path', true)
-      // .on('mouseover', (d) => {
-      //   const layoutNodeId = extractLayoutNodeId(d.key)
-      //   if (!layoutNodeId || this.isInHoverBox) return
-
-      //   const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-      //   if (layoutNode) {
-      //     this.topmostUI.highlightNode(layoutNode)
-      //   }
-      //   this.ui.highlightColour('type', d.key.split('_')[0])
-      // })
-      // .on('mouseout', () => {
-      //   if (this.isInHoverBox) return
-      //   this.topmostUI.highlightNode(null)
-      //   this.ui.highlightColour('type', null)
-      // })
-      // .on('click', (d) => {
-      //   const layoutNodeId = extractLayoutNodeId(d.key)
-      //   if (!layoutNodeId) return
-
-      //   this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
-      //     this.topmostUI.highlightNode(null)
-
-      //     const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-      //     this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
-      //       if (targetUI !== this.ui) {
-      //         this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-      //       }
-      //       this.ui.highlightColour('type', null)
-      //       animationQueue.execute()
-      //     })
-      //   })
-      // })
-      // .on('mousemove', () => {
-      //   this.showSlice(d3.event)
-      // })
-
-    if (!this.layoutNodeToApply) this.drawFiltering()
+    // if (!this.layoutNodeToApply) this.drawFiltering()
   }
 
   applyLayoutNode (layoutNode = null) {
@@ -330,12 +325,14 @@ class AreaChart extends HtmlContent {
     }
     this.updateWidth()
   }
+
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
     const targetUI = this.isInHoverBox ? this.topmostUI : this.topmostUI.parentUI
     const layoutNode = targetUI.layout.findAggregateNode(aggregateNode)
     return (layoutNode === this.layoutNode)
   }
+
   getLeadInText () {
     const pluralCalls = this.ui.dataSet.callbackEventsCount !== 1
     const pluralResources = this.ui.dataSet.sourceNodesCount !== 1
@@ -346,11 +343,11 @@ class AreaChart extends HtmlContent {
       ${(this.ui.formatNumber(this.ui.dataSet.wallTime.profileDuration))} milliseconds.
     `
   }
+
   showSlice (event) {
     const { offsetX } = event
     // Note: d3.event is a live binding which fails if d3 is not bundled in a recommended way.
     // See, for example, https://github.com/d3/d3-sankey/issues/30#issuecomment-307869620
-
     const width = this.d3AreaChartSVG.node().getBoundingClientRect().width
     const margins = this.contentProperties.margins
 
@@ -361,15 +358,12 @@ class AreaChart extends HtmlContent {
     }
 
     const leftPosition = offsetX - margins.left
-
     const index = Math.floor(leftPosition / this.pixelsPerSlice)
     const timeSliceData = this.dataArray[index]
-
     const totalOperationsInSlice = this.aggregateIds.reduce((accum, aggregateId) => {
       if (this.layoutNode && !this.layoutNodeHasAggregateId(aggregateId)) return accum
       return accum + timeSliceData[aggregateId]
     }, 0)
-
     const topOffset = margins.top
     const leftOffset = this.pixelsPerSlice * index + margins.left
 
@@ -385,6 +379,13 @@ class AreaChart extends HtmlContent {
     this.hoverBox.d3Element.classed('off-bottom', true)
   }
 
+  getHiddenMouseValues (event) {
+    const { offsetX, offsetY } = event
+    const col = this.hiddenMouseMapperCanvasContext.getImageData(offsetX, offsetY, 1, 1).data
+    console.log(col)
+    return this.colourToNode['rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')']
+  }
+
   drawPathsToFit (width) {
     if (width) this.width = width
 
@@ -397,10 +398,13 @@ class AreaChart extends HtmlContent {
     this.xScale.range([0, usableWidth])
     this.yScale.range([usableHeight, 0])
 
-    // this.d3ChartWrapper.style('height', `${height}px`)
-    this.d3AreaPaths.attr('d', this.areaMaker)
+    this.d3AreaChartSVG.style('height', `${height}px`)
 
     this.d3CanvasPlotArea
+      .attr('width', width)
+      .attr('height', height)
+
+    this.hiddenMouseMapperCanvas
       .attr('width', width)
       .attr('height', height)
 
@@ -442,17 +446,14 @@ class AreaChart extends HtmlContent {
     this.d3SliceHighlight.style('top', margins.top + 'px')
   }
 
-  drawFiltering () {
-    this.d3AreaPaths.classed('filtered', d => d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
-  }
-
   draw () {
     super.draw()
 
     if (this.layoutNodeToApply) {
       this.layoutNode = this.layoutNodeToApply
       this.layoutNodeToApply = null
-      this.drawFiltering()
+      // this.drawFiltering()
+      this.drawToCanvas(true)
     }
     if (this.widthToApply && this.widthToApply !== this.width) {
       this.drawPathsToFit(this.widthToApply)
@@ -461,23 +462,52 @@ class AreaChart extends HtmlContent {
     if (!this.isInHoverBox) this.widthToApply = null
   }
 
-  drawToCanvas () {
-    this.canvasContext.clearRect(0,0,this.canvasContext.width, this.canvasContext.height)
-    this.d3ChartInner.selectAll('path').each((d,i) => {
-      
+  drawToCanvas (filtered = false) {
+    this.canvasContext.clearRect(0, 0, this.d3CanvasPlotArea.attr('width'), this.d3CanvasPlotArea.attr('height'))
+    this.dataContainer.selectAll('path').each((d) => {
       const cssId = `type-${d.key.split('_')[0]}`
       const isEven = !(d.index % 2)
-      const {fillColour, opacity, blendMode} = this.getCanvasAreaStyles(cssId, isEven)
+      const isFiltered = filtered && (d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
+
+      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(cssId, isEven, isFiltered)
       this.canvasContext.globaleCompositeOperation = blendMode
-      this.canvasContext.globalAlpha = opacity 
+      this.canvasContext.globalAlpha = opacity
 
       this.canvasContext.beginPath()
       this.areaMaker.context(this.canvasContext)(d)
       this.canvasContext.fillStyle = fillColour
       this.canvasContext.fill()
     })
+    this.drawToMouseClickCanvas()
   }
 
+  drawToMouseClickCanvas () {
+    this.hiddenMouseMapperCanvasContext.clearRect(0, 0, this.hiddenMouseMapperCanvas.attr('width'), this.hiddenMouseMapperCanvas.attr('height'))
+    this.dataContainer.selectAll('path').each((d) => {
+      if (!d.hiddenCol) {
+        d.hiddenCol = this.genColor()
+        this.colourToNode[d.hiddenCol] = d
+      }
+      this.hiddenMouseMapperCanvasContext.beginPath()
+      this.areaMaker.context(this.hiddenMouseMapperCanvasContext)(d)
+      this.hiddenMouseMapperCanvasContext.fillStyle = d.hiddenCol
+      this.hiddenMouseMapperCanvasContext.fill()
+    })
+  }
+
+  // Function to create new colours for the picking.
+
+  genColor () {
+    var ret = []
+    if (this.hiddenMouseMapperNextColour < 16777215) {
+      ret.push(this.hiddenMouseMapperNextColour & 0xff) // R
+      ret.push((this.hiddenMouseMapperNextColour & 0xff00) >> 8) // G
+      ret.push((this.hiddenMouseMapperNextColour & 0xff0000) >> 16) // B
+      this.hiddenMouseMapperNextColour += 1
+    }
+    var col = 'rgb(' + ret.join(',') + ')'
+    return col
+  }
 }
 
 function applyAggregateIdToNodeGroup (aggregateId, ui, nodeGroups, nodeGroup) {
