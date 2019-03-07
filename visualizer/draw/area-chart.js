@@ -328,7 +328,7 @@ class AreaChart extends HtmlContent {
       .attr('class', 'area')
       .attr('cssId', d => `type-${d.key.split('_')[0]}`)
       .attr('isEven', d => !(d.index % 2))
-      .attr('isFiltered', d => (d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))))
+      .attr('isFiltered', d => !!(d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))))
   }
 
   applyLayoutNode (layoutNode = null) {
@@ -457,7 +457,6 @@ class AreaChart extends HtmlContent {
     if (this.layoutNodeToApply) {
       this.layoutNode = this.layoutNodeToApply
       this.layoutNodeToApply = null
-      // this.drawFiltering()
       this.drawToCanvas(true)
     }
     if (this.widthToApply && this.widthToApply !== this.width) {
@@ -472,7 +471,7 @@ class AreaChart extends HtmlContent {
     this.dataContainer.selectAll('custom.area').each((d, i, nodes) => {
       const node = d3.select(nodes[i])
       const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), node.attr('isEven'), filtered && node.attr('isFiltered'))
-      this.canvasContext.globaleCompositeOperation = blendMode
+      this.canvasContext.globalCompositeOperation = blendMode
       this.canvasContext.globalAlpha = opacity
       this.canvasContext.beginPath()
       this.areaMaker.context(this.canvasContext)(d)
