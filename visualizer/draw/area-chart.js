@@ -95,7 +95,7 @@ class AreaChart extends HtmlContent {
    * For SVG we could do this with CSS - but for Canvas we don't have access to CSS
    */
   getCanvasAreaStyles (type, isEven = false, isFiltered = false, isHighlighted = false, notEmphasised = false) {
-    const blendMode = isHighlighted ? 'screen' : 'normal'
+    const blendMode = isHighlighted ? 'screen' : 'source-over'
 
     const colourIds = {
       'type-files-streams': '--type-colour-1',
@@ -327,8 +327,6 @@ class AreaChart extends HtmlContent {
       .append('custom')
       .attr('class', 'area')
       .attr('cssId', d => `type-${d.key.split('_')[0]}`)
-      .attr('isEven', d => !(d.index % 2))
-      .attr('isFiltered', d => !!(d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))))
   }
 
   applyLayoutNode (layoutNode = null) {
@@ -453,7 +451,6 @@ class AreaChart extends HtmlContent {
 
   draw () {
     super.draw()
-
     if (this.layoutNodeToApply) {
       this.layoutNode = this.layoutNodeToApply
       this.layoutNodeToApply = null
@@ -470,12 +467,15 @@ class AreaChart extends HtmlContent {
     this.canvasContext.clearRect(0, 0, this.d3CanvasPlotArea.attr('width'), this.d3CanvasPlotArea.attr('height'))
     this.dataContainer.selectAll('custom.area').each((d, i, nodes) => {
       const node = d3.select(nodes[i])
-      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), node.attr('isEven'), filtered && node.attr('isFiltered'))
+      const isFiltered = filtered && (d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
+      const isEven = !(d.index % 2)
+      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), isEven, isFiltered)
+      const d3Col = d3.color(fillColour)
+      d3Col.opacity = opacity
       this.canvasContext.globalCompositeOperation = blendMode
-      this.canvasContext.globalAlpha = opacity
       this.canvasContext.beginPath()
       this.areaMaker.context(this.canvasContext)(d)
-      this.canvasContext.fillStyle = fillColour
+      this.canvasContext.fillStyle = d3Col.toString()
       this.canvasContext.fill()
     })
     this.drawToMouseClickCanvas()
