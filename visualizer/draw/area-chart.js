@@ -25,7 +25,6 @@ class AreaChart extends HtmlContent {
     this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
-    this.hiddenMouseMapperNextColour = 1
     this.isInHoverBox = this.parentContent.contentProperties.type === 'node-link'
     this.key = 'AreaChart-' + this.isInHoverBox ? 'HoverBox' : 'SideBar'
 
@@ -152,9 +151,6 @@ class AreaChart extends HtmlContent {
       .style('display', 'none')
     this.hiddenMouseMapperCanvasContext = this.hiddenMouseMapperCanvas.node().getContext('2d')
 
-    // the colour mapped to node - see above
-    this.colourToNode = {}
-
     this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
       .classed('area-chart-svg', true)
 
@@ -188,6 +184,7 @@ class AreaChart extends HtmlContent {
     } = this.ui.dataSet
 
     this.slicesCount = wallTime.slicesCount
+    this.stacksCount = wallTime.maxAsyncPending
 
     this.xScale.domain([0, wallTime.profileEnd - wallTime.profileStart])
     this.yScale.domain([0, wallTime.maxAsyncPending])
@@ -237,6 +234,22 @@ class AreaChart extends HtmlContent {
     }
   }
 
+  /**
+   * calculate the layout node id associated with the position of the mouse on the canvas rendered area chart
+   */
+  getCurrentMouseNode (evt) {
+    const { offsetX, offsetY } = evt
+    const margins = this.contentProperties.margins
+    const leftPosition = offsetX - margins.left
+    const index = Math.floor(leftPosition / this.pixelsPerSlice)
+    const stackIndex = Math.floor(this.yScale.invert(offsetY))
+    const stackMatch = this.stackedData.find(sd => {
+      if (!sd[index]) return false
+      return sd[index][0] <= stackIndex && stackIndex < sd[index][1]
+    })
+    return stackMatch
+  }
+
   initializeFromData () {
     if (!this.initialized) {
       // These actions aren't redone when data changes, but must be done after data was set
@@ -246,11 +259,14 @@ class AreaChart extends HtmlContent {
       this.d3AreaChartSVG
         .on('mousemove', () => {
           this.showSlice(d3.event)
-          const d = this.getHiddenMouseValues(d3.event)
-          if (!d) return
+          const d = this.getCurrentMouseNode(d3.event)
+          if (!d) {
+            this.topmostUI.highlightNode(null)
+            this.ui.highlightColour('type', null)
+            return
+          }
           const layoutNodeId = extractLayoutNodeId(d.key)
           if (!layoutNodeId || this.isInHoverBox) return
-
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
           if (layoutNode) {
             this.topmostUI.highlightNode(layoutNode)
@@ -263,7 +279,7 @@ class AreaChart extends HtmlContent {
           this.ui.highlightColour('type', null)
         })
         .on('click', () => {
-          const d = this.getHiddenMouseValues(d3.event)
+          const d = this.getCurrentMouseNode(d3.event)
           if (!d) return
           const layoutNodeId = extractLayoutNodeId(d.key)
           if (!layoutNodeId) return
@@ -319,10 +335,10 @@ class AreaChart extends HtmlContent {
     const dataStacker = d3.stack()
       .keys(nodeGroupKeys)
 
-    const stackedData = dataStacker(combinedDataArray)
+    this.stackedData = dataStacker(combinedDataArray)
 
     this.d3AreaPaths = this.dataContainer.selectAll('custom.area')
-      .data(stackedData)
+      .data(this.stackedData)
       .enter()
       .append('custom')
       .attr('class', 'area')
@@ -443,6 +459,7 @@ class AreaChart extends HtmlContent {
       .call(xAxis)
 
     this.pixelsPerSlice = usableWidth / this.slicesCount
+    this.pixelsPerStack = usableHeight / this.stacksCount
 
     this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
     this.d3SliceHighlight.style('height', usableHeight + 'px')
@@ -478,40 +495,6 @@ class AreaChart extends HtmlContent {
       this.canvasContext.fillStyle = d3Col.toString()
       this.canvasContext.fill()
     })
-    this.drawToMouseClickCanvas()
-  }
-
-  getHiddenMouseValues (event) {
-    const { offsetX, offsetY } = event
-    const col = this.hiddenMouseMapperCanvasContext.getImageData(offsetX, offsetY, 1, 1).data
-    return this.colourToNode['rgb(' + col[0] + ',' + col[1] + ',' + col[2] + ')']
-  }
-
-  drawToMouseClickCanvas () {
-    this.hiddenMouseMapperCanvasContext.clearRect(0, 0, this.hiddenMouseMapperCanvas.attr('width'), this.hiddenMouseMapperCanvas.attr('height'))
-    this.dataContainer.selectAll('custom.area').each((d) => {
-      if (!d.hiddenCol) {
-        d.hiddenCol = this.genColor()
-        this.colourToNode[d.hiddenCol] = d
-      }
-      this.hiddenMouseMapperCanvasContext.beginPath()
-      this.areaMaker.context(this.hiddenMouseMapperCanvasContext)(d)
-      this.hiddenMouseMapperCanvasContext.fillStyle = d.hiddenCol
-      this.hiddenMouseMapperCanvasContext.fill()
-    })
-  }
-
-  // Function to create new colours for the picking.
-  genColor () {
-    var ret = []
-    if (this.hiddenMouseMapperNextColour < 16777215) {
-      ret.push(this.hiddenMouseMapperNextColour & 0xff) // R
-      ret.push((this.hiddenMouseMapperNextColour & 0xff00) >> 8) // G
-      ret.push((this.hiddenMouseMapperNextColour & 0xff0000) >> 16) // B
-      this.hiddenMouseMapperNextColour += 1
-    }
-    var col = 'rgb(' + ret.join(',') + ')'
-    return col
   }
 }
 
