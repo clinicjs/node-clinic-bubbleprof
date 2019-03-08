@@ -58,13 +58,17 @@ class AreaChart extends HtmlContent {
       if (!this.d3AreaPaths || layoutNode === this.highlightedLayoutNode) return
       this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
       this.highlightedLayoutNode = layoutNode
+      this.draw()
     }
+
+    this.topmostUI.on('hover', this.hoverListener)
+
 
     this.ui.on('setTopmostUI', topmostUI => {
       if (this.topmostUI === topmostUI) return
       // Remove listener from old topmostUI
       this.topmostUI.removeListener('hover', this.hoverListener)
-
+      
       // Add listener to new one
       this.topmostUI = topmostUI
       this.topmostUI.on('hover', this.hoverListener)
@@ -144,12 +148,6 @@ class AreaChart extends HtmlContent {
       .style('left', `${margins.left}px`)
       .classed('chart-inner', true)
     this.canvasContext = this.d3CanvasPlotArea.node().getContext('2d')
-
-    // we can't access individual nodes once rendered to the canvas - we are using a technique to map the nodes that
-    // are placed on the canvas to a unique colour - see: https://medium.freecodecamp.org/d3-and-canvas-in-3-steps-8505c8b27444
-    this.hiddenMouseMapperCanvas = this.d3ChartWrapper.append('canvas')
-      .style('display', 'none')
-    this.hiddenMouseMapperCanvasContext = this.hiddenMouseMapperCanvas.node().getContext('2d')
 
     this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
       .classed('area-chart-svg', true)
@@ -260,11 +258,7 @@ class AreaChart extends HtmlContent {
         .on('mousemove', () => {
           this.showSlice(d3.event)
           const d = this.getCurrentMouseNode(d3.event)
-          if (!d) {
-            this.topmostUI.highlightNode(null)
-            this.ui.highlightColour('type', null)
-            return
-          }
+          if (!d) return
           const layoutNodeId = extractLayoutNodeId(d.key)
           if (!layoutNodeId || this.isInHoverBox) return
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
@@ -423,10 +417,6 @@ class AreaChart extends HtmlContent {
       .attr('width', width)
       .attr('height', height)
 
-    this.hiddenMouseMapperCanvas
-      .attr('width', width)
-      .attr('height', height)
-
     const xAxis = d3.axisBottom()
       .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
       .tickSize(2)
@@ -471,22 +461,22 @@ class AreaChart extends HtmlContent {
     if (this.layoutNodeToApply) {
       this.layoutNode = this.layoutNodeToApply
       this.layoutNodeToApply = null
-      this.drawToCanvas(true)
     }
     if (this.widthToApply && this.widthToApply !== this.width) {
       this.drawPathsToFit(this.widthToApply)
-      this.drawToCanvas()
     }
+    this.drawToCanvas()
     if (!this.isInHoverBox) this.widthToApply = null
   }
 
-  drawToCanvas (filtered = false) {
+  drawToCanvas () {
     this.canvasContext.clearRect(0, 0, this.d3CanvasPlotArea.attr('width'), this.d3CanvasPlotArea.attr('height'))
     this.dataContainer.selectAll('custom.area').each((d, i, nodes) => {
       const node = d3.select(nodes[i])
-      const isFiltered = filtered && (d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
+      const isFiltered = d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))
       const isEven = !(d.index % 2)
-      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), isEven, isFiltered)
+      const isHighlighted = this.highlightedLayoutNode && extractLayoutNodeId(d.key) === this.highlightedLayoutNode.id
+      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), isEven, isFiltered, isHighlighted)
       const d3Col = d3.color(fillColour)
       d3Col.opacity = opacity
       this.canvasContext.globalCompositeOperation = blendMode
