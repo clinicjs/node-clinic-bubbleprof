@@ -63,12 +63,11 @@ class AreaChart extends HtmlContent {
 
     this.topmostUI.on('hover', this.hoverListener)
 
-
     this.ui.on('setTopmostUI', topmostUI => {
       if (this.topmostUI === topmostUI) return
       // Remove listener from old topmostUI
       this.topmostUI.removeListener('hover', this.hoverListener)
-      
+
       // Add listener to new one
       this.topmostUI = topmostUI
       this.topmostUI.on('hover', this.hoverListener)
@@ -98,8 +97,6 @@ class AreaChart extends HtmlContent {
    * For SVG we could do this with CSS - but for Canvas we don't have access to CSS
    */
   getCanvasAreaStyles (type, isEven = false, isFiltered = false, isHighlighted = false, notEmphasised = false) {
-    const blendMode = isHighlighted ? 'screen' : 'source-over'
-
     const colourIds = {
       'type-files-streams': '--type-colour-1',
       'type-networks': '--type-colour-2',
@@ -117,8 +114,7 @@ class AreaChart extends HtmlContent {
 
     return {
       fillColour,
-      opacity,
-      blendMode
+      opacity
     }
   }
 
@@ -330,13 +326,11 @@ class AreaChart extends HtmlContent {
       .keys(nodeGroupKeys)
 
     this.stackedData = dataStacker(combinedDataArray)
-
     this.d3AreaPaths = this.dataContainer.selectAll('custom.area')
       .data(this.stackedData)
       .enter()
       .append('custom')
       .attr('class', 'area')
-      .attr('cssId', d => `type-${d.key.split('_')[0]}`)
   }
 
   applyLayoutNode (layoutNode = null) {
@@ -469,22 +463,41 @@ class AreaChart extends HtmlContent {
     if (!this.isInHoverBox) this.widthToApply = null
   }
 
-  drawToCanvas () {
+  clearCanvas () {
     this.canvasContext.clearRect(0, 0, this.d3CanvasPlotArea.attr('width'), this.d3CanvasPlotArea.attr('height'))
-    this.dataContainer.selectAll('custom.area').each((d, i, nodes) => {
-      const node = d3.select(nodes[i])
-      const isFiltered = d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))
-      const isEven = !(d.index % 2)
-      const isHighlighted = this.highlightedLayoutNode && extractLayoutNodeId(d.key) === this.highlightedLayoutNode.id
-      const { fillColour, opacity, blendMode } = this.getCanvasAreaStyles(node.attr('cssId'), isEven, isFiltered, isHighlighted)
-      const d3Col = d3.color(fillColour)
-      d3Col.opacity = opacity
-      this.canvasContext.globalCompositeOperation = blendMode
-      this.canvasContext.beginPath()
-      this.areaMaker.context(this.canvasContext)(d)
-      this.canvasContext.fillStyle = d3Col.toString()
-      this.canvasContext.fill()
-    })
+  }
+
+  drawToCanvas () {
+    const areas = this.dataContainer.selectAll('custom.area')
+    if (!this.highlightedLayoutNode) {
+      this.clearCanvas()
+      areas.each(d => this.drawNodeArea(d))
+    } else {
+      if (this.isInHoverBox) {
+        this.clearCanvas()
+      }
+      if (this.currentHighlightedArea) {
+        this.currentHighlightedArea.each(d => this.drawNodeArea(d))
+      }
+      this.currentHighlightedArea = areas.select((d, i, nodes) => this.highlightedLayoutNode.id === extractLayoutNodeId(d.key) ? nodes[i] : null)
+      this.currentHighlightedArea.each(d => this.drawNodeArea(d))
+    }
+  }
+
+  drawNodeArea (d) {
+    const cssId = `type-${d.key.split('_')[0]}`
+    const isFiltered = d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))
+    const isEven = !(d.index % 2)
+    const isHighlighted = this.highlightedLayoutNode && extractLayoutNodeId(d.key) === this.highlightedLayoutNode.id
+    const { fillColour, opacity } = this.getCanvasAreaStyles(cssId, isEven, isFiltered, isHighlighted)
+    const d3Col = d3.color(fillColour)
+    d3Col.opacity = opacity
+    this.canvasContext.beginPath()
+    this.areaMaker.context(this.canvasContext)(d)
+    this.canvasContext.fillStyle = this.getCSSVarValue('--main-bg-color')
+    this.canvasContext.fill()
+    this.canvasContext.fillStyle = d3Col.toString()
+    this.canvasContext.fill()
   }
 }
 
