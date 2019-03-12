@@ -255,6 +255,7 @@ class AreaChart extends HtmlContent {
           this.showSlice(d3.event)
           const d = this.getCurrentMouseNode(d3.event)
           if (!d) return
+          document.body.style.cursor = 'pointer'
           const layoutNodeId = extractLayoutNodeId(d.key)
           if (!layoutNodeId || this.isInHoverBox) return
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
@@ -264,6 +265,7 @@ class AreaChart extends HtmlContent {
           this.ui.highlightColour('type', d.key.split('_')[0])
         })
         .on('mouseout', () => {
+          document.body.style.cursor = 'default'
           if (this.isInHoverBox) return
           this.topmostUI.highlightNode(null)
           this.ui.highlightColour('type', null)
