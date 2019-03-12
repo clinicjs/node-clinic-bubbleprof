@@ -47,6 +47,6 @@ const drawUi = () => {
 askBehaviours()
 
 // Orchestrate font loading
-loadFonts()
+setTimeout(loadFonts)
 
 drawUi()
