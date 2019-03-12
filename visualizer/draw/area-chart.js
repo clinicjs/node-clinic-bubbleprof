@@ -255,7 +255,10 @@ class AreaChart extends HtmlContent {
           this.showSlice(d3.event)
           const d = this.getCurrentMouseNode(d3.event)
           this.d3AreaChartSVG.style('cursor', d ? 'pointer' : 'default')
-          if (!d) return
+          if (!d) {
+            if (!this.isInHoverBox) this.topmostUI.highlightNode(null)
+            return
+          }
           const layoutNodeId = extractLayoutNodeId(d.key)
           if (!layoutNodeId || this.isInHoverBox) return
           const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
