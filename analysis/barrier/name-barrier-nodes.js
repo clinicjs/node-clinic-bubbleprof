@@ -155,7 +155,6 @@ function noDups () {
 
 function getModuleNames (aggregateNode, sysInfo) {
   const frames = aggregateNode.frames.filter(frame => frame.fileName)
-
   if (isExternal(frames, sysInfo)) {
     const modules = aggregateNode.frames
       .filter((frame) => !frame.isNodecore(sysInfo))
@@ -168,8 +167,8 @@ function getModuleNames (aggregateNode, sysInfo) {
       .filter(name => name)
       .filter(noDups())
   }
-
-  return []
+  // it's not external - return the userland name
+  return [aggregateNode.name]
 }
 
 function isExternal (frames, sysInfo) {
