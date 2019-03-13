@@ -30,7 +30,7 @@
   "keywords": [],
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@nearform/clinic-common": "github:nearform/node-clinic-common#feature/brand-fonts",
+    "@nearform/clinic-common": "^2.0.0",
     "@nearform/trace-events-parser": "^1.0.4",
     "array-flatten": "^2.1.1",
     "async": "^2.5.0",
