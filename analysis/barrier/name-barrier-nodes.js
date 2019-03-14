@@ -124,7 +124,9 @@ class NameBarrierNodes extends stream.Transform {
     const moduleNames = getModuleNames(aggregateNode, this.systemInfo)
     const typeName = toName(types)
     const prefix = moduleNames.length > 3 ? '... > ' : ''
-
+    // http is special for identifying latency etc - so we don't let http names be overwritten by userland or module filenames
+    // - see: https://github.com/nearform/node-clinic-bubbleprof/pull/115 and existing integration tests
+    if (typeName.includes('http')) return typeName
     if (moduleNames.length) return prefix + moduleNames.slice(-3).join(' > ')
     return typeName
   }
@@ -168,7 +170,8 @@ function getModuleNames (aggregateNode, sysInfo) {
       .filter(noDups())
   }
   // it's not external - return the userland name
-  return [aggregateNode.name]
+  if (aggregateNode.name) return [aggregateNode.name]
+  return []
 }
 
 function isExternal (frames, sysInfo) {

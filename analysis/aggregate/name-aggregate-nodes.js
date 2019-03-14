@@ -28,7 +28,10 @@ function getAggregateName (aggregateNode, sysInfo) {
     'module.exports',
     'handler',
     'async.series',
-    'async.parallel'
+    'async.parallel',
+    'Promise.all.then',
+    'Promise.all',
+    'Object'
   ]
   if (userland.length) {
     const uniqueNameOptions = [...new Set(userland.map(frame => name(frame)))]
