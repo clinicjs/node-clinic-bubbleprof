@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "standard | snazzy && tap --no-cov --timeout=50 test/*.test.js",
+    "test:file": "standard | snazzy && tap --no-cov --timeout=50",
     "ci-lint": "standard | snazzy",
     "ci-test": "tap --timeout=50 test/*.test.js",
     "ci-cov": "tap --statements=95 --timeout=60 test/*.test.js",
