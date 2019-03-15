@@ -152,8 +152,8 @@ class BubbleprofUI extends EventEmitter {
       sublayoutHtml.addCollapseControl()
       const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
-      const sublayoutSvg = sublayoutHtml.addContent('SvgContainer', { id: 'sublayout-svg', svgBounds: {} })
-      sublayoutHtml.addContent('HoverBox', { svg: sublayoutSvg })
+      // const sublayoutSvg = sublayoutHtml.addContent('CanvasContainer', { id: 'sublayout-svg', svgBounds: {} })
+      // sublayoutHtml.addContent('HoverBox', { svg: sublayoutSvg })
 
       uiWithinSublayout.initializeElements()
 
@@ -207,20 +207,20 @@ class BubbleprofUI extends EventEmitter {
   }
 
   animate (isExpanding, onAnimationStep) {
-    this.isAnimating = true
+    // this.isAnimating = true
 
-    this.highlightNode(null)
-    this.parentUI.highlightNode(null)
+    // this.highlightNode(null)
+    // this.parentUI.highlightNode(null)
 
-    const nodeLinkSection = this.getNodeLinkSection()
-    this.svgNodeDiagram.animate(isExpanding, () => {
-      this.isAnimating = false
-      if (!isExpanding) {
-        nodeLinkSection.d3Element.remove()
-        this.parentUI.svgNodeDiagram.deselectAll()
-      }
-      if (onAnimationStep) onAnimationStep()
-    })
+    // const nodeLinkSection = this.getNodeLinkSection()
+    // this.svgNodeDiagram.animate(isExpanding, () => {
+    //   this.isAnimating = false
+    //   if (!isExpanding) {
+    //     nodeLinkSection.d3Element.remove()
+    //     this.parentUI.svgNodeDiagram.deselectAll()
+    //   }
+    //   if (onAnimationStep) onAnimationStep()
+    // })
   }
 
   setAsTopmostUI () {
