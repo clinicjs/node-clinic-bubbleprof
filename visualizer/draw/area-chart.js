@@ -499,6 +499,7 @@ class AreaChart extends HtmlContent {
     d3Col.opacity = opacity
     this.canvasContext.beginPath()
     this.areaMaker.context(this.canvasContext)(d)
+    // Reset area's colour, so repeated hover in/out doesn't overlay colours increasing their intensity
     this.canvasContext.fillStyle = this.getCSSVarValue('--main-bg-color')
     this.canvasContext.fill()
     this.canvasContext.fillStyle = d3Col.toString()
