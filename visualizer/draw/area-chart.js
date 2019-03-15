@@ -19,11 +19,12 @@ class AreaChart extends HtmlContent {
       }
     }, contentProperties))
 
+    this.cssVarValues = {}
+
     this.initialized = false
     this.topmostUI = this.ui
     this.xScale = d3.scaleTime()
     this.yScale = d3.scaleLinear()
-
     this.isInHoverBox = this.parentContent.contentProperties.type === 'node-link'
     this.key = 'AreaChart-' + this.isInHoverBox ? 'HoverBox' : 'SideBar'
 
@@ -57,7 +58,10 @@ class AreaChart extends HtmlContent {
       if (!this.d3AreaPaths || layoutNode === this.highlightedLayoutNode) return
       this.d3AreaPaths.classed('highlighted', d => layoutNode && extractLayoutNodeId(d.key) === layoutNode.id)
       this.highlightedLayoutNode = layoutNode
+      this.draw()
     }
+
+    this.topmostUI.on('hover', this.hoverListener)
 
     this.ui.on('setTopmostUI', topmostUI => {
       if (this.topmostUI === topmostUI) return
@@ -76,21 +80,70 @@ class AreaChart extends HtmlContent {
       this.draw()
     })
   }
+
+  /**
+   * Get the value of a CSS variable
+   * @param {String} varName
+   */
+  getCSSVarValue (varName) {
+    if (!this.cssVarValues[varName]) {
+      this.cssVarValues[varName] = window.getComputedStyle(document.body).getPropertyValue(varName)
+    }
+    return this.cssVarValues[varName]
+  }
+
+  /**
+   * Generic function to define the styles for the canvas based visualization
+   * For SVG we could do this with CSS - but for Canvas we don't have access to CSS
+   */
+  getCanvasAreaStyles (type, isEven = false, isFiltered = false, isHighlighted = false, notEmphasised = false) {
+    const colourIds = {
+      'type-files-streams': '--type-colour-1',
+      'type-networks': '--type-colour-2',
+      'type-crypto': '--type-colour-3',
+      'type-timing-promises': '--type-colour-4',
+      'type-other': '--type-colour-5'
+    }
+
+    const fillColour = this.getCSSVarValue(colourIds[type] || 'type-other')
+    let opacity = 0.8
+    if (isEven) opacity = 0.6
+    if (isHighlighted) opacity = 1
+    if (notEmphasised) opacity = 0.45
+    if (isFiltered) opacity = 0.14
+
+    return {
+      fillColour,
+      opacity
+    }
+  }
+
   updateWidth () {
     if (this.isInHoverBox) return
     this.widthToApply = this.d3AreaChartSVG.node().getBoundingClientRect().width
   }
+
   getAggregateNode (id) {
     return this.ui.dataSet.aggregateNodes.get(id)
   }
+
   initializeElements () {
     super.initializeElements()
     const margins = this.contentProperties.margins
+    this.dataContainer = d3.select(document.createElement('custom'))
 
     this.d3Element.classed('area-chart', true)
 
     this.d3ChartWrapper = this.d3ContentWrapper.append('div')
       .classed('area-chart', true)
+
+    // create canvas element and overlay it in position with the SVG chart area and axes
+    this.d3CanvasPlotArea = this.d3ChartWrapper.append('canvas')
+      .style('position', 'absolute')
+      .style('top', `${margins.top}px`)
+      .style('left', `${margins.left}px`)
+      .classed('chart-inner', true)
+    this.canvasContext = this.d3CanvasPlotArea.node().getContext('2d')
 
     this.d3AreaChartSVG = this.d3ChartWrapper.append('svg')
       .classed('area-chart-svg', true)
@@ -98,9 +151,6 @@ class AreaChart extends HtmlContent {
     this.d3ChartOuter = this.d3AreaChartSVG.append('g')
       .classed('chart-outer', true)
       .attr('transform', `translate(${margins.left}, ${margins.top})`)
-
-    this.d3ChartInner = this.d3ChartOuter.append('g')
-      .classed('chart-inner', true)
 
     this.d3XAxisGroup = this.d3ChartOuter.append('g')
       .classed('axis-group', true)
@@ -120,6 +170,7 @@ class AreaChart extends HtmlContent {
     this.d3LeadInText = this.d3ChartWrapper.append('p')
       .classed('lead-in-text', true)
   }
+
   setData () {
     const {
       wallTime,
@@ -127,6 +178,7 @@ class AreaChart extends HtmlContent {
     } = this.ui.dataSet
 
     this.slicesCount = wallTime.slicesCount
+    this.stacksCount = wallTime.maxAsyncPending
 
     this.xScale.domain([0, wallTime.profileEnd - wallTime.profileStart])
     this.yScale.domain([0, wallTime.maxAsyncPending])
@@ -175,15 +227,69 @@ class AreaChart extends HtmlContent {
       this.draw()
     }
   }
+
+  /**
+   * calculate the layout node id associated with the position of the mouse on the canvas rendered area chart
+   */
+  getCurrentMouseNode (evt) {
+    const { offsetX, offsetY } = evt
+    const margins = this.contentProperties.margins
+    const leftPosition = offsetX - margins.left
+    const index = Math.floor(leftPosition / this.pixelsPerSlice)
+    const stackIndex = Math.floor(this.yScale.invert(offsetY))
+    const stackMatch = this.stackedData.find(sd => {
+      if (!sd[index]) return false
+      return sd[index][0] <= stackIndex && stackIndex < sd[index][1]
+    })
+    return stackMatch
+  }
+
   initializeFromData () {
     if (!this.initialized) {
       // These actions aren't redone when data changes, but must be done after data was set
       this.initialized = true
 
       // Same behaviour on mouse movements off coloured area as on
-      this.d3AreaChartSVG.on('mousemove', () => {
-        this.showSlice(d3.event)
-      })
+      this.d3AreaChartSVG
+        .on('mousemove', () => {
+          this.showSlice(d3.event)
+          const d = this.getCurrentMouseNode(d3.event)
+          this.d3AreaChartSVG.style('cursor', d ? 'pointer' : 'default')
+          if (!d) {
+            if (!this.isInHoverBox) this.topmostUI.highlightNode(null)
+            return
+          }
+          const layoutNodeId = extractLayoutNodeId(d.key)
+          if (!layoutNodeId || this.isInHoverBox) return
+          const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+          if (layoutNode) {
+            this.topmostUI.highlightNode(layoutNode)
+          }
+          this.ui.highlightColour('type', d.key.split('_')[0])
+        })
+        .on('mouseout', () => {
+          this.d3AreaChartSVG.style('cursor', 'default')
+          if (this.isInHoverBox) return
+          this.topmostUI.highlightNode(null)
+          this.ui.highlightColour('type', null)
+        })
+        .on('click', () => {
+          const d = this.getCurrentMouseNode(d3.event)
+          if (!d) return
+          const layoutNodeId = extractLayoutNodeId(d.key)
+          if (!layoutNodeId) return
+          this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
+            this.topmostUI.highlightNode(null)
+            const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
+            this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
+              if (targetUI !== this.ui) {
+                this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+              }
+              this.ui.highlightColour('type', null)
+              animationQueue.execute()
+            })
+          })
+        })
 
       this.d3ContentWrapper.on('mouseleave', () => {
         this.hoverBox.hide()
@@ -194,11 +300,10 @@ class AreaChart extends HtmlContent {
     if (!this.d3AreaPaths) this.createPathsForLayout()
     this.updateWidth()
   }
+
   createPathsForLayout () {
     if (this.d3AreaPaths) this.d3AreaPaths.remove()
-
     const nodeGroups = []
-
     let currentNodeGroup = applyAggregateIdToNodeGroup(this.aggregateIds[0], this.topmostUI, nodeGroups)
 
     const aggregateIdsCount = this.aggregateIds.length
@@ -225,52 +330,12 @@ class AreaChart extends HtmlContent {
     const dataStacker = d3.stack()
       .keys(nodeGroupKeys)
 
-    const stackedData = dataStacker(combinedDataArray)
-
-    this.d3AreaPaths = this.d3ChartInner.selectAll('.area-path')
-      .data(stackedData)
+    this.stackedData = dataStacker(combinedDataArray)
+    this.d3AreaPaths = this.dataContainer.selectAll('custom.area')
+      .data(this.stackedData)
       .enter()
-      .append('path')
-      .attr('class', d => `type-${d.key.split('_')[0]}`)
-      .classed('area-path-even', d => !(d.index % 2))
-      .classed('area-path', true)
-      .on('mouseover', (d) => {
-        const layoutNodeId = extractLayoutNodeId(d.key)
-        if (!layoutNodeId || this.isInHoverBox) return
-
-        const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-        if (layoutNode) {
-          this.topmostUI.highlightNode(layoutNode)
-        }
-        this.ui.highlightColour('type', d.key.split('_')[0])
-      })
-      .on('mouseout', () => {
-        if (this.isInHoverBox) return
-        this.topmostUI.highlightNode(null)
-        this.ui.highlightColour('type', null)
-      })
-      .on('click', (d) => {
-        const layoutNodeId = extractLayoutNodeId(d.key)
-        if (!layoutNodeId) return
-
-        this.topmostUI.queueAnimation('selectChartNode', (animationQueue) => {
-          this.topmostUI.highlightNode(null)
-
-          const layoutNode = this.topmostUI.layout.layoutNodes.get(layoutNodeId)
-          this.topmostUI.selectNode(layoutNode, animationQueue).then(targetUI => {
-            if (targetUI !== this.ui) {
-              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-            }
-            this.ui.highlightColour('type', null)
-            animationQueue.execute()
-          })
-        })
-      })
-      .on('mousemove', () => {
-        this.showSlice(d3.event)
-      })
-
-    if (!this.layoutNodeToApply) this.drawFiltering()
+      .append('custom')
+      .attr('class', 'area')
   }
 
   applyLayoutNode (layoutNode = null) {
@@ -279,12 +344,14 @@ class AreaChart extends HtmlContent {
     }
     this.updateWidth()
   }
+
   layoutNodeHasAggregateId (aggregateId) {
     const aggregateNode = this.getAggregateNode(aggregateId)
     const targetUI = this.isInHoverBox ? this.topmostUI : this.topmostUI.parentUI
     const layoutNode = targetUI.layout.findAggregateNode(aggregateNode)
     return (layoutNode === this.layoutNode)
   }
+
   getLeadInText () {
     const pluralCalls = this.ui.dataSet.callbackEventsCount !== 1
     const pluralResources = this.ui.dataSet.sourceNodesCount !== 1
@@ -295,11 +362,11 @@ class AreaChart extends HtmlContent {
       ${(this.ui.formatNumber(this.ui.dataSet.wallTime.profileDuration))} milliseconds.
     `
   }
+
   showSlice (event) {
     const { offsetX } = event
     // Note: d3.event is a live binding which fails if d3 is not bundled in a recommended way.
     // See, for example, https://github.com/d3/d3-sankey/issues/30#issuecomment-307869620
-
     const width = this.d3AreaChartSVG.node().getBoundingClientRect().width
     const margins = this.contentProperties.margins
 
@@ -310,15 +377,12 @@ class AreaChart extends HtmlContent {
     }
 
     const leftPosition = offsetX - margins.left
-
     const index = Math.floor(leftPosition / this.pixelsPerSlice)
     const timeSliceData = this.dataArray[index]
-
     const totalOperationsInSlice = this.aggregateIds.reduce((accum, aggregateId) => {
       if (this.layoutNode && !this.layoutNodeHasAggregateId(aggregateId)) return accum
       return accum + timeSliceData[aggregateId]
     }, 0)
-
     const topOffset = margins.top
     const leftOffset = this.pixelsPerSlice * index + margins.left
 
@@ -347,7 +411,10 @@ class AreaChart extends HtmlContent {
     this.yScale.range([usableHeight, 0])
 
     this.d3AreaChartSVG.style('height', `${height}px`)
-    this.d3AreaPaths.attr('d', this.areaMaker)
+
+    this.d3CanvasPlotArea
+      .attr('width', width)
+      .attr('height', height)
 
     const xAxis = d3.axisBottom()
       .ticks(width < 160 ? 5 : 9) // Show fewer ticks if less space is available
@@ -381,28 +448,62 @@ class AreaChart extends HtmlContent {
       .call(xAxis)
 
     this.pixelsPerSlice = usableWidth / this.slicesCount
+    this.pixelsPerStack = usableHeight / this.stacksCount
 
     this.d3SliceHighlight.style('width', Math.max(this.pixelsPerSlice, 1) + 'px')
     this.d3SliceHighlight.style('height', usableHeight + 'px')
     this.d3SliceHighlight.style('top', margins.top + 'px')
   }
 
-  drawFiltering () {
-    this.d3AreaPaths.classed('filtered', d => d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key)))
-  }
-
   draw () {
     super.draw()
-
     if (this.layoutNodeToApply) {
       this.layoutNode = this.layoutNodeToApply
       this.layoutNodeToApply = null
-      this.drawFiltering()
     }
     if (this.widthToApply && this.widthToApply !== this.width) {
       this.drawPathsToFit(this.widthToApply)
     }
+    this.drawToCanvas()
     if (!this.isInHoverBox) this.widthToApply = null
+  }
+
+  clearCanvas () {
+    this.canvasContext.clearRect(0, 0, this.d3CanvasPlotArea.attr('width'), this.d3CanvasPlotArea.attr('height'))
+  }
+
+  drawToCanvas () {
+    const areas = this.dataContainer.selectAll('custom.area')
+    if (!this.highlightedLayoutNode) {
+      this.clearCanvas()
+      areas.each(d => this.drawNodeArea(d))
+    } else {
+      if (this.isInHoverBox) {
+        this.clearCanvas()
+      }
+      if (this.currentHighlightedArea) {
+        this.currentHighlightedArea.each(d => this.drawNodeArea(d))
+      }
+      this.currentHighlightedArea = areas.select((d, i, nodes) => this.highlightedLayoutNode.id === extractLayoutNodeId(d.key) ? nodes[i] : null)
+      this.currentHighlightedArea.each(d => this.drawNodeArea(d))
+    }
+  }
+
+  drawNodeArea (d) {
+    const cssId = `type-${d.key.split('_')[0]}`
+    const isFiltered = d.key.split('_')[1] === 'absent' || (this.layoutNode && this.layoutNode.id !== extractLayoutNodeId(d.key))
+    const isEven = !(d.index % 2)
+    const isHighlighted = this.highlightedLayoutNode && extractLayoutNodeId(d.key) === this.highlightedLayoutNode.id
+    const { fillColour, opacity } = this.getCanvasAreaStyles(cssId, isEven, isFiltered, isHighlighted)
+    const d3Col = d3.color(fillColour)
+    d3Col.opacity = opacity
+    this.canvasContext.beginPath()
+    this.areaMaker.context(this.canvasContext)(d)
+    // Reset area's colour, so repeated hover in/out doesn't overlay colours increasing their intensity
+    this.canvasContext.fillStyle = this.getCSSVarValue('--main-bg-color')
+    this.canvasContext.fill()
+    this.canvasContext.fillStyle = d3Col.toString()
+    this.canvasContext.fill()
   }
 }
 

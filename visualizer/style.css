@@ -931,54 +931,6 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   border-color: var(--type-colour-5);
 }
 
-/* In area chart specifically, apply to fill instead of stroke */
-
-svg.area-chart-svg .area-path {
-  stroke: none;
-  opacity: 0.8;
-}
-svg.area-chart-svg .area-path:not(.filtered) {
-  cursor: pointer;
-}
-
-svg.area-chart-svg .area-path-even {
-  opacity: 0.6;
-}
-svg.area-chart-svg .area-path.highlighted {
-  mix-blend-mode: screen;
-  opacity: 1;
-}
-svg.area-chart-svg .area-path.type-files-streams {
-  fill: var(--type-colour-1);
-}
-svg.area-chart-svg .area-path.type-networks {
-  fill: var(--type-colour-2);
-}
-svg.area-chart-svg .area-path.type-crypto {
-  fill: var(--type-colour-3);
-}
-svg.area-chart-svg .area-path.type-timing-promises {
-  fill: var(--type-colour-4);
-}
-svg.area-chart-svg .area-path.type-other {
-  fill: var(--type-colour-5);
-}
-svg.area-chart-svg .area-path.not-emphasised {
-  opacity: 0.45;
-}
-svg.area-chart-svg .area-path.filtered {
-  opacity: 0.14;
-}
-#side-bar svg.area-chart-svg .area-path.filtered {
-  animation-name: mostly-fade-out;
-}
-
-@keyframes mostly-fade-out {
-  to {
-    opacity: 0.14;
-  }
-}
-
 .hover-box .area-chart {
   background: var(--reverse-contrast);
   opacity: 1;
