@@ -1,6 +1,6 @@
 {
   "name": "@nearform/bubbleprof",
-  "description": "Programmable interface to clinic bubbleprof",
+  "description": "Programmable interface to Clinic.js Bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
   "version": "2.0.1",
   "engines": {
