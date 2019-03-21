@@ -2,9 +2,9 @@
 
 const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
-const SvgNode = require('./svg-node.js')
+const BubbleNode = require('./bubble-node.js')
 
-class SvgNodeDiagram {
+class BubbleNodeDiagram {
   constructor (svgContainer) {
     this.svgContainer = svgContainer
     this.ui = svgContainer.ui
@@ -46,7 +46,7 @@ class SvgNodeDiagram {
       .enter()
 
     this.dataArray.forEach(layoutNode => {
-      if (!this.svgNodes.has(layoutNode.id)) this.svgNodes.set(layoutNode.id, new SvgNode(this))
+      if (!this.svgNodes.has(layoutNode.id)) this.svgNodes.set(layoutNode.id, new BubbleNode(this))
       this.svgNodes.get(layoutNode.id).setData(layoutNode)
     })
   }
@@ -145,4 +145,4 @@ class SvgNodeDiagram {
   }
 }
 
-module.exports = SvgNodeDiagram
+module.exports = BubbleNodeDiagram

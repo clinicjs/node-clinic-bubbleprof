@@ -4,7 +4,7 @@ const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const { validateNumber } = require('../validation.js')
 
-class SvgNodeSection {
+class BubbleNodeSection {
   constructor (parentContent, settings) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
@@ -30,18 +30,18 @@ class SvgNodeSection {
         .classed('inner-circle', true)
     }
 
-    const svgNodeElementClasses = {
-      SvgLine,
-      SvgBubble
+    const bubbleNodeElementClasses = {
+      BubbleNodeLine,
+      BubbleNodeBubble
     }
 
-    const SvgNodeElementClass = svgNodeElementClasses[this.shapeClass]
+    const BubbleNodeElementClass = bubbleNodeElementClasses[this.shapeClass]
 
-    this.byParty = new SvgNodeElementClass(this, this.d3NodeGroup, 'party')
+    this.byParty = new BubbleNodeElementClass(this, this.d3NodeGroup, 'party')
       .setData(this.layoutNode)
       .initializeFromData()
 
-    this.byType = new SvgNodeElementClass(this, this.d3NodeGroup, 'typeCategory')
+    this.byType = new BubbleNodeElementClass(this, this.d3NodeGroup, 'typeCategory')
       .setData(this.layoutNode)
       .initializeFromData()
   }
@@ -67,7 +67,7 @@ class SvgNodeSection {
   }
 }
 
-class SvgNodeElement {
+class BubbleNodeElement {
   constructor (parentContent, d3Group, dataType) {
     this.svgNode = parentContent.parentContent
     this.d3Group = d3Group
@@ -225,7 +225,7 @@ class SvgNodeElement {
   }
 }
 
-class SvgLine extends SvgNodeElement {
+class BubbleNodeLine extends BubbleNodeElement {
   initializeFromData () {
     const d3Enter = this.d3Group.selectAll('path.segmented-line')
       .data(this.decimalsArray)
@@ -287,7 +287,7 @@ class SvgLine extends SvgNodeElement {
   }
 }
 
-class SvgBubble extends SvgNodeElement {
+class BubbleNodeBubble extends BubbleNodeElement {
   setData (layoutNode) {
     super.setData(layoutNode)
     this.arcData = d3.pie().value((arcDatum) => arcDatum[1])(this.decimalsArray)
@@ -588,4 +588,4 @@ function getEllipseAngle (degrees) {
   return LineCoordinates.degreesToRadians(degrees + 90)
 }
 
-module.exports = SvgNodeSection
+module.exports = BubbleNodeSection

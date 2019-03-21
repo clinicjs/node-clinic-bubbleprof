@@ -1,13 +1,14 @@
 'use strict'
 
 const HtmlContent = require('./html-content.js')
-const SvgNodeDiagram = require('./svg-node-diagram.js')
+const BubbleNodeDiagram = require('./bubble-node-diagram.js')
 
-class SvgContainer extends HtmlContent {
+class BubbleNodeContainer extends HtmlContent {
   constructor (parentContent, contentProperties = {}) {
     const defaultProperties = {
       htmlElementType: 'svg'
     }
+    console.log(contentProperties)
     super(parentContent, Object.assign(defaultProperties, contentProperties))
 
     if (contentProperties.svgBounds) {
@@ -22,7 +23,7 @@ class SvgContainer extends HtmlContent {
       this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
 
-    this.svgNodeDiagram = new SvgNodeDiagram(this)
+    this.svgNodeDiagram = new BubbleNodeDiagram(this)
     this.ui.svgNodeDiagram = this.svgNodeDiagram
 
     this.ui.on('setData', () => {
@@ -63,4 +64,4 @@ class SvgContainer extends HtmlContent {
   }
 }
 
-module.exports = SvgContainer
+module.exports = BubbleNodeContainer

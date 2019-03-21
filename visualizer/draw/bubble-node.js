@@ -1,9 +1,9 @@
 'use strict'
 
 const LineCoordinates = require('../layout/line-coordinates.js')
-const SvgNodeSection = require('./svg-node-section.js')
+const BubbleNodeSection = require('./bubble-node-section.js')
 
-class SvgNode {
+class BubbleNode {
   constructor (parentContent) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
@@ -13,13 +13,13 @@ class SvgNode {
     this.degrees = null
     this.originPoint = null
 
-    this.asyncBetweenLines = new SvgNodeSection(this, {
+    this.asyncBetweenLines = new BubbleNodeSection(this, {
       dataPosition: 'between',
-      shapeClass: 'SvgLine'
+      shapeClass: 'BubbleNodeLine'
     })
-    this.syncBubbles = new SvgNodeSection(this, {
+    this.syncBubbles = new BubbleNodeSection(this, {
       dataPosition: 'within',
-      shapeClass: 'SvgBubble'
+      shapeClass: 'BubbleNodeBubble'
     })
   }
 
@@ -506,4 +506,4 @@ function formatNameLabel (string) {
   return string
 }
 
-module.exports = SvgNode
+module.exports = BubbleNode
