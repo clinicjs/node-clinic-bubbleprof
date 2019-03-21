@@ -8,8 +8,9 @@ class BubbleNodeContainer extends HtmlContent {
     const defaultProperties = {
       htmlElementType: 'svg'
     }
-    console.log(contentProperties)
     super(parentContent, Object.assign(defaultProperties, contentProperties))
+
+    // this.renderType =
 
     if (contentProperties.svgBounds) {
       const defaultBounds = {
@@ -31,6 +32,10 @@ class BubbleNodeContainer extends HtmlContent {
     })
   }
 
+  get renderType () {
+    return this.contentProperties.htmlElementType
+  }
+
   setData () {
     const {
       minX,
@@ -40,9 +45,17 @@ class BubbleNodeContainer extends HtmlContent {
     this.svgBounds.height = this.ui.layout.scale.finalSvgHeight || this.ui.layout.settings.svgHeight
     this.svgBounds.width = this.ui.layout.settings.svgWidth
 
-    this.d3Element
-      .attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
-      .attr('preserveAspectRatio', preserveAspectRatio)
+    if (this.renderType === 'svg') {
+      this.d3Element
+        .attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
+        .attr('preserveAspectRatio', preserveAspectRatio)
+    }
+
+    if (this.renderType === 'canvas') {
+      this.d3Element
+        .attr('width', this.svgBounds.width)
+        .attr('height', this.svgBounds.height)
+    }
   }
 
   initializeElements () {

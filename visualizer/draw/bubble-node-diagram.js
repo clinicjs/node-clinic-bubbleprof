@@ -5,11 +5,12 @@ const LineCoordinates = require('../layout/line-coordinates.js')
 const BubbleNode = require('./bubble-node.js')
 
 class BubbleNodeDiagram {
-  constructor (svgContainer) {
-    this.svgContainer = svgContainer
-    this.ui = svgContainer.ui
+  constructor (bubbleNodeContainer) {
+    this.bubbleNodeContainer = bubbleNodeContainer
+    this.ui = bubbleNodeContainer.ui
 
     this.svgNodes = new Map()
+    this.canvasCtx = null
 
     this.ui.on('initializeFromData', () => {
       // Called once, creates group contents using d3's .append()
@@ -32,7 +33,14 @@ class BubbleNodeDiagram {
   }
 
   initializeElements () {
-    this.d3Container = this.svgContainer.d3Element
+    if (this.bubbleNodeContainer.renderType === 'svg') {
+      this.d3Container = this.bubbleNodeContainer.d3Element
+    }
+
+    if (this.bubbleNodeContainer.renderType === 'canvas') {
+      this.canvasCtx = this.bubbleNodeContainer.d3Element.node().getContext('2d')
+      this.d3Container = d3.select(document.createElement('custom'))
+    }
 
     // Group to which one group for each node is appended
     this.d3Element = this.d3Container.append('g')
@@ -77,10 +85,10 @@ class BubbleNodeDiagram {
   animate (isExpanding, onComplete) {
     this.ui.isAnimating = true
 
-    this.svgContainer.d3Element.classed('fade-elements-in', isExpanding)
-    this.svgContainer.d3Element.classed('fade-elements-out', !isExpanding)
-    this.svgContainer.d3Element.classed('complete-fade-out', false)
-    this.svgContainer.d3Element.classed('complete-fade-in', false)
+    this.bubbleNodeContainer.d3Element.classed('fade-elements-in', isExpanding)
+    this.bubbleNodeContainer.d3Element.classed('fade-elements-out', !isExpanding)
+    this.bubbleNodeContainer.d3Element.classed('complete-fade-out', false)
+    this.bubbleNodeContainer.d3Element.classed('complete-fade-in', false)
 
     const parentContainer = this.ui.parentUI.svgNodeDiagram.svgContainer
     parentContainer.d3Element.classed('fade-elements-in', false)

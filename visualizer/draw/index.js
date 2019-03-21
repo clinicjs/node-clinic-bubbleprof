@@ -164,10 +164,10 @@ function drawOuterUI () {
   // Main panel - nodelink diagram
   const nodeLink = ui.sections.get('node-link')
 
-  const nodeLinkSVG = nodeLink.addContent('BubbleNodeContainer', { id: 'node-link-svg', svgBounds: {} })
-  nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
+  // const nodeLinkSVG = nodeLink.addContent('BubbleNodeContainer', { id: 'node-link-svg', svgBounds: {} })
+  // nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
 
-  // const nodeLinkCanvas = nodeLink.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'node-link-svg', svgBounds: {} })
+  const nodeLinkCanvas = nodeLink.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'node-link-svg', svgBounds: {} })
   // nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
 
   // Sidebar

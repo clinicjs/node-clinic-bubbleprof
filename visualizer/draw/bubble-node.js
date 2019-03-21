@@ -2,16 +2,20 @@
 
 const LineCoordinates = require('../layout/line-coordinates.js')
 const BubbleNodeSection = require('./bubble-node-section.js')
+const getCSSVarValue = require('./util/getCssVarValue.js')
 
 class BubbleNode {
   constructor (parentContent) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
+    this.canvasCtx = parentContent.canvasCtx
 
     // Set and updated in .setCoordinates():
     this.strokePadding = null
     this.degrees = null
     this.originPoint = null
+
+    this.cssVarValues = getCSSVarValue()
 
     this.asyncBetweenLines = new BubbleNodeSection(this, {
       dataPosition: 'between',
@@ -382,6 +386,7 @@ class BubbleNode {
   }
 
   drawOuterPath () {
+
     let outerPath = ''
     const lineLength = this.getLength()
 
@@ -426,8 +431,31 @@ class BubbleNode {
     })
     // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
     outerPath += `A ${arcRadius} ${arcRadius} 0 1 0 ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
+    
+    // TODO: make this an external def - and in sync with styles - maybe generate relevant styles from JS
+    const canvasStyles = {
+      fill: this.cssVarValues('--node-background'),
+      'stroke-width': 0.5,
+      stroke: this.cssVarValues('--shortcut-stroke')
+    }
 
-    this.d3OuterPath.attr('d', outerPath)
+    if (this.canvasCtx) {
+      this.canvasCtx.beginPath()
+      this.canvasCtx.strokeStyle = canvasStyles['stroke']
+      this.canvasCtx.lineWidth = canvasStyles['stroke-width']
+      this.canvasCtx.fillStyle = canvasStyles['fill']
+      const canvaspath = new window.Path2D(outerPath)
+      this.canvasCtx.stroke(canvaspath)
+    } else {
+      this.d3OuterPath.attr('d', outerPath)
+    }
+  }
+
+  clearCanvas () {
+    if (!this.canvasCtx) {
+      return
+    }
+    this.canvasCtx.clearRect(0, 0, this.parentContent.bubbleNodeContainer.d3Element.attr('width'), this.parentContent.bubbleNodeContainer.d3Element.attr('height'))
   }
 
   getRadius (layoutNode = this.layoutNode) {
@@ -464,7 +492,9 @@ function labelRotation (degrees) {
 function trimText (d3Text, maxLength, reps = 0) {
   d3Text.classed('hidden', false)
 
-  const width = d3Text.node().getBBox().width
+  // const width = d3Text.node().getBBox().width
+  // getBBox is SVG specific - and accounts for transforms - but breaks things when text is not SVG
+  const width = d3Text.node().getBoundingClientRect().width
   const textString = d3Text.text()
 
   if (width > maxLength) {

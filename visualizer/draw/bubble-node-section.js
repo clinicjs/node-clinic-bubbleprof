@@ -3,12 +3,15 @@
 const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const { validateNumber } = require('../validation.js')
+const getCSSVarValue = require('./util/getCssVarValue.js')
+const cssVarValues = getCSSVarValue()
 
 class BubbleNodeSection {
   constructor (parentContent, settings) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
     this.layoutNode = parentContent.layoutNode
+    this.canvasCtx = parentContent.canvasCtx
 
     const {
       dataPosition,
@@ -64,6 +67,7 @@ class BubbleNodeSection {
         .attr('cy', this.parentContent.circleCentre.y)
         .attr('r', Math.max(this.parentContent.getRadius() - this.ui.settings.lineWidth * 4, 0))
     }
+    // TODO: add canvas render for inner circle here
   }
 }
 
@@ -72,6 +76,7 @@ class BubbleNodeElement {
     this.svgNode = parentContent.parentContent
     this.d3Group = d3Group
     this.ui = parentContent.ui
+    this.canvasCtx = parentContent.canvasCtx
 
     this.dataPosition = parentContent.dataPosition
     this.dataType = dataType
@@ -223,6 +228,53 @@ class BubbleNodeElement {
       .ease(this.ui.settings.animationEasing)
       .attr('d', endPath)
   }
+
+  canvasStyles () {
+    const strokeStyles = {
+      'party-user': cssVarValues('--party-colour-1'),
+      'party-external': cssVarValues('--party-colour-2'),
+      'party-nodecore': cssVarValues('--party-colour-3'),
+      'party-root': cssVarValues('--party-colour-3'),
+      'type-files-streams': cssVarValues('--type-colour-1'),
+      'type-networks': cssVarValues('--type-colour-2'),
+      'type-crypto': cssVarValues('--type-colour-3'),
+      'type-timing-promises': cssVarValues('--type-colour-4'),
+      'type-other': cssVarValues('--type-colour-5')
+    }
+
+    const solid = []
+    const dashed = [1.3, 0.7]
+
+    const strokeDash = {
+      'party-user': solid,
+      'party-external': solid,
+      'party-nodecore': dashed,
+      'party-root': dashed,
+      'type-files-streams': dashed,
+      'type-networks': solid,
+      'type-crypto': dashed,
+      'type-timing-promises': solid,
+      'type-other': dashed
+    }
+
+    const lineWidths = {
+      'party-user': 1.5,
+      'party-external': 1.5,
+      'party-nodecore': 1.5,
+      'party-root': 1.5,
+      'type-files-streams': 3.5,
+      'type-networks': 3.5,
+      'type-crypto': 3.5,
+      'type-timing-promises': 3.5,
+      'type-other': 3.5
+    }
+
+    return {
+      strokeStyles,
+      strokeDash,
+      lineWidths
+    }
+  }
 }
 
 class BubbleNodeLine extends BubbleNodeElement {
@@ -236,6 +288,7 @@ class BubbleNodeLine extends BubbleNodeElement {
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', decimal => `line-segment ${classPrepend}-${decimal[0]}`)
+      .attr('styleId', decimal => `${classPrepend}-${decimal[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth + (this.dataType === 'typeCategory' ? 1.5 : -0.5))
       .on('mouseover', decimal => this.ui.emit(highlightEvent, decimal[0]))
       .on('mouseout', () => this.ui.emit(highlightEvent, null))
@@ -282,6 +335,18 @@ class BubbleNodeLine extends BubbleNodeElement {
 
       const segmentPath = getLineUpdatingOrigin(currentOrigin, this.degrees, this.length * segmentDatum[1])
 
+      if (this.canvasCtx) {
+        const { strokeStyles, lineWidths, strokeDash } = this.canvasStyles()
+
+        const styleId = d3LineSegment.attr('styleId')
+        this.canvasCtx.beginPath()
+        this.canvasCtx.strokeStyle = strokeStyles[styleId]
+        this.canvasCtx.lineWidth = lineWidths[styleId]
+        this.canvasCtx.setLineDash(strokeDash[styleId])
+        const canvaspath = new window.Path2D(segmentPath)
+        this.canvasCtx.stroke(canvaspath)
+      }
+
       d3LineSegment.attr('d', segmentPath)
     })
   }
@@ -304,6 +369,7 @@ class BubbleNodeBubble extends BubbleNodeElement {
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', arcDatum => `line-segment ${classPrepend}-${arcDatum.data[0]}`)
+      .attr('styleId', arcDatum => `${classPrepend}-${arcDatum.data[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth + (this.dataType === 'typeCategory' ? 1.5 : -0.5))
       .on('mouseover', arcDatum => this.ui.emit(highlightEvent, arcDatum.data[0]))
       .on('mouseout', () => this.ui.emit(highlightEvent, null))
@@ -324,6 +390,25 @@ class BubbleNodeBubble extends BubbleNodeElement {
     this.d3Shapes.attr('d', arcDatum => {
       const initialArc = this.arcMaker(arcDatum)
       const adjustedArc = adjustArcPath(initialArc, this)
+      return adjustedArc
+    })
+
+    this.d3Shapes.attr('d', (arcDatum, i, nodes) => {
+      const initialArc = this.arcMaker(arcDatum)
+      const adjustedArc = adjustArcPath(initialArc, this)
+
+      if (this.canvasCtx) {
+        const { strokeStyles, lineWidths, strokeDash } = this.canvasStyles()
+
+        const node = d3.select(nodes[i])
+        const styleId = node.attr('styleId')
+        this.canvasCtx.beginPath()
+        this.canvasCtx.strokeStyle = strokeStyles[styleId]
+        this.canvasCtx.lineWidth = lineWidths[styleId]
+        this.canvasCtx.setLineDash(strokeDash[styleId])
+        const canvaspath = new window.Path2D(adjustedArc)
+        this.canvasCtx.stroke(canvaspath)
+      }
       return adjustedArc
     })
   }
