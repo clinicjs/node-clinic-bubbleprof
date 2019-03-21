@@ -50,10 +50,23 @@ test('Aggregate Node - mark module', function (t) {
     type: 'TickObject'
   })
 
+  const aggregateNodeEval = new FakeAggregateNode({
+    aggregateId: 2,
+    parentAggregateId: 1,
+    children: [],
+    frames: [
+      { fileName: '/node_modules/promise/lib/core.js' },
+      { fileName: '', isEval: true, evalOrigin: 'eval at denodeifyWithoutCount (/node_modules/promise/lib/node-extensions.js:90:10)' }
+    ],
+    mark: ['external', null, null],
+    type: 'TickObject'
+  })
+
   const systemInfo = new FakeSystemInfo('/')
   const aggregateNodesInput = [
     aggregateNodeRoot, aggregateNodeNodecore,
-    aggregateNodeInternal, aggregateNodeExternal
+    aggregateNodeInternal, aggregateNodeExternal,
+    aggregateNodeEval
   ]
 
   startpoint(aggregateNodesInput, { objectMode: true })
@@ -75,6 +88,10 @@ test('Aggregate Node - mark module', function (t) {
       t.strictDeepEqual(
         aggregateNodesOutput[3].mark.toJSON(),
         ['external', 'deep', null]
+      )
+      t.strictDeepEqual(
+        aggregateNodesOutput[4].mark.toJSON(),
+        ['external', 'promise', null]
       )
       t.end()
     }))
