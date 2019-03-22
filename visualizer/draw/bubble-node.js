@@ -2,7 +2,7 @@
 
 const LineCoordinates = require('../layout/line-coordinates.js')
 const BubbleNodeSection = require('./bubble-node-section.js')
-const getCSSVarValue = require('./util/getCssVarValue.js')
+const canvasStyles = require('./util/canvasStyles.js')
 
 class BubbleNode {
   constructor (parentContent) {
@@ -14,8 +14,6 @@ class BubbleNode {
     this.strokePadding = null
     this.degrees = null
     this.originPoint = null
-
-    this.cssVarValues = getCSSVarValue()
 
     this.asyncBetweenLines = new BubbleNodeSection(this, {
       dataPosition: 'between',
@@ -97,11 +95,13 @@ class BubbleNode {
       .classed(partyClass, true)
       .classed('text-label', true)
       .classed('name-label', true)
+      .attr('styleId', partyClass)
 
     this.d3TimeLabel = this.d3NodeGroup.append('text')
       .classed(partyClass, true)
       .classed('text-label', true)
       .classed('time-label', true)
+      .attr('styleId', partyClass)
 
     this.setCoordinates()
     return this
@@ -128,11 +128,10 @@ class BubbleNode {
       this.drawShortcut()
     } else {
       this.drawOuterPath()
-      this.drawNameLabel()
-      this.drawTimeLabel()
-
       this.asyncBetweenLines.draw()
       this.syncBubbles.draw()
+      this.drawNameLabel()
+      this.drawTimeLabel()
     }
   }
 
@@ -230,13 +229,28 @@ class BubbleNode {
     this.d3TimeLabel.classed('hidden', true)
     this.d3NameLabel.text(formatNameLabel(this.layoutNode.node.name))
       .classed(`party-${this.layoutNode.node.mark.get('party')}`, true)
+      .attr('styleId', `party-${this.layoutNode.node.mark.get('party')}`)
       .classed('on-line-label', true)
-    trimText(this.d3NameLabel, length - this.strokePadding)
+    trimText(this.d3NameLabel, length - this.strokePadding, this.canvasCtx)
 
     const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${this.labelDegrees})`
     this.d3NameLabel.attr('transform', transformString)
     if (!window.CSS.supports('dominant-baseline', 'middle')) {
       this.d3NameLabel.attr('dy', 3)
+    }
+  }
+
+  drawCanvasNameLabel (nameLabel, canvasTransforms) {
+    if (this.canvasCtx && !this.d3NameLabel.classed('hidden')) {
+      const { colours } = canvasStyles()
+      this.canvasCtx.beginPath()
+      this.canvasCtx.fillStyle = colours[this.d3NameLabel.attr('styleId')]
+      this.canvasCtx.translate(canvasTransforms.translate.x, canvasTransforms.translate.y)
+      this.canvasCtx.rotate(canvasTransforms.rotate * Math.PI / 180)
+      this.canvasCtx.textAlign = canvasTransforms.align || 'center'
+      this.canvasCtx.font = canvasTransforms.font || 'normal 9pt sans-serif'
+      this.canvasCtx.fillText(nameLabel, 0, 0)
+      this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0)
     }
   }
 
@@ -261,12 +275,14 @@ class BubbleNode {
     const spaceInCircle = Math.max(this.getRadius() * 2 - this.strokePadding - this.lineWidth, 0)
     const spaceOnLine = Math.max(this.getLength() - this.strokePadding, 0)
 
+    const canvasTransforms = {}
+
     if (!this.layoutNode.children.length) {
       // Is a leaf / endpoint - can position at end of line, continuing line
 
       // First see if the label fits fine on the line or in the circle
-      if (this.drawType === 'labelOnLine') textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
-      if (this.drawType === 'labelInCircle') textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
+      if (this.drawType === 'labelOnLine') textAfterTrim = trimText(this.d3NameLabel, spaceOnLine, this.canvasCtx)
+      if (this.drawType === 'labelInCircle') textAfterTrim = trimText(this.d3NameLabel, spaceInCircle, this.canvasCtx)
 
       if (textAfterTrim !== labelPlusTime) {
         // See if putting the label after the line truncates it less
@@ -288,7 +304,9 @@ class BubbleNode {
         const lengthToBottom = this.parentContent.getVerticalLength(x2, y2, this.degrees)
         const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
 
-        const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge)
+        // console.log({lengthToSide, lengthToBottom})
+
+        const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge, this.canvasCtx)
 
         if (textAfterTrimToEdge.length > textAfterTrim.length) {
           this.d3NameLabel.classed('upper-label', false)
@@ -302,13 +320,23 @@ class BubbleNode {
           const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
           this.d3NameLabel.attr('transform', transformString)
 
+          canvasTransforms.translate = { x: x2, y: y2 }
+          canvasTransforms.rotate = this.labelDegrees
+          canvasTransforms.font = 'normal 9pt sans-serif'
+          canvasTransforms.align = 'left'
+
           this.d3TimeLabel.classed('hidden', true)
 
           // Tell the rest of the drawing logic that the expected on-line/in-cirlce label has been moved
           if (this.drawType === 'labelOnLine' || this.drawType === 'labelInCircle') this.drawType = 'labelAfterLine'
+          this.drawCanvasNameLabel(labelPlusTime, canvasTransforms)
           return
         } else {
           this.d3NameLabel.text(textAfterTrim)
+          canvasTransforms.translate = { x: x2, y: y2 }
+          canvasTransforms.rotate = this.labelDegrees
+          canvasTransforms.font = 'normal 9pt sans-serif'
+          this.drawCanvasNameLabel(textAfterTrim, canvasTransforms)
         }
 
         this.d3NameLabel.classed('hidden', !textAfterTrim)
@@ -321,7 +349,7 @@ class BubbleNode {
     // If not returned yet, has space and is not a leaf/endpoint, so position on line or circle
 
     if (this.drawType === 'labelOnLine') {
-      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
+      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceOnLine, this.canvasCtx)
 
       if (!textAfterTrim) {
         this.drawType = 'noNameLabel'
@@ -339,7 +367,11 @@ class BubbleNode {
       const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${this.labelDegrees})`
       this.d3NameLabel.attr('transform', transformString)
 
+      canvasTransforms.translate = { x: toMidwayPoint.x2, y: toMidwayPoint.y2 }
+      canvasTransforms.rotate = this.labelDegrees
+
       this.d3NameLabel.classed('on-line-label', true)
+      this.drawCanvasNameLabel(textAfterTrim, canvasTransforms)
       return
     }
 
@@ -348,7 +380,7 @@ class BubbleNode {
       this.d3TimeLabel.classed('hidden', false)
       this.d3NameLabel.text(nameLabel)
 
-      textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
+      textAfterTrim = trimText(this.d3NameLabel, spaceInCircle, this.canvasCtx)
 
       if (!textAfterTrim) {
         this.drawType = 'noNameLabel'
@@ -359,8 +391,12 @@ class BubbleNode {
 
       this.d3NameLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
+      canvasTransforms.translate = { x: this.circleCentre.x, y: this.circleCentre.y }
+      canvasTransforms.rotate = labelRotation(this.degrees - 90)
+
       this.d3NameLabel.classed('in-circle-label', true)
     }
+    this.drawCanvasNameLabel(nameLabel, canvasTransforms)
   }
 
   drawTimeLabel () {
@@ -373,7 +409,7 @@ class BubbleNode {
     this.d3TimeLabel.text(formatTimeLabel(this.layoutNode.node.stats.overall))
 
     // Position in circle
-    const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding)
+    const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding, this.canvasCtx)
     this.d3TimeLabel.classed('hidden', !textAfterTrim)
     this.d3TimeLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
@@ -383,10 +419,20 @@ class BubbleNode {
     if (!window.CSS.supports('dominant-baseline', 'text-before-edge')) {
       this.d3TimeLabel.attr('dy', 11)
     }
+    if (this.canvasCtx && !this.d3TimeLabel.classed('hidden')) {
+      const { colours } = canvasStyles()
+      this.canvasCtx.beginPath()
+      this.canvasCtx.fillStyle = colours[this.d3NameLabel.attr('styleId')]
+      this.canvasCtx.translate(this.circleCentre.x, this.circleCentre.y)
+      this.canvasCtx.rotate(labelRotation(this.degrees - 90) * Math.PI / 180)
+      this.canvasCtx.textAlign = 'center'
+      this.canvasCtx.font = 'normal 9pt sans-serif'
+      this.canvasCtx.fillText(formatTimeLabel(this.layoutNode.node.stats.overall), 0, 11)
+      this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0)
+    }
   }
 
   drawOuterPath () {
-
     let outerPath = ''
     const lineLength = this.getLength()
 
@@ -431,19 +477,14 @@ class BubbleNode {
     })
     // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
     outerPath += `A ${arcRadius} ${arcRadius} 0 1 0 ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
-    
-    // TODO: make this an external def - and in sync with styles - maybe generate relevant styles from JS
-    const canvasStyles = {
-      fill: this.cssVarValues('--node-background'),
-      'stroke-width': 0.5,
-      stroke: this.cssVarValues('--shortcut-stroke')
-    }
+
+    const { lineWidths, colours } = canvasStyles()
 
     if (this.canvasCtx) {
       this.canvasCtx.beginPath()
-      this.canvasCtx.strokeStyle = canvasStyles['stroke']
-      this.canvasCtx.lineWidth = canvasStyles['stroke-width']
-      this.canvasCtx.fillStyle = canvasStyles['fill']
+      this.canvasCtx.strokeStyle = colours['outer-path-stroke']
+      this.canvasCtx.lineWidth = lineWidths['outer-path']
+      this.canvasCtx.fillStyle = colours['outer-path']
       const canvaspath = new window.Path2D(outerPath)
       this.canvasCtx.stroke(canvaspath)
     } else {
@@ -489,12 +530,17 @@ function labelRotation (degrees) {
   return degrees
 }
 
-function trimText (d3Text, maxLength, reps = 0) {
+function trimText (d3Text, maxLength, canvasCtx, reps = 0) {
   d3Text.classed('hidden', false)
 
   // const width = d3Text.node().getBBox().width
   // getBBox is SVG specific - and accounts for transforms - but breaks things when text is not SVG
-  const width = d3Text.node().getBoundingClientRect().width
+  let width = 0
+  if (canvasCtx) {
+    width = canvasCtx.measureText(d3Text.text())
+  } else {
+    width = d3Text.node().getBBox().width
+  }
   const textString = d3Text.text()
 
   if (width > maxLength) {
@@ -507,7 +553,7 @@ function trimText (d3Text, maxLength, reps = 0) {
       const newText = textString.slice(0, trimToLength) + ellipsisChar
       d3Text.text(newText)
       // Check new text fits - won't if early chars are wider than later chars, e.g. 'Mmmmmm!!!!!!'
-      return (trimText(d3Text, maxLength, reps))
+      return (trimText(d3Text, maxLength, canvasCtx, reps))
     }
     d3Text.text('')
     return ''

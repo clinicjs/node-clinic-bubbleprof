@@ -3,8 +3,7 @@
 const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const { validateNumber } = require('../validation.js')
-const getCSSVarValue = require('./util/getCssVarValue.js')
-const cssVarValues = getCSSVarValue()
+const canvasStyles = require('./util/canvasStyles.js')
 
 class BubbleNodeSection {
   constructor (parentContent, settings) {
@@ -228,53 +227,6 @@ class BubbleNodeElement {
       .ease(this.ui.settings.animationEasing)
       .attr('d', endPath)
   }
-
-  canvasStyles () {
-    const strokeStyles = {
-      'party-user': cssVarValues('--party-colour-1'),
-      'party-external': cssVarValues('--party-colour-2'),
-      'party-nodecore': cssVarValues('--party-colour-3'),
-      'party-root': cssVarValues('--party-colour-3'),
-      'type-files-streams': cssVarValues('--type-colour-1'),
-      'type-networks': cssVarValues('--type-colour-2'),
-      'type-crypto': cssVarValues('--type-colour-3'),
-      'type-timing-promises': cssVarValues('--type-colour-4'),
-      'type-other': cssVarValues('--type-colour-5')
-    }
-
-    const solid = []
-    const dashed = [1.3, 0.7]
-
-    const strokeDash = {
-      'party-user': solid,
-      'party-external': solid,
-      'party-nodecore': dashed,
-      'party-root': dashed,
-      'type-files-streams': dashed,
-      'type-networks': solid,
-      'type-crypto': dashed,
-      'type-timing-promises': solid,
-      'type-other': dashed
-    }
-
-    const lineWidths = {
-      'party-user': 1.5,
-      'party-external': 1.5,
-      'party-nodecore': 1.5,
-      'party-root': 1.5,
-      'type-files-streams': 3.5,
-      'type-networks': 3.5,
-      'type-crypto': 3.5,
-      'type-timing-promises': 3.5,
-      'type-other': 3.5
-    }
-
-    return {
-      strokeStyles,
-      strokeDash,
-      lineWidths
-    }
-  }
 }
 
 class BubbleNodeLine extends BubbleNodeElement {
@@ -336,11 +288,11 @@ class BubbleNodeLine extends BubbleNodeElement {
       const segmentPath = getLineUpdatingOrigin(currentOrigin, this.degrees, this.length * segmentDatum[1])
 
       if (this.canvasCtx) {
-        const { strokeStyles, lineWidths, strokeDash } = this.canvasStyles()
+        const { colours, lineWidths, strokeDash } = canvasStyles()
 
         const styleId = d3LineSegment.attr('styleId')
         this.canvasCtx.beginPath()
-        this.canvasCtx.strokeStyle = strokeStyles[styleId]
+        this.canvasCtx.strokeStyle = colours[styleId]
         this.canvasCtx.lineWidth = lineWidths[styleId]
         this.canvasCtx.setLineDash(strokeDash[styleId])
         const canvaspath = new window.Path2D(segmentPath)
@@ -398,12 +350,12 @@ class BubbleNodeBubble extends BubbleNodeElement {
       const adjustedArc = adjustArcPath(initialArc, this)
 
       if (this.canvasCtx) {
-        const { strokeStyles, lineWidths, strokeDash } = this.canvasStyles()
+        const { colours, lineWidths, strokeDash } = canvasStyles()
 
         const node = d3.select(nodes[i])
         const styleId = node.attr('styleId')
         this.canvasCtx.beginPath()
-        this.canvasCtx.strokeStyle = strokeStyles[styleId]
+        this.canvasCtx.strokeStyle = colours[styleId]
         this.canvasCtx.lineWidth = lineWidths[styleId]
         this.canvasCtx.setLineDash(strokeDash[styleId])
         const canvaspath = new window.Path2D(adjustedArc)
