@@ -168,7 +168,7 @@ function drawOuterUI () {
   // nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
 
   const nodeLinkCanvas = nodeLink.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'node-link-svg', svgBounds: {} })
-  // nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
+  nodeLink.addContent('HoverBox', { svg: nodeLinkCanvas })
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')

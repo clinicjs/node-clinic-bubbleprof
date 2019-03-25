@@ -76,7 +76,6 @@ class BubbleNodeSection {
         this.canvasCtx.fill()
       }
     }
-    // TODO: add canvas render for inner circle here
   }
 }
 

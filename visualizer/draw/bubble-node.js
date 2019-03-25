@@ -9,6 +9,7 @@ class BubbleNode {
     this.parentContent = parentContent
     this.ui = parentContent.ui
     this.canvasCtx = parentContent.canvasCtx
+    this.shadowCanvas = parentContent.shadowCanvas
 
     // Set and updated in .setCoordinates():
     this.strokePadding = null
@@ -127,6 +128,13 @@ class BubbleNode {
     if (this.layoutNode.node.constructor.name === 'ShortcutNode') {
       this.drawShortcut()
     } else {
+      this.shadowCanvas.ctx.beginPath()
+
+      // thicker white border on shadow shapes avoids some false positives with antialiasing and edges - is there a better way?
+      this.shadowCanvas.ctx.strokeStyle = '#ffffff'
+      this.shadowCanvas.ctx.lineWidth = 2
+      this.shadowCanvas.ctx.fillStyle = this.shadowCanvas.addDataItem(this.layoutNode)
+
       this.drawOuterPath()
       this.asyncBetweenLines.draw()
       this.syncBubbles.draw()
@@ -245,12 +253,35 @@ class BubbleNode {
       const { colours } = canvasStyles()
       this.canvasCtx.beginPath()
       this.canvasCtx.fillStyle = colours[this.d3NameLabel.attr('styleId')]
+
       this.canvasCtx.translate(canvasTransforms.translate.x, canvasTransforms.translate.y)
       this.canvasCtx.rotate(canvasTransforms.rotate * Math.PI / 180)
+      this.shadowCanvas.ctx.translate(canvasTransforms.translate.x, canvasTransforms.translate.y)
+      this.shadowCanvas.ctx.rotate(canvasTransforms.rotate * Math.PI / 180)
+
       this.canvasCtx.textAlign = canvasTransforms.align || 'center'
       this.canvasCtx.font = canvasTransforms.font || 'normal 9pt sans-serif'
+
+      const labelLength = this.canvasCtx.measureText(nameLabel).width
+      const labelHeight = 12
+
+      const startX = canvasTransforms.align === 'start'
+        ? 0
+        : canvasTransforms.align === 'end'
+          ? labelLength
+          : labelLength / 2
+
       this.canvasCtx.fillText(nameLabel, 0, 0)
       this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0)
+
+      // don't draw internal borders on labels
+      if (this.drawType !== 'labelOnLine' && this.drawType !== 'labelInCircle') {
+        this.shadowCanvas.ctx.rect(-startX, (-labelHeight / 2), labelLength, labelHeight)
+        this.shadowCanvas.ctx.fill()
+        this.shadowCanvas.ctx.stroke()
+      }
+
+      this.shadowCanvas.ctx.setTransform(1, 0, 0, 1, 0, 0)
     }
   }
 
@@ -486,6 +517,9 @@ class BubbleNode {
       const canvaspath = new window.Path2D(outerPath)
       this.canvasCtx.stroke(canvaspath)
       this.canvasCtx.fill(canvaspath)
+
+      this.shadowCanvas.ctx.fill(canvaspath)
+      this.shadowCanvas.ctx.stroke(canvaspath)
     } else {
       this.d3OuterPath.attr('d', outerPath)
     }
@@ -496,6 +530,7 @@ class BubbleNode {
       return
     }
     this.canvasCtx.clearRect(0, 0, this.parentContent.bubbleNodeContainer.d3Element.attr('width'), this.parentContent.bubbleNodeContainer.d3Element.attr('height'))
+    this.shadowCanvas.clear()
   }
 
   getRadius (layoutNode = this.layoutNode) {

@@ -3,6 +3,7 @@
 const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const BubbleNode = require('./bubble-node.js')
+const ShadowCanvas = require('./util/shadowCanvas.js')
 
 class BubbleNodeDiagram {
   constructor (bubbleNodeContainer) {
@@ -11,6 +12,7 @@ class BubbleNodeDiagram {
 
     this.svgNodes = new Map()
     this.canvasCtx = null
+    this.shadowCanvas = null
 
     this.ui.on('initializeFromData', () => {
       // Called once, creates group contents using d3's .append()
@@ -23,6 +25,7 @@ class BubbleNodeDiagram {
     })
 
     this.ui.on('svgDraw', () => {
+      this.shadowCanvas.clear()
       // Called any time the SVG DOM elements need to be modified or redrawn
       this.draw()
     })
@@ -41,7 +44,11 @@ class BubbleNodeDiagram {
       this.canvasCtx = this.bubbleNodeContainer.d3Element.node().getContext('2d')
       this.d3Container = d3.select(document.createElement('custom'))
     }
-
+    if (this.canvasCtx) {
+      this.shadowCanvas = new ShadowCanvas()
+      // document.getElementById('node-link').append(this.shadowCanvas.canvasElement)
+      // this.shadowCanvas.canvasElement.style = 'position:absolute; top:0; left: 0; opacity: 1'
+    }
     // Group to which one group for each node is appended
     this.d3Element = this.d3Container.append('g')
       .classed('node-links-wrapper', true)
@@ -57,6 +64,10 @@ class BubbleNodeDiagram {
       if (!this.svgNodes.has(layoutNode.id)) this.svgNodes.set(layoutNode.id, new BubbleNode(this))
       this.svgNodes.get(layoutNode.id).setData(layoutNode)
     })
+
+    if (this.shadowCanvas) {
+      this.shadowCanvas.setDimensions(this.ui.layout.settings.svgWidth, this.ui.layout.settings.svgHeight)
+    }
   }
 
   initializeFromData () {
@@ -67,9 +78,20 @@ class BubbleNodeDiagram {
         const d3NodeGroup = d3.select(nodes[i])
         this.svgNodes.get(layoutNode.id).initializeFromData(d3NodeGroup)
       })
-      .on('mouseenter', layoutNode => this.ui.highlightNode(layoutNode))
-      .on('mouseleave', () => this.ui.highlightNode(null))
-      .on('click', (layoutNode) => {
+
+    this.bubbleNodeContainer.d3Element
+      .on('mousemove', () => {
+        const layoutNode = this.shadowCanvas.getData(d3.event)
+        if (layoutNode) {
+          if (!this.ui.highlightedDataNode) {
+            this.ui.highlightNode(layoutNode)
+          }
+        } else {
+          this.ui.highlightNode(null)
+        }
+      })
+      .on('click', () => {
+        const layoutNode = this.shadowCanvas.getData(d3.event)
         d3.event.stopPropagation()
         this.ui.queueAnimation('selectGraphNode', (animationQueue) => {
           this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
@@ -113,6 +135,7 @@ class BubbleNodeDiagram {
 
   draw () {
     if (this.ui.isAnimating) return
+    this.shadowCanvas.clear()
 
     this.bbox = this.d3Container.node().getBoundingClientRect()
     this.svgNodes.forEach(svgNode => svgNode.draw())
