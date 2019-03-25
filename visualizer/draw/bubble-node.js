@@ -279,7 +279,6 @@ class BubbleNode {
 
     if (!this.layoutNode.children.length) {
       // Is a leaf / endpoint - can position at end of line, continuing line
-
       // First see if the label fits fine on the line or in the circle
       if (this.drawType === 'labelOnLine') textAfterTrim = trimText(this.d3NameLabel, spaceOnLine, this.canvasCtx)
       if (this.drawType === 'labelInCircle') textAfterTrim = trimText(this.d3NameLabel, spaceInCircle, this.canvasCtx)
@@ -323,8 +322,7 @@ class BubbleNode {
           canvasTransforms.translate = { x: x2, y: y2 }
           canvasTransforms.rotate = this.labelDegrees
           canvasTransforms.font = 'normal 9pt sans-serif'
-          canvasTransforms.align = 'left'
-
+          canvasTransforms.align = this.labelDegrees < 0 ? 'end' : 'start'
           this.d3TimeLabel.classed('hidden', true)
 
           // Tell the rest of the drawing logic that the expected on-line/in-cirlce label has been moved
@@ -396,7 +394,7 @@ class BubbleNode {
 
       this.d3NameLabel.classed('in-circle-label', true)
     }
-    this.drawCanvasNameLabel(nameLabel, canvasTransforms)
+    this.drawCanvasNameLabel(textAfterTrim, canvasTransforms)
   }
 
   drawTimeLabel () {
@@ -487,6 +485,7 @@ class BubbleNode {
       this.canvasCtx.fillStyle = colours['outer-path']
       const canvaspath = new window.Path2D(outerPath)
       this.canvasCtx.stroke(canvaspath)
+      this.canvasCtx.fill(canvaspath)
     } else {
       this.d3OuterPath.attr('d', outerPath)
     }
@@ -537,16 +536,16 @@ function trimText (d3Text, maxLength, canvasCtx, reps = 0) {
   // getBBox is SVG specific - and accounts for transforms - but breaks things when text is not SVG
   let width = 0
   if (canvasCtx) {
-    width = canvasCtx.measureText(d3Text.text())
+    width = canvasCtx.measureText(d3Text.text()).width
   } else {
     width = d3Text.node().getBBox().width
   }
   const textString = d3Text.text()
-
-  if (width > maxLength) {
-    const decimal = maxLength / width
+  // console.log({textString, maxLength, width})
+  const absMaxLength = Math.abs(maxLength)
+  if (width > absMaxLength) {
+    const decimal = absMaxLength / width
     const trimToLength = Math.floor(textString.length * decimal) - 2
-
     if (trimToLength > 1 && reps < 5) {
       reps++ // Limit recursion in case unusual characters e.g. diacritics cause infinite loop
       const ellipsisChar = '…'

@@ -12,9 +12,10 @@ module.exports = function canvasStyles () {
     'type-crypto': cssVarValues('--type-colour-3'),
     'type-timing-promises': cssVarValues('--type-colour-4'),
     'type-other': cssVarValues('--type-colour-5'),
-    'outer-path': cssVarValues('---node-background'),
+    'outer-path': cssVarValues('--node-background'),
     'outer-path-stroke': cssVarValues('--shortcut-stroke'),
-    'selected-node': cssVarValues('--highlight-bg-color)')
+    'selected-node': cssVarValues('--highlight-bg-color'),
+    'inner-circle': cssVarValues('--main-bg-color')
   }
 
   const solid = []

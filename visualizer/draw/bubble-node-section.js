@@ -26,8 +26,7 @@ class BubbleNodeSection {
 
   initializeFromData () {
     this.d3NodeGroup = this.parentContent.d3NodeGroup
-
-    if (this.shapeClass === 'SvgBubble') {
+    if (this.shapeClass === 'BubbleNodeBubble') {
       this.d3InnerCircle = this.d3NodeGroup.append('circle')
         .classed('inner-circle', true)
     }
@@ -59,12 +58,23 @@ class BubbleNodeSection {
 
     this.byParty.draw()
     this.byType.draw()
-
+    const { colours } = canvasStyles()
     if (this.d3InnerCircle) {
+      const r = Math.max(this.parentContent.getRadius() - this.ui.settings.lineWidth * 4, 0)
+      const x = this.parentContent.circleCentre.x
+      const y = this.parentContent.circleCentre.y
+
       this.d3InnerCircle
-        .attr('cx', this.parentContent.circleCentre.x)
-        .attr('cy', this.parentContent.circleCentre.y)
-        .attr('r', Math.max(this.parentContent.getRadius() - this.ui.settings.lineWidth * 4, 0))
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', r)
+
+      if (this.canvasCtx) {
+        this.canvasCtx.beginPath()
+        this.canvasCtx.fillStyle = colours['inner-circle']
+        this.canvasCtx.arc(x, y, r, 0, 2 * Math.PI)
+        this.canvasCtx.fill()
+      }
     }
     // TODO: add canvas render for inner circle here
   }
