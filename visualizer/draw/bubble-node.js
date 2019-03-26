@@ -128,12 +128,14 @@ class BubbleNode {
     if (this.layoutNode.node.constructor.name === 'ShortcutNode') {
       this.drawShortcut()
     } else {
-      this.shadowCanvas.ctx.beginPath()
+      if (this.canvasCtx) {
+        this.shadowCanvas.ctx.beginPath()
 
-      // thicker white border on shadow shapes avoids some false positives with antialiasing and edges - is there a better way?
-      this.shadowCanvas.ctx.strokeStyle = '#ffffff'
-      this.shadowCanvas.ctx.lineWidth = 2
-      this.shadowCanvas.ctx.fillStyle = this.shadowCanvas.addDataItem(this.layoutNode)
+        // thicker white border on shadow shapes avoids some false positives with antialiasing and edges - is there a better way?
+        this.shadowCanvas.ctx.strokeStyle = '#ffffff'
+        this.shadowCanvas.ctx.lineWidth = 2
+        this.shadowCanvas.ctx.fillStyle = this.shadowCanvas.addDataItem(this.layoutNode)
+      }
 
       this.drawOuterPath()
       this.asyncBetweenLines.draw()

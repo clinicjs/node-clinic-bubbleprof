@@ -7,11 +7,11 @@ const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
 const arrowUpIcon = require('@nearform/clinic-common/icons/chevron-up')
 const closeIcon = require('@nearform/clinic-common/icons/close')
 
-function drawOuterUI () {
+function drawOuterUI (renderSVG = false) {
   // Initial DOM drawing that is independent of data
 
   const sections = ['header', 'node-link', 'side-bar', 'footer']
-  const ui = new BubbleprofUI(sections)
+  const ui = new BubbleprofUI(sections, { renderSVG })
 
   // Header
   const header = ui.sections.get('header')
@@ -163,12 +163,13 @@ function drawOuterUI () {
 
   // Main panel - nodelink diagram
   const nodeLink = ui.sections.get('node-link')
-
-  // const nodeLinkSVG = nodeLink.addContent('BubbleNodeContainer', { id: 'node-link-svg', svgBounds: {} })
-  // nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
-
-  const nodeLinkCanvas = nodeLink.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'node-link-svg', svgBounds: {} })
-  nodeLink.addContent('HoverBox', { svg: nodeLinkCanvas })
+  let nodeLinkContainer
+  if (renderSVG) {
+    nodeLinkContainer = nodeLink.addContent('BubbleNodeContainer', { id: 'node-link-svg', svgBounds: {} })
+  } else {
+    nodeLinkContainer = nodeLink.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'node-link-svg', svgBounds: {} })
+  }
+  nodeLink.addContent('HoverBox', { svg: nodeLinkContainer })
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')

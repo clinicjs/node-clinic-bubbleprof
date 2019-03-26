@@ -25,7 +25,7 @@ class BubbleNodeDiagram {
     })
 
     this.ui.on('svgDraw', () => {
-      this.shadowCanvas.clear()
+      if (this.canvasCtx) this.shadowCanvas.clear()
       // Called any time the SVG DOM elements need to be modified or redrawn
       this.draw()
     })
@@ -79,29 +79,49 @@ class BubbleNodeDiagram {
         this.svgNodes.get(layoutNode.id).initializeFromData(d3NodeGroup)
       })
 
-    this.bubbleNodeContainer.d3Element
-      .on('mousemove', () => {
-        const layoutNode = this.shadowCanvas.getData(d3.event)
-        if (layoutNode) {
-          if (!this.ui.highlightedDataNode) {
-            this.ui.highlightNode(layoutNode)
-          }
-        } else {
-          this.ui.highlightNode(null)
-        }
-      })
-      .on('click', () => {
-        const layoutNode = this.shadowCanvas.getData(d3.event)
-        d3.event.stopPropagation()
-        this.ui.queueAnimation('selectGraphNode', (animationQueue) => {
-          this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
-            if (targetUI !== this.ui) {
-              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-            }
-            animationQueue.execute()
+    if (!this.canvasCtx) {
+      this.d3NodeGroups
+        .on('mouseenter', layoutNode => this.ui.highlightNode(layoutNode))
+        .on('mouseleave', () => this.ui.highlightNode(null))
+        .on('click', (layoutNode) => {
+          d3.event.stopPropagation()
+          this.ui.queueAnimation('selectGraphNode', (animationQueue) => {
+            this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
+              if (targetUI !== this.ui) {
+                this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+              }
+              animationQueue.execute()
+            })
           })
         })
-      })
+    } else {
+      this.bubbleNodeContainer.d3Element
+        .on('mousemove', () => {
+          const layoutNode = this.shadowCanvas.getData(d3.event)
+          if (layoutNode) {
+            if (!this.ui.highlightedDataNode) {
+              this.ui.highlightNode(layoutNode)
+            }
+          } else {
+            this.ui.highlightNode(null)
+          }
+        })
+        .on('click', () => {
+          const layoutNode = this.shadowCanvas.getData(d3.event)
+          d3.event.stopPropagation()
+          if (!layoutNode) {
+            return
+          }
+          this.ui.queueAnimation('selectGraphNode', (animationQueue) => {
+            this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
+              if (targetUI !== this.ui) {
+                this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+              }
+              animationQueue.execute()
+            })
+          })
+        })
+    }
   }
 
   animate (isExpanding, onComplete) {
@@ -112,7 +132,7 @@ class BubbleNodeDiagram {
     this.bubbleNodeContainer.d3Element.classed('complete-fade-out', false)
     this.bubbleNodeContainer.d3Element.classed('complete-fade-in', false)
 
-    const parentContainer = this.ui.parentUI.svgNodeDiagram.svgContainer
+    const parentContainer = this.ui.parentUI.svgNodeDiagram.bubbleNodeContainer
     parentContainer.d3Element.classed('fade-elements-in', false)
     parentContainer.d3Element.classed('fade-elements-out', false)
     parentContainer.d3Element.classed('complete-fade-out', isExpanding)
@@ -120,13 +140,17 @@ class BubbleNodeDiagram {
 
     this.bbox = this.d3Container.node().getBoundingClientRect()
 
-    const svgNodeAnimations = []
-    this.svgNodes.forEach(svgNode => svgNode.animate(svgNodeAnimations, isExpanding))
+    if (this.canvasCtx) {
+      onComplete()
+    } else {
+      const svgNodeAnimations = []
+      this.svgNodes.forEach(svgNode => svgNode.animate(svgNodeAnimations, isExpanding))
 
-    Promise.all(svgNodeAnimations).then(() => {
-      this.ui.isAnimating = false
-      if (onComplete) onComplete()
-    })
+      Promise.all(svgNodeAnimations).then(() => {
+        this.ui.isAnimating = false
+        if (onComplete) onComplete()
+      })
+    }
   }
 
   deselectAll () {
@@ -135,7 +159,7 @@ class BubbleNodeDiagram {
 
   draw () {
     if (this.ui.isAnimating) return
-    this.shadowCanvas.clear()
+    if (this.canvasCtx) this.shadowCanvas.clear()
 
     this.bbox = this.d3Container.node().getBoundingClientRect()
     this.svgNodes.forEach(svgNode => svgNode.draw())

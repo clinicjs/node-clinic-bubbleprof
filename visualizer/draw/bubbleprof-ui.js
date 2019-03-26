@@ -21,7 +21,8 @@ class BubbleprofUI extends EventEmitter {
       strokePadding: 10,
       nodeLinkId: 'node-link',
       classNames: '',
-      viewMode: 'fit'
+      viewMode: 'fit',
+      renderSVG: false
     }
 
     this.isAnimating = false
@@ -152,10 +153,14 @@ class BubbleprofUI extends EventEmitter {
       sublayoutHtml.addCollapseControl()
       const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
-      // const sublayoutSvg = sublayoutHtml.addContent('BubbleNodeContainer', { id: 'sublayout-svg', svgBounds: {} })
-      
-      const sublayoutCanvas = sublayoutHtml.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'sublayout-canvas', svgBounds: {} })
-      sublayoutHtml.addContent('HoverBox', { svg: sublayoutCanvas })
+      let subLayout
+      if (this.settings.renderSVG) {
+        subLayout = sublayoutHtml.addContent('BubbleNodeContainer', { id: 'sublayout-svg', svgBounds: {} })
+      } else {
+        subLayout = sublayoutHtml.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'sublayout-canvas', svgBounds: {} })
+      }
+
+      sublayoutHtml.addContent('HoverBox', { svg: subLayout })
 
       uiWithinSublayout.initializeElements()
 
