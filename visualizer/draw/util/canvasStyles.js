@@ -15,7 +15,8 @@ module.exports = function canvasStyles () {
     'outer-path': cssVarValues('--node-background'),
     'outer-path-stroke': cssVarValues('--shortcut-stroke'),
     'selected-node': cssVarValues('--highlight-bg-color'),
-    'inner-circle': cssVarValues('--main-bg-color')
+    'inner-circle': cssVarValues('--main-bg-color'),
+    'shortcut': cssVarValues('--translucent-reverse')
   }
 
   const solid = []

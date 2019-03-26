@@ -125,18 +125,17 @@ class BubbleNode {
   }
 
   draw () {
+    if (this.canvasCtx) {
+      this.shadowCanvas.ctx.beginPath()
+      this.shadowCanvas.ctx.fillStyle = this.shadowCanvas.addDataItem(this.layoutNode)
+      // thicker white border on shadow shapes avoids some false positives with antialiasing and edges - is there a better way?
+      this.shadowCanvas.ctx.strokeStyle = '#ffffff'
+      this.shadowCanvas.ctx.lineWidth = 2
+    }
+
     if (this.layoutNode.node.constructor.name === 'ShortcutNode') {
       this.drawShortcut()
     } else {
-      if (this.canvasCtx) {
-        this.shadowCanvas.ctx.beginPath()
-
-        // thicker white border on shadow shapes avoids some false positives with antialiasing and edges - is there a better way?
-        this.shadowCanvas.ctx.strokeStyle = '#ffffff'
-        this.shadowCanvas.ctx.lineWidth = 2
-        this.shadowCanvas.ctx.fillStyle = this.shadowCanvas.addDataItem(this.layoutNode)
-      }
-
       this.drawOuterPath()
       this.asyncBetweenLines.draw()
       this.syncBubbles.draw()
@@ -227,7 +226,20 @@ class BubbleNode {
     })
     outerPath += `L ${toArrowheadLeftBase.x2} ${toArrowheadLeftBase.y2} Z`
 
-    this.d3OuterPath.attr('d', outerPath)
+    if (this.canvasCtx) {
+      const { colours } = canvasStyles()
+      this.canvasCtx.beginPath()
+      // this.canvasCtx.strokeStyle = colours['outer-path-stroke']
+      // this.canvasCtx.lineWidth = lineWidths['outer-path']
+      this.canvasCtx.fillStyle = colours['shortcut']
+      const canvaspath = new window.Path2D(outerPath)
+      // this.canvasCtx.stroke(canvaspath)
+      this.canvasCtx.fill(canvaspath)
+      this.shadowCanvas.ctx.fill(canvaspath)
+      this.shadowCanvas.ctx.stroke(canvaspath)
+    } else {
+      this.d3OuterPath.attr('d', outerPath)
+    }
 
     const toArrowMidpoint = new LineCoordinates({
       x1: start.x,
@@ -247,6 +259,14 @@ class BubbleNode {
     this.d3NameLabel.attr('transform', transformString)
     if (!window.CSS.supports('dominant-baseline', 'middle')) {
       this.d3NameLabel.attr('dy', 3)
+    }
+
+    if (this.canvasCtx) {
+      const canvasTransforms = {}
+      canvasTransforms.translate = { x: toArrowMidpoint.x2, y: toArrowMidpoint.y2 }
+      canvasTransforms.rotate = this.labelDegrees
+      canvasTransforms.font = 'normal 9pt sans-serif'
+      this.drawCanvasNameLabel(this.d3NameLabel.text(), canvasTransforms)
     }
   }
 
