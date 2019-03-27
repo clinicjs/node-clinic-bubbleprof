@@ -21,11 +21,12 @@ class BubbleprofUI extends EventEmitter {
       strokePadding: 10,
       nodeLinkId: 'node-link',
       classNames: '',
-      viewMode: 'fit',
-      renderSVG: false
+      viewMode: 'fit'
     }
 
     this.isAnimating = false
+
+    this.renderInCanvas = false
 
     this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
@@ -153,13 +154,8 @@ class BubbleprofUI extends EventEmitter {
       sublayoutHtml.addCollapseControl()
       const closeBtn = sublayoutHtml.addContent(undefined, { classNames: 'close-btn' })
 
-      let subLayout
-      if (this.settings.renderSVG) {
-        subLayout = sublayoutHtml.addContent('BubbleNodeContainer', { id: 'sublayout-svg', svgBounds: {} })
-      } else {
-        subLayout = sublayoutHtml.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'sublayout-canvas', svgBounds: {} })
-      }
-
+      const subLayoutSettings = { htmlElementType: this.renderInCanvas ? 'canvas' : 'svg', id: 'sublayout-svg', svgBounds: {} }
+      const subLayout = sublayoutHtml.addContent('BubbleNodeContainer', subLayoutSettings)
       sublayoutHtml.addContent('HoverBox', { svg: subLayout })
 
       uiWithinSublayout.initializeElements()
@@ -637,6 +633,16 @@ class BubbleprofUI extends EventEmitter {
           this.traverseUp(null, { animationQueue })
         })
       })
+  }
+
+  addNodeContainer (renderInCanvas = false) {
+    this.renderInCanvas = renderInCanvas
+    const nodeLink = this.sections.get('node-link')
+    const settings = { htmlElementType: renderInCanvas ? 'canvas' : 'svg', id: 'node-link-svg', svgBounds: {} }
+    const nodeLinkContainer = nodeLink.addContent('BubbleNodeContainer', settings)
+    nodeLinkContainer.initializeElements()
+    const hoverBox = nodeLink.addContent('HoverBox', { svg: nodeLinkContainer })
+    hoverBox.initializeElements()
   }
 
   // Clear sublayouts until the topmost layout is `targetUI`, or the original UI if no target is given.

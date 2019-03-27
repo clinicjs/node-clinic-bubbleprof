@@ -125,7 +125,7 @@ class BubbleNodeElement {
     }
 
     // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
-    if (this.constructor.name === 'SvgBubble') {
+    if (this.constructor.name === 'BubbleNodeBubble') {
       elementProperties.nodeWasBetweenInParent = false
     } else {
       switch (dataNode.constructor.name) {
@@ -184,8 +184,8 @@ class BubbleNodeElement {
 
     const degrees = contractedSvgNode.degrees
 
-    const segmentDecimal = this.constructor.name === 'SvgBubble' ? segmentDatum.data[1] : segmentDatum[1]
-    const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'SvgBubble' ? 'getWithinTime' : 'getBetweenTime')]()
+    const segmentDecimal = this.constructor.name === 'BubbleNodeBubble' ? segmentDatum.data[1] : segmentDatum[1]
+    const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'BubbleNodeBubble' ? 'getWithinTime' : 'getBetweenTime')]()
     const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
     const segmentDecimalOfParentTime = parentTime ? (nodeTime / parentTime) * segmentDecimal : 1
 
@@ -200,7 +200,7 @@ class BubbleNodeElement {
     }
 
     let expandedPath
-    if (this.constructor.name === 'SvgBubble') {
+    if (this.constructor.name === 'BubbleNodeBubble') {
       const arcObject = unpackArcString(adjustArcPath(this.arcMaker(segmentDatum), this))
       removeA2FromPath(arcObject, this)
       expandedPath = repackArcString(arcObject)
@@ -219,7 +219,7 @@ class BubbleNodeElement {
         resolveSegment(segmentDatum)
       })
 
-    if (!nodeWasBetweenInParent && this.constructor.name === 'SvgLine') {
+    if (!nodeWasBetweenInParent && this.constructor.name === 'BubbleNodeLine') {
       const endArc = unpackArcString(endPath)
       if (endArc) {
         d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
@@ -227,7 +227,7 @@ class BubbleNodeElement {
       }
     }
 
-    if (this.constructor.name === 'SvgBubble') {
+    if (this.constructor.name === 'BubbleNodeBubble') {
       d3Transition.attrTween('d', tweenArcToArc(arcDatum, parentBubble, this, this.ui.settings.animationEasing, isExpanding))
       return
     }

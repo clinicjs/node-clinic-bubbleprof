@@ -23,7 +23,7 @@ class BubbleNodeContainer extends HtmlContent {
       }
       this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
-
+    this.ui.nodeLinkContainer = this
     this.svgNodeDiagram = new BubbleNodeDiagram(this)
     this.ui.svgNodeDiagram = this.svgNodeDiagram
 
@@ -52,10 +52,14 @@ class BubbleNodeContainer extends HtmlContent {
     }
 
     if (this.renderType === 'canvas') {
-      this.d3Element
-        .attr('width', this.svgBounds.width)
-        .attr('height', this.svgBounds.height)
+      this.initializeCanvas()
     }
+  }
+
+  initializeCanvas () {
+    this.d3Element
+      .attr('width', this.svgBounds.width)
+      .attr('height', this.svgBounds.height)
   }
 
   initializeElements () {

@@ -7,11 +7,11 @@ const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
 const arrowUpIcon = require('@nearform/clinic-common/icons/chevron-up')
 const closeIcon = require('@nearform/clinic-common/icons/close')
 
-function drawOuterUI (renderSVG = false) {
+function drawOuterUI () {
   // Initial DOM drawing that is independent of data
 
   const sections = ['header', 'node-link', 'side-bar', 'footer']
-  const ui = new BubbleprofUI(sections, { renderSVG })
+  const ui = new BubbleprofUI(sections)
 
   // Header
   const header = ui.sections.get('header')
@@ -161,15 +161,7 @@ function drawOuterUI (renderSVG = false) {
     `
   })
 
-  // Main panel - nodelink diagram
-  const nodeLink = ui.sections.get('node-link')
-  let nodeLinkContainer
-  if (renderSVG) {
-    nodeLinkContainer = nodeLink.addContent('BubbleNodeContainer', { id: 'node-link-svg', svgBounds: {} })
-  } else {
-    nodeLinkContainer = nodeLink.addContent('BubbleNodeContainer', { htmlElementType: 'canvas', id: 'node-link-svg', svgBounds: {} })
-  }
-  nodeLink.addContent('HoverBox', { svg: nodeLinkContainer })
+  // removed nodeLink init here, it's now done later in the process from main.js so we can choose to render canvas or SVG
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')
