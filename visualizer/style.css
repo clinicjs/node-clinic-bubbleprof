@@ -95,6 +95,12 @@ html.light-theme {
 
   --small-chevron: var(--down-cyan-chevron-arrow);
   --icon-color:var(--cyan);
+
+  --type-colour-1: rgb(89, 46, 18); /* Rusty orange */
+  --type-colour-2: rgb(0, 173, 130); /* Pale green */
+  --type-colour-3: rgb(255, 51, 252); /* Pinkish lilac */
+  --type-colour-4: rgb(82, 0, 189); /* Deep violet */
+  --type-colour-5: rgb(153, 145, 0); /* Rich yellow */
 }
 
 /* Main layout */

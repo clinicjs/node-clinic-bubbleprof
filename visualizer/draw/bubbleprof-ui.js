@@ -44,6 +44,8 @@ class BubbleprofUI extends EventEmitter {
     this.name = this.parentUI && this.parentUI.selectedDataNode.name
     this.name = this.name || 'Main view'
 
+    this.currentTheme = 'default'
+
     // Main divisions of the page
     this.sections = new Map()
 
@@ -731,6 +733,11 @@ class BubbleprofUI extends EventEmitter {
     const newLayout = new Layout(this.layout.initialInput, this.getSettingsForLayout())
     newLayout.generate()
     this.setData(newLayout)
+  }
+
+  themeChanged (themeName) {
+    this.currentTheme = themeName
+    this.emit('themeChanged')
   }
 }
 

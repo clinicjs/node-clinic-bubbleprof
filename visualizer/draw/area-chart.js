@@ -50,8 +50,14 @@ class AreaChart extends HtmlContent {
         this.draw()
       }
     })
+
     this.ui.on('initializeFromData', () => {
       this.initializeFromData()
+    })
+
+    this.ui.on('themeChanged', () => {
+      this.cssVarValues = getCSSVarValue(this.ui.currentTheme)
+      this.draw()
     })
 
     this.highlightedLayoutNode = null

@@ -38,6 +38,7 @@ function drawOuterUI () {
         const d3Html = d3.select('html')
         // Toggle light theme
         d3Html.classed('light-theme', !d3Html.classed('light-theme'))
+        ui.themeChanged(!d3Html.classed('light-theme') ? 'light' : 'default')
       }
     }
   })
