@@ -1,7 +1,7 @@
 const getCssVarValue = require('./getCssVarValue')
-const cssVarValues = getCssVarValue()
 
-module.exports = function canvasStyles () {
+module.exports = function canvasStyles (theme = 'default') {
+  const cssVarValues = getCssVarValue(theme)
   const colours = {
     'party-user': cssVarValues('--party-colour-1'),
     'party-external': cssVarValues('--party-colour-2'),

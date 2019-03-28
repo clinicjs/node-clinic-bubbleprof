@@ -3,12 +3,12 @@
 * @param {String} varName
 */
 
-module.exports = function () {
-  const cssVarValues = {}
+module.exports = function (theme = 'default') {
+  const cssVarValues = { [theme]: {} }
   return function getCSSVarValue (varName) {
-    if (!cssVarValues[varName]) {
-      cssVarValues[varName] = window.getComputedStyle(document.body).getPropertyValue(varName)
+    if (!cssVarValues[theme][varName]) {
+      cssVarValues[theme][varName] = window.getComputedStyle(document.body).getPropertyValue(varName)
     }
-    return cssVarValues[varName]
+    return cssVarValues[theme][varName]
   }
 }
