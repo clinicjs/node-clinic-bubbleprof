@@ -17,9 +17,7 @@ const buildJs = require('@nearform/clinic-common/scripts/build-js')
 const buildCss = require('@nearform/clinic-common/scripts/build-css')
 const mainTemplate = require('@nearform/clinic-common/templates/main')
 
-const makeInjectPath = (fileName) => {
-  return path.join(__dirname, 'injects', fileName)
-}
+const makeInjectPath = fileName => path.join(__dirname, 'injects', fileName)
 
 class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
