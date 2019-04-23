@@ -17,8 +17,6 @@ const buildJs = require('@nearform/clinic-common/scripts/build-js')
 const buildCss = require('@nearform/clinic-common/scripts/build-css')
 const mainTemplate = require('@nearform/clinic-common/templates/main')
 
-const makeInjectPath = fileName => path.join(__dirname, 'injects', fileName)
-
 class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
     super()
@@ -37,15 +35,15 @@ class ClinicBubbleprof extends events.EventEmitter {
   collect (args, callback) {
     // run program, but inject the sampler
     const logArgs = [
-      '-r', makeInjectPath('no-cluster.js'),
-      '-r', makeInjectPath('logger.js'),
+      '-r', 'no-cluster.js',
+      '-r', 'logger.js',
       '--trace-events-enabled', '--trace-event-categories', 'node.async_hooks'
     ]
 
     const stdio = ['inherit', 'inherit', 'inherit']
 
     if (this.detectPort) {
-      logArgs.push('-r', makeInjectPath('detect-port.js'))
+      logArgs.push('-r', 'detect-port.js')
       stdio.push('pipe')
     }
 
