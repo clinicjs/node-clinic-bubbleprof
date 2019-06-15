@@ -3,6 +3,7 @@
 const test = require('tap').test
 const path = require('path')
 const async = require('async')
+const semver = require('semver')
 const endpoint = require('endpoint')
 const CollectAndRead = require('./collect-and-read.js')
 const analysis = require('../analysis/index.js')
@@ -30,7 +31,7 @@ function runServer (name, callback) {
   })
 }
 
-test('basic server aggregates HTTPPARSER', function (t) {
+test('basic server aggregates HTTPPARSER', { skip: semver.gte(process.version, '12.0.0') }, function (t) {
   runServer('basic', function (err, nodes) {
     if (err) return t.ifError(err)
 
@@ -51,7 +52,7 @@ test('basic server aggregates HTTPPARSER', function (t) {
   })
 })
 
-test('latency server has http.connection.end cluster', function (t) {
+test('latency server has http.connection.end cluster', { skip: semver.gte(process.version, '12.0.0') }, function (t) {
   runServer('latency', function (err, nodes) {
     if (err) return t.ifError(err)
 
