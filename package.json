@@ -11,7 +11,7 @@
     "test:file": "standard | snazzy && tap -j1 --no-cov --timeout=50",
     "ci-lint": "standard | snazzy",
     "ci-test": "tap -j1 --timeout=50 test/*.test.js",
-    "ci-cov": "tap -j1 --statements=95 --timeout=60 test/*.test.js",
+    "ci-cov": "tap -j1 --statements=95 --branches=90 --functions=95 --lines=98 --timeout=60 test/*.test.js",
     "lint": "standard --fix | snazzy",
     "visualize-watch": "node debug/visualize-watch.js",
     "visualize-all": "node debug/visualize-all.js"
