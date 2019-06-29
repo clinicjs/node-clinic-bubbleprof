@@ -54,6 +54,6 @@
     "on-net-listen": "^1.0.0",
     "protocol-buffers": "^4.0.4",
     "pump": "^3.0.0",
-    "terser": "^3.10.11"
+    "terser": "^4.0.0"
   }
 }
