@@ -32,7 +32,8 @@ const d3 = Object.assign(
   // d3.timeSecond
   require('d3-time'),
   // d3.selection().transition()
-  require('d3-transition')
+  require('d3-transition'),
+  require('d3-color')
 )
 
 // This property changes after importing so we fake a live binding.
