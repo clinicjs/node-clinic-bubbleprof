@@ -206,8 +206,6 @@ test('Analysis - truncates when low on memory', function (t) {
   var traceAsyncId = 1
   var ticks = 0
 
-  const datas = []
-
   const stackTrace = new stream.Readable({
     objectMode: true,
     read () {
