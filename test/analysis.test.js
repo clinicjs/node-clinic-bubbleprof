@@ -1,6 +1,7 @@
 'use strict'
 
 const test = require('tap').test
+const stream = require('stream')
 const endpoint = require('endpoint')
 const startpoint = require('startpoint')
 const analysis = require('../analysis/index.js')
@@ -8,6 +9,8 @@ const { FakeSystemInfo, FakeSourceNode } = require('./analysis-util')
 const BarrierNode = require('../analysis/barrier/barrier-node.js')
 const ClusterNode = require('../analysis/cluster/cluster-node.js')
 const AggregateNode = require('../analysis/aggregate/aggregate-node.js')
+const StackTrace = require('../analysis/stack-trace/stack-trace.js')
+const TraceEvent = require('../analysis/trace-event/trace-event.js')
 
 function createInputStream (frames) {
   const { frameUser, frameExternal, frameNodecore } = frames
@@ -197,4 +200,43 @@ test('Analysis - pipeline with SystemInfo error', function (t) {
       t.strictDeepEqual(err, new Error('error'))
       t.end()
     }))
+})
+test('Analysis - truncates when low on memory', function (t) {
+  var stackAsyncId = 1
+  var traceAsyncId = 1
+  var ticks = 0
+
+  const stackTrace = new stream.Readable({
+    objectMode: true,
+    read () {
+      this.push(new StackTrace({ asyncId: stackAsyncId++, frames: [] }))
+    }
+  })
+
+  const traceEvent = new stream.Readable({
+    objectMode: true,
+    read () {
+      this.push(new TraceEvent({
+        asyncId: traceAsyncId++,
+        timestamp: ticks++,
+        event: 'init',
+        type: 'custom',
+        triggerAsyncId: 0,
+        executionAsyncId: 0
+      }))
+    }
+  })
+
+  const systemInfoParsed = new FakeSystemInfo('/')
+  const systemInfoData = [{
+    providers: systemInfoParsed.providers,
+    pathSeparator: systemInfoParsed.pathSeparator,
+    mainDirectory: systemInfoParsed.mainDirectory
+  }]
+  const systemInfo = startpoint(systemInfoData, { objectMode: true })
+
+  analysis(systemInfo, stackTrace, traceEvent).on('warning', function (message) {
+    t.same(message, 'Truncating input data due to memory constraints')
+    t.end()
+  })
 })
