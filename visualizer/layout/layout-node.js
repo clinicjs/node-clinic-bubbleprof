@@ -98,9 +98,11 @@ class CollapsedLayoutNode {
   getWithinTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
   }
+  /* istanbul ignore next: currently unused */
   getSyncTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getSyncTime(), 0)
   }
+  /* istanbul ignore next: currently unused */
   getAsyncTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getAsyncTime(), 0)
   }

@@ -44,7 +44,9 @@ class DataNode {
   }
   getWithinTime () { return this.stats.sync + this.stats.async.within }
   getBetweenTime () { return this.stats.async.between }
+  /* istanbul ignore next: currently unused */
   getAsyncTime () { return this.stats.async.between + this.stats.async.within }
+  /* istanbul ignore next: currently unused */
   getSyncTime () { return this.stats.sync }
   getTotalTime () { return this.stats.overall }
 
