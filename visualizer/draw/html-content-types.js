@@ -13,6 +13,6 @@ module.exports = {
   InteractiveKey: require('./interactive-key.js'),
   AreaChart: require('./area-chart.js'),
   Lookup: require('./lookup.js'),
-  SvgContainer: require('./svg-container.js'),
+  BubbleNodeContainer: require('./bubble-node-container.js'),
   SideBarDrag: require('./side-bar-drag.js')
 }

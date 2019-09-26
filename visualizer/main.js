@@ -28,6 +28,10 @@ setTimeout(() => {
     console.log('layout is exposed on window.layout')
   }
 
+  // render as canvas if there are more than 400 connections - otherwise SVG is ok
+  const renderAsCanvas = layout.connections.length > 400
+  ui.addNodeContainer(renderAsCanvas)
+
   /* istanbul ignore next */
   ui.setData(layout, dataSet)
 

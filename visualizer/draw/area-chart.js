@@ -2,6 +2,8 @@
 
 const d3 = require('./d3-subset.js')
 const HtmlContent = require('./html-content.js')
+const getCSSVarValue = require('./util/getCssVarValue.js')
+
 const {
   numberiseIfNumericString,
   uniqueObjectKey
@@ -19,7 +21,7 @@ class AreaChart extends HtmlContent {
       }
     }, contentProperties))
 
-    this.cssVarValues = {}
+    this.cssVarValues = getCSSVarValue()
 
     this.initialized = false
     this.topmostUI = this.ui
@@ -82,17 +84,6 @@ class AreaChart extends HtmlContent {
   }
 
   /**
-   * Get the value of a CSS variable
-   * @param {String} varName
-   */
-  getCSSVarValue (varName) {
-    if (!this.cssVarValues[varName]) {
-      this.cssVarValues[varName] = window.getComputedStyle(document.body).getPropertyValue(varName)
-    }
-    return this.cssVarValues[varName]
-  }
-
-  /**
    * Generic function to define the styles for the canvas based visualization
    * For SVG we could do this with CSS - but for Canvas we don't have access to CSS
    */
@@ -105,7 +96,7 @@ class AreaChart extends HtmlContent {
       'type-other': '--type-colour-5'
     }
 
-    const fillColour = this.getCSSVarValue(colourIds[type] || 'type-other')
+    const fillColour = this.cssVarValues(colourIds[type] || 'type-other')
     let opacity = 0.8
     if (isEven) opacity = 0.6
     if (isHighlighted) opacity = 1
@@ -500,7 +491,7 @@ class AreaChart extends HtmlContent {
     this.canvasContext.beginPath()
     this.areaMaker.context(this.canvasContext)(d)
     // Reset area's colour, so repeated hover in/out doesn't overlay colours increasing their intensity
-    this.canvasContext.fillStyle = this.getCSSVarValue('--main-bg-color')
+    this.canvasContext.fillStyle = this.cssVarValues('--main-bg-color')
     this.canvasContext.fill()
     this.canvasContext.fillStyle = d3Col.toString()
     this.canvasContext.fill()

@@ -1,25 +1,28 @@
 'use strict'
 
 const LineCoordinates = require('../layout/line-coordinates.js')
-const SvgNodeSection = require('./svg-node-section.js')
+const BubbleNodeSection = require('./bubble-node-section.js')
+const canvasStyles = require('./util/canvasStyles.js')
 
-class SvgNode {
+class BubbleNode {
   constructor (parentContent) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
+    this.canvasCtx = parentContent.canvasCtx
+    this.shadowCanvas = parentContent.shadowCanvas
 
     // Set and updated in .setCoordinates():
     this.strokePadding = null
     this.degrees = null
     this.originPoint = null
 
-    this.asyncBetweenLines = new SvgNodeSection(this, {
+    this.asyncBetweenLines = new BubbleNodeSection(this, {
       dataPosition: 'between',
-      shapeClass: 'SvgLine'
+      shapeClass: 'BubbleNodeLine'
     })
-    this.syncBubbles = new SvgNodeSection(this, {
+    this.syncBubbles = new BubbleNodeSection(this, {
       dataPosition: 'within',
-      shapeClass: 'SvgBubble'
+      shapeClass: 'BubbleNodeBubble'
     })
   }
 
@@ -93,11 +96,13 @@ class SvgNode {
       .classed(partyClass, true)
       .classed('text-label', true)
       .classed('name-label', true)
+      .attr('styleId', partyClass)
 
     this.d3TimeLabel = this.d3NodeGroup.append('text')
       .classed(partyClass, true)
       .classed('text-label', true)
       .classed('time-label', true)
+      .attr('styleId', partyClass)
 
     this.setCoordinates()
     return this
@@ -120,15 +125,22 @@ class SvgNode {
   }
 
   draw () {
+    if (this.canvasCtx) {
+      this.shadowCanvas.ctx.beginPath()
+      this.shadowCanvas.ctx.fillStyle = this.shadowCanvas.addDataItem(this.layoutNode)
+      // thicker white border on shadow shapes avoids some false positives with antialiasing and edges - is there a better way?
+      this.shadowCanvas.ctx.strokeStyle = '#ffffff'
+      this.shadowCanvas.ctx.lineWidth = 2
+    }
+
     if (this.layoutNode.node.constructor.name === 'ShortcutNode') {
       this.drawShortcut()
     } else {
       this.drawOuterPath()
-      this.drawNameLabel()
-      this.drawTimeLabel()
-
       this.asyncBetweenLines.draw()
       this.syncBubbles.draw()
+      this.drawNameLabel()
+      this.drawTimeLabel()
     }
   }
 
@@ -214,7 +226,20 @@ class SvgNode {
     })
     outerPath += `L ${toArrowheadLeftBase.x2} ${toArrowheadLeftBase.y2} Z`
 
-    this.d3OuterPath.attr('d', outerPath)
+    if (this.canvasCtx) {
+      const { colours } = canvasStyles()
+      this.canvasCtx.beginPath()
+      // this.canvasCtx.strokeStyle = colours['outer-path-stroke']
+      // this.canvasCtx.lineWidth = lineWidths['outer-path']
+      this.canvasCtx.fillStyle = colours['shortcut']
+      const canvaspath = new window.Path2D(outerPath)
+      // this.canvasCtx.stroke(canvaspath)
+      this.canvasCtx.fill(canvaspath)
+      this.shadowCanvas.ctx.fill(canvaspath)
+      this.shadowCanvas.ctx.stroke(canvaspath)
+    } else {
+      this.d3OuterPath.attr('d', outerPath)
+    }
 
     const toArrowMidpoint = new LineCoordinates({
       x1: start.x,
@@ -226,13 +251,59 @@ class SvgNode {
     this.d3TimeLabel.classed('hidden', true)
     this.d3NameLabel.text(formatNameLabel(this.layoutNode.node.name))
       .classed(`party-${this.layoutNode.node.mark.get('party')}`, true)
+      .attr('styleId', `party-${this.layoutNode.node.mark.get('party')}`)
       .classed('on-line-label', true)
-    trimText(this.d3NameLabel, length - this.strokePadding)
+    trimText(this.d3NameLabel, length - this.strokePadding, this.canvasCtx)
 
     const transformString = `translate(${toArrowMidpoint.x2}, ${toArrowMidpoint.y2}) rotate(${this.labelDegrees})`
     this.d3NameLabel.attr('transform', transformString)
     if (!window.CSS.supports('dominant-baseline', 'middle')) {
       this.d3NameLabel.attr('dy', 3)
+    }
+
+    if (this.canvasCtx) {
+      const canvasTransforms = {}
+      canvasTransforms.translate = { x: toArrowMidpoint.x2, y: toArrowMidpoint.y2 }
+      canvasTransforms.rotate = this.labelDegrees
+      canvasTransforms.font = 'normal 9pt sans-serif'
+      this.drawCanvasNameLabel(this.d3NameLabel.text(), canvasTransforms)
+    }
+  }
+
+  drawCanvasNameLabel (nameLabel, canvasTransforms) {
+    if (this.canvasCtx && !this.d3NameLabel.classed('hidden')) {
+      const { colours } = canvasStyles()
+      this.canvasCtx.beginPath()
+      this.canvasCtx.fillStyle = colours[this.d3NameLabel.attr('styleId')]
+
+      this.canvasCtx.translate(canvasTransforms.translate.x, canvasTransforms.translate.y)
+      this.canvasCtx.rotate(canvasTransforms.rotate * Math.PI / 180)
+      this.shadowCanvas.ctx.translate(canvasTransforms.translate.x, canvasTransforms.translate.y)
+      this.shadowCanvas.ctx.rotate(canvasTransforms.rotate * Math.PI / 180)
+
+      this.canvasCtx.textAlign = canvasTransforms.align || 'center'
+      this.canvasCtx.font = canvasTransforms.font || 'normal 9pt sans-serif'
+
+      const labelLength = this.canvasCtx.measureText(nameLabel).width
+      const labelHeight = 12
+
+      const startX = canvasTransforms.align === 'start'
+        ? 0
+        : canvasTransforms.align === 'end'
+          ? labelLength
+          : labelLength / 2
+
+      this.canvasCtx.fillText(nameLabel, 0, 0)
+      this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0)
+
+      // don't draw internal borders on labels
+      if (this.drawType !== 'labelOnLine' && this.drawType !== 'labelInCircle') {
+        this.shadowCanvas.ctx.rect(-startX, (-labelHeight / 2), labelLength, labelHeight)
+        this.shadowCanvas.ctx.fill()
+        this.shadowCanvas.ctx.stroke()
+      }
+
+      this.shadowCanvas.ctx.setTransform(1, 0, 0, 1, 0, 0)
     }
   }
 
@@ -257,12 +328,13 @@ class SvgNode {
     const spaceInCircle = Math.max(this.getRadius() * 2 - this.strokePadding - this.lineWidth, 0)
     const spaceOnLine = Math.max(this.getLength() - this.strokePadding, 0)
 
+    const canvasTransforms = {}
+
     if (!this.layoutNode.children.length) {
       // Is a leaf / endpoint - can position at end of line, continuing line
-
       // First see if the label fits fine on the line or in the circle
-      if (this.drawType === 'labelOnLine') textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
-      if (this.drawType === 'labelInCircle') textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
+      if (this.drawType === 'labelOnLine') textAfterTrim = trimText(this.d3NameLabel, spaceOnLine, this.canvasCtx)
+      if (this.drawType === 'labelInCircle') textAfterTrim = trimText(this.d3NameLabel, spaceInCircle, this.canvasCtx)
 
       if (textAfterTrim !== labelPlusTime) {
         // See if putting the label after the line truncates it less
@@ -284,7 +356,9 @@ class SvgNode {
         const lengthToBottom = this.parentContent.getVerticalLength(x2, y2, this.degrees)
         const lengthToEdge = Math.min(lengthToSide, lengthToBottom)
 
-        const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge)
+        // console.log({lengthToSide, lengthToBottom})
+
+        const textAfterTrimToEdge = trimText(this.d3NameLabel, lengthToEdge, this.canvasCtx)
 
         if (textAfterTrimToEdge.length > textAfterTrim.length) {
           this.d3NameLabel.classed('upper-label', false)
@@ -298,13 +372,22 @@ class SvgNode {
           const transformString = `translate(${x2}, ${y2}) rotate(${this.labelDegrees})`
           this.d3NameLabel.attr('transform', transformString)
 
+          canvasTransforms.translate = { x: x2, y: y2 }
+          canvasTransforms.rotate = this.labelDegrees
+          canvasTransforms.font = 'normal 9pt sans-serif'
+          canvasTransforms.align = this.labelDegrees < 0 ? 'end' : 'start'
           this.d3TimeLabel.classed('hidden', true)
 
           // Tell the rest of the drawing logic that the expected on-line/in-cirlce label has been moved
           if (this.drawType === 'labelOnLine' || this.drawType === 'labelInCircle') this.drawType = 'labelAfterLine'
+          this.drawCanvasNameLabel(labelPlusTime, canvasTransforms)
           return
         } else {
           this.d3NameLabel.text(textAfterTrim)
+          canvasTransforms.translate = { x: x2, y: y2 }
+          canvasTransforms.rotate = this.labelDegrees
+          canvasTransforms.font = 'normal 9pt sans-serif'
+          this.drawCanvasNameLabel(textAfterTrim, canvasTransforms)
         }
 
         this.d3NameLabel.classed('hidden', !textAfterTrim)
@@ -317,7 +400,7 @@ class SvgNode {
     // If not returned yet, has space and is not a leaf/endpoint, so position on line or circle
 
     if (this.drawType === 'labelOnLine') {
-      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceOnLine)
+      if (!textAfterTrim) textAfterTrim = trimText(this.d3NameLabel, spaceOnLine, this.canvasCtx)
 
       if (!textAfterTrim) {
         this.drawType = 'noNameLabel'
@@ -335,7 +418,11 @@ class SvgNode {
       const transformString = `translate(${toMidwayPoint.x2}, ${toMidwayPoint.y2}) rotate(${this.labelDegrees})`
       this.d3NameLabel.attr('transform', transformString)
 
+      canvasTransforms.translate = { x: toMidwayPoint.x2, y: toMidwayPoint.y2 }
+      canvasTransforms.rotate = this.labelDegrees
+
       this.d3NameLabel.classed('on-line-label', true)
+      this.drawCanvasNameLabel(textAfterTrim, canvasTransforms)
       return
     }
 
@@ -344,7 +431,7 @@ class SvgNode {
       this.d3TimeLabel.classed('hidden', false)
       this.d3NameLabel.text(nameLabel)
 
-      textAfterTrim = trimText(this.d3NameLabel, spaceInCircle)
+      textAfterTrim = trimText(this.d3NameLabel, spaceInCircle, this.canvasCtx)
 
       if (!textAfterTrim) {
         this.drawType = 'noNameLabel'
@@ -355,8 +442,12 @@ class SvgNode {
 
       this.d3NameLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
+      canvasTransforms.translate = { x: this.circleCentre.x, y: this.circleCentre.y }
+      canvasTransforms.rotate = labelRotation(this.degrees - 90)
+
       this.d3NameLabel.classed('in-circle-label', true)
     }
+    this.drawCanvasNameLabel(textAfterTrim, canvasTransforms)
   }
 
   drawTimeLabel () {
@@ -369,7 +460,7 @@ class SvgNode {
     this.d3TimeLabel.text(formatTimeLabel(this.layoutNode.node.stats.overall))
 
     // Position in circle
-    const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding)
+    const textAfterTrim = trimText(this.d3TimeLabel, this.getRadius() * 1.5 - this.strokePadding, this.canvasCtx)
     this.d3TimeLabel.classed('hidden', !textAfterTrim)
     this.d3TimeLabel.attr('transform', `translate(${this.circleCentre.x}, ${this.circleCentre.y}) rotate(${labelRotation(this.degrees - 90)})`)
 
@@ -378,6 +469,17 @@ class SvgNode {
     this.d3TimeLabel.classed('lower-label', true)
     if (!window.CSS.supports('dominant-baseline', 'text-before-edge')) {
       this.d3TimeLabel.attr('dy', 11)
+    }
+    if (this.canvasCtx && !this.d3TimeLabel.classed('hidden')) {
+      const { colours } = canvasStyles()
+      this.canvasCtx.beginPath()
+      this.canvasCtx.fillStyle = colours[this.d3NameLabel.attr('styleId')]
+      this.canvasCtx.translate(this.circleCentre.x, this.circleCentre.y)
+      this.canvasCtx.rotate(labelRotation(this.degrees - 90) * Math.PI / 180)
+      this.canvasCtx.textAlign = 'center'
+      this.canvasCtx.font = 'normal 9pt sans-serif'
+      this.canvasCtx.fillText(formatTimeLabel(this.layoutNode.node.stats.overall), 0, 11)
+      this.canvasCtx.setTransform(1, 0, 0, 1, 0, 0)
     }
   }
 
@@ -427,7 +529,30 @@ class SvgNode {
     // Arc definition: A radiusX radiusY x-axis-rotation large-arc-flag sweep-flag x y
     outerPath += `A ${arcRadius} ${arcRadius} 0 1 0 ${toLineBottomLeft.x2} ${toLineBottomLeft.y2} Z`
 
-    this.d3OuterPath.attr('d', outerPath)
+    const { lineWidths, colours } = canvasStyles()
+
+    if (this.canvasCtx) {
+      this.canvasCtx.beginPath()
+      this.canvasCtx.strokeStyle = colours['outer-path-stroke']
+      this.canvasCtx.lineWidth = lineWidths['outer-path']
+      this.canvasCtx.fillStyle = colours['outer-path']
+      const canvaspath = new window.Path2D(outerPath)
+      this.canvasCtx.stroke(canvaspath)
+      this.canvasCtx.fill(canvaspath)
+
+      this.shadowCanvas.ctx.fill(canvaspath)
+      this.shadowCanvas.ctx.stroke(canvaspath)
+    } else {
+      this.d3OuterPath.attr('d', outerPath)
+    }
+  }
+
+  clearCanvas () {
+    if (!this.canvasCtx) {
+      return
+    }
+    this.canvasCtx.clearRect(0, 0, this.parentContent.bubbleNodeContainer.d3Element.attr('width'), this.parentContent.bubbleNodeContainer.d3Element.attr('height'))
+    this.shadowCanvas.clear()
   }
 
   getRadius (layoutNode = this.layoutNode) {
@@ -461,23 +586,30 @@ function labelRotation (degrees) {
   return degrees
 }
 
-function trimText (d3Text, maxLength, reps = 0) {
+function trimText (d3Text, maxLength, canvasCtx, reps = 0) {
   d3Text.classed('hidden', false)
 
-  const width = d3Text.node().getBBox().width
+  // const width = d3Text.node().getBBox().width
+  // getBBox is SVG specific - and accounts for transforms - but breaks things when text is not SVG
+  let width = 0
+  if (canvasCtx) {
+    width = canvasCtx.measureText(d3Text.text()).width
+  } else {
+    width = d3Text.node().getBBox().width
+  }
   const textString = d3Text.text()
-
-  if (width > maxLength) {
-    const decimal = maxLength / width
+  // console.log({textString, maxLength, width})
+  const absMaxLength = Math.abs(maxLength)
+  if (width > absMaxLength) {
+    const decimal = absMaxLength / width
     const trimToLength = Math.floor(textString.length * decimal) - 2
-
     if (trimToLength > 1 && reps < 5) {
       reps++ // Limit recursion in case unusual characters e.g. diacritics cause infinite loop
       const ellipsisChar = '…'
       const newText = textString.slice(0, trimToLength) + ellipsisChar
       d3Text.text(newText)
       // Check new text fits - won't if early chars are wider than later chars, e.g. 'Mmmmmm!!!!!!'
-      return (trimText(d3Text, maxLength, reps))
+      return (trimText(d3Text, maxLength, canvasCtx, reps))
     }
     d3Text.text('')
     return ''
@@ -506,4 +638,4 @@ function formatNameLabel (string) {
   return string
 }
 
-module.exports = SvgNode
+module.exports = BubbleNode

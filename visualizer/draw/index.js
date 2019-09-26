@@ -161,12 +161,7 @@ function drawOuterUI () {
     `
   })
 
-  // Main panel - nodelink diagram
-  const nodeLink = ui.sections.get('node-link')
-
-  const nodeLinkSVG = nodeLink.addContent('SvgContainer', { id: 'node-link-svg', svgBounds: {} })
-
-  nodeLink.addContent('HoverBox', { svg: nodeLinkSVG })
+  // removed nodeLink init here, it's now done later in the process from main.js so we can choose to render canvas or SVG
 
   // Sidebar
   const sideBar = ui.sections.get('side-bar')

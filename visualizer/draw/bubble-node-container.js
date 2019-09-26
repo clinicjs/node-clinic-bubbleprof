@@ -1,14 +1,16 @@
 'use strict'
 
 const HtmlContent = require('./html-content.js')
-const SvgNodeDiagram = require('./svg-node-diagram.js')
+const BubbleNodeDiagram = require('./bubble-node-diagram.js')
 
-class SvgContainer extends HtmlContent {
+class BubbleNodeContainer extends HtmlContent {
   constructor (parentContent, contentProperties = {}) {
     const defaultProperties = {
       htmlElementType: 'svg'
     }
     super(parentContent, Object.assign(defaultProperties, contentProperties))
+
+    // this.renderType =
 
     if (contentProperties.svgBounds) {
       const defaultBounds = {
@@ -21,13 +23,17 @@ class SvgContainer extends HtmlContent {
       }
       this.svgBounds = Object.assign(defaultBounds, contentProperties.svgBounds)
     }
-
-    this.svgNodeDiagram = new SvgNodeDiagram(this)
+    this.ui.nodeLinkContainer = this
+    this.svgNodeDiagram = new BubbleNodeDiagram(this)
     this.ui.svgNodeDiagram = this.svgNodeDiagram
 
     this.ui.on('setData', () => {
       this.setData()
     })
+  }
+
+  get renderType () {
+    return this.contentProperties.htmlElementType
   }
 
   setData () {
@@ -39,9 +45,21 @@ class SvgContainer extends HtmlContent {
     this.svgBounds.height = this.ui.layout.scale.finalSvgHeight || this.ui.layout.settings.svgHeight
     this.svgBounds.width = this.ui.layout.settings.svgWidth
 
+    if (this.renderType === 'svg') {
+      this.d3Element
+        .attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
+        .attr('preserveAspectRatio', preserveAspectRatio)
+    }
+
+    if (this.renderType === 'canvas') {
+      this.initializeCanvas()
+    }
+  }
+
+  initializeCanvas () {
     this.d3Element
-      .attr('viewBox', `${minX} ${minY} ${this.svgBounds.width} ${this.svgBounds.height}`)
-      .attr('preserveAspectRatio', preserveAspectRatio)
+      .attr('width', this.svgBounds.width)
+      .attr('height', this.svgBounds.height)
   }
 
   initializeElements () {
@@ -63,4 +81,4 @@ class SvgContainer extends HtmlContent {
   }
 }
 
-module.exports = SvgContainer
+module.exports = BubbleNodeContainer

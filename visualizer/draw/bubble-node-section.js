@@ -3,12 +3,14 @@
 const d3 = require('./d3-subset.js')
 const LineCoordinates = require('../layout/line-coordinates.js')
 const { validateNumber } = require('../validation.js')
+const canvasStyles = require('./util/canvasStyles.js')
 
-class SvgNodeSection {
+class BubbleNodeSection {
   constructor (parentContent, settings) {
     this.parentContent = parentContent
     this.ui = parentContent.ui
     this.layoutNode = parentContent.layoutNode
+    this.canvasCtx = parentContent.canvasCtx
 
     const {
       dataPosition,
@@ -24,24 +26,23 @@ class SvgNodeSection {
 
   initializeFromData () {
     this.d3NodeGroup = this.parentContent.d3NodeGroup
-
-    if (this.shapeClass === 'SvgBubble') {
+    if (this.shapeClass === 'BubbleNodeBubble') {
       this.d3InnerCircle = this.d3NodeGroup.append('circle')
         .classed('inner-circle', true)
     }
 
-    const svgNodeElementClasses = {
-      SvgLine,
-      SvgBubble
+    const bubbleNodeElementClasses = {
+      BubbleNodeLine,
+      BubbleNodeBubble
     }
 
-    const SvgNodeElementClass = svgNodeElementClasses[this.shapeClass]
+    const BubbleNodeElementClass = bubbleNodeElementClasses[this.shapeClass]
 
-    this.byParty = new SvgNodeElementClass(this, this.d3NodeGroup, 'party')
+    this.byParty = new BubbleNodeElementClass(this, this.d3NodeGroup, 'party')
       .setData(this.layoutNode)
       .initializeFromData()
 
-    this.byType = new SvgNodeElementClass(this, this.d3NodeGroup, 'typeCategory')
+    this.byType = new BubbleNodeElementClass(this, this.d3NodeGroup, 'typeCategory')
       .setData(this.layoutNode)
       .initializeFromData()
   }
@@ -57,21 +58,33 @@ class SvgNodeSection {
 
     this.byParty.draw()
     this.byType.draw()
-
+    const { colours } = canvasStyles()
     if (this.d3InnerCircle) {
+      const r = Math.max(this.parentContent.getRadius() - this.ui.settings.lineWidth * 4, 0)
+      const x = this.parentContent.circleCentre.x
+      const y = this.parentContent.circleCentre.y
+
       this.d3InnerCircle
-        .attr('cx', this.parentContent.circleCentre.x)
-        .attr('cy', this.parentContent.circleCentre.y)
-        .attr('r', Math.max(this.parentContent.getRadius() - this.ui.settings.lineWidth * 4, 0))
+        .attr('cx', x)
+        .attr('cy', y)
+        .attr('r', r)
+
+      if (this.canvasCtx) {
+        this.canvasCtx.beginPath()
+        this.canvasCtx.fillStyle = colours['inner-circle']
+        this.canvasCtx.arc(x, y, r, 0, 2 * Math.PI)
+        this.canvasCtx.fill()
+      }
     }
   }
 }
 
-class SvgNodeElement {
+class BubbleNodeElement {
   constructor (parentContent, d3Group, dataType) {
     this.svgNode = parentContent.parentContent
     this.d3Group = d3Group
     this.ui = parentContent.ui
+    this.canvasCtx = parentContent.canvasCtx
 
     this.dataPosition = parentContent.dataPosition
     this.dataType = dataType
@@ -112,7 +125,7 @@ class SvgNodeElement {
     }
 
     // Check if this node should animate to/from the line (was from 'between data' in parent) or the arc (was within & big enough to be visible)
-    if (this.constructor.name === 'SvgBubble') {
+    if (this.constructor.name === 'BubbleNodeBubble') {
       elementProperties.nodeWasBetweenInParent = false
     } else {
       switch (dataNode.constructor.name) {
@@ -171,8 +184,8 @@ class SvgNodeElement {
 
     const degrees = contractedSvgNode.degrees
 
-    const segmentDecimal = this.constructor.name === 'SvgBubble' ? segmentDatum.data[1] : segmentDatum[1]
-    const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'SvgBubble' ? 'getWithinTime' : 'getBetweenTime')]()
+    const segmentDecimal = this.constructor.name === 'BubbleNodeBubble' ? segmentDatum.data[1] : segmentDatum[1]
+    const nodeTime = this.svgNode.layoutNode.node[(this.constructor.name === 'BubbleNodeBubble' ? 'getWithinTime' : 'getBetweenTime')]()
     const parentTime = nodeWasBetweenInParent ? parentBetweenTime : parentWithinTime
     const segmentDecimalOfParentTime = parentTime ? (nodeTime / parentTime) * segmentDecimal : 1
 
@@ -187,7 +200,7 @@ class SvgNodeElement {
     }
 
     let expandedPath
-    if (this.constructor.name === 'SvgBubble') {
+    if (this.constructor.name === 'BubbleNodeBubble') {
       const arcObject = unpackArcString(adjustArcPath(this.arcMaker(segmentDatum), this))
       removeA2FromPath(arcObject, this)
       expandedPath = repackArcString(arcObject)
@@ -206,7 +219,7 @@ class SvgNodeElement {
         resolveSegment(segmentDatum)
       })
 
-    if (!nodeWasBetweenInParent && this.constructor.name === 'SvgLine') {
+    if (!nodeWasBetweenInParent && this.constructor.name === 'BubbleNodeLine') {
       const endArc = unpackArcString(endPath)
       if (endArc) {
         d3Transition.attrTween('d', tweenArcToLine(endArc, parentBubble.arcMaker, this.ui.settings.animationEasing, isExpanding))
@@ -214,7 +227,7 @@ class SvgNodeElement {
       }
     }
 
-    if (this.constructor.name === 'SvgBubble') {
+    if (this.constructor.name === 'BubbleNodeBubble') {
       d3Transition.attrTween('d', tweenArcToArc(arcDatum, parentBubble, this, this.ui.settings.animationEasing, isExpanding))
       return
     }
@@ -225,7 +238,7 @@ class SvgNodeElement {
   }
 }
 
-class SvgLine extends SvgNodeElement {
+class BubbleNodeLine extends BubbleNodeElement {
   initializeFromData () {
     const d3Enter = this.d3Group.selectAll('path.segmented-line')
       .data(this.decimalsArray)
@@ -236,6 +249,7 @@ class SvgLine extends SvgNodeElement {
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', decimal => `line-segment ${classPrepend}-${decimal[0]}`)
+      .attr('styleId', decimal => `${classPrepend}-${decimal[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth + (this.dataType === 'typeCategory' ? 1.5 : -0.5))
       .on('mouseover', decimal => this.ui.emit(highlightEvent, decimal[0]))
       .on('mouseout', () => this.ui.emit(highlightEvent, null))
@@ -282,12 +296,24 @@ class SvgLine extends SvgNodeElement {
 
       const segmentPath = getLineUpdatingOrigin(currentOrigin, this.degrees, this.length * segmentDatum[1])
 
+      if (this.canvasCtx) {
+        const { colours, lineWidths, strokeDash } = canvasStyles()
+
+        const styleId = d3LineSegment.attr('styleId')
+        this.canvasCtx.beginPath()
+        this.canvasCtx.strokeStyle = colours[styleId]
+        this.canvasCtx.lineWidth = lineWidths[styleId]
+        this.canvasCtx.setLineDash(strokeDash[styleId])
+        const canvaspath = new window.Path2D(segmentPath)
+        this.canvasCtx.stroke(canvaspath)
+      }
+
       d3LineSegment.attr('d', segmentPath)
     })
   }
 }
 
-class SvgBubble extends SvgNodeElement {
+class BubbleNodeBubble extends BubbleNodeElement {
   setData (layoutNode) {
     super.setData(layoutNode)
     this.arcData = d3.pie().value((arcDatum) => arcDatum[1])(this.decimalsArray)
@@ -304,6 +330,7 @@ class SvgBubble extends SvgNodeElement {
 
     this.d3Shapes = d3Enter.append('path')
       .attr('class', arcDatum => `line-segment ${classPrepend}-${arcDatum.data[0]}`)
+      .attr('styleId', arcDatum => `${classPrepend}-${arcDatum.data[0]}`)
       .style('stroke-width', this.ui.settings.lineWidth + (this.dataType === 'typeCategory' ? 1.5 : -0.5))
       .on('mouseover', arcDatum => this.ui.emit(highlightEvent, arcDatum.data[0]))
       .on('mouseout', () => this.ui.emit(highlightEvent, null))
@@ -324,6 +351,25 @@ class SvgBubble extends SvgNodeElement {
     this.d3Shapes.attr('d', arcDatum => {
       const initialArc = this.arcMaker(arcDatum)
       const adjustedArc = adjustArcPath(initialArc, this)
+      return adjustedArc
+    })
+
+    this.d3Shapes.attr('d', (arcDatum, i, nodes) => {
+      const initialArc = this.arcMaker(arcDatum)
+      const adjustedArc = adjustArcPath(initialArc, this)
+
+      if (this.canvasCtx) {
+        const { colours, lineWidths, strokeDash } = canvasStyles()
+
+        const node = d3.select(nodes[i])
+        const styleId = node.attr('styleId')
+        this.canvasCtx.beginPath()
+        this.canvasCtx.strokeStyle = colours[styleId]
+        this.canvasCtx.lineWidth = lineWidths[styleId]
+        this.canvasCtx.setLineDash(strokeDash[styleId])
+        const canvaspath = new window.Path2D(adjustedArc)
+        this.canvasCtx.stroke(canvaspath)
+      }
       return adjustedArc
     })
   }
@@ -588,4 +634,4 @@ function getEllipseAngle (degrees) {
   return LineCoordinates.degreesToRadians(degrees + 90)
 }
 
-module.exports = SvgNodeSection
+module.exports = BubbleNodeSection
