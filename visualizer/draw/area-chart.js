@@ -529,7 +529,7 @@ class NodeGroup {
   constructor (aggregateNode, layoutNode = null) {
     this.typeCategory = aggregateNode.typeCategory
     this.layoutNodeId = layoutNode ? layoutNode.id : 'absent'
-    this.aggregateNodes = [ aggregateNode ]
+    this.aggregateNodes = [aggregateNode]
 
     this.key = `${this.typeCategory}_${this.layoutNodeId}`
   }

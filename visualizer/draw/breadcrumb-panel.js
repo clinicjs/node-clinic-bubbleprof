@@ -63,6 +63,7 @@ class BreadcrumbPanel extends HtmlContent {
         .property('textContent', '➥')
     }
   }
+
   traverseUp (targetUI) {
     this.topmostUI.queueAnimation('breadcrumb', (animationQueue) => {
       if (this.topmostUI !== targetUI) {

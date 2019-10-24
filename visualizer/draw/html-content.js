@@ -142,6 +142,7 @@ class CollapseControl extends HtmlContent {
     this.portraitOnly = contentProperties.portraitOnly || false
     this.collapseClassName = this.portraitOnly ? 'portrait-collapsed' : 'collapsed'
   }
+
   initializeElements () {
     super.initializeElements()
 
@@ -160,6 +161,7 @@ class CollapseControl extends HtmlContent {
       this.parentContent.collapseToggle()
     })
   }
+
   draw () {
     super.draw()
     this.parentContent.d3Element.classed(this.collapseClassName, this.isCollapsed)

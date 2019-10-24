@@ -25,7 +25,7 @@ test('collect-analysis pipeline', function (t) {
         t.strictEqual(nodeMap.size, 2)
 
         // aggregateId = 1 is the root and points to the Timeout
-        t.strictDeepEqual(nodeMap.get(1).children, [ 2 ])
+        t.strictDeepEqual(nodeMap.get(1).children, [2])
         // aggregateId = 2 is the Timeout
         t.strictEqual(nodeMap.get(2).sources[0].type, 'Timeout')
 

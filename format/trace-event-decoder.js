@@ -3,6 +3,8 @@
 const stream = require('stream')
 const parser = require('@nearform/trace-events-parser')
 
+function has (object, property) { return Object.prototype.hasOwnProperty.call(object, property) }
+
 class TraceEvent {
   constructor (data) {
     const isCallback = data.name.slice(-'_CALLBACK'.length) === '_CALLBACK'
@@ -25,10 +27,10 @@ class TraceEvent {
     // The trace event format changed in Node 11.0.0. To support both, old and
     // new versions of Node, this checks for both data formats.
     const args = data.args.data || data.args
-    if (args.hasOwnProperty('triggerAsyncId')) {
+    if (has(args, 'triggerAsyncId')) {
       this.triggerAsyncId = args.triggerAsyncId
     }
-    if (args.hasOwnProperty('executionAsyncId')) {
+    if (has(args, 'executionAsyncId')) {
       this.executionAsyncId = args.executionAsyncId
     }
   }

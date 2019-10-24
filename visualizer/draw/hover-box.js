@@ -254,11 +254,12 @@ class HoverBox extends HtmlContent {
         this.d3Element.attr('name', 'shortcut-node')
         break
       case 'ArtificialNode':
-      case 'ClusterNode':
+      case 'ClusterNode': {
         const nodesCount = nodeType === 'ClusterNode' ? dataNode.nodes.size : layoutNode.collapsedNodes.length
         this.d3ClickMessage.text(`Click to expand ${nodesCount} grouped items`)
         this.d3Element.attr('name', 'cluster-node')
         break
+      }
     }
     const clickHandler = () => {
       d3.event.stopPropagation()

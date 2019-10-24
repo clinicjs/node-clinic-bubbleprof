@@ -11,6 +11,7 @@ class Positioning {
     this.layout = layout
     this.layoutNodes = null // defined later
   }
+
   formClumpPyramid () {
     this.layoutNodes = this.layout.layoutNodes
     const leavesByLongest = pickLeavesByLongest(this.layoutNodes)
@@ -18,11 +19,13 @@ class Positioning {
     clumpPyramid.setLeaves(leavesByLongest)
     this.order = clumpPyramid.order
   }
+
   placeNodes () {
     const nodeAllocation = new NodeAllocation(this.layout, this.layoutNodes)
     nodeAllocation.process()
     if (this.layout.settings.debugMode) this.nodeAllocation = nodeAllocation
   }
+
   debugInspect () {
     const intoOrder = (leafA, leafB) => this.order.indexOf(leafA.id) - this.order.indexOf(leafB.id)
     const leavesByLongest = pickLeavesByLongest(this.layoutNodes)
@@ -95,15 +98,16 @@ class ClumpPyramid {
     this.layout = layout
     this.layoutNodes = layout.layoutNodes
     this.insertionSideToOrientation = {
-      'unshift': 'lhs',
-      'push': 'rhs'
+      unshift: 'lhs',
+      push: 'rhs'
     }
     this.orientationToInsertionSide = {
-      'lhs': 'unshift',
-      'rhs': 'push'
+      lhs: 'unshift',
+      rhs: 'push'
     }
     this.emptyPyramid()
   }
+
   emptyPyramid () {
     this.leavesOnSide = {
       lhs: 0,
@@ -114,9 +118,11 @@ class ClumpPyramid {
     this.clumpById = {}
     this.leadingLeaf = null
   }
+
   nextPyramidSide () {
     return this.leavesOnSide.lhs < this.leavesOnSide.rhs ? 'unshift' : 'push'
   }
+
   setAncestorClump (leaf, ancestorId, insertAtSide) {
     if (this.clumpById[ancestorId]) {
       return
@@ -138,6 +144,7 @@ class ClumpPyramid {
       this.clumpById[ancestorParent.id][insertAtSide](this.clumpById[ancestorId])
     }
   }
+
   setLeaves (leavesByLongest) {
     const roots = []
     this.emptyPyramid()

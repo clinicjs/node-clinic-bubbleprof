@@ -73,8 +73,8 @@ test('Aggregate Node - combine', function (t) {
       t.strictDeepEqual(aggregateNodes[0].toJSON(), {
         aggregateId: 1,
         parentAggregateId: 0,
-        children: [ 2 ],
-        sources: [ aggregateNodes[0].sources[0].toJSON({ short: true }) ],
+        children: [2],
+        sources: [aggregateNodes[0].sources[0].toJSON({ short: true })],
         mark: ['root', null, null],
         name: null,
         type: null,
@@ -85,8 +85,8 @@ test('Aggregate Node - combine', function (t) {
       t.strictDeepEqual(aggregateNodes[1].toJSON(), {
         aggregateId: 2,
         parentAggregateId: 1,
-        children: [ 3 ],
-        sources: [ serverNode.toJSON({ short: true }) ],
+        children: [3],
+        sources: [serverNode.toJSON({ short: true })],
         mark: [null, null, null],
         name: null,
         type: 'CUSTOM_SERVER',
@@ -97,7 +97,7 @@ test('Aggregate Node - combine', function (t) {
       t.strictDeepEqual(aggregateNodes[2].toJSON(), {
         aggregateId: 3,
         parentAggregateId: 2,
-        children: [ 4, 5 ],
+        children: [4, 5],
         sources: socketNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
         name: null,
@@ -109,7 +109,7 @@ test('Aggregate Node - combine', function (t) {
       t.strictDeepEqual(aggregateNodes[3].toJSON(), {
         aggregateId: 4,
         parentAggregateId: 3,
-        children: [ ],
+        children: [],
         sources: logNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
         name: null,
@@ -121,7 +121,7 @@ test('Aggregate Node - combine', function (t) {
       t.strictDeepEqual(aggregateNodes[4].toJSON(), {
         aggregateId: 5,
         parentAggregateId: 3,
-        children: [ ],
+        children: [],
         sources: endNodes.map((source) => source.toJSON({ short: true })),
         mark: [null, null, null],
         name: null,

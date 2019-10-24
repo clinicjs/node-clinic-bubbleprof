@@ -158,7 +158,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     dataFile.on('warning', msg => this.emit('warning', msg))
 
     // build JS
-    let scriptFile = buildJs({
+    const scriptFile = buildJs({
       basedir: __dirname,
       debug: this.debug,
       fakeDataPath,

@@ -49,7 +49,7 @@ test('Barrier Node - set name', function (t) {
       parentAggregateId: 1,
       children: [6, 7],
       type: 'Immediate',
-      frames: [ frameUser, frameExternal, frameNodecore ]
+      frames: [frameUser, frameExternal, frameNodecore]
     }]
   })
 
@@ -63,7 +63,7 @@ test('Barrier Node - set name', function (t) {
       parentAggregateId: 1,
       children: [8, 9],
       type: 'TickObject',
-      frames: [ frameExternal, frameNodecore ]
+      frames: [frameExternal, frameNodecore]
     }]
   })
 
@@ -77,13 +77,13 @@ test('Barrier Node - set name', function (t) {
       parentAggregateId: 1,
       children: [10],
       type: 'Immediate',
-      frames: [ frameUser, frameExternal, frameNodecore ]
+      frames: [frameUser, frameExternal, frameNodecore]
     }, {
       aggregateId: 5,
       parentAggregateId: 1,
       children: [11],
       type: 'TickObject',
-      frames: [ frameExternal, frameNodecore ]
+      frames: [frameExternal, frameNodecore]
     }]
   })
 
@@ -154,7 +154,7 @@ test('Barrier Node - set name with multiple modules in stack', function (t) {
       parentAggregateId: 1,
       children: [6, 7],
       type: 'Immediate',
-      frames: [ frameUser, frameExternal, frameNodecore ]
+      frames: [frameUser, frameExternal, frameNodecore]
     }]
   })
 
@@ -168,7 +168,7 @@ test('Barrier Node - set name with multiple modules in stack', function (t) {
       parentAggregateId: 1,
       children: [8, 9],
       type: 'TickObject',
-      frames: [ frameExternal, frameExternal, frameOtherExternal, frameNodecore ]
+      frames: [frameExternal, frameExternal, frameOtherExternal, frameNodecore]
     }]
   })
 
@@ -182,13 +182,13 @@ test('Barrier Node - set name with multiple modules in stack', function (t) {
       parentAggregateId: 1,
       children: [10],
       type: 'Immediate',
-      frames: [ frameUser, frameExternal, frameNodecore ]
+      frames: [frameUser, frameExternal, frameNodecore]
     }, {
       aggregateId: 5,
       parentAggregateId: 1,
       children: [11],
       type: 'TickObject',
-      frames: [ frameExternal, frameExternal, frameOtherExternal, frameNodecore ]
+      frames: [frameExternal, frameExternal, frameOtherExternal, frameNodecore]
     }]
   })
 
@@ -247,7 +247,7 @@ test('Barrier Node - set name with too many modules in stack', function (t) {
       parentAggregateId: 1,
       children: [6, 7],
       type: 'Immediate',
-      frames: [ frameUser, external('a'), frameNodecore ]
+      frames: [frameUser, external('a'), frameNodecore]
     }]
   })
 
@@ -283,7 +283,7 @@ test('Barrier Node - set name with too many modules in stack', function (t) {
       parentAggregateId: 1,
       children: [10],
       type: 'Immediate',
-      frames: [ frameUser, external('a'), frameNodecore ]
+      frames: [frameUser, external('a'), frameNodecore]
     }, {
       aggregateId: 5,
       parentAggregateId: 1,

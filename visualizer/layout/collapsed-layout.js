@@ -51,6 +51,7 @@ class CollapsedLayout {
     }
     this.layoutNodes = newLayoutNodes
   }
+
   setCollapseThreshold (settings, multiplier = 1) {
     // Set an initial value based on settings then test it
     this.collapseThreshold = settings.initialCollapseThreshold * multiplier
@@ -61,6 +62,7 @@ class CollapsedLayout {
       this.testStemLength(leaves[i], settings, multiplier)
     }
   }
+
   testStemLength (layoutNode, settings, multiplier) {
     let isCollapsible
     const availableHeight = settings.sizeIndependentHeight
@@ -103,6 +105,7 @@ class CollapsedLayout {
       if (absoluteExceedsHeight) this.collapseThreshold = this.collapseThreshold * 1.05
     }
   }
+
   indexLayoutNode (nodesMap, layoutNode) {
     nodesMap.set(layoutNode.id, layoutNode)
     for (let i = 0; i < layoutNode.children.length; ++i) {
@@ -110,6 +113,7 @@ class CollapsedLayout {
       this.indexLayoutNode(nodesMap, this.layoutNodes.get(childId))
     }
   }
+
   mergeShortcutNodes (layoutNode) {
     // Reduce shortcuts
     const { dataNodes, shortcutsByTarget } = this.groupNodesByTarget(layoutNode)
@@ -123,6 +127,7 @@ class CollapsedLayout {
       this.mergeShortcutNodes(childLayoutNode)
     }
   }
+
   groupNodesByTarget (layoutNode) {
     // Used to group alike ShortcutNodes together
     // Maps { LayoutNode => [...ShortcutNode] }
@@ -148,6 +153,7 @@ class CollapsedLayout {
     }
     return { dataNodes, shortcutsByTarget }
   }
+
   formShortcutBijection (shortcutsByTarget, parentLayoutNode) {
     const bijectiveShortcuts = []
     const shortcutsIterator = shortcutsByTarget.entries()
@@ -174,6 +180,7 @@ class CollapsedLayout {
     }
     return bijectiveShortcuts
   }
+
   collapseHorizontally (layoutNode) {
     let combined
     let prevTiny
@@ -193,6 +200,7 @@ class CollapsedLayout {
       }
     }
   }
+
   collapseVertically (layoutNode) {
     const children = layoutNode.children.map(childId => this.layoutNodes.get(childId))
     let combined
@@ -214,6 +222,7 @@ class CollapsedLayout {
     }
     return combined
   }
+
   combineLayoutNodes (hostNode, squashNode) {
     if ([hostNode.node.constructor.name, squashNode.node.constructor.name].includes('ShortcutNode')) {
       return
@@ -255,22 +264,27 @@ class CollapsedLayout {
 
     return collapsed
   }
+
   removeLayoutNode (id) {
     this.layoutNodes.delete(id)
     if (id.charAt(0) === 'x') removeFromCounter(id, 'x', this.layoutNodes, '')
   }
+
   countNonShortcutNodes () {
     const total = this.layoutNodes.size
     const nonShortcutCount = total - this.shortcutCount
     if (nonShortcutCount <= 0) throw new Error(`${nonShortcutCount} non-shortcut nodes (${total} nodes, ${this.shortcutCount} shortcuts)`)
     return nonShortcutCount
   }
+
   isBelowThreshold (layoutNode) {
     return layoutNode.getTotalTime() * this.scale.sizeIndependentScale < this.collapseThreshold
   }
+
   isCollapsible (layoutNode) {
     return layoutNode.collapsedNodes || this.isBelowThreshold(layoutNode)
   }
+
   isVerticallyCollapsible (childNode, hostNode, squashNode = childNode) {
     if (this.countNonShortcutNodes() <= this.minimumNodes) {
       return 'abort' // Can't squash beyond this point so we can tell calling function to stop

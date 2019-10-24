@@ -26,7 +26,7 @@ test('Barrier Node - wrap', function (t) {
         children: [3, 4],
         name: null,
         isWrapper: true,
-        nodes: [ aggregateNode.toJSON() ]
+        nodes: [aggregateNode.toJSON()]
       })
       t.end()
     }))

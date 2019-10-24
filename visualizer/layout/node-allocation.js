@@ -30,6 +30,7 @@ class NodeAllocation {
     const coordinates = coordinatesFn(this.layout, this.roots)
     this.initializeSegments(coordinates)
   }
+
   initializeSegments (coordinates) {
     this.segments = []
     this.total1DSpaceAvailable = 0
@@ -42,6 +43,7 @@ class NodeAllocation {
       this.total1DSpaceAvailable += line.length
     }
   }
+
   static threeSided (layout, roots) {
     const { svgWidth, svgDistanceFromEdge } = layout.settings
     const { finalSvgHeight } = layout.scale
@@ -61,6 +63,7 @@ class NodeAllocation {
     ]
     return coordinates
   }
+
   process (placementMode = NodeAllocation.placementMode.LENGTH_CONSTRAINED) {
     this.convertTotalStemLengthsToUnits()
     this.calculate1DLinearOffsets()
@@ -70,6 +73,7 @@ class NodeAllocation {
       this.constrain2DLeafCoordinates()
     }
   }
+
   // Hierarchical (by depth) comparison narrows clumps internally and expands space between clumps.
   // This has proved to be more visually appealing than result of flat comparison.
   // Example:
@@ -150,6 +154,7 @@ class NodeAllocation {
       }
     }
   }
+
   calculate1DLinearOffsets () {
     let currentSegment = this.segments[0]
     let currentBlock = null
@@ -165,6 +170,7 @@ class NodeAllocation {
       currentBlock.layoutNode.position.segment = currentSegment.label
     }
   }
+
   calculate2DLeafCoordinates () {
     for (const segment of this.segments) {
       for (const block of segment.blocks) {
@@ -177,6 +183,7 @@ class NodeAllocation {
       }
     }
   }
+
   constrain2DLeafCoordinates () {
     for (const layoutNode of this.leaves.values()) {
       const leaf = layoutNode
@@ -197,6 +204,7 @@ class NodeAllocation {
       position.y = leaf.validateStat(y)
     }
   }
+
   calculate2DMidpointCoordinates (placementMode) {
     for (const layoutNode of this.midPoints.values()) {
       const midPoint = layoutNode // TODO: make naming consistent
@@ -216,7 +224,7 @@ class NodeAllocation {
 
       const ownLeavesInSubset = stem.leaves.ids.filter(leafId => this.leaves.has(leafId))
       const leafPositions = ownLeavesInSubset.map(leafId => this.layoutNodes.get(leafId).position)
-      midPoint.validateStat(leafPositions.length, `leafCenter division`, { aboveZero: true })
+      midPoint.validateStat(leafPositions.length, 'leafCenter division', { aboveZero: true })
       const leafCenter = leafPositions.reduce((combinedPosition, nodePosition) => {
         return {
           x: midPoint.validateStat(combinedPosition.x + nodePosition.x),
@@ -228,7 +236,7 @@ class NodeAllocation {
       leafCenter.y /= leafPositions.length
 
       switch (placementMode) {
-        case NodeAllocation.placementMode.LENGTH_CONSTRAINED:
+        case NodeAllocation.placementMode.LENGTH_CONSTRAINED: {
           const line = new LineCoordinates({ x1: parentPosition.x, y1: parentPosition.y, x2: leafCenter.x, y2: leafCenter.y })
 
           const parentRadius = parentNode.validateStat(parentStem.scaled.ownDiameter / 2)
@@ -239,7 +247,8 @@ class NodeAllocation {
           position.x = midPoint.validateStat(x)
           position.y = midPoint.validateStat(y)
           break
-        case NodeAllocation.placementMode.SPIDER:
+        }
+        case NodeAllocation.placementMode.SPIDER: {
           const combinedCenter = {
             x: leafCenter.x + parentPosition.x / 2,
             y: leafCenter.y + parentPosition.y / 2
@@ -247,15 +256,18 @@ class NodeAllocation {
           position.x = midPoint.validateStat(combinedCenter.x)
           position.y = midPoint.validateStat(combinedCenter.y)
           break
+        }
       }
     }
   }
+
   getRootPosition (nodeDiameter) {
     return {
       x: this.layout.settings.svgWidth / 2,
       y: this.layout.settings.svgDistanceFromEdge + (nodeDiameter / 2)
     }
   }
+
   static get placementMode () {
     return {
       LENGTH_CONSTRAINED: 'LENGTH_CONSTRAINED',
@@ -269,6 +281,7 @@ class HierarchyLevel {
     this.depth = depth
     this.clumps = new Map()
   }
+
   sumLongestLeafLengths () {
     this.longestLeafLengthSum = [...this.clumps.values()].reduce((total, clump) => total + clump.longestLeafLength, 0)
   }
@@ -281,6 +294,7 @@ class Clump {
     this.childClumps = new Map()
     this.longestLeafLength = longestLeafLength
   }
+
   getTotalChildrenLongestLeafLength () {
     return [...this.childClumps.values()].reduce((total, clump) => total + clump.longestLeafLength, 0)
   }
@@ -295,9 +309,11 @@ class LinearSpaceSegment {
     // SpaceBlock may span across multiple LinearSpaceSegments, however it will belong to the one which contains its center
     this.blocks = []
   }
+
   contains1DPoint (offset) {
     return this.begin < offset && offset < this.end
   }
+
   translate1DPointTo2D (relativeOffset) {
     return this.line.pointAtLength(relativeOffset)
   }

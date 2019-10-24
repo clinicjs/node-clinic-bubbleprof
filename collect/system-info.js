@@ -2,7 +2,7 @@
 
 const path = require('path')
 const Module = require('module')
-const asyncWrap = process.binding('async_wrap')
+const asyncWrap = process.binding('async_wrap') // eslint-disable-line node/no-deprecated-api
 
 function getMainDirectory () {
   if (process._eval != null) return process.cwd()

@@ -4,6 +4,8 @@ const SourceNode = require('../../analysis/source/source-node.js')
 const StackTrace = require('../../analysis/stack-trace/stack-trace.js')
 const TraceEvent = require('../../analysis/trace-event/trace-event.js')
 
+function has (object, property) { return Object.prototype.hasOwnProperty.call(object, property) }
+
 class FakeSourceNode extends SourceNode {
   constructor (data) {
     super(data.asyncId)
@@ -26,8 +28,8 @@ class FakeSourceNode extends SourceNode {
       }))
     }
 
-    const before = data.hasOwnProperty('before') ? data.before : []
-    const after = data.hasOwnProperty('after') ? data.after : []
+    const before = has(data, 'before') ? data.before : []
+    const after = has(data, 'after') ? data.after : []
 
     for (let i = 0; i < Math.max(before.length, after.length); i++) {
       if (i < before.length) {

@@ -90,12 +90,13 @@ class BubbleprofUI extends EventEmitter {
 
     switch (this.settings.viewMode) {
       case 'fit':
-      case 'maximised':
+      case 'maximised': {
         const boundingBox = this.originalUI.getNodeLinkSection().d3Element.node().getBoundingClientRect()
         settings.svgHeight = boundingBox.height
         settings.svgWidth = boundingBox.width
         settings.allowStretch = false
         break
+      }
       case 'scroll':
       default:
         settings.allowStretch = true
@@ -251,7 +252,7 @@ class BubbleprofUI extends EventEmitter {
           const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
 
           switch (dataNode.constructor.name) {
-            case 'ShortcutNode':
+            case 'ShortcutNode': {
               // Go up a level and start queuing animations, as shortcuts always point outside the node
               if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
               const uiParent = this.clearSublayout(animationQueue)
@@ -259,8 +260,9 @@ class BubbleprofUI extends EventEmitter {
               const targetUI = await uiParent.jumpToNode(targetDataNode, animationQueue)
               resolve(targetUI)
               break
+            }
 
-            case 'AggregateNode':
+            case 'AggregateNode': {
               this.selectedDataNode = dataNode
               const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
               if (animationQueue) {
@@ -270,8 +272,9 @@ class BubbleprofUI extends EventEmitter {
               }
               resolve(this)
               break
+            }
 
-            case 'ClusterNode':
+            case 'ClusterNode': {
               if (dataNode.nodes.size === 1) {
                 // If there's only one aggregateNode, just select it
                 this.selectedDataNode = dataNode.nodes.values().next().value
@@ -287,12 +290,14 @@ class BubbleprofUI extends EventEmitter {
                 resolve(sameNode ? this : this.createSubLayout(layoutNode, animationQueue))
               }
               break
+            }
 
-            case 'ArtificialNode':
+            case 'ArtificialNode': {
               this.selectedDataNode = dataNode
               const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
               resolve(uiWithinCollapsedNode)
               break
+            }
           }
           this.emit('selectNodeComplete')
         }, 10)
@@ -516,16 +521,18 @@ class BubbleprofUI extends EventEmitter {
   async jumpToHash (hash, animationQueue) {
     const id = parseInt(hash.slice(1))
     switch (hash.charAt(0)) {
-      case 'a':
+      case 'a': {
         const aggregateNode = this.dataSet.aggregateNodes.get(id)
         const uiWithinAggregate = await this.jumpToNode(aggregateNode, animationQueue)
         this.originalUI.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
         break
-      case 'c':
+      }
+      case 'c': {
         const clusterNode = this.dataSet.clusterNodes.get(id)
         const uiWithinCluster = await this.jumpToNode(clusterNode, animationQueue)
         this.originalUI.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
         break
+      }
       case 'x':
         this.jumpToCollapsedNodeHash(window.location.hash, animationQueue)
         break

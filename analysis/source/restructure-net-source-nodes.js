@@ -44,7 +44,7 @@ class RestructureNetSourceNodes extends stream.Transform {
 
   _processTree (subroot) {
     // process as much of the subtree as possible
-    const queue = [ subroot ]
+    const queue = [subroot]
 
     while (queue.length > 0) {
       // get node from queue and processs it

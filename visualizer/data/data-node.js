@@ -42,6 +42,7 @@ class DataNode {
       }
     }
   }
+
   getWithinTime () { return this.stats.sync + this.stats.async.within }
   getBetweenTime () { return this.stats.async.between }
   /* istanbul ignore next: currently unused */
@@ -113,6 +114,7 @@ class ClusterNode extends DataNode {
     const mark = node.mark || (node.nodes.length ? node.nodes[0].mark : null)
     this.mark = mark ? DataNode.markFromArray(mark) : null
   }
+
   generateAggregateNodes (nodes) {
     // TODO: if this is done out of sequence, it causes a 1d segment not found error in layout/node-allocation
     // on opening some nodes (usually root node). Should ideally not rely on map order: investigate
@@ -125,11 +127,13 @@ class ClusterNode extends DataNode {
     this.setDecimal(this.getBetweenTime(), 'party', 'between', this.mark.get('party'))
     this.setDecimal(this.getWithinTime(), 'party', 'within', this.mark.get('party'))
   }
+
   setDecimal (num, classification, position, label) {
     const decimalsMap = this.decimals[classification][position]
     const newValue = decimalsMap.has(label) ? decimalsMap.get(label) + num : num
     decimalsMap.set(label, this.validateStat(newValue))
   }
+
   getDecimal (classification, position, label) {
     const raw = this.stats.rawTotals
     const rawTotal = position === 'within' ? raw.async.within + raw.sync : raw.async.between
@@ -140,9 +144,11 @@ class ClusterNode extends DataNode {
     const decimal = (num === 0 || rawTotal === 0) ? 0 : this.validateStat(num / rawTotal, statType)
     return decimal
   }
+
   getDecimalLabels (classification, position) {
     return this.decimals[classification][position].keys()
   }
+
   getDecimalsArray (classification, position) {
     const decimalsArray = []
     for (const label of this.decimals[classification][position].keys()) {
@@ -151,9 +157,11 @@ class ClusterNode extends DataNode {
     }
     return decimalsArray
   }
+
   get id () {
     return this.clusterId
   }
+
   get parentId () {
     return this.parentClusterId
   }
@@ -206,6 +214,7 @@ class AggregateNode extends DataNode {
 
     this.dataSet.aggregateNodes.set(this.aggregateId, this)
   }
+
   generateSourceNodes (sources) {
     const debugMode = this.dataSet.settings.debugMode
 
@@ -221,6 +230,7 @@ class AggregateNode extends DataNode {
     }
     if (debugMode) this.dataSet.sourceNodes = this.dataSet.sourceNodes.concat(this.sources)
   }
+
   applyDecimalsToCluster () {
     const apply = (time, betweenOrWithin) => {
       this.clusterNode.setDecimal(time, 'type', betweenOrWithin, this.type)
@@ -234,15 +244,19 @@ class AggregateNode extends DataNode {
       apply(this.stats.rawTotals.async.between + this.stats.rawTotals.sync, 'within')
     }
   }
+
   getDecimalsArray (classification, position) {
     return [[this[classification], 1]]
   }
+
   get id () {
     return this.aggregateId
   }
+
   get parentId () {
     return this.parentAggregateId
   }
+
   static getAsyncTypeCategories (typeName) {
   // Combines node's async_hook types into sets of more user-friendly thematic categories
   // Based on https://gist.github.com/mafintosh/e31eb1d61f126de019cc10344bdbb62b
@@ -335,6 +349,7 @@ class SourceNode {
 
     this.aggregateNode = aggregateNode
   }
+
   generateCallbackEvents () {
     // Skip unusual cases of a broken asyncId with no init time (e.g. some root nodes)
     if (!isNumber(this.init)) return this
@@ -347,6 +362,7 @@ class SourceNode {
     }
     return this
   }
+
   get id () {
     return this.asyncId
   }
@@ -374,6 +390,7 @@ class ArtificialNode extends ClusterNode {
     this.uid = rawNode.id
     this.contents = contents
   }
+
   applyAggregateNodes (nodes) {
     if (!nodes.size) return
 
@@ -382,9 +399,11 @@ class ArtificialNode extends ClusterNode {
       if (!this.mark) this.mark = aggregateNode.mark
     }
   }
+
   getSameType (nodeId) {
     return this.dataSet.getByNodeType(this.nodeType, nodeId)
   }
+
   aggregateStats (dataNode) {
     this.stats.setOverall(this.stats.overall + dataNode.stats.overall)
     this.stats.setSync(this.stats.sync + dataNode.stats.sync)
@@ -395,6 +414,7 @@ class ArtificialNode extends ClusterNode {
     this.stats.rawTotals.async.between += dataNode.stats.rawTotals.async.between
     this.stats.rawTotals.async.within += dataNode.stats.rawTotals.async.within
   }
+
   aggregateDecimals (dataNode, classification, position) {
     if (dataNode.decimals) {
       // e.g. combining clusterNodes

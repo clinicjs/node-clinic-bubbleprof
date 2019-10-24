@@ -44,7 +44,7 @@ function uniqueMapKey (key, map, separator = '_', startingNum = 0) {
   return getUniqueKey(key, map, mapTest, startingNum, separator)
 }
 
-const objectTest = (key, object) => !object.hasOwnProperty(key)
+const objectTest = (key, object) => !Object.prototype.hasOwnProperty.call(object, key)
 function uniqueObjectKey (key, object, separator = '_', startingNum = 0) {
   return getUniqueKey(key, object, objectTest, startingNum, separator)
 }

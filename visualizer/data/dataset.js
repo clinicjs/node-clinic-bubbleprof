@@ -49,11 +49,13 @@ class DataSet {
       clusterNode.generateAggregateNodes(node.nodes)
     }
   }
+
   processData () {
     this.calculateFlattenedStats()
     this.calculateDecimals()
     this.wallTime.processSlices()
   }
+
   getByNodeType (nodeType, nodeId) {
     const typeKeyMapping = {
       AggregateNode: 'aggregateNodes',
@@ -62,17 +64,20 @@ class DataSet {
     validateKey(nodeType, Object.keys(typeKeyMapping))
     return this[typeKeyMapping[nodeType]].get(nodeId)
   }
+
   calculateFlattenedStats () {
     this.callbackEvents.processAll()
     this.callbackEventsCount = this.callbackEvents.array.length
     this.callbackEvents = null
   }
+
   calculateDecimals () {
     this.aggregateNodes.forEach(aggregateNode => {
       aggregateNode.applyDecimalsToCluster()
       this.applyDecimals(aggregateNode)
     })
   }
+
   applyDecimals (aggregateNode) {
     const totalTime = aggregateNode.stats.rawTotals.sync + aggregateNode.stats.rawTotals.async.between
     this.setDecimal(totalTime, 'type', aggregateNode.type)
@@ -80,11 +85,13 @@ class DataSet {
     this.setDecimal(totalTime, 'party', aggregateNode.mark.get('party'))
     this.rawTotalTime += totalTime
   }
+
   setDecimal (num, classification, label) {
     const decimalsMap = this.decimals[classification]
     const newValue = decimalsMap.has(label) ? decimalsMap.get(label) + num : num
     decimalsMap.set(label, validateNumber(newValue, `Setting DataSet decimal for ${classification} "${label}"`))
   }
+
   getDecimal (classification, label) {
     if (!this.decimals[classification].has(label)) return null
 

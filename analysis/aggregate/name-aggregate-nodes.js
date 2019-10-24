@@ -39,7 +39,7 @@ function getAggregateName (aggregateNode, sysInfo) {
 
     if (!nameCandidate) {
       const sysPath = sysInfo.pathSeparator.includes('\\') ? path.win32 : path
-      let filePath = userland[0].getFileNameWithoutModuleDirectory(sysInfo)
+      const filePath = userland[0].getFileNameWithoutModuleDirectory(sysInfo)
       nameCandidate = sysPath.basename(filePath)
       // we don't want a default name - let's take the containing dirname
       if (nameCandidate === 'index.js') {

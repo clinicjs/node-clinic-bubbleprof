@@ -76,6 +76,7 @@ class SvgNodeElement {
     this.dataPosition = parentContent.dataPosition
     this.dataType = dataType
   }
+
   setData (layoutNode) {
     this.decimalsArray = layoutNode.node.getDecimalsArray(this.dataType, this.dataPosition)
 
