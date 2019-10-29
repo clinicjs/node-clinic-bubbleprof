@@ -185,7 +185,8 @@ class ClinicBubbleprof extends events.EventEmitter {
       headerLogo: logoFile,
       headerText: 'Bubbleprof',
       nearFormLogo: nearFormLogoFile,
-      uploadId: outputFilename.split('/').pop().split('.html').shift()
+      uploadId: outputFilename.split('/').pop().split('.html').shift(),
+      body: '<div class="ncb-font-spinner-container"></div>'
     })
 
     pump(

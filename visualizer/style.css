@@ -112,6 +112,7 @@ body {
    * - Firefox adds an empty x scrollbar to sublayouts */
   overflow-y: scroll;
   overflow-x: hidden;
+  min-height: 100vh;
 }
 
 main#bubbleprof-main {
@@ -122,10 +123,6 @@ main#bubbleprof-main {
 }
 
 /* Global Typography */
-
-html {
-  font-family: sans-serif;
-}
 
 html * {
   box-sizing: border-box;
@@ -160,6 +157,19 @@ a.external-link:visited {
   text-decoration: none;
 }
 
+/* Header */
+.is-loading-font .nc-header {
+  opacity: 0;
+}
+
+.ncb-font-spinner-container {
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+}
 
 main {
   display: flex;
@@ -845,7 +855,7 @@ body[data-highlight-type='other'] #node-link svg:not(:hover) .type-other {
   color: var(--cyan);
   list-style: none;
   font-size: 8pt;
-  font-family: monospace;
+  font-family: var(--nc-font-family-monospace);
   white-space: pre-wrap;
   word-break: break-all;
 }
