@@ -206,6 +206,15 @@ test('Analysis - truncates when low on memory', function (t) {
   var traceAsyncId = 1
   var ticks = 0
 
+  const tmp = process.memoryUsage
+  // get there faster by pretending the heap is bigger
+  process.memoryUsage = () => ({
+    heapTotal: tmp().heapTotal * 2
+  })
+  t.on('end', () => {
+    process.memoryUsage = tmp
+  })
+
   const stackTrace = new stream.Readable({
     objectMode: true,
     read () {
