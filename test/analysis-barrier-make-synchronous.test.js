@@ -83,7 +83,7 @@ function createTreeStructure () {
       parentAggregateId: 1,
       children: [3, 4, 5, 6, 7, 8],
       type: 'PARENT',
-      frames: [ frameNodecore ]
+      frames: [frameNodecore]
     }]
   })
 
@@ -97,7 +97,7 @@ function createTreeStructure () {
       parentAggregateId: 2,
       children: [],
       type: 'STANDALONE_BARRIER',
-      frames: [ frameUserBranchA, frameUserMainA, frameExternal, frameNodecore ]
+      frames: [frameUserBranchA, frameUserMainA, frameExternal, frameNodecore]
     }]
   })
 
@@ -111,7 +111,7 @@ function createTreeStructure () {
       parentAggregateId: 2,
       children: [],
       type: 'BRANCH_A',
-      frames: [ frameUserBranchA, frameUserMainA, frameExternal, frameNodecore ]
+      frames: [frameUserBranchA, frameUserMainA, frameExternal, frameNodecore]
     }]
   })
 
@@ -125,7 +125,7 @@ function createTreeStructure () {
       parentAggregateId: 2,
       children: [],
       type: 'BRANCH_B',
-      frames: [ frameUserBranchB, frameUserMainA, frameExternal, frameNodecore ]
+      frames: [frameUserBranchB, frameUserMainA, frameExternal, frameNodecore]
     }]
   })
 
@@ -139,7 +139,7 @@ function createTreeStructure () {
       parentAggregateId: 2,
       children: [],
       type: 'BRANCH_A',
-      frames: [ frameUserBranchA, frameUserMainC, frameExternal, frameNodecore ]
+      frames: [frameUserBranchA, frameUserMainC, frameExternal, frameNodecore]
     }]
   })
 
@@ -153,7 +153,7 @@ function createTreeStructure () {
       parentAggregateId: 2,
       children: [],
       type: 'BRANCH_A',
-      frames: [ frameUserBranchA, frameUserMainB, frameExternal, frameNodecore ]
+      frames: [frameUserBranchA, frameUserMainB, frameExternal, frameNodecore]
     }]
   })
 
@@ -167,7 +167,7 @@ function createTreeStructure () {
       parentAggregateId: 2,
       children: [9],
       type: 'BRANCH_B',
-      frames: [ frameUserBranchB, frameUserMainB, frameExternal, frameNodecore ]
+      frames: [frameUserBranchB, frameUserMainB, frameExternal, frameNodecore]
     }]
   })
 
@@ -181,7 +181,7 @@ function createTreeStructure () {
       parentAggregateId: 8,
       children: [],
       type: 'REMAPPED',
-      frames: [ frameUserBranchB, frameUserMainC, frameExternal, frameNodecore ]
+      frames: [frameUserBranchB, frameUserMainC, frameExternal, frameNodecore]
     }]
   })
 

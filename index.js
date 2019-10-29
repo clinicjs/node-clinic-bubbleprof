@@ -7,15 +7,15 @@ const path = require('path')
 const pump = require('pump')
 const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
-const browserify = require('browserify')
-const envify = require('loose-envify/custom')
-const streamTemplate = require('stream-template')
 const joinTrace = require('node-trace-log-join')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
 const minifyInline = require('./lib/minify-inline')
+const buildJs = require('@nearform/clinic-common/scripts/build-js')
+const buildCss = require('@nearform/clinic-common/scripts/build-css')
+const mainTemplate = require('@nearform/clinic-common/templates/main')
 
 class ClinicBubbleprof extends events.EventEmitter {
   constructor (settings = {}) {
@@ -47,8 +47,14 @@ class ClinicBubbleprof extends events.EventEmitter {
       stdio.push('pipe')
     }
 
+    let NODE_PATH = path.join(__dirname, 'injects')
+    // use NODE_PATH to work around issues with spaces in inject path
+    if (process.env.NODE_PATH) {
+      NODE_PATH += `${process.platform === 'win32' ? ';' : ':'}${process.env.NODE_PATH}`
+    }
+
     const customEnv = {
-      NODE_PATH: path.join(__dirname, 'injects'),
+      NODE_PATH,
       NODE_OPTIONS: logArgs.join(' ') + (
         process.env.NODE_OPTIONS ? ' ' + process.env.NODE_OPTIONS : ''
       )
@@ -151,41 +157,37 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     dataFile.on('warning', msg => this.emit('warning', msg))
 
-    // create script-file stream
-    const b = browserify({
-      'basedir': __dirname,
-      'debug': this.debug,
-      'noParse': [fakeDataPath]
+    // build JS
+    const scriptFile = buildJs({
+      basedir: __dirname,
+      debug: this.debug,
+      fakeDataPath,
+      scriptPath,
+      beforeBundle: b => b.require(dataFile, {
+        file: fakeDataPath
+      })
     })
-    b.transform('brfs')
-    b.transform(envify({ DEBUG_MODE: this.debug }))
-    b.require(dataFile, {
-      'file': fakeDataPath
-    })
-    b.add(scriptPath)
-    let scriptFile = b.bundle()
 
-    // create style-file stream
-    const styleFile = fs.createReadStream(stylePath)
+    // build CSS
+    const styleFile = buildCss({
+      stylePath,
+      debug: this.debug
+    })
 
     // build output file
-    const outputFile = streamTemplate`
-      <!DOCTYPE html>
-      <meta charset="utf8">
-      <meta name="viewport" content="width=device-width">
-      <title>Clinic Bubbleprof</title>
-      <link rel="shortcut icon" type="image/png" href="${clinicFaviconBase64}">
-      <style>${styleFile}</style>
-      <div id="banner">
-        <a id="main-logo" href="https://github.com/nearform/node-clinic-bubbleprof" title="Clinic Bubbleprof on GitHub" target="_blank">
-          ${logoFile} <span>Bubbleprof</span>  
-        </a>
-        <a id="company-logo" href="https://nearform.com" title="nearForm" target="_blank">
-          ${nearFormLogoFile}
-        </a>
-      </div>
-      <script>${scriptFile}</script>
-    `
+    const outputFile = mainTemplate({
+      favicon: clinicFaviconBase64,
+      title: 'Clinic Bubbleprof',
+      styles: styleFile,
+      script: scriptFile,
+      headerLogoUrl: 'https://github.com/nearform/node-clinic-bubbleprof',
+      headerLogoTitle: 'Clinic Bubbleprof on GitHub',
+      headerLogo: logoFile,
+      headerText: 'Bubbleprof',
+      nearFormLogo: nearFormLogoFile,
+      uploadId: outputFilename.split('/').pop().split('.html').shift(),
+      body: '<div class="ncb-font-spinner-container"></div>'
+    })
 
     pump(
       outputFile,

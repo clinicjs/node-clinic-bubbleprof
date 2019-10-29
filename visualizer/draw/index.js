@@ -1,8 +1,11 @@
 'use strict'
-
 const BubbleprofUI = require('./bubbleprof-ui.js')
 const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
+const eyeIcon = require('@nearform/clinic-common/icons/eye-show')
+const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
+const arrowUpIcon = require('@nearform/clinic-common/icons/chevron-up')
+const closeIcon = require('@nearform/clinic-common/icons/close')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -21,13 +24,14 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
-    htmlContent: '<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"></a>'
+    htmlContent: `<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"><span>How to use this</span> ${extLinkIcon}</a>`
   })
 
   header.addContent(undefined, {
     htmlElementType: 'a',
     classNames: 'toggle-theme',
     title: 'Toggle between light and dark themes',
+    htmlContent: `${eyeIcon}`,
     eventHandler: {
       name: 'click',
       func: () => {
@@ -159,7 +163,6 @@ function drawOuterUI () {
 
   // Main panel - nodelink diagram
   const nodeLink = ui.sections.get('node-link')
-  nodeLink.addLoadingAnimation()
 
   const nodeLinkSVG = nodeLink.addContent('SvgContainer', { id: 'node-link-svg', svgBounds: {} })
 
@@ -172,9 +175,9 @@ function drawOuterUI () {
   })
 
   sideBar.addCollapseControl(true, {
-    htmlContent: '<div class="text">Details</div><div class="arrow"></div>',
+    htmlContent: `<div class="text">Details</div>${arrowUpIcon}`,
     classNames: 'bar',
-    closeIcon: '×',
+    closeIcon: closeIcon,
     collapseEvent: 'main-overlay',
     portraitOnly: true
   })
@@ -183,28 +186,27 @@ function drawOuterUI () {
     classNames: 'side-bar-item',
     defaultText: 'Enter a file or function name'
   })
-  lookup.addCollapseControl(true, { htmlContent: 'Search <span class="arrow"></span>' })
-  lookup.addLoadingAnimation({ hidden: true })
+  lookup.addCollapseControl(true, { htmlContent: `Search ${arrowUpIcon}` })
 
   const callbacksOverTime = sideBar.addContent('AreaChart', {
     id: 'area-chart',
     classNames: 'side-bar-item'
   })
-  callbacksOverTime.addCollapseControl(false, { htmlContent: 'Async operations <span class="arrow"></span>' })
+  callbacksOverTime.addCollapseControl(false, { htmlContent: `Async operations ${arrowUpIcon}` })
 
   const key = sideBar.addContent(undefined, {
     classNames: 'main-key side-bar-item',
     htmlContent: staticKeyHtml
   })
-  key.addCollapseControl(false, { htmlContent: 'Key <span class="arrow"></span>' })
+  key.addCollapseControl(false, { htmlContent: `Key ${arrowUpIcon}` })
 
   /* TODO: Add this when feature is implemented
   sideBar.addContent(undefined, { classNames: 'side-bar-item' })
-    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays <span class="arrow"></span>' })
+    .addCollapseControl(true, { htmlContent: 'Stack frames with longest delays ${arrowUpIcon}' })
   */
 
   // Footer
-  const footerCollapseHTML = '<div class="text">Call stacks</div><div class="arrow"></div>'
+  const footerCollapseHTML = `<div class="text">Call stacks</div>${arrowUpIcon}`
   const footer = ui.sections.get('footer')
   footer.addCollapseControl(true, {
     htmlContent: footerCollapseHTML,

@@ -25,6 +25,10 @@ class SvgNodeDiagram {
       // Called any time the SVG DOM elements need to be modified or redrawn
       this.draw()
     })
+
+    this.ui.on('selectNode', layoutNode => {
+      this.svgNodes.get(layoutNode.id).select()
+    })
   }
 
   initializeElements () {
@@ -60,11 +64,12 @@ class SvgNodeDiagram {
       .on('click', (layoutNode) => {
         d3.event.stopPropagation()
         this.ui.queueAnimation('selectGraphNode', (animationQueue) => {
-          const targetUI = this.ui.selectNode(layoutNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
-          animationQueue.execute()
+          this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+            animationQueue.execute()
+          })
         })
       })
   }
@@ -92,10 +97,6 @@ class SvgNodeDiagram {
       this.ui.isAnimating = false
       if (onComplete) onComplete()
     })
-  }
-
-  selectNodeById (id) {
-    this.svgNodes.get(id).select()
   }
 
   deselectAll () {

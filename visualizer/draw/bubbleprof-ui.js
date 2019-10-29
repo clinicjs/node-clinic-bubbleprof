@@ -6,6 +6,9 @@ const EventEmitter = require('events')
 const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
+const spinner = require('@nearform/clinic-common/spinner')
+const closeIcon = require('@nearform/clinic-common/icons/close')
+const backIcon = require('@nearform/clinic-common/icons/circle-arrow-left')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {
@@ -26,6 +29,7 @@ class BubbleprofUI extends EventEmitter {
     this.settings = Object.assign({}, defaultSettings, settings)
     this.mainContainer = {}
     this.layoutNode = null // Is assigned if this is a sublayout with .layoutNode
+    this.resizeSpinner = null
 
     function getOriginalUI (parentUI) {
       return parentUI.parentUI ? getOriginalUI(parentUI.parentUI) : parentUI
@@ -53,6 +57,7 @@ class BubbleprofUI extends EventEmitter {
       const nodeLinkSection = this.getNodeLinkSection()
       this.backBtn = nodeLinkSection.addContent(undefined, {
         hidden: true,
+        htmlContent: backIcon,
         classNames: 'back-btn'
       })
 
@@ -85,12 +90,13 @@ class BubbleprofUI extends EventEmitter {
 
     switch (this.settings.viewMode) {
       case 'fit':
-      case 'maximised':
+      case 'maximised': {
         const boundingBox = this.originalUI.getNodeLinkSection().d3Element.node().getBoundingClientRect()
         settings.svgHeight = boundingBox.height
         settings.svgWidth = boundingBox.width
         settings.allowStretch = false
         break
+      }
       case 'scroll':
       default:
         settings.allowStretch = true
@@ -128,6 +134,9 @@ class BubbleprofUI extends EventEmitter {
   **/
 
   createSubLayout (layoutNode, animationQueue = null) {
+    // Clear any highlighting
+    this.highlightNode(null)
+
     const sublayout = this.layout.createSubLayout(layoutNode, this.getSettingsForLayout())
     if (sublayout) {
       sublayout.generate()
@@ -166,7 +175,6 @@ class BubbleprofUI extends EventEmitter {
       } else {
         uiWithinSublayout.animate(true, onAnimationStep)
       }
-
       return uiWithinSublayout
     }
     return this
@@ -230,51 +238,71 @@ class BubbleprofUI extends EventEmitter {
 
   // Selects a node visible within current layout
   selectNode (layoutNode, animationQueue) {
-    const dataNode = layoutNode.node
-    const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
     this.outputFrames(null) // Make sure no frames are being output, without changing selection
+    this.emit('selectNode', layoutNode)
 
-    this.svgNodeDiagram.selectNodeById(layoutNode.id)
+    // The new layout generation below can be slow if >~1000 nodes, so make async
+    // so that on-screen changes from emitting selectNode are shown to user first.
+    return new Promise(resolve => window.requestAnimationFrame(() =>
+      // Needs two chained animation frames to reliably execute _after_ DOM repaint
+      window.requestAnimationFrame(() => {
+        // On Firefox, animation doesn't show unless it has already started, so we need a moment's delay
+        setTimeout(async () => {
+          const dataNode = layoutNode.node
+          const sameNode = this.selectedDataNode && this.selectedDataNode.uid === dataNode.uid
 
-    switch (dataNode.constructor.name) {
-      case 'ShortcutNode':
-        // Go up a level and start queuing animations, as shortcuts always point outside the node
-        if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
-        const uiParent = this.clearSublayout(animationQueue)
-        const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
-        return uiParent.jumpToNode(targetDataNode, animationQueue)
+          switch (dataNode.constructor.name) {
+            case 'ShortcutNode': {
+              // Go up a level and start queuing animations, as shortcuts always point outside the node
+              if (!animationQueue) animationQueue = new AnimationQueue('selectShortcutNode')
+              const uiParent = this.clearSublayout(animationQueue)
+              const targetDataNode = dataNode.targetLayoutNode ? dataNode.targetLayoutNode.node : dataNode.shortcutTo
+              const targetUI = await uiParent.jumpToNode(targetDataNode, animationQueue)
+              resolve(targetUI)
+              break
+            }
 
-      case 'AggregateNode':
-        this.selectedDataNode = dataNode
-        const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
-        if (animationQueue) {
-          animationQueue.on('complete', selectAggregate)
-        } else {
-          selectAggregate()
-        }
-        return this
+            case 'AggregateNode': {
+              this.selectedDataNode = dataNode
+              const selectAggregate = this.getAggregateNodeSelector(dataNode, layoutNode)
+              if (animationQueue) {
+                animationQueue.on('complete', selectAggregate)
+              } else {
+                selectAggregate()
+              }
+              resolve(this)
+              break
+            }
 
-      case 'ClusterNode':
-        if (dataNode.nodes.size === 1) {
-          // If there's only one aggregateNode, just select it
-          this.selectedDataNode = dataNode.nodes.values().next().value
-          const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
-          if (animationQueue) {
-            animationQueue.on('complete', selectAggregate)
-          } else {
-            selectAggregate()
+            case 'ClusterNode': {
+              if (dataNode.nodes.size === 1) {
+                // If there's only one aggregateNode, just select it
+                this.selectedDataNode = dataNode.nodes.values().next().value
+                const selectAggregate = this.getAggregateNodeSelector(this.selectedDataNode, layoutNode)
+                if (animationQueue) {
+                  animationQueue.on('complete', selectAggregate)
+                } else {
+                  selectAggregate()
+                }
+                resolve(this)
+              } else {
+                this.selectedDataNode = dataNode
+                resolve(sameNode ? this : this.createSubLayout(layoutNode, animationQueue))
+              }
+              break
+            }
+
+            case 'ArtificialNode': {
+              this.selectedDataNode = dataNode
+              const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
+              resolve(uiWithinCollapsedNode)
+              break
+            }
           }
-          return this
-        } else {
-          this.selectedDataNode = dataNode
-          return sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
-        }
-
-      case 'ArtificialNode':
-        this.selectedDataNode = dataNode
-        const uiWithinCollapsedNode = sameNode ? this : this.createSubLayout(layoutNode, animationQueue)
-        return uiWithinCollapsedNode
-    }
+          this.emit('selectNodeComplete')
+        }, 10)
+      })
+    ))
   }
 
   getAggregateNodeSelector (dataNode, layoutNode) {
@@ -285,7 +313,7 @@ class BubbleprofUI extends EventEmitter {
   }
 
   // Selects a node that may or may not be collapsed
-  jumpToNode (dataNode, animationQueue = new AnimationQueue('jumpToNode')) {
+  async jumpToNode (dataNode, animationQueue = new AnimationQueue('jumpToNode')) {
     if (this.layoutNode && this.layoutNode.node.uid === dataNode.uid) {
       animationQueue.execute()
       return this
@@ -298,33 +326,35 @@ class BubbleprofUI extends EventEmitter {
     // If we can't find the node in this sublayout, step up one level and try again
     if (!layoutNode) {
       this.clearSublayout(animationQueue)
-      return this.parentUI.jumpToNode(dataNode, animationQueue)
+      const targetUI = await this.parentUI.jumpToNode(dataNode, animationQueue)
+      return targetUI
     }
 
     if (layoutNode.node.uid === dataNode.uid) {
-      const uiInsideNode = this.selectNode(layoutNode, animationQueue)
+      const uiInsideNode = await this.selectNode(layoutNode, animationQueue)
       animationQueue.execute()
       return uiInsideNode
     } else {
       // dataNode is inside one or more levels of collapsedNode - recurse
-      const uiWithinCollapsedNode = this.selectNode(layoutNode, animationQueue)
-      return uiWithinCollapsedNode.jumpToNode(dataNode, animationQueue)
+      const uiWithinCollapsedNode = await this.selectNode(layoutNode, animationQueue)
+      const deepNestedUI = await uiWithinCollapsedNode.jumpToNode(dataNode, animationQueue)
+      return deepNestedUI
     }
   }
 
   // Should not be called directly, only via jumpToNode
-  jumpToAggregateNode (aggregateNode, animationQueue) {
+  async jumpToAggregateNode (aggregateNode, animationQueue) {
     this.highlightNode(null)
     const nodeId = aggregateNode.id
     const layoutNodes = this.layout.layoutNodes
     const layoutNodeInView = layoutNodes.get(nodeId)
     if (layoutNodeInView && layoutNodeInView.node.uid === aggregateNode.uid) {
-      const uiInsideNode = this.selectNode(layoutNodeInView)
+      const uiInsideNode = await this.selectNode(layoutNodeInView)
       animationQueue.execute()
       return uiInsideNode
     }
 
-    const uiWithinClusterNode = this.jumpToNode(aggregateNode.clusterNode, animationQueue)
+    const uiWithinClusterNode = await this.jumpToNode(aggregateNode.clusterNode, animationQueue)
     if (aggregateNode.clusterNode.nodes.size === 1) {
       return uiWithinClusterNode
     }
@@ -337,7 +367,7 @@ class BubbleprofUI extends EventEmitter {
         const clusterUID = aggregateNode.clusterNode && aggregateNode.clusterNode.uid
         throw new Error(`Could not find aggregate ${aggregateNode.uid} from cluster ${clusterUID} in view ${viewUID} with nodes ${context}`)
       }
-      currentUI = currentUI.selectNode(layoutNode, animationQueue)
+      currentUI = await currentUI.selectNode(layoutNode, animationQueue)
       if (layoutNode.node.uid === aggregateNode.uid) {
         animationQueue.execute()
         return currentUI
@@ -457,7 +487,7 @@ class BubbleprofUI extends EventEmitter {
     return null
   }
 
-  jumpToCollapsedNodeHash (hash, animationQueue = new AnimationQueue('jumpToCollapsedNodeHash')) {
+  async jumpToCollapsedNodeHash (hash, animationQueue = new AnimationQueue('jumpToCollapsedNodeHash')) {
     const nodeIds = hash.slice(1).split('-')
     let targetUI = this
 
@@ -476,30 +506,33 @@ class BubbleprofUI extends EventEmitter {
       const nodeId = nodeIds[i]
       if (nodeId.charAt(0) === 'x') {
         const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
-        targetUI = targetUI.selectNode(layoutNode, animationQueue)
+        targetUI = await targetUI.selectNode(layoutNode, animationQueue)
       } else {
         const clusterId = parseInt(nodeId.slice(1))
         const clusterNode = this.dataSet.clusterNodes.get(clusterId)
-        targetUI = targetUI.jumpToNode(clusterNode, animationQueue)
+        targetUI = await targetUI.jumpToNode(clusterNode, animationQueue)
       }
     }
+
     animationQueue.execute()
     this.originalUI.emit('navigation', { from: this, to: targetUI, silent: true })
   }
 
-  jumpToHash (hash, animationQueue) {
+  async jumpToHash (hash, animationQueue) {
     const id = parseInt(hash.slice(1))
     switch (hash.charAt(0)) {
-      case 'a':
+      case 'a': {
         const aggregateNode = this.dataSet.aggregateNodes.get(id)
-        const uiWithinAggregate = this.jumpToNode(aggregateNode, animationQueue)
+        const uiWithinAggregate = await this.jumpToNode(aggregateNode, animationQueue)
         this.originalUI.emit('navigation', { from: this, to: uiWithinAggregate, silent: true })
         break
-      case 'c':
+      }
+      case 'c': {
         const clusterNode = this.dataSet.clusterNodes.get(id)
-        const uiWithinCluster = this.jumpToNode(clusterNode, animationQueue)
+        const uiWithinCluster = await this.jumpToNode(clusterNode, animationQueue)
         this.originalUI.emit('navigation', { from: this, to: uiWithinCluster, silent: true })
         break
+      }
       case 'x':
         this.jumpToCollapsedNodeHash(window.location.hash, animationQueue)
         break
@@ -570,21 +603,24 @@ class BubbleprofUI extends EventEmitter {
 
     const debounceTime = 300
     const nodeLinkSection = this.getNodeLinkSection()
+    if (!this.layoutNode) {
+      this.resizeSpinner = spinner.attachTo(nodeLinkSection.d3Element.node())
+    }
 
-    const onWindowResizeBegin = debounce(() => {
-      nodeLinkSection.d3Element.classed('redraw', true)
-
-      // Use a shorter time period than the trailing debounce to prevent getting stuck
-    }, debounceTime * 0.9, { leading: true })
-
-    const onWindowResizeEnd = debounce(() => {
+    const onWindowResize = debounce(() => {
       this.redrawLayout()
-      nodeLinkSection.d3Element.classed('redraw', false)
+
+      if (this.resizeSpinner) {
+        this.resizeSpinner.hide()
+      }
     }, debounceTime)
 
     window.addEventListener('resize', () => {
-      onWindowResizeBegin()
-      onWindowResizeEnd()
+      if (this.resizeSpinner) {
+        this.resizeSpinner.show('Redrawing...')
+      }
+
+      onWindowResize()
     })
 
     if (this.originalUI === this) {
@@ -595,7 +631,7 @@ class BubbleprofUI extends EventEmitter {
   // Close button returns to the originalUI
   initializeCloseButton (closeBtn) {
     closeBtn.d3Element
-      .property('textContent', '×')
+      .html(closeIcon)
       .on('click', () => {
         this.queueAnimation('close', (animationQueue) => {
           this.traverseUp(null, { animationQueue })

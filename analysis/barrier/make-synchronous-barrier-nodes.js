@@ -35,7 +35,7 @@ class MakeSynchronousBarrierNodes extends stream.Transform {
       // Ensure that the new barrierNodes have the same aggregateNode parent.
       const mergeIdentifier = `${aggregateNode.parentAggregateId}\f${userCallSite.getPosition()}`
       if (!maybeMerges.has(mergeIdentifier)) {
-        maybeMerges.set(mergeIdentifier, [ childBarrierNode ])
+        maybeMerges.set(mergeIdentifier, [childBarrierNode])
       } else {
         maybeMerges.get(mergeIdentifier).push(childBarrierNode)
       }

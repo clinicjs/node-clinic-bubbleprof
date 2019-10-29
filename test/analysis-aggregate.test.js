@@ -168,7 +168,7 @@ test('Aggregate Node - aggregate.inspect', function (t) {
     frames: [
       { fileName: 'fileName.js', isToplevel: true }
     ],
-    sources: [ aggregateNode.sources[0].toJSON({ short: true }) ]
+    sources: [aggregateNode.sources[0].toJSON({ short: true })]
   })
 
   t.end()
@@ -266,7 +266,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
     frames: [
       { fileName: 'fileName.js', isToplevel: true }
     ],
-    sources: [ sourceNodeA.toJSON({ short: true }) ]
+    sources: [sourceNodeA.toJSON({ short: true })]
   })
 
   aggregateNode.addSourceNode(sourceNodeB)
@@ -319,7 +319,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
 
   const aggregateNode = new AggregateNode(1, 0)
   aggregateNode.addSourceNode(sourceNodeA)
-  t.strictDeepEqual(aggregateNode.getSourceNodes(), [ sourceNodeA ])
+  t.strictDeepEqual(aggregateNode.getSourceNodes(), [sourceNodeA])
 
   aggregateNode.addSourceNode(sourceNodeB)
   t.strictDeepEqual(aggregateNode.getSourceNodes(), [

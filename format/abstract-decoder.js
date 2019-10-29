@@ -45,7 +45,9 @@ class AbstractDecoder extends stream.Transform {
             this.push(
               msg
             )
-          } catch (_) {
+          } catch (_)
+          /* istanbul ignore next: if we knew how to trigger it we wouldn't need the `catch` at all! */
+          { // eslint-disable-line brace-style
             // Recover from the 16 bit truncation bug in the encoder
             if (chunk.length < MAX_CHUNK_SIZE) {
               this._nextMessageLength += 65536

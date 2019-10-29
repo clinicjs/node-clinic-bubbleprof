@@ -196,7 +196,7 @@ test('Barrier Node - barrier.toJSON', function (t) {
       mark: [null, null, null],
       name: null,
       frames: [],
-      sources: [ barrierNode.nodes[0].sources[0].toJSON({ short: true }) ]
+      sources: [barrierNode.nodes[0].sources[0].toJSON({ short: true })]
     }]
   })
 
@@ -341,7 +341,7 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
     children: [2],
     name: null,
     isWrapper: true,
-    nodes: [ aggregateNodeRoot.toJSON() ]
+    nodes: [aggregateNodeRoot.toJSON()]
   })
 
   barrierNodeNormal.initializeAsWrapper(aggregateNodeNormal, [3, 4])
@@ -352,7 +352,7 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
     children: [3, 4],
     name: null,
     isWrapper: true,
-    nodes: [ aggregateNodeNormal.toJSON() ]
+    nodes: [aggregateNodeNormal.toJSON()]
   })
 
   t.throws(
@@ -389,7 +389,7 @@ test('Barrier Node - barrier.initializeAsCombined', function (t) {
     children: [3, 4, 6, 7],
     name: null,
     isWrapper: false,
-    nodes: [ aggregateNodeA.toJSON(), aggregateNodeB.toJSON() ]
+    nodes: [aggregateNodeA.toJSON(), aggregateNodeB.toJSON()]
   })
   t.throws(
     function () {
@@ -480,7 +480,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     children: [3, 5],
     name: null,
     isWrapper: true,
-    nodes: [ barrierNodeParent.nodes[0].toJSON() ]
+    nodes: [barrierNodeParent.nodes[0].toJSON()]
   })
 
   t.strictDeepEqual(barrierNodeCat1Combined.toJSON(), {
@@ -501,7 +501,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     children: [],
     name: null,
     isWrapper: true,
-    nodes: [ barrierNodeCat2Node1.nodes[0].toJSON() ]
+    nodes: [barrierNodeCat2Node1.nodes[0].toJSON()]
   })
 
   t.throws(

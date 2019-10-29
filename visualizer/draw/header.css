@@ -1,0 +1,234 @@
+/* Header */
+#header {
+  width: 100%;
+  margin: 0 24px;
+  border-bottom: 1px solid var(--cyan);
+  font-size: var(--main-text-size);
+  height: var(--header-height);
+  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 11;
+  background: var(--main-bg-color);
+}
+
+#header .header-bar {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: row;
+}
+
+#header .panel {
+  margin: 0 12px;
+}
+
+#header .panel > label {
+  color: var(--cyan);
+}
+
+#header .highlight-bar {
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+#header .breadcrumb-bar {
+  margin-top: 0;
+  white-space: nowrap;
+  overflow-x: hidden;
+  width: calc(100% - var(--eye-icon-total-width));
+}
+
+#header .panel.breadcrumbs-panel {
+  margin: 0 6px;
+}
+
+#header .breadcrumb-bar:hover,
+#header .breadcrumb-bar:focus,
+#header .breadcrumb-bar:active {
+  overflow-x: auto;
+}
+
+#header .breadcrumb {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 3px 6px;
+  background-color: var(--reverse-contrast);
+}
+
+#header .breadcrumb:hover {
+  cursor: pointer;
+}
+
+#header .breadcrumb-separator {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+#header .interactive-key {
+  display: inline-block;
+  margin: 0 3px;
+  padding: 2px 4px 3px 2px;
+  border-bottom: 1px solid transparent;
+  background: var(--node-background);
+  border-radius: 10px;
+}
+
+#header .interactive-key label {
+  color: var(--max-contrast);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#header .interactive-key .interactive-key-icon {
+  display: inline-block;
+  height: 7px;
+  margin: 0 4px;
+}
+
+#header .interactive-key .interactive-key-icon .type-icon {
+  stroke-width: var(--type-width);
+}
+
+#header .interactive-key .interactive-key-icon .party-icon {
+  stroke-width: var(--party-width);
+}
+
+#header .interactive-key.grey-out label {
+  color: var(--primary-grey);
+}
+
+#header .interactive-key.grey-out .interactive-key-icon {
+  display: none;
+}
+
+#header .hover-box {
+  display: flex;
+  flex-direction: column-reverse;
+  color: var(--grey-highlight);
+  width: 255px;
+  margin-left: -25px;
+  margin-top: -12px;
+
+  /* Visual gap between label and hover box for neatness, without triggering mouseout */
+  border-top: 4px solid transparent;
+  background: none;
+}
+
+#header .hover-box .block {
+  background: var(--translucent-reverse);
+  cursor: default;
+}
+
+#header .hover-box.hidden {
+  display: none;
+}
+
+#header .hover-box .title-block.by-variable {
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+}
+
+#header .hover-box .collapse-control {
+  color: var(--max-contrast);
+  cursor: pointer;
+}
+
+#header .hover-box a:link,
+#header .hover-box a:visited {
+  color: var(--cyan);
+  text-decoration: none;
+}
+
+#header .hover-box a:hover,
+#header .hover-box a:focus {
+  color: var(--cyan-highlight);
+}
+
+#header .hover-box .collapsible-content-wrapper {
+  padding-top: 14px;
+}
+
+#header .hover-box .collapsible-content-wrapper ul {
+  padding-left: 16px;
+  margin-bottom: 0;
+}
+
+#header .toggle-theme {
+  height: 16px;
+  width: calc(var(--eye-icon-total-width) - 6px);
+  font-size: 24px;
+  cursor: pointer;
+  float: right;
+  margin: 0px 4px 0 2px;
+  color: var(--grey-highlight);
+}
+
+#header .help-link-block {
+  position: absolute;
+  right: 25px;
+  margin-top: 2px;
+}
+
+#header .help-link-block .help-link {
+  padding: 4px 6px;
+  display: block;
+  font-weight: bold;
+  text-decoration: none;
+  outline: 2px solid var(--banner-bg-color);
+  display: flex;
+}
+#header .help-link-block .help-link span{
+  margin-right: 0.3em;
+}
+
+/* unvisited link only */
+#header .help-link-block .help-link:link {
+  animation-name: pulseLink;
+  color: var(--max-contrast);
+  background-color: var(--banner-bg-color);
+}
+
+#header .help-link-block .help-link:link:after {
+  animation-name: pulseIcon;
+  color: var(--max-contrast);
+  /* border-left-color: var(--max-contrast);
+  border-bottom-color: var(--max-contrast); */
+}
+
+#header .help-link-block .help-link:link,
+#header .help-link-block .help-link:link:after {
+  animation-direction: alternate;
+  animation-duration: 0.8s;
+  animation-iteration-count: 8;
+  animation-timing-function: ease-in-out;
+}
+
+/* :visited can't apply animation-name: none; so use !important to stop animation */
+#header .help-link-block .help-link:visited {
+  color: var(--cyan) !important;
+  background-color: var(--main-bg-color) !important;
+  outline-color: var(--main-bg-color) !important;
+}
+#header .help-link-block .help-link:visited:after {
+  color: var(--cyan) !important;
+  border-left-color: var(--cyan) !important;
+  border-bottom-color: var(--cyan) !important;
+}
+
+@keyframes pulseLink {
+  100% {
+    background-color: var(--main-bg-color);
+    color: var(--cyan);
+    outline-color: var(--main-bg-color);
+  }
+}
+@keyframes pulseIcon {
+  100% {
+    color: var(--cyan);
+    border-left-color: var(--cyan);
+    border-bottom-color: var(--cyan);
+  }
+}

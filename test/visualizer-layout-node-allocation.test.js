@@ -296,8 +296,8 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
 
   const keys = [...layout.layoutNodes.keys()]
   const clumpId = 'x1'
-  t.deepEqual([ 1, 2, 3, 'x1', 5, 6, 8, 9, 10, 11 ], keys)
-  t.deepEqual([ 4, 7 ], layout.layoutNodes.get(clumpId).collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([1, 2, 3, 'x1', 5, 6, 8, 9, 10, 11], keys)
+  t.deepEqual([4, 7], layout.layoutNodes.get(clumpId).collapsedNodes.map(layoutNode => layoutNode.id))
 
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
@@ -359,9 +359,9 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
 
   const keys = [...layout.layoutNodes.keys()]
   const firstClumpId = 'x1'
-  t.deepEqual([ 1, 'x4', 5, 6, 'x1', 9, 11 ], keys)
-  t.deepEqual([ 8, 10 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
-  t.deepEqual([ 2, 3, 4, 7 ], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([1, 'x4', 5, 6, 'x1', 9, 11], keys)
+  t.deepEqual([8, 10], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([2, 3, 4, 7], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
 
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()

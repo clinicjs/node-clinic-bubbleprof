@@ -138,7 +138,7 @@ test('Cluster Node - cluster.toJSON', function (t) {
       mark: [null, null, null],
       name: null,
       frames: [],
-      sources: [ clusterNode.nodes[0].sources[0].toJSON({ short: true }) ]
+      sources: [clusterNode.nodes[0].sources[0].toJSON({ short: true })]
     }]
   })
 

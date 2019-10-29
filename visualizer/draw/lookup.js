@@ -2,6 +2,7 @@
 
 const HtmlContent = require('./html-content.js')
 const debounce = require('lodash/debounce')
+const spinner = require('@nearform/clinic-common/spinner')
 
 class Lookup extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
@@ -26,6 +27,8 @@ class Lookup extends HtmlContent {
 
   initializeElements () {
     super.initializeElements()
+
+    this.spinner = spinner.attachTo(document.querySelector('#side-bar'))
     this.d3Element.classed('lookup', true)
 
     this.d3LookupInput = this.d3ContentWrapper.append('input')
@@ -55,7 +58,7 @@ class Lookup extends HtmlContent {
     })
 
     this.d3Element.on('mouseout', () => {
-      this.clearLookup()
+      this.tryClearLookup()
     })
   }
 
@@ -76,16 +79,18 @@ class Lookup extends HtmlContent {
     // Try to clear after current event stack resolves (e.g. click on a suggestion)
     setTimeout(() => {
       // Arrow function to preserve `this` context
-      this.clearLookup()
+      this.tryClearLookup()
     })
   }
 
-  clearLookup () {
+  tryClearLookup () {
     // Only clear if the input doesn't have focus and the cursor isn't over any child of this element
     const hasHover = this.d3Element.selectAll(':hover').size()
     const hasFocus = this.d3LookupInput.node() === document.activeElement
-    if (hasHover || hasFocus) return
+    if (!hasHover && !hasFocus) this.clearLookup()
+  }
 
+  clearLookup () {
     this.d3Suggestions
       .classed('hidden', true)
       .selectAll('li').remove()
@@ -101,17 +106,15 @@ class Lookup extends HtmlContent {
   }
 
   lookupFrames (inputText) {
+    // Clear again in case an earlier lookup resolved while this one was still processing
     this.d3Suggestions.selectAll('li').remove()
 
     if (inputText === this.defaultText || inputText.length < 3) return
+    this.d3Suggestions.selectAll('li').remove()
+    this.spinner.show('searching...')
 
-    this.d3Element.classed('loading', true)
-
-    // Let the .loading message show then do the lookup in another tick
+    // Let the spinner show then do the lookup in another tick
     setTimeout(() => {
-      // Clear again in case an earlier lookup resolved while this one was still processing
-      this.d3Suggestions.selectAll('li').remove()
-
       const searchResults = this.deepFramesSearch(inputText)
       const matches = searchResults.length
       const pluralizer = matches === 1 ? '' : 'es'
@@ -124,9 +127,8 @@ class Lookup extends HtmlContent {
       for (const { frame, dataNode, layoutNode } of searchResults) {
         this.addSuggestion(frame, dataNode, layoutNode)
       }
-
-      this.d3Element.classed('loading', false)
-    })
+      this.spinner.hide()
+    }, 20)
   }
 
   addSuggestion (frame, dataNode, layoutNode) {
@@ -147,11 +149,13 @@ class Lookup extends HtmlContent {
         this.topmostUI.highlightNode(null)
       })
       .on('click', () => {
+        this.clearLookup()
         this.topmostUI.queueAnimation('searchFrame', (animationQueue) => {
-          const targetUI = this.topmostUI.jumpToNode(dataNode, animationQueue)
-          if (targetUI !== this.ui) {
-            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-          }
+          this.topmostUI.jumpToNode(dataNode, animationQueue).then(targetUI => {
+            if (targetUI !== this.ui) {
+              this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+            }
+          })
         })
       })
   }

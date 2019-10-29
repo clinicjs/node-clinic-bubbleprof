@@ -60,7 +60,7 @@ function createTreeStructure () {
       parentAggregateId: 1,
       children: [6, 7],
       type: 'PARENT_USER',
-      frames: [ frameUser, frameExternal, frameNodecore ]
+      frames: [frameUser, frameExternal, frameNodecore]
     }]
   })
 
@@ -74,7 +74,7 @@ function createTreeStructure () {
       parentAggregateId: 1,
       children: [8, 9],
       type: 'PARENT_EXTERNAL',
-      frames: [ frameExternal, frameNodecore ]
+      frames: [frameExternal, frameNodecore]
     }]
   })
 
@@ -88,13 +88,13 @@ function createTreeStructure () {
       parentAggregateId: 1,
       children: [10],
       type: 'PARENT_USER',
-      frames: [ frameUser, frameExternal, frameNodecore ]
+      frames: [frameUser, frameExternal, frameNodecore]
     }, {
       aggregateId: 5,
       parentAggregateId: 1,
       children: [11],
       type: 'PARENT_EXTERNAL',
-      frames: [ frameExternal, frameNodecore ]
+      frames: [frameExternal, frameNodecore]
     }]
   })
 
@@ -109,7 +109,7 @@ function createTreeStructure () {
         parentAggregateId: parentNode.barrierId,
         children: [],
         type: 'CHILD_USER',
-        frames: [ frameUser, frameExternal, frameNodecore ]
+        frames: [frameUser, frameExternal, frameNodecore]
       }]
     })
 
@@ -123,7 +123,7 @@ function createTreeStructure () {
         parentAggregateId: parentNode.barrierId,
         children: [],
         type: 'CHILD_EXTERNAL',
-        frames: [ frameExternal, frameNodecore ]
+        frames: [frameExternal, frameNodecore]
       }]
     })
 

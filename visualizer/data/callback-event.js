@@ -102,6 +102,7 @@ class TemporaryStatsItem {
     }
     this.node = node
   }
+
   applyIntervalsTotals () {
     this.node.stats.rawTotals = this.rawTotals
 
@@ -117,6 +118,7 @@ class FlattenedIntervals {
   constructor () {
     this.array = []
   }
+
   pushAndFlatten (interval) {
     // Clone interval data to mutate it without cross-referencing between cluster and aggregate
     const newInterval = new Interval(interval.start, interval.end, interval.isBetween)
@@ -128,6 +130,7 @@ class FlattenedIntervals {
     }
     this.array.push(newInterval)
   }
+
   getFlattenedTotal () {
     let total = 0
     for (var i = this.array.length - 1; i >= 0; i--) {
@@ -143,12 +146,15 @@ class Interval {
     this.end = end
     this.isBetween = isBetween
   }
+
   getClusterDataType () {
     return this.isBetween ? 'between' : 'within'
   }
+
   getDuration () {
     return this.end - this.start
   }
+
   applyAsync (clusterStatsItem, aggregateStatsItem) {
     clusterStatsItem.rawTotals.async[this.getClusterDataType()] += this.getDuration()
     aggregateStatsItem.rawTotals.async.between += this.getDuration()
@@ -159,6 +165,7 @@ class Interval {
     clusterStatsItem.intervals.overall.pushAndFlatten(this)
     aggregateStatsItem.intervals.overall.pushAndFlatten(this)
   }
+
   applySync (clusterStatsItem, aggregateStatsItem) {
     clusterStatsItem.rawTotals.sync += this.getDuration()
     aggregateStatsItem.rawTotals.sync += this.getDuration()

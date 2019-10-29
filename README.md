@@ -1,13 +1,13 @@
-# node-clinic-bubbleprof
+# Clinic.js Bubbleprof
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/nearform/node-clinic-bubbleprof.svg)](https://greenkeeper.io/)
 
 [![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![azureCI build status][azure-status]][azure-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
-Programmable interface to [clinic][clinic-url] bubbleprof. Learn more about clinic: https://clinicjs.org/
+Programmable interface to [Clinic.js][clinic-url] Bubbleprof. Learn more about Clinic.js: https://clinicjs.org/
 
-![banner](logo.png)
+![Screenshot](screenshot.png)
 
 ## Supported node versions
 
@@ -30,7 +30,7 @@ bubbleprof.collect(['node', './path-to-script.js'], function (err, filepath) {
 })
 ```
 
-To get started with bubbleprof you might want to take a look at the [examples
+To get started with Clinic.js Bubbleprof you might want to take a look at the [examples
 repo](https://github.com/nearform/node-clinic-bubbleprof-examples).
 
 ## Documentation

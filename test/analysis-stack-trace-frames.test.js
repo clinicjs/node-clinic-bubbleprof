@@ -79,7 +79,7 @@ test('Stack Trace - frame.isNodecore', function (t) {
 
   t.strictDeepEqual(
     frames.map((frame) => frame.isNodecore(root)),
-    [ true, true, false, false, false ]
+    [true, true, false, false, false]
   )
   t.end()
 })
@@ -116,12 +116,12 @@ test('Stack Trace - frame.isExternal', function (t) {
 
   t.strictDeepEqual(
     frames.map((frame) => frame.isExternal(root)),
-    [ true, true, true, true, true, false, true ]
+    [true, true, true, true, true, false, true]
   )
 
   t.strictDeepEqual(
     frames.map((frame) => frame.isExternal(modules)),
-    [ true, true, true, true, true, false, false ]
+    [true, true, true, true, true, false, false]
   )
 
   t.end()
@@ -621,12 +621,12 @@ test('Stack Trace - frames.get', function (t) {
 
   t.throws(
     () => frames.get(2),
-    new RangeError(`index 2 is out of range in frames array of length 2`)
+    new RangeError('index 2 is out of range in frames array of length 2')
   )
 
   t.throws(
     () => frames.get(-1),
-    new RangeError(`index -1 is out of range in frames array of length 2`)
+    new RangeError('index -1 is out of range in frames array of length 2')
   )
 
   t.end()

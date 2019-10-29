@@ -83,8 +83,17 @@ class Frame {
   }
 
   getModuleName (systemInfo) {
-    const filePath = this.fileName.split(systemInfo.pathSeparator)
-    if (!filePath.includes('node_modules')) return null
+    let filePath = this.fileName.split(systemInfo.pathSeparator)
+    // For eval frames, use the source file listed in the `evalOrigin`
+    if (this.fileName === '' && this.isEval) {
+      const m = this.evalOrigin.match(/\((.*?):\d+:\d+\)$/)
+      if (m) {
+        filePath = m[1].split(systemInfo.pathSeparator)
+      }
+    }
+    if (!filePath.includes('node_modules')) {
+      return null
+    }
 
     // Find the last node_modules directory, and count how many were
     // encountered.

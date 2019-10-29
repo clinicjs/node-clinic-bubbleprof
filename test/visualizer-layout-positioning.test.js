@@ -250,9 +250,9 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets', functi
   layout.processHierarchy({ collapseNodes: true })
 
   const keys = [...layout.layoutNodes.keys()]
-  t.deepEqual([ 1, 'x3', 11, 'x1', 5, 7, 9, 10, 12 ], keys)
-  t.deepEqual([ 4, 6 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
-  t.deepEqual([ 2, 3, 8 ], layout.layoutNodes.get('x3').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([1, 'x3', 11, 'x1', 5, 7, 9, 10, 12], keys)
+  t.deepEqual([4, 6], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([2, 3, 8], layout.layoutNodes.get('x3').collapsedNodes.map(layoutNode => layoutNode.id))
 
   // Arbitrary Map order being issue here
   // const clumpId = [...layout.layoutNodes.keys()].find(key => ['clump', 2, 3, 8].every(c => ('' + key).includes(c)))
@@ -292,9 +292,9 @@ test('Visualizer layout - positioning - pyramid - can handle collapsets with clu
   layout.processHierarchy({ collapseNodes: true })
 
   const keys = [...layout.layoutNodes.keys()]
-  t.deepEqual([ 1, 'x4', 11, 'x1', 5, 7, 9, 10 ], keys)
-  t.deepEqual([ 4, 6 ], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
-  t.deepEqual([ 2, 12, 3, 8 ], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([1, 'x4', 11, 'x1', 5, 7, 9, 10], keys)
+  t.deepEqual([4, 6], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.deepEqual([2, 12, 3, 8], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
 
   const positioning = layout.positioning
   positioning.formClumpPyramid()

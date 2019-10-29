@@ -40,6 +40,7 @@ class LineCoordinates {
     const degrees = LineCoordinates.radiansToDegrees(radians)
     this.degrees = LineCoordinates.enforceDegreesRange(degrees)
   }
+
   applyDegrees (degrees) {
     this.degrees = LineCoordinates.enforceDegreesRange(degrees)
     this.radians = LineCoordinates.degreesToRadians(degrees)

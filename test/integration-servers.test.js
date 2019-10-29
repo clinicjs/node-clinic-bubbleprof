@@ -3,9 +3,14 @@
 const test = require('tap').test
 const path = require('path')
 const async = require('async')
+const semver = require('semver')
 const endpoint = require('endpoint')
 const CollectAndRead = require('./collect-and-read.js')
 const analysis = require('../analysis/index.js')
+
+const skipHTTPPARSER = semver.gte(process.version, '12.0.0')
+  ? 'Node 12 uses a new http parser that does not generate HTTPPARSER aggregate nodes'
+  : false
 
 function runServer (name, callback) {
   const serverPath = path.resolve(__dirname, 'servers', name + '.js')
@@ -30,7 +35,7 @@ function runServer (name, callback) {
   })
 }
 
-test('basic server aggregates HTTPPARSER', function (t) {
+test('basic server aggregates HTTPPARSER', { skip: skipHTTPPARSER }, function (t) {
   runServer('basic', function (err, nodes) {
     if (err) return t.ifError(err)
 
@@ -51,7 +56,7 @@ test('basic server aggregates HTTPPARSER', function (t) {
   })
 })
 
-test('latency server has http.connection.end cluster', function (t) {
+test('latency server has http.connection.end cluster', { skip: skipHTTPPARSER }, function (t) {
   runServer('latency', function (err, nodes) {
     if (err) return t.ifError(err)
 

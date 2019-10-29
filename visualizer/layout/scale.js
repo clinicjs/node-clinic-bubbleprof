@@ -10,6 +10,7 @@ class Scale {
     this.layoutNodes = null // set later
     this.heightMultiplier = 1 // applied to calculations here, and to threshold in collapse-layout.js
   }
+
   // This simplified computation is necessary to ensure correct leaves order
   // when calculating the final scale factor
   calculatePreScaleFactor (collapsed = false) {
@@ -31,6 +32,7 @@ class Scale {
 
     this.prescaleFactor = scaleByHeight * (isStretchMode ? 1 : this.heightMultiplier) / (longest || 1)
   }
+
   calculateScaleFactor (collapsed = false) {
     // No need to apply the height multiplier after it increased the collapse threshold, squashing excessive nodes
     const multiplier = collapsed ? 1 : this.heightMultiplier

@@ -13,15 +13,19 @@ class LayoutNode {
     this.parent = parent
     this.children = []
   }
+
   getBetweenTime () {
     return this.node.getBetweenTime()
   }
+
   getWithinTime () {
     return this.node.getWithinTime()
   }
+
   getTotalTime () {
     return this.getBetweenTime() + this.getWithinTime()
   }
+
   validateStat (...args) {
     return this.node.validateStat(...args)
   }
@@ -58,6 +62,7 @@ class CollapsedLayoutNode {
     // Create new mark to avoid modifying the mark of the node this was based on
     this.node.mark = new Map().set('party', namesByPriority[0].party)
   }
+
   getNamesByPriority (dataNodes) {
     // Where names appear multiple times, reduce down to one total for that name
     const nodeNamesMap = dataNodes.reduce((namesMap, dataNode) => {
@@ -81,6 +86,7 @@ class CollapsedLayoutNode {
       return getWeightedNameTime(b) - getWeightedNameTime(a)
     })
   }
+
   getCollapsedName (namesByPriority) {
     let fullName = ''
     let index = 0
@@ -92,25 +98,34 @@ class CollapsedLayoutNode {
     }
     return namesByPriority.length > index ? fullName + ' & …' : fullName
   }
+
   getBetweenTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getBetweenTime(), 0)
   }
+
   getWithinTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getWithinTime(), 0)
   }
+
+  /* istanbul ignore next: currently unused */
   getSyncTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getSyncTime(), 0)
   }
+
+  /* istanbul ignore next: currently unused */
   getAsyncTime () {
     return this.collapsedNodes.reduce((total, layoutNode) => total + layoutNode.node.getAsyncTime(), 0)
   }
+
   getTotalTime () {
     return this.getBetweenTime() + this.getWithinTime()
   }
+
   validateStat (num, statType = '', aboveZero = false) {
     const targetDescription = `For ${this.constructor.name} ${this.id}${statType ? ` ${statType}` : ''}`
     return validateNumber(num, targetDescription, aboveZero)
   }
+
   applyDecimals (otherNode) {
     this.node.aggregateDecimals(otherNode, 'type', 'between')
     this.node.aggregateDecimals(otherNode, 'type', 'within')

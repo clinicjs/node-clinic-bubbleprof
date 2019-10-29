@@ -13,11 +13,35 @@ class HoverBox extends HtmlContent {
       fixedOrientation: null
     }, contentProperties))
     validateKey(this.contentProperties.type, ['node-link', 'tool-tip', 'static'])
-    if (this.contentProperties.type === 'node-link' && !this.contentProperties.svg) {
-      throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
-    }
+    if (this.contentProperties.type === 'node-link') {
+      if (!this.contentProperties.svg) throw new Error('Node-link HoverBox requires contentProperties.svg to be defined')
 
+      this.ui.on('selectNode', layoutNode => {
+        if (!layoutNode || layoutNode.node.constructor.name === 'AggregateNode' ||
+          (layoutNode.node.constructor.name === 'ClusterNode' && layoutNode.node.nodes.size === 1)) {
+          // Don't display busy indicator if we'll just show frames, won't be cancelled by setTopmostUI
+          return
+        }
+
+        // Immediately change click message so if select is slow, it's clear something is happening
+        this.d3TitleBlock.classed('is-loading', true)
+
+        const newText = this.d3ClickMessage.text().replace('Click to expand', 'Expanding') + '...'
+        this.d3ClickMessage.text(newText)
+      })
+
+      this.ui.on('selectNodeComplete', () => {
+        let newText = this.d3ClickMessage.text()
+        newText = newText.replace('Expanding', 'Click to expand')
+        newText = newText.replace('...', '')
+        this.d3ClickMessage.text(newText)
+        this.d3TitleBlock.classed('is-loading', false)
+      })
+    }
     this.isHidden = true
+
+    this.layoutNode = null
+    this.drawnLayoutNode = null
   }
 
   initializeElements () {
@@ -56,6 +80,7 @@ class HoverBox extends HtmlContent {
 
     this.ui.on('hover', layoutNode => {
       if (layoutNode) this.layoutNode = layoutNode
+      if (this.asyncOperationsChart) this.asyncOperationsChart.applyLayoutNode(layoutNode)
       this.changeVisibility(!!layoutNode)
     })
   }
@@ -162,7 +187,10 @@ class HoverBox extends HtmlContent {
     super.draw()
 
     if (this.contentProperties.type === 'node-link') {
-      if (this.layoutNode) this.nodeLinkDraw(this.layoutNode)
+      if (this.layoutNode && this.layoutNode !== this.drawnLayoutNode) {
+        this.nodeLinkDraw(this.layoutNode)
+        this.drawnLayoutNode = this.layoutNode
+      }
       return
     }
 
@@ -192,8 +220,6 @@ class HoverBox extends HtmlContent {
     this.d3Element.on('mouseleave', () => {
       this.ui.highlightNode(null)
     })
-
-    this.asyncOperationsChart.applyLayoutNode(layoutNode)
 
     // Ensure off-bottom class is not applied before calculating if it's needed
     this.d3Element.classed('off-bottom', false)
@@ -228,21 +254,23 @@ class HoverBox extends HtmlContent {
         this.d3Element.attr('name', 'shortcut-node')
         break
       case 'ArtificialNode':
-      case 'ClusterNode':
+      case 'ClusterNode': {
         const nodesCount = nodeType === 'ClusterNode' ? dataNode.nodes.size : layoutNode.collapsedNodes.length
         this.d3ClickMessage.text(`Click to expand ${nodesCount} grouped items`)
         this.d3Element.attr('name', 'cluster-node')
         break
+      }
     }
     const clickHandler = () => {
       d3.event.stopPropagation()
-      this.ui.highlightNode(null)
       this.ui.queueAnimation('selectHoverBoxNode', (animationQueue) => {
-        const targetUI = this.ui.selectNode(layoutNode, animationQueue)
-        if (targetUI !== this.ui) {
-          this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
-        }
-        animationQueue.execute()
+        this.ui.selectNode(layoutNode, animationQueue).then(targetUI => {
+          this.ui.highlightNode(null)
+          if (targetUI !== this.ui) {
+            this.ui.originalUI.emit('navigation', { from: this.ui, to: targetUI })
+          }
+          animationQueue.execute()
+        })
       })
     }
     this.d3TitleBlock.on('click', clickHandler)

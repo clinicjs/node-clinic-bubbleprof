@@ -23,7 +23,6 @@ class HtmlContent {
     this.isHidden = this.contentProperties.hidden
 
     this.collapseControl = null
-    this.loadingAnimation = null
 
     this.content = new Map()
     this.contentIds = []
@@ -69,11 +68,6 @@ class HtmlContent {
     this.draw()
   }
 
-  addLoadingAnimation (contentProperties = {}) {
-    this.loadingAnimation = new LoadingAnimation(this, contentProperties)
-    return this.loadingAnimation
-  }
-
   // Initial creation of elements independent of data and layout, before .setData() is called
   initializeElements (skipContent = false) {
     const {
@@ -106,8 +100,6 @@ class HtmlContent {
       }
     }
 
-    if (this.loadingAnimation) this.loadingAnimation.initializeElements()
-
     if (id) this.d3Element.attr('id', id)
     if (title) this.d3Element.attr('title', title)
     if (classNames) this.d3Element.classed(classNames, true)
@@ -128,7 +120,6 @@ class HtmlContent {
     this.d3Element.classed('hidden', this.isHidden)
 
     if (this.collapseControl) this.collapseControl.draw()
-    if (this.loadingAnimation) this.loadingAnimation.draw()
 
     if (!this.isHidden) {
       for (const item of this.content.values()) {
@@ -151,6 +142,7 @@ class CollapseControl extends HtmlContent {
     this.portraitOnly = contentProperties.portraitOnly || false
     this.collapseClassName = this.portraitOnly ? 'portrait-collapsed' : 'collapsed'
   }
+
   initializeElements () {
     super.initializeElements()
 
@@ -169,21 +161,10 @@ class CollapseControl extends HtmlContent {
       this.parentContent.collapseToggle()
     })
   }
+
   draw () {
     super.draw()
     this.parentContent.d3Element.classed(this.collapseClassName, this.isCollapsed)
-  }
-}
-
-class LoadingAnimation extends HtmlContent {
-  initializeElements () {
-    super.initializeElements()
-    this.d3Element.classed('loading-indicator', true)
-
-    this.ui.on('complete', () => {
-      this.isHidden = true
-      this.draw()
-    })
   }
 }
 

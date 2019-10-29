@@ -7,7 +7,8 @@ const {
   validateKey,
   validateNumber,
   uniqueMapKey,
-  uniqueObjectKey
+  uniqueObjectKey,
+  removeFromCounter
 } = require('../visualizer/validation.js')
 
 test('Visualizer validation - isNumber', function (t) {
@@ -76,8 +77,8 @@ test('Visualizer validation - uniqueMapKey', function (t) {
   t.equals(uniqueMapKey('a', testMap), 'a_1')
   t.equals(uniqueMapKey('b', testMap), 'b_2')
   t.equals(uniqueMapKey(99, testMap), '99_1')
-  t.equals(uniqueMapKey(objectKey, testMap), '[object Object]_1')
   t.equals(uniqueMapKey(objectKey2, testMap), objectKey2)
+  t.equals(uniqueMapKey(objectKey, testMap), '[object Object]_1')
 
   t.equals(uniqueMapKey('a', testMap, '', 1), 'a1')
   t.equals(uniqueMapKey('b', testMap, '_', 1), 'b_2')
@@ -90,6 +91,19 @@ test('Visualizer validation - uniqueMapKey', function (t) {
 
   testMap.set(uniqueMapKey('a', testMap), 7)
   t.equals(uniqueMapKey('a', testMap), 'a_3')
+
+  testMap.set(uniqueMapKey('a', testMap), true)
+  testMap.set(uniqueMapKey('a', testMap), true)
+  testMap.set(uniqueMapKey('a', testMap), true)
+  t.ok(testMap.has('a_5'))
+  t.notOk(testMap.has('a_6'))
+
+  testMap.delete('a_3')
+  removeFromCounter('a_3', testMap, 'a', '_')
+  t.equals(uniqueMapKey('a', testMap), 'a_3')
+  testMap.set(uniqueMapKey('a', testMap), true)
+  t.equals(uniqueMapKey('a', testMap), 'a_6')
+
   t.end()
 })
 

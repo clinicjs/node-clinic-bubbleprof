@@ -46,6 +46,7 @@ class Stem {
     }
     this.update()
   }
+
   update () {
     if (!this.lengths) {
       const absolute = this.getAbsoluteLength()
@@ -68,6 +69,7 @@ class Stem {
       this.lengths.scaledTotal = this.lengths.absolute + (this.lengths.scalable * this.layout.scale.scaleFactor)
     }
   }
+
   getAbsoluteLength (stemLength = this.ancestors.ids.length) {
     const {
       labelMinimumSpace,
@@ -76,16 +78,19 @@ class Stem {
     } = this.layout.settings
     return ((labelMinimumSpace * 2) + lineWidth) * stemLength + shortcutLength * this.shortcutsInStem
   }
+
   getValidationMessage () {
     return `for stem with:
     ancestor ids [${this.ancestors.ids.join(', ')}], length ${this.ancestors.ids.length});
     leaves [${this.leaves.ids.join(', ')}], length ${this.leaves.ids.length};
     `
   }
+
   pickMostAccurateTotal () {
     const { rawTotal, prescaledTotal, scaledTotal } = this.lengths
     return scaledTotal || prescaledTotal || rawTotal
   }
+
   static pickLeavesByLongest (layoutNodes) {
     const byLongest = (leafA, leafB) => leafB.stem.pickMostAccurateTotal() - leafA.stem.pickMostAccurateTotal()
     const byLeafOnly = layoutNode => !layoutNode.children.length
