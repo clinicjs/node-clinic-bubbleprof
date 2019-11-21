@@ -34,7 +34,7 @@
   "dependencies": {
     "@nearform/clinic-common": "^2.0.0",
     "@nearform/trace-events-parser": "^1.0.4",
-    "array-flatten": "^2.1.1",
+    "array-flatten": "^3.0.0",
     "async": "^3.0.1",
     "d3-axis": "^1.0.8",
     "d3-drag": "^1.2.3",
