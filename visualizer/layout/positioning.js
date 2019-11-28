@@ -2,7 +2,7 @@
 
 const { pickLeavesByLongest } = require('./stems.js')
 const NodeAllocation = require('./node-allocation.js')
-const arrayFlatten = require('array-flatten')
+const arrayFlatten = require('array-flatten').flatten
 
 // Modified version of https://gist.github.com/samgiles/762ee337dff48623e729#gistcomment-2128332
 

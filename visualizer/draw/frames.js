@@ -3,7 +3,7 @@ const closeIcon = require('@nearform/clinic-common/icons/close')
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')
-const arrayFlatten = require('array-flatten')
+const arrayFlatten = require('array-flatten').flatten
 
 class Frames extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {
