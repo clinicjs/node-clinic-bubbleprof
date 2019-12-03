@@ -134,6 +134,11 @@ class Analysis extends stream.PassThrough {
   start (systemInfo, stackTraceReader, traceEventReader) {
     analysisPipeline(systemInfo, stackTraceReader, traceEventReader, this)
   }
+
+  // return a stream that will turn the output of this Analysis into JSON.
+  stringify () {
+    return this.pipe(new Stringify(this))
+  }
 }
 
 class Stringify extends stream.Transform {
@@ -169,7 +174,7 @@ class Stringify extends stream.Transform {
   }
 }
 
-function analysis (systemInfoReader, stackTraceReader, traceEventReader, opts) {
+function analysis (systemInfoReader, stackTraceReader, traceEventReader) {
   const result = new Analysis()
 
   systemInfoReader.pipe(endpoint({ objectMode: true }, function (err, data) {
@@ -178,11 +183,11 @@ function analysis (systemInfoReader, stackTraceReader, traceEventReader, opts) {
     result.start(systemInfo, stackTraceReader, traceEventReader)
   }))
 
-  const stream = opts && opts.stringify ? result.pipe(new Stringify(result)) : result
+  result.on('truncate', () => {
+    result.emit('warning', 'Truncating input data due to memory constraints')
+  })
 
-  result.on('truncate', () => stream.emit('warning', 'Truncating input data due to memory constraints'))
-
-  return stream
+  return result
 }
 
 module.exports = analysis

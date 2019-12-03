@@ -117,8 +117,34 @@ class ClinicBubbleprof extends events.EventEmitter {
     })
   }
 
-  visualize (dataDirname, outputFilename, callback) {
-    this._visualize(dataDirname, outputFilename, (err) => {
+  analyze (dataDirname) {
+    // Load data
+    const paths = getLoggingPaths({ path: dataDirname })
+    const systemInfoReader = fs.createReadStream(paths['/systeminfo'])
+      .pipe(new SystemInfoDecoder())
+    const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
+      .pipe(new StackTraceDecoder())
+    const traceEventReader = fs.createReadStream(paths['/traceevent'])
+      .pipe(new TraceEventDecoder())
+
+    // create analysis
+    const result = analysis(systemInfoReader, stackTraceReader, traceEventReader)
+
+    return {
+      systemInfoReader,
+      stackTraceReader,
+      traceEventReader,
+      analysis: result
+    }
+  }
+
+  visualize (analysisData, outputFilename, callback) {
+    // back compat
+    if (typeof analysisData === 'string') {
+      analysisData = this.analyze(analysisData)
+    }
+
+    this._visualize(analysisData, outputFilename, (err) => {
       if (err || this.debug) return callback(err)
 
       // Having a hard time getting V8 to GC the streams from the _visualize call.
@@ -129,7 +155,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     })
   }
 
-  _visualize (dataDirname, outputFilename, callback) {
+  _visualize (analysisData, outputFilename, callback) {
     const fakeDataPath = path.join(__dirname, 'visualizer', 'data.json')
     const stylePath = path.join(__dirname, 'visualizer', 'style.css')
     const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
@@ -138,24 +164,15 @@ class ClinicBubbleprof extends events.EventEmitter {
     const clinicFaviconPath = path.join(__dirname, 'visualizer', 'clinic-favicon.png.b64')
 
     // Load data
-    const paths = getLoggingPaths({ path: dataDirname })
-    const systemInfoReader = fs.createReadStream(paths['/systeminfo'])
-      .pipe(new SystemInfoDecoder())
-    const stackTraceReader = fs.createReadStream(paths['/stacktrace'])
-      .pipe(new StackTraceDecoder())
-    const traceEventReader = fs.createReadStream(paths['/traceevent'])
-      .pipe(new TraceEventDecoder())
+    const result = analysisData.analysis
 
-    // create dataFile
-    const dataFile = analysis(
-      systemInfoReader, stackTraceReader, traceEventReader, { stringify: true }
-    )
     // add logos
     const logoFile = fs.createReadStream(logoPath)
     const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
     const clinicFaviconBase64 = fs.createReadStream(clinicFaviconPath)
 
-    dataFile.on('warning', msg => this.emit('warning', msg))
+    result.on('warning', msg => this.emit('warning', msg))
+    const dataFile = result.stringify()
 
     // build JS
     const scriptFile = buildJs({
