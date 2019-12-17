@@ -27,7 +27,7 @@
     "snazzy": "^8.0.0",
     "standard": "^14.3.1",
     "startpoint": "^0.3.2",
-    "tap": "14.10.1"
+    "tap": "^14.10.3"
   },
   "keywords": [],
   "license": "GPL-3.0-or-later",
