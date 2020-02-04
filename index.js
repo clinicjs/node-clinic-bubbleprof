@@ -36,8 +36,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     // run program, but inject the sampler
     const logArgs = [
       '-r', 'no-cluster.js',
-      '-r', 'logger.js',
-      '--trace-events-enabled', '--trace-event-categories', 'node.async_hooks'
+      '-r', 'logger.js'
     ]
 
     const stdio = ['inherit', 'inherit', 'inherit']

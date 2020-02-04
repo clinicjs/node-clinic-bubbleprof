@@ -2,11 +2,18 @@
 
 const fs = require('fs')
 const makeDir = require('mkdirp')
+const traceEvents = require('trace_events')
 const asyncHooks = require('async_hooks')
 const stackTrace = require('../collect/stack-trace.js')
 const systemInfo = require('../collect/system-info.js')
 const StackTraceEncoder = require('../format/stack-trace-encoder.js')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
+
+const trace = traceEvents.createTracing({
+  categories: ['node.async_hooks']
+})
+
+trace.enable()
 
 // create dirname
 const paths = getLoggingPaths({
