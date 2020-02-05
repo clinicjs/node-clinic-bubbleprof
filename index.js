@@ -22,6 +22,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     super()
 
     const {
+      timeoutDelay = 0,
       detectPort = false,
       debug = false,
       dest = null
@@ -30,6 +31,7 @@ class ClinicBubbleprof extends events.EventEmitter {
     this.detectPort = detectPort
     this.debug = debug
     this.path = dest
+    this.timeoutDelay = timeoutDelay
   }
 
   collect (args, callback) {
@@ -57,7 +59,8 @@ class ClinicBubbleprof extends events.EventEmitter {
       NODE_PATH,
       NODE_OPTIONS: logArgs.join(' ') + (
         process.env.NODE_OPTIONS ? ' ' + process.env.NODE_OPTIONS : ''
-      )
+      ),
+      NODE_CLINIC_BUBBLEPROF_TIMEOUT_DELAY: this.timeoutDelay
     }
 
     if (this.path) {

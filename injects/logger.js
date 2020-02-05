@@ -53,7 +53,11 @@ const hook = asyncHooks.createHook({
     skipAsyncIds.delete(asyncId)
   }
 })
-hook.enable()
+
+// allow time delay to be specified before we start collecting data
+setTimeout(() => {
+  hook.enable()
+}, process.env.NODE_CLINIC_BUBBLEPROF_TIMEOUT_DELAY)
 
 // before process exits, flush the encoded data to the sample file
 process.once('beforeExit', function () {
