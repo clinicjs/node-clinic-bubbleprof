@@ -42,10 +42,13 @@ const hook = asyncHooks.createHook({
 
     // Track async events that comes from this async operation
     exports.skipThis = true
-    encoder.write({
-      asyncId: asyncId,
-      frames: stackTrace(2)
-    })
+    // allow time delay to be specified before we start collecting data
+    setTimeout(() => {
+      encoder.write({
+        asyncId: asyncId,
+        frames: stackTrace(2)
+      })
+    }, process.env.NODE_CLINIC_BUBBLEPROF_TIMEOUT_DELAY)
     exports.skipThis = false
   },
 
@@ -54,10 +57,7 @@ const hook = asyncHooks.createHook({
   }
 })
 
-// allow time delay to be specified before we start collecting data
-setTimeout(() => {
-  hook.enable()
-}, process.env.NODE_CLINIC_BUBBLEPROF_TIMEOUT_DELAY)
+hook.enable()
 
 // before process exits, flush the encoded data to the sample file
 process.once('beforeExit', function () {
