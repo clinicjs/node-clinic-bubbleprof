@@ -22,7 +22,7 @@
     "express": "^4.16.2",
     "inspectpoint": "^0.2.2",
     "rimraf": "^3.0.0",
-    "semver": "^7.0.0",
+    "semver": "7.1.2",
     "shuffle-array": "^1.0.1",
     "snazzy": "^8.0.0",
     "standard": "^14.3.1",
