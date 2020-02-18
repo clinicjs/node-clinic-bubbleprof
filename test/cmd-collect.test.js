@@ -83,7 +83,7 @@ test('collect command produces data files with content', function (t) {
         // Node.js 13 does not appear to show this `resolve()` call in its trace event log.
           : semver.satisfies(process.version, '>= 12.16.0 < 13.0.0')
             ? ['PROMISE', 'Timeout']
-            : ['Timeout'] // default
+            : ['Timeout']
 
       t.strictDeepEqual(asyncOperationTypes.sort(), expected)
 
