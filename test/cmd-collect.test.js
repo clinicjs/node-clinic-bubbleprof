@@ -3,6 +3,7 @@
 const test = require('tap').test
 const async = require('async')
 const endpoint = require('endpoint')
+const semver = require('semver')
 const CollectAndRead = require('./collect-and-read.js')
 
 test('collect command produces data files with content', function (t) {
@@ -74,15 +75,17 @@ test('collect command produces data files with content', function (t) {
         asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
-      const majorVersion = parseInt(process.version.match(/^v(\d+)\./)[1], 10)
-      // Expect Timeout and TIMERWRAP to be there in Node 10.x and below
-      const oldExpected = ['TIMERWRAP', 'Timeout']
-      // TIMERWRAP was removed in Node 11: https://github.com/nodejs/node/pull/20894
-      const newExpected = ['Timeout']
-      t.strictDeepEqual(
-        asyncOperationTypes.sort(),
-        majorVersion >= 11 ? newExpected : oldExpected
-      )
+      const expected =
+        // Expect Timeout and TIMERWRAP to be there in Node 10.x and below
+        semver.satisfies(process.version, '< 11.0')
+          ? ['TIMERWRAP', 'Timeout']
+        // A `Promise.resolve()` call was added to bootstrap code in Node 12.16.x: https://github.com/nodejs/node/pull/30624
+        // Node.js 13 does not appear to show this `resolve()` call in its trace event log.
+          : semver.satisfies(process.version, '>= 12.16.0 < 13.0.0')
+            ? ['PROMISE', 'Timeout']
+            : ['Timeout'] // default
+
+      t.strictDeepEqual(asyncOperationTypes.sort(), expected)
 
       t.end()
     })
