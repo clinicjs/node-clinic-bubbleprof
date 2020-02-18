@@ -76,7 +76,7 @@ test('collect command produces data files with content', function (t) {
       }
 
       const expected =
-        // Expect Timeout and TIMERWRAP to be there in Node 10.x and below
+        // Expect Timeout and TIMERWRAP to be there in Node 10.x and below. TIMERWRAP was removed in https://github.com/nodejs/node/pull/20894
         semver.satisfies(process.version, '< 11.0')
           ? ['TIMERWRAP', 'Timeout']
         // A `Promise.resolve()` call was added to bootstrap code in Node 12.16.x: https://github.com/nodejs/node/pull/30624
