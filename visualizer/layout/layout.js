@@ -92,25 +92,25 @@ class Layout {
 
   // For layouts inside a clusterNode, rather than layouts of all cluterNodes
   prepareSublayoutNodes (dataNodes, connection) {
-    // This sublayout is of nodes within targetNode. Some have parents within sourceNode
+    // This sublayout is of nodes within targetNode. Some have parents within originNode
 
     const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
 
-    const shortcutToSource = !connection.sourceNode ? null : new ShortcutNode({
-      id: `shortcut:${connection.sourceNode.id}`,
+    const shortcutToOrigin = !connection.originNode ? null : new ShortcutNode({
+      id: `shortcut:${connection.originNode.id}`,
       isRoot: true,
       children: []
-    }, connection.sourceNode)
+    }, connection.originNode)
 
-    if (shortcutToSource) {
-      dataNodes.unshift(shortcutToSource)
+    if (shortcutToOrigin) {
+      dataNodes.unshift(shortcutToOrigin)
     }
 
     for (let i = 0; i < dataNodes.length; ++i) {
       const dataNode = dataNodes[i]
 
-      if (shortcutToSource && !includedIds.has(dataNode.parentId)) {
-        shortcutToSource.children.push(dataNode.id)
+      if (shortcutToOrigin && !includedIds.has(dataNode.parentId)) {
+        shortcutToOrigin.children.push(dataNode.id)
       }
       for (let i = 0; i < dataNode.children.length; ++i) {
         const childId = dataNode.children[i]

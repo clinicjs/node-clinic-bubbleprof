@@ -1,11 +1,11 @@
 'use strict'
 
 class Connection {
-  constructor (sourceLayoutNode, targetLayoutNode, scale) {
+  constructor (originLayoutNode, targetLayoutNode, scale) {
     // TODO: rename sourceNode everywhere to avoid confusion with DataNode->SourceNode class
-    this.sourceId = sourceLayoutNode.id
-    this.sourceLayoutNode = sourceLayoutNode
-    this.sourceNode = sourceLayoutNode.node.shortcutTo || sourceLayoutNode.node
+    this.originId = originLayoutNode.id
+    this.originLayoutNode = originLayoutNode
+    this.originNode = originLayoutNode.node.shortcutTo || originLayoutNode.node
 
     this.targetId = targetLayoutNode.id
     this.targetLayoutNode = targetLayoutNode
@@ -19,7 +19,7 @@ class Connection {
 
   // Avoid duplication of values so stats can be swtiched/recalculated with settings
   // If recalculating these proves to be a performance problem, consider caching values
-  getSourceRadius () { return this.scale.getCircleRadius(this.sourceLayoutNode.getWithinTime()) }
+  getSourceRadius () { return this.scale.getCircleRadius(this.originLayoutNode.getWithinTime()) }
   getTargetRadius () { return this.scale.getCircleRadius(this.targetLayoutNode.getWithinTime()) }
   getVisibleLineLength () { return this.scale.getLineLength(this.targetLayoutNode.getBetweenTime()) }
   getDistanceBetweenCenters () {
