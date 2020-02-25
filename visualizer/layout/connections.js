@@ -15,11 +15,11 @@ class Connection {
 
   // Avoid duplication of values so stats can be swtiched/recalculated with settings
   // If recalculating these proves to be a performance problem, consider caching values
-  getSourceRadius () { return this.scale.getCircleRadius(this.originLayoutNode.getWithinTime()) }
+  getOriginRadius () { return this.scale.getCircleRadius(this.originLayoutNode.getWithinTime()) }
   getTargetRadius () { return this.scale.getCircleRadius(this.targetLayoutNode.getWithinTime()) }
   getVisibleLineLength () { return this.scale.getLineLength(this.targetLayoutNode.getBetweenTime()) }
   getDistanceBetweenCenters () {
-    return this.getSourceRadius() +
+    return this.getOriginRadius() +
       this.getVisibleLineLength() +
       this.getTargetRadius() +
       // Leave a gap at both ends so any text labels are readable
