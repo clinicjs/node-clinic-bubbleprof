@@ -24,12 +24,14 @@ class ClinicBubbleprof extends events.EventEmitter {
     const {
       detectPort = false,
       debug = false,
-      dest = null
+      dest = null,
+      collectDelay = 0
     } = settings
 
     this.detectPort = detectPort
     this.debug = debug
     this.path = dest
+    this.collectDelay = collectDelay
   }
 
   collect (args, callback) {
@@ -71,6 +73,10 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     if (this.detectPort) {
       proc.stdio[3].once('data', data => this.emit('port', Number(data), proc, () => proc.stdio[3].destroy()))
+    }
+
+    if (this.collectDelay) {
+      customEnv.NODE_CLINIC_BUBBLEPROF_COLLECT_DELAY = this.collectDelay
     }
 
     // get filenames of logfiles
