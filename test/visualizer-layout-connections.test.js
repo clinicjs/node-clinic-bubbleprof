@@ -27,7 +27,7 @@ test('Visualizer layout - scale - calculates visible circle radius based on with
 
   t.ok(isNumber(parentLayoutNode.getWithinTime()))
   const expectedParentRadius = fakeScale.getCircleRadius(parentLayoutNode.getWithinTime())
-  t.equal(connection.getSourceRadius(), expectedParentRadius)
+  t.equal(connection.getOriginRadius(), expectedParentRadius)
 
   t.ok(isNumber(childLayoutNode.getWithinTime()))
   const expectedChildRadius = fakeScale.getCircleRadius(childLayoutNode.getWithinTime())

@@ -200,37 +200,37 @@ test('Visualizer - layer - layout connections are healthy on processBetweenData'
 
   layout.processBetweenData()
 
-  t.equal(layout.connections[0].sourceId, 'A')
-  t.equal(layout.connections[0].sourceNode, dataSet.clusterNodes.get('A'))
-  t.equal(layout.connections[0].sourceNode.constructor.name, 'ClusterNode')
+  t.equal(layout.connections[0].originId, 'A')
+  t.equal(layout.connections[0].originNode, dataSet.clusterNodes.get('A'))
+  t.equal(layout.connections[0].originNode.constructor.name, 'ClusterNode')
   t.equal(layout.connections[0].targetId, 'B')
   t.equal(layout.connections[0].targetNode, dataSet.clusterNodes.get('B'))
   t.equal(layout.connections[0].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[1].sourceId, 'B')
-  t.equal(layout.connections[1].sourceNode, dataSet.clusterNodes.get('B'))
-  t.equal(layout.connections[1].sourceNode.constructor.name, 'ClusterNode')
+  t.equal(layout.connections[1].originId, 'B')
+  t.equal(layout.connections[1].originNode, dataSet.clusterNodes.get('B'))
+  t.equal(layout.connections[1].originNode.constructor.name, 'ClusterNode')
   t.equal(layout.connections[1].targetId, 'D')
   t.equal(layout.connections[1].targetNode, dataSet.clusterNodes.get('D'))
   t.equal(layout.connections[1].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[2].sourceId, 'B')
-  t.equal(layout.connections[2].sourceNode, dataSet.clusterNodes.get('B'))
-  t.equal(layout.connections[2].sourceNode.constructor.name, 'ClusterNode')
+  t.equal(layout.connections[2].originId, 'B')
+  t.equal(layout.connections[2].originNode, dataSet.clusterNodes.get('B'))
+  t.equal(layout.connections[2].originNode.constructor.name, 'ClusterNode')
   t.equal(layout.connections[2].targetId, 'E')
   t.equal(layout.connections[2].targetNode, dataSet.clusterNodes.get('E'))
   t.equal(layout.connections[2].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[3].sourceId, 'E')
-  t.equal(layout.connections[3].sourceNode, dataSet.clusterNodes.get('E'))
-  t.equal(layout.connections[3].sourceNode.constructor.name, 'ClusterNode')
+  t.equal(layout.connections[3].originId, 'E')
+  t.equal(layout.connections[3].originNode, dataSet.clusterNodes.get('E'))
+  t.equal(layout.connections[3].originNode.constructor.name, 'ClusterNode')
   t.equal(layout.connections[3].targetId, 'F')
   t.equal(layout.connections[3].targetNode, dataSet.clusterNodes.get('F'))
   t.equal(layout.connections[3].targetNode.constructor.name, 'ClusterNode')
 
-  t.equal(layout.connections[4].sourceId, 'A')
-  t.equal(layout.connections[4].sourceNode, dataSet.clusterNodes.get('A'))
-  t.equal(layout.connections[4].sourceNode.constructor.name, 'ClusterNode')
+  t.equal(layout.connections[4].originId, 'A')
+  t.equal(layout.connections[4].originNode, dataSet.clusterNodes.get('A'))
+  t.equal(layout.connections[4].originNode.constructor.name, 'ClusterNode')
   t.equal(layout.connections[4].targetId, 'C')
   t.equal(layout.connections[4].targetNode, dataSet.clusterNodes.get('C'))
   t.equal(layout.connections[4].targetNode.constructor.name, 'ClusterNode')
@@ -316,7 +316,7 @@ test('Visualizer - layer - layout connections are healthy on calculateScaleFacto
 
   const expectedScaleFactor = 25.7102
 
-  t.equal(layout.connections[0].getSourceRadius().toFixed(2), (((24.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // A
+  t.equal(layout.connections[0].getOriginRadius().toFixed(2), (((24.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // A
   t.equal(layout.connections[0].getTargetRadius().toFixed(2), (((10.5 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // B
   t.equal(layout.connections[0].getVisibleLineLength().toFixed(2), (6 * expectedScaleFactor).toFixed(2))
   t.equal(layout.connections[1].getTargetRadius().toFixed(2), (((0.7 / Math.PI) / 2) * expectedScaleFactor).toFixed(2)) // D
