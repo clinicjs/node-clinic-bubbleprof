@@ -2,7 +2,6 @@
 
 class Connection {
   constructor (originLayoutNode, targetLayoutNode, scale) {
-    // TODO: rename sourceNode everywhere to avoid confusion with DataNode->SourceNode class
     this.originId = originLayoutNode.id
     this.originLayoutNode = originLayoutNode
     this.originNode = originLayoutNode.node.shortcutTo || originLayoutNode.node
@@ -12,9 +11,6 @@ class Connection {
     this.targetNode = targetLayoutNode.node.shortcutTo || targetLayoutNode.node
 
     this.scale = scale
-
-    // TODO: remove this completely once all branches are merged and released
-    // this.targetNode.connectionFromParent = this
   }
 
   // Avoid duplication of values so stats can be swtiched/recalculated with settings
