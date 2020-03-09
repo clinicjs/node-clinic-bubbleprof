@@ -40,7 +40,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       '--trace-events-enabled', '--trace-event-categories', 'node.async_hooks'
     ]
 
-    const stdio = ['inherit', 'inherit', 'inherit']
+    const stdio = ['inherit', 'inherit', 'inherit', 'pipe']
 
     if (this.detectPort) {
       logArgs.push('-r', 'detect-port.js')
@@ -69,9 +69,15 @@ class ClinicBubbleprof extends events.EventEmitter {
       env: Object.assign({}, process.env, customEnv)
     })
 
-    if (this.detectPort) {
-      proc.stdio[3].once('data', data => this.emit('port', Number(data), proc, () => proc.stdio[3].destroy()))
-    }
+    proc.stdio[3].once('data', data => { 
+      if (this.detectPort) {
+        this.emit('port', Number(data), proc, () => proc.stdio[3].destroy())
+      }
+      else if (data.toString() === 'source_warning') {
+        this.emit('warning', 'Transpiled code is not supported')
+        proc.stdio[3].destroy()
+      }
+    })
 
     // get filenames of logfiles
     const paths = getLoggingPaths({

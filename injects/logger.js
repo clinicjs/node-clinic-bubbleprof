@@ -8,6 +8,30 @@ const systemInfo = require('../collect/system-info.js')
 const StackTraceEncoder = require('../format/stack-trace-encoder.js')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 
+function checkForTranspiledCode (filename) {
+  const readFile = fs.readFileSync(filename, 'utf8')
+  const regex = /function\s+(?<functionName>\w+)/g
+  let matchedObj
+  let isTranspiled = false
+
+  // Check for a source map
+  isTranspiled = readFile.includes('//# sourceMappingURL=')
+
+  while ((matchedObj = regex.exec(readFile)) !== null) {
+    // Avoid infinite loops with zero-width matches
+    if (matchedObj.index === regex.lastIndex) {
+      regex.lastIndex++
+    }
+    // Loop through results and check length of fn name
+    matchedObj.forEach((match, groupIndex) => {
+      if (groupIndex !== 0 && match.length < 3) {
+        isTranspiled = true
+      }
+    })
+  }
+  return isTranspiled
+}
+
 // create dirname
 const paths = getLoggingPaths({
   path: process.env.NODE_CLINIC_BUBBLEPROF_DATA_PATH,
@@ -32,7 +56,17 @@ const out = encoder.pipe(
 // log stack traces, export a flag to opt out of logging for internals
 exports.skipThis = false
 const skipAsyncIds = new Set()
+let firedOnce = false;
+
 const hook = asyncHooks.createHook({
+  before () {
+    if (!firedOnce && process.mainModule && checkForTranspiledCode(process.mainModule.filename)) {
+      // Show warning to user
+      fs.writeSync(3, 'source_warning', null, 'utf8')
+      firedOnce = true
+    }
+  },
+
   init (asyncId, type, triggerAsyncId) {
     // Save the asyncId such nested async operations can be skiped later.
     if (exports.skipThis) return skipAsyncIds.add(asyncId)
