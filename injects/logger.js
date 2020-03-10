@@ -7,30 +7,7 @@ const stackTrace = require('../collect/stack-trace.js')
 const systemInfo = require('../collect/system-info.js')
 const StackTraceEncoder = require('../format/stack-trace-encoder.js')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
-
-function checkForTranspiledCode (filename) {
-  const readFile = fs.readFileSync(filename, 'utf8')
-  const regex = /function\s+(?<functionName>\w+)/g
-  let matchedObj
-  let isTranspiled = false
-
-  // Check for a source map
-  isTranspiled = readFile.includes('//# sourceMappingURL=')
-
-  while ((matchedObj = regex.exec(readFile)) !== null) {
-    // Avoid infinite loops with zero-width matches
-    if (matchedObj.index === regex.lastIndex) {
-      regex.lastIndex++
-    }
-    // Loop through results and check length of fn name
-    matchedObj.forEach((match, groupIndex) => {
-      if (groupIndex !== 0 && match.length < 3) {
-        isTranspiled = true
-      }
-    })
-  }
-  return isTranspiled
-}
+const checkForTranspiledCode = require('@nearform/clinic-common').checkForTranspiledCode
 
 process.nextTick(function () {
   if (process.mainModule && checkForTranspiledCode(process.mainModule.filename)) {
