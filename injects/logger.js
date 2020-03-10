@@ -32,6 +32,13 @@ function checkForTranspiledCode (filename) {
   return isTranspiled
 }
 
+process.nextTick(function () {
+  if (process.mainModule && checkForTranspiledCode(process.mainModule.filename)) {
+    // Show warning to user
+    fs.writeSync(3, 'source_warning', null, 'utf8')
+  }
+})
+
 // create dirname
 const paths = getLoggingPaths({
   path: process.env.NODE_CLINIC_BUBBLEPROF_DATA_PATH,
@@ -56,15 +63,8 @@ const out = encoder.pipe(
 // log stack traces, export a flag to opt out of logging for internals
 exports.skipThis = false
 const skipAsyncIds = new Set()
-let firedOnce = false
-
 const hook = asyncHooks.createHook({
   init (asyncId, type, triggerAsyncId) {
-    if (!firedOnce && process.mainModule && checkForTranspiledCode(process.mainModule.filename)) {
-      // Show warning to user
-      fs.writeSync(3, 'source_warning', null, 'utf8')
-      firedOnce = true
-    }
     // Save the asyncId such nested async operations can be skiped later.
     if (exports.skipThis) return skipAsyncIds.add(asyncId)
     // This is a nested async operations, skip this and track futher nested
