@@ -44,7 +44,6 @@ class ClinicBubbleprof extends events.EventEmitter {
 
     if (this.detectPort) {
       logArgs.push('-r', 'detect-port.js')
-      stdio.push('pipe')
     }
 
     let NODE_PATH = path.join(__dirname, 'injects')
@@ -69,11 +68,10 @@ class ClinicBubbleprof extends events.EventEmitter {
       env: Object.assign({}, process.env, customEnv)
     })
 
-    proc.stdio[3].once('data', data => { 
+    proc.stdio[3].once('data', data => {
       if (this.detectPort) {
         this.emit('port', Number(data), proc, () => proc.stdio[3].destroy())
-      }
-      else if (data.toString() === 'source_warning') {
+      } else if (data.toString() === 'source_warning') {
         this.emit('warning', 'The code is transpiled, bubbleprof does not support source maps yet.')
         proc.stdio[3].destroy()
       }
