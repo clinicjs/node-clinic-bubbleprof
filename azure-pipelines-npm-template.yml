@@ -12,9 +12,8 @@ jobs:
         node_version: 11.x
       node_10_x:
         node_version: 10.x
-        # Lowest supported version.
-      node_10_12:
-        node_version: 10.12.0
+      node_8_x:
+        node_version: 8.x
     maxParallel: 5
   steps:
   - task: NodeTool@0
