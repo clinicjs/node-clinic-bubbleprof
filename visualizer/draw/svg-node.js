@@ -45,7 +45,7 @@ class SvgNode {
     }
 
     const inboundConnection = this.layoutNode.inboundConnection
-    const previousPosition = inboundConnection ? inboundConnection.sourceLayoutNode.position : {
+    const previousPosition = inboundConnection ? inboundConnection.originLayoutNode.position : {
       // Root node position
       x: this.layoutNode.position.x,
       y: this.ui.settings.svgDistanceFromEdge - this.strokePadding - this.lineWidth
@@ -63,7 +63,7 @@ class SvgNode {
     this.labelDegrees = labelRotation(this.degrees)
     this.flipLabel = !(this.degrees === this.labelDegrees)
 
-    const sourceRadius = inboundConnection ? this.getRadius(inboundConnection.sourceLayoutNode) + this.strokePadding : 0
+    const sourceRadius = inboundConnection ? this.getRadius(inboundConnection.originLayoutNode) + this.strokePadding : 0
 
     const offsetLength = sourceRadius - this.lineWidth / 2 + this.strokePadding
     const offsetBeforeLine = new LineCoordinates({
