@@ -40,11 +40,10 @@ class ClinicBubbleprof extends events.EventEmitter {
       '--trace-events-enabled', '--trace-event-categories', 'node.async_hooks'
     ]
 
-    const stdio = ['inherit', 'inherit', 'inherit']
+    const stdio = ['inherit', 'inherit', 'inherit', 'pipe']
 
     if (this.detectPort) {
       logArgs.push('-r', 'detect-port.js')
-      stdio.push('pipe')
     }
 
     let NODE_PATH = path.join(__dirname, 'injects')
@@ -69,9 +68,14 @@ class ClinicBubbleprof extends events.EventEmitter {
       env: Object.assign({}, process.env, customEnv)
     })
 
-    if (this.detectPort) {
-      proc.stdio[3].once('data', data => this.emit('port', Number(data), proc, () => proc.stdio[3].destroy()))
-    }
+    proc.stdio[3].once('data', data => {
+      if (this.detectPort) {
+        this.emit('port', Number(data), proc, () => proc.stdio[3].destroy())
+      }
+      if (data.toString() === 'source_warning') {
+        this.emit('warning', 'The code is transpiled, bubbleprof does not support source maps yet.')
+      }
+    })
 
     // get filenames of logfiles
     const paths = getLoggingPaths({
