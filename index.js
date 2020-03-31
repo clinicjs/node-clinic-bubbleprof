@@ -69,11 +69,10 @@ class ClinicBubbleprof extends events.EventEmitter {
     })
 
     proc.stdio[3].once('data', data => {
-      if (this.detectPort) {
-        this.emit('port', Number(data), proc, () => proc.stdio[3].destroy())
-      }
       if (data.toString() === 'source_warning') {
         this.emit('warning', 'The code is transpiled, bubbleprof does not support source maps yet.')
+      } else if (this.detectPort) {
+        this.emit('port', Number(data), proc, () => proc.stdio[3].destroy())
       }
     })
 
