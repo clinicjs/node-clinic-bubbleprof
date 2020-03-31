@@ -1,8 +1,7 @@
 # Clinic.js Bubbleprof
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/nearform/node-clinic-bubbleprof.svg)](https://greenkeeper.io/)
-
-[![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![azureCI build status][azure-status]][azure-url]
+[![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![Github Actions build status][actions-status]][actions-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
 Programmable interface to [Clinic.js][clinic-url] Bubbleprof. Learn more about Clinic.js: https://clinicjs.org/
@@ -88,5 +87,5 @@ arguments, except a possible error.
 [`<Object>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
 [`<boolean>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type
 [`<String>`]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String
-[azure-status]: https://dev.azure.com/node-clinic/node-clinic/_apis/build/status/nearform.node-clinic-bubbleprof
-[azure-url]: https://dev.azure.com/node-clinic/node-clinic/_apis/build/status/nearform.node-clinic-bubbleprof?branchName=master
+[actions-status]: https://github.com/nearform/node-clinic-bubbleprof/workflows/CI/badge.svg
+[actions-url]: https://github.com/nearform/node-clinic-bubbleprof/actions
