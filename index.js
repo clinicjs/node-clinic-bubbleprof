@@ -68,7 +68,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       env: Object.assign({}, process.env, customEnv)
     })
 
-    proc.stdio[3].once('data', data => {
+    proc.stdio[3].on('data', data => {
       if (data.toString() === 'source_warning') {
         this.emit('warning', 'The code is transpiled, bubbleprof does not support source maps yet.')
       } else if (this.detectPort) {
