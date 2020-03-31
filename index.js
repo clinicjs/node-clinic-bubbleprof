@@ -12,7 +12,7 @@ const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubb
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
 const TraceEventDecoder = require('./format/trace-event-decoder.js')
-const minifyInline = require('./lib/minify-inline')
+const minifyStream = require('minify-stream')
 const buildJs = require('@nearform/clinic-common/scripts/build-js')
 const buildCss = require('@nearform/clinic-common/scripts/build-css')
 const mainTemplate = require('@nearform/clinic-common/templates/main')
@@ -121,19 +121,6 @@ class ClinicBubbleprof extends events.EventEmitter {
   }
 
   visualize (dataDirname, outputFilename, callback) {
-    this._visualize(dataDirname, outputFilename, (err) => {
-      if (err || this.debug) return callback(err)
-
-      // Having a hard time getting V8 to GC the streams from the _visualize call.
-      // Might be a memory leak or might be something fishy with the V8 Frame objects ...
-      // Anyway the smarter minifier fixes this for now. YOLO.
-
-      minifyInline(outputFilename, { sourceMap: false, mangle: false }, callback)
-    })
-  }
-
-  _visualize (dataDirname, outputFilename, callback) {
-    const fakeDataPath = path.join(__dirname, 'visualizer', 'data.json')
     const stylePath = path.join(__dirname, 'visualizer', 'style.css')
     const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
     const logoPath = path.join(__dirname, 'visualizer', 'app-logo.svg')
@@ -161,15 +148,15 @@ class ClinicBubbleprof extends events.EventEmitter {
     dataFile.on('warning', msg => this.emit('warning', msg))
 
     // build JS
-    const scriptFile = buildJs({
+    let scriptFile = buildJs({
       basedir: __dirname,
       debug: this.debug,
-      fakeDataPath,
-      scriptPath,
-      beforeBundle: b => b.require(dataFile, {
-        file: fakeDataPath
-      })
+      scriptPath
     })
+
+    if (!this.debug) {
+      scriptFile = pump(scriptFile, minifyStream({ sourceMap: false, mangle: false }))
+    }
 
     // build CSS
     const styleFile = buildCss({
@@ -182,6 +169,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       favicon: clinicFaviconBase64,
       title: 'Clinic Bubbleprof',
       styles: styleFile,
+      data: dataFile,
       script: scriptFile,
       headerLogoUrl: 'https://github.com/nearform/node-clinic-bubbleprof',
       headerLogoTitle: 'Clinic Bubbleprof on GitHub',
