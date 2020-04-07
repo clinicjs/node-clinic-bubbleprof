@@ -2,7 +2,7 @@
   "name": "@nearform/bubbleprof",
   "description": "Programmable interface to Clinic.js Bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "engines": {
     "node": "^13.0.0 || ^12.0.0 || ^11.0.0 || ^10.0.0 || ^8.11.1"
   },
