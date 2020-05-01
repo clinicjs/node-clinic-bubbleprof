@@ -32,7 +32,7 @@
   "keywords": [],
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@nearform/clinic-common": "^2.3.0",
+    "@nearform/clinic-common": "^3.0.0",
     "@nearform/node-trace-log-join": "2.0.0-0",
     "@nearform/trace-events-parser": "^1.0.4",
     "array-flatten": "^3.0.0",
