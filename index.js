@@ -158,6 +158,8 @@ class ClinicBubbleprof extends events.EventEmitter {
     const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
     const clinicFaviconBase64 = fs.createReadStream(clinicFaviconPath)
 
+    const bubbleprofVersion = require('./package.json').version
+
     dataFile.on('warning', msg => this.emit('warning', msg))
 
     // build JS
@@ -187,6 +189,7 @@ class ClinicBubbleprof extends events.EventEmitter {
       headerLogoTitle: 'Clinic Bubbleprof on Clinicjs.org',
       headerLogo: logoFile,
       headerText: 'Bubbleprof',
+      toolVersion: bubbleprofVersion,
       nearFormLogo: nearFormLogoFile,
       uploadId: outputFilename.split('/').pop().split('.html').shift(),
       body: '<div class="ncb-font-spinner-container"></div>'
