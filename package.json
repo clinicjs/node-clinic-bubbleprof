@@ -55,11 +55,6 @@
     "mkdirp": "^1.0.0",
     "on-net-listen": "^1.0.0",
     "protocol-buffers": "^4.0.4",
-<<<<<<< HEAD
     "pump": "^3.0.0"
-=======
-    "pump": "^3.0.0",
-    "terser": "^4.6.10"
->>>>>>> master
   }
 }
