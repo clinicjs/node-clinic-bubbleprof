@@ -10,8 +10,11 @@ function loadData (settings = {}, json = getDataFromPage()) {
 }
 
 function getDataFromPage () {
-  const dataElement = document.querySelector('#clinic-data')
-  return JSON.parse(dataElement.textContent)
+  if (typeof document === 'object') {
+    const dataElement = document.querySelector('#clinic-data')
+    return JSON.parse(dataElement.textContent)
+  }
+  return {}
 }
 
 module.exports = loadData
