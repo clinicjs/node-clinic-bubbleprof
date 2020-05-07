@@ -7,7 +7,7 @@ const path = require('path')
 const pump = require('pump')
 const { spawn } = require('child_process')
 const analysis = require('./analysis/index.js')
-const joinTrace = require('node-trace-log-join')
+const joinTrace = require('@nearform/node-trace-log-join')
 const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
 const SystemInfoDecoder = require('./format/system-info-decoder.js')
 const StackTraceDecoder = require('./format/stack-trace-decoder.js')
@@ -145,6 +145,8 @@ class ClinicBubbleprof extends events.EventEmitter {
     const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
     const clinicFaviconBase64 = fs.createReadStream(clinicFaviconPath)
 
+    const bubbleprofVersion = require('./package.json').version
+
     dataFile.on('warning', msg => this.emit('warning', msg))
 
     // build JS
@@ -171,10 +173,11 @@ class ClinicBubbleprof extends events.EventEmitter {
       styles: styleFile,
       data: dataFile,
       script: scriptFile,
-      headerLogoUrl: 'https://github.com/nearform/node-clinic-bubbleprof',
-      headerLogoTitle: 'Clinic Bubbleprof on GitHub',
+      headerLogoUrl: 'https://clinicjs.org/bubbleprof/',
+      headerLogoTitle: 'Clinic Bubbleprof on Clinicjs.org',
       headerLogo: logoFile,
       headerText: 'Bubbleprof',
+      toolVersion: bubbleprofVersion,
       nearFormLogo: nearFormLogoFile,
       uploadId: outputFilename.split('/').pop().split('.html').shift(),
       body: '<div class="ncb-font-spinner-container"></div>'
