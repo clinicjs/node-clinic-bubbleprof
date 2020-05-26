@@ -21,7 +21,7 @@ test('Visualizer dataset - fake json', function (t) {
 test('Visualizer data - DataSet - empty data file', function (t) {
   t.throws(() => {
     loadData()
-  }, new Error('No valid data found, data.json is typeof string'))
+  }, new Error('No valid data found, data.json is typeof object'))
 
   t.end()
 })
