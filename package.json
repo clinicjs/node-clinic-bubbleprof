@@ -2,7 +2,7 @@
   "name": "@nearform/bubbleprof",
   "description": "Programmable interface to Clinic.js Bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "engines": {
     "node": ">=10.12.0"
   },
@@ -32,7 +32,7 @@
   "keywords": [],
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "@nearform/clinic-common": "^3.1.0",
+    "@nearform/clinic-common": "^3.2.1",
     "@nearform/node-trace-log-join": "2.0.0-0",
     "@nearform/trace-events-parser": "^1.0.4",
     "array-flatten": "^3.0.0",
