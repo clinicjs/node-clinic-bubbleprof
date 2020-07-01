@@ -5,8 +5,14 @@
 // we need to look at each call to these callbacks, relative to its source
 class CallbackEvent {
   constructor (callKey, source) {
-    // Timestamp when this became the next call to this callback
-    this.delayStart = callKey === 0 ? source.init : Math.max(source.before[callKey - 1], source.after[callKey - 1])
+
+    // the sequence of timestamps should be
+    // 1. this.delayStart (earliest, i.e. lowest number)
+    // 2. this.before 
+    // 3. this.after (latest, i.e. highest number)
+
+    // Timestamp when this became the next call to this callback - must be earlier or equal to before 
+    this.delayStart = callKey === 0 ? source.init : Math.min(source.before[callKey - 1], source.after[callKey - 1])
 
     // In rare cases, possibly due to a bug in streams or event tracing, .before timestamps may be greater
     // than .after timestamps. If this happens, sort them, warn the user, and provide debug data
