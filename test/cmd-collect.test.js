@@ -80,8 +80,8 @@ test('collect command produces data files with content', function (t) {
         semver.satisfies(process.version, '< 11.0')
           ? ['TIMERWRAP', 'Timeout']
         // A `Promise.resolve()` call was added to bootstrap code in Node 12.16.x: https://github.com/nodejs/node/pull/30624
-        // Node.js 13 does not appear to show this `resolve()` call in its trace event log.
-          : semver.satisfies(process.version, '>= 12.16.0 < 13.0.0')
+        // Node.js 12.17.0 does not appear to show this `resolve()` call in its trace event log.
+          : semver.satisfies(process.version, '>= 12.16.0 < 12.17.0')
             ? ['PROMISE', 'Timeout']
             : ['Timeout']
 
