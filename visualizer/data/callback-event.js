@@ -5,6 +5,11 @@
 // we need to look at each call to these callbacks, relative to its source
 class CallbackEvent {
   constructor (callKey, source) {
+    // the sequence of timestamps should be
+    // 1. this.delayStart (earliest, i.e. lowest number)
+    // 2. this.before (equal or greater than delayStart)
+    // 3. this.after (latest, i.e. highest number)
+
     // Timestamp when this became the next call to this callback
     this.delayStart = callKey === 0 ? source.init : Math.max(source.before[callKey - 1], source.after[callKey - 1])
 
@@ -18,6 +23,10 @@ class CallbackEvent {
     // Timestamp when this callback call completes
     this.after = source[this.inverted ? 'before' : 'after'][callKey]
 
+    // delayStart cannot be after before callback
+    if (this.delayStart > this.before) {
+      this.delayStart = this.before
+    }
     this.aggregateNode = source.aggregateNode
 
     if (source.dataSet.settings.debugMode) {

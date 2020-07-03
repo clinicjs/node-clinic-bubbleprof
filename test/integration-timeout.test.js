@@ -22,7 +22,7 @@ test('collect-analysis pipeline', function (t) {
         const nodeMap = new Map(
           aggregateNodes.map((node) => [node.aggregateId, node])
         )
-        if (semver.satisfies(process.version, '>= 12.16.0 < 13.0.0')) {
+        if (semver.satisfies(process.version, '>= 12.16.0 < 12.17.0')) {
           t.strictEqual(nodes.length, 3)
           t.strictEqual(nodeMap.size, 3)
           // aggregateId = 1 is the root and points to the Timeout and a PROMISE from Node.js's initialization code
