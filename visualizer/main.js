@@ -1,7 +1,6 @@
 'use strict'
 
 const drawOuterUI = require('./draw/index.js')
-const askBehaviours = require('@nearform/clinic-common/behaviours/ask')
 const loadFonts = require('@nearform/clinic-common/behaviours/font-loader')
 
 // Called on font load or timeout
@@ -42,9 +41,6 @@ const drawUi = () => {
     ui.complete()
   })
 }
-
-// Attach ask tray behaviours
-askBehaviours()
 
 // Orchestrate font loading
 setTimeout(loadFonts)
