@@ -2,7 +2,7 @@ const { Transform } = require('stream')
 
 function isHTTPEnd (sourceNode) {
   if (sourceNode.type !== 'TickObject') return false
-  for (var i = 0; i < sourceNode.frames.length; i++) {
+  for (let i = 0; i < sourceNode.frames.length; i++) {
     const frame = sourceNode.frames.get(i)
     if (frame.typeName !== 'ServerResponse') continue
     if (frame.functionName !== 'end') continue
@@ -43,7 +43,7 @@ class HTTPRequestNodes extends Transform {
   }
 
   _maxRequests () {
-    var result = []
+    let result = []
     for (const nodes of this._nodes.values()) {
       if (nodes.length > result.length) result = nodes
     }

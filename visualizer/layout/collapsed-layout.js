@@ -58,7 +58,7 @@ class CollapsedLayout {
 
     const leaves = pickLeavesByLongest(this.layoutNodes)
     const leavesCount = leaves.length
-    for (var i = 0; i < leavesCount; i++) {
+    for (let i = 0; i < leavesCount; i++) {
       this.testStemLength(leaves[i], settings, multiplier)
     }
   }

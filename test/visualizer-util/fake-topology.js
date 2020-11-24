@@ -80,8 +80,8 @@ function topologyToSortedIds (topology, numeric = true) {
   const splitArrays = topologyToSplitArrays(topology, numeric)
   const maxDepth = splitArrays.reduce((max, arr) => arr.length > max ? arr.length : max, 0)
   const orderedUniqueIds = []
-  for (var depth = 0; depth < maxDepth; depth++) {
-    for (var arrayIndex = 0; arrayIndex < splitArrays.length; arrayIndex++) {
+  for (let depth = 0; depth < maxDepth; depth++) {
+    for (let arrayIndex = 0; arrayIndex < splitArrays.length; arrayIndex++) {
       const id = splitArrays[arrayIndex][depth]
       if (id && !orderedUniqueIds.includes(id)) orderedUniqueIds.push(id)
     }

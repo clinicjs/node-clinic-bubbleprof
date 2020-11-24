@@ -304,9 +304,9 @@ test('Raw Event - fast end event', function (t) {
 })
 
 test('Raw Event - truncates when low on memory', function (t) {
-  var stackAsyncId = 1
-  var traceAsyncId = 1
-  var ticks = 0
+  let stackAsyncId = 1
+  let traceAsyncId = 1
+  let ticks = 0
 
   const datas = []
 
