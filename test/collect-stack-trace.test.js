@@ -102,6 +102,7 @@ test('stack trace - native', function (t) {
   // native call-site.
   [1, 2].sort(function (a, b) {
     frames = stackTrace()
+    return 0
   })
 
   const v8VersionParts = process.versions.v8.split('.')

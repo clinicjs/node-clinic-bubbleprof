@@ -119,7 +119,7 @@ class ClusterNode extends DataNode {
     // TODO: if this is done out of sequence, it causes a 1d segment not found error in layout/node-allocation
     // on opening some nodes (usually root node). Should ideally not rely on map order: investigate
     const nodesLength = nodes.length
-    for (var i = 0; i < nodesLength; i++) {
+    for (let i = 0; i < nodesLength; i++) {
       const aggregateNode = new AggregateNode(nodes[i], this)
       aggregateNode.generateSourceNodes(nodes[i].sources)
       this.nodes.set(aggregateNode.aggregateId, aggregateNode)
@@ -223,7 +223,7 @@ class AggregateNode extends DataNode {
     // Only store sourceNodes in debugMode, otherwise extract their callbackEvents and discard
     if (debugMode) this.sources = new Array(sourcesLength)
 
-    for (var i = 0; i < sourcesLength; i++) {
+    for (let i = 0; i < sourcesLength; i++) {
       const sourceNode = new SourceNode(sources[i], this)
       sourceNode.generateCallbackEvents()
       if (debugMode) this.sources[i] = sourceNode
@@ -356,7 +356,7 @@ class SourceNode {
 
     // This loop runs thousands+++ of times, unbounded and scales with size of profile. Optimize for browsers
     const callbackEventCount = this.before.length
-    for (var i = 0; i < callbackEventCount; i++) {
+    for (let i = 0; i < callbackEventCount; i++) {
       // Skip incomplete items, e.g. bad application exits leaving a .before with no corresponding .after
       if (isNumber(this.after[i])) this.dataSet.callbackEvents.add(new CallbackEvent(i, this))
     }

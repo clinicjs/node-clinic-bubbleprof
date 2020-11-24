@@ -45,11 +45,13 @@ class SvgNode {
     }
 
     const inboundConnection = this.layoutNode.inboundConnection
-    const previousPosition = inboundConnection ? inboundConnection.originLayoutNode.position : {
-      // Root node position
-      x: this.layoutNode.position.x,
-      y: this.ui.settings.svgDistanceFromEdge - this.strokePadding - this.lineWidth
-    }
+    const previousPosition = inboundConnection
+      ? inboundConnection.originLayoutNode.position
+      : {
+        // Root node position
+          x: this.layoutNode.position.x,
+          y: this.ui.settings.svgDistanceFromEdge - this.strokePadding - this.lineWidth
+        }
     const connectCentresCoords = new LineCoordinates({
       x1: previousPosition.x,
       y1: previousPosition.y,

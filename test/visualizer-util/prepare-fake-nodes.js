@@ -34,7 +34,7 @@ for (const [aggregateId] of aggregateNodes) {
 }
 
 for (const [clusterId, clusterNode] of clusterNodes) {
-  for (var i = 0; i < clusterNode.nodes.length; i++) {
+  for (let i = 0; i < clusterNode.nodes.length; i++) {
     const aggregateId = clusterNode.nodes[i]
     clusterNode.nodes[i] = aggregateNodes.get(aggregateId)
   }

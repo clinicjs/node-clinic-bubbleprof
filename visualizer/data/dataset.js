@@ -147,7 +147,7 @@ class WallTime {
   processSlices () {
     const maxAsyncByCategory = {}
 
-    for (var i = 0; i < this.slicesCount; i++) {
+    for (let i = 0; i < this.slicesCount; i++) {
       const slice = this.slices[i]
       if (slice.syncActive.callbackCount > this.maxSyncActive) this.maxSyncActive = slice.syncActive.callbackCount
       if (slice.asyncPending.callbackCount > this.maxAsyncPending) this.maxAsyncPending = slice.asyncPending.callbackCount

@@ -214,7 +214,7 @@ class AreaChart extends HtmlContent {
       const asyncInSliceByAgId = {
         time: index * wallTime.msPerSlice
       }
-      for (var i = 0; i < aggregateIdsCount; i++) {
+      for (let i = 0; i < aggregateIdsCount; i++) {
         // Each aggregateId key is the number of async ops from that aggregate node active in this time slice
         asyncInSliceByAgId[this.aggregateIds[i]] = timeSlice.asyncPending.byAggregateId[this.aggregateIds[i]] || 0
       }

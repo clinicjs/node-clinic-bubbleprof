@@ -60,7 +60,7 @@ class AllCallbackEvents {
 
     // Browserified short-ish (few hundred) loops, within very long loop. Order isn't important.
     // For efficiency, use for (var), only check length once, no variables in block, send to ordinary function
-    var i
+    let i
     for (i = asyncSegments.length - 1; i >= 0; i--) {
       setToWallTimeSegment(callbackEvent, asyncSegments[i].asyncPending)
     }
@@ -82,7 +82,7 @@ class AllCallbackEvents {
     this.array.sort((a, b) => b.before - a.before)
 
     // Optimised for browsers because it runs once for every callback event in the profile
-    for (var i = this.array.length - 1; i >= 0; i--) {
+    for (let i = this.array.length - 1; i >= 0; i--) {
       this.applyWallTimes(this.array[i])
       processCallbackEvent(this.array[i], clusterStats, aggregateStats)
     }
@@ -133,7 +133,7 @@ class FlattenedIntervals {
     const newInterval = new Interval(interval.start, interval.end, interval.isBetween)
 
     // If we've already found intervals for this node, walk backwards through them...
-    for (var i = this.array.length - 1; i >= 0; i--) {
+    for (let i = this.array.length - 1; i >= 0; i--) {
       // ...flattening against this new one as we go, until we hit a gap
       if (!flattenInterval(this.array, i, newInterval)) break
     }
@@ -142,7 +142,7 @@ class FlattenedIntervals {
 
   getFlattenedTotal () {
     let total = 0
-    for (var i = this.array.length - 1; i >= 0; i--) {
+    for (let i = this.array.length - 1; i >= 0; i--) {
       total += this.array[i].getDuration()
     }
     return total

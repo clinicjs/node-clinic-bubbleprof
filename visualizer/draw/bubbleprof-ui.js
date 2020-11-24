@@ -502,7 +502,7 @@ class BubbleprofUI extends EventEmitter {
       }
     }
 
-    for (var i = nodeIds.length - 1; i >= 0; i--) {
+    for (let i = nodeIds.length - 1; i >= 0; i--) {
       const nodeId = nodeIds[i]
       if (nodeId.charAt(0) === 'x') {
         const layoutNode = targetUI.layout.layoutNodes.get(nodeId)
@@ -584,8 +584,9 @@ class BubbleprofUI extends EventEmitter {
     d3Body.classed('initialized', true)
     d3Body.attr('data-view-mode', this.settings.viewMode)
 
-    this.mainContainer.d3Element = d3Main.size() ? d3Main : d3Body.append('main')
-      .attr('id', 'bubbleprof-main')
+    this.mainContainer.d3Element = d3Main.size()
+      ? d3Main
+      : d3Body.append('main').attr('id', 'bubbleprof-main')
     this.mainContainer.d3ContentWrapper = this.mainContainer.d3Element
 
     // TODO: try replacing with .emit('initializeElements')

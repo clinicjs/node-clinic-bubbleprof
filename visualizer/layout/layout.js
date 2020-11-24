@@ -96,11 +96,13 @@ class Layout {
 
     const includedIds = new Set(dataNodes.map(dataNode => dataNode.id))
 
-    const shortcutToOrigin = !connection.originNode ? null : new ShortcutNode({
-      id: `shortcut:${connection.originNode.id}`,
-      isRoot: true,
-      children: []
-    }, connection.originNode)
+    const shortcutToOrigin = !connection.originNode
+      ? null
+      : new ShortcutNode({
+        id: `shortcut:${connection.originNode.id}`,
+        isRoot: true,
+        children: []
+      }, connection.originNode)
 
     if (shortcutToOrigin) {
       dataNodes.unshift(shortcutToOrigin)
