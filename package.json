@@ -2,9 +2,9 @@
   "name": "@nearform/bubbleprof",
   "description": "Programmable interface to Clinic.js Bubbleprof",
   "repository": "nearform/node-clinic-bubbleprof",
-  "version": "6.0.1",
+  "version": "7.0.0",
   "engines": {
-    "node": ">=10.12.0"
+    "node": ">=12.13.0"
   },
   "scripts": {
     "test": "standard | snazzy && tap -j1 --no-cov --timeout=50 test/*.test.js",
@@ -32,7 +32,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@nearform/clinic-common": "^5.0.0",
+    "@nearform/clinic-common": "^6.0.0",
     "@nearform/node-trace-log-join": "2.0.0-0",
     "@nearform/trace-events-parser": "^1.0.4",
     "array-flatten": "^3.0.0",
