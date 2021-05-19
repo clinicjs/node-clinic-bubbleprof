@@ -125,7 +125,7 @@ class NameBarrierNodes extends stream.Transform {
     const typeName = toName(types)
     const prefix = moduleNames.length > 3 ? '... > ' : ''
     // http is special for identifying latency etc - so we don't let http names be overwritten by userland or module filenames
-    // - see: https://github.com/nearform/node-clinic-bubbleprof/pull/115 and existing integration tests
+    // - see: https://github.com/clinicjs/node-clinic-bubbleprof/pull/115 and existing integration tests
     if (typeName.includes('http')) return typeName
     if (moduleNames.length) return prefix + moduleNames.slice(-3).join(' > ')
     return typeName
