@@ -56,7 +56,7 @@ class AbstractDecoder extends stream.Transform {
             if (!this._warned) {
               console.error('There was a decoding error with chunk (base64):')
               console.error(chunk.toString('base64'))
-              console.error('Please open an issue on https://github.com/nearform/node-clinic-bubbleprof with the above output.')
+              console.error('Please open an issue on https://github.com/clinicjs/node-clinic-bubbleprof with the above output.')
               this._warned = true
             }
           }
