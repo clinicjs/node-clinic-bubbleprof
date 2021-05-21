@@ -124,7 +124,6 @@ class ClinicBubbleprof extends events.EventEmitter {
     const stylePath = path.join(__dirname, 'visualizer', 'style.css')
     const scriptPath = path.join(__dirname, 'visualizer', 'main.js')
     const logoPath = path.join(__dirname, 'visualizer', 'app-logo.svg')
-    // const nearFormLogoPath = path.join(__dirname, 'visualizer', 'nearform-logo.svg')
     const clinicFaviconPath = path.join(__dirname, 'visualizer', 'clinic-favicon.png.b64')
 
     // Load data
@@ -142,7 +141,6 @@ class ClinicBubbleprof extends events.EventEmitter {
     )
     // add logos
     const logoFile = fs.createReadStream(logoPath)
-    // const nearFormLogoFile = fs.createReadStream(nearFormLogoPath)
     const clinicFaviconBase64 = fs.createReadStream(clinicFaviconPath)
 
     const bubbleprofVersion = require('./package.json').version
@@ -178,7 +176,6 @@ class ClinicBubbleprof extends events.EventEmitter {
       headerLogo: logoFile,
       headerText: 'Bubbleprof',
       toolVersion: bubbleprofVersion,
-      // nearFormLogo: nearFormLogoFile,
       uploadId: outputFilename.split('/').pop().split('.html').shift(),
       body: '<div class="ncb-font-spinner-container"></div>'
     })
