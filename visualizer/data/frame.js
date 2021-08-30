@@ -1,6 +1,22 @@
 'use strict'
 
 class Frame {
+  /**
+   * 
+   * @param {object} frame 
+   * @param {String} frame.functionName
+   * @param {String} frame.typeName
+   * @param {String} frame.evalOrigin
+   * @param {String} frame.fileName
+   * @param {String} frame.lineNumber
+   * @param {String} frame.columnNumber
+   * @param {Boolean} frame.isEval
+   * @param {Boolean} frame.isConstructor
+   * @param {Boolean} frame.isNative
+   * @param {Boolean} frame.isToplevel
+   * @param {String} frame.fileName
+   * 
+   */
   constructor (frame) {
     this.functionName = frame.functionName
     this.typeName = frame.typeName
