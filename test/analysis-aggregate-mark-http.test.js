@@ -87,27 +87,27 @@ function checkTreeStructure (t, sourceNodes) {
     aggregateNodeUnknownParent
   ] = sourceNodes
 
-  t.strictEqual(aggregateNodeRoot.aggregateId, 1)
-  t.strictEqual(aggregateNodeServer.aggregateId, 2)
-  t.strictEqual(aggregateNodeSocket.aggregateId, 3)
-  t.strictEqual(aggregateNodeHttpParser.aggregateId, 4)
-  t.strictEqual(aggregateNodeReady.aggregateId, 5)
-  t.strictEqual(aggregateNodeWriteWrap.aggregateId, 6)
-  t.strictEqual(aggregateNodeUnknownParent.aggregateId, 11)
+  t.equal(aggregateNodeRoot.aggregateId, 1)
+  t.equal(aggregateNodeServer.aggregateId, 2)
+  t.equal(aggregateNodeSocket.aggregateId, 3)
+  t.equal(aggregateNodeHttpParser.aggregateId, 4)
+  t.equal(aggregateNodeReady.aggregateId, 5)
+  t.equal(aggregateNodeWriteWrap.aggregateId, 6)
+  t.equal(aggregateNodeUnknownParent.aggregateId, 11)
 
-  t.strictDeepEqual(aggregateNodeRoot.mark.toJSON(),
+  t.strictSame(aggregateNodeRoot.mark.toJSON(),
     ['root', null, null])
-  t.strictDeepEqual(aggregateNodeServer.mark.toJSON(),
+  t.strictSame(aggregateNodeServer.mark.toJSON(),
     ['nodecore', 'net', 'server'])
-  t.strictDeepEqual(aggregateNodeSocket.mark.toJSON(),
+  t.strictSame(aggregateNodeSocket.mark.toJSON(),
     ['nodecore', 'net', 'onconnection'])
-  t.strictDeepEqual(aggregateNodeHttpParser.mark.toJSON(),
+  t.strictSame(aggregateNodeHttpParser.mark.toJSON(),
     ['nodecore', 'net', 'onrequest'])
-  t.strictDeepEqual(aggregateNodeReady.mark.toJSON(),
+  t.strictSame(aggregateNodeReady.mark.toJSON(),
     ['nodecore', null, null])
-  t.strictDeepEqual(aggregateNodeWriteWrap.mark.toJSON(),
+  t.strictSame(aggregateNodeWriteWrap.mark.toJSON(),
     ['nodecore', null, null])
-  t.strictDeepEqual(aggregateNodeUnknownParent.mark.toJSON(),
+  t.strictSame(aggregateNodeUnknownParent.mark.toJSON(),
     ['user', null, null])
 }
 
@@ -117,7 +117,7 @@ test('Aggregate Node - mark http - tcp', function (t) {
   startpoint(aggregateNodesInput, { objectMode: true })
     .pipe(new MarkHttpAggregateNodes())
     .pipe(endpoint({ objectMode: true }, function (err, aggregateNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
       checkTreeStructure(t, aggregateNodesOutput)
       t.end()
     }))
@@ -129,7 +129,7 @@ test('Aggregate Node - mark http - pipe', function (t) {
   startpoint(aggregateNodesInput, { objectMode: true })
     .pipe(new MarkHttpAggregateNodes())
     .pipe(endpoint({ objectMode: true }, function (err, aggregateNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
       checkTreeStructure(t, aggregateNodesOutput)
       t.end()
     }))

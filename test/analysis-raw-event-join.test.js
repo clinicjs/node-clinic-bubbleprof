@@ -87,9 +87,9 @@ test('Raw Event - join order', function (t) {
 
   new JoinAsRawEvent(stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, data) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
+      t.strictSame(data.map((rawEvent) => rawEvent.toJSON()), [
         { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() },
         { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() },
         { type: 'traceEvent', asyncId: 1, info: traceEventData[1].toJSON() },
@@ -142,9 +142,9 @@ test('Raw Event - join with earily stackTrace end', function (t) {
 
   new JoinAsRawEvent(stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, data) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
+      t.strictSame(data.map((rawEvent) => rawEvent.toJSON()), [
         { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() },
         { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() },
         { type: 'traceEvent', asyncId: 2, info: traceEventData[1].toJSON() },
@@ -184,9 +184,9 @@ test('Raw Event - join with earily traceEvent end', function (t) {
 
   new JoinAsRawEvent(stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, data) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(data.map((rawEvent) => rawEvent.toJSON()), [
+      t.strictSame(data.map((rawEvent) => rawEvent.toJSON()), [
         { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() },
         { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() },
         { type: 'traceEvent', asyncId: 1, info: traceEventData[1].toJSON() },
@@ -226,9 +226,9 @@ test('Raw Event - read before available', function (t) {
 
   async.series([
     function awaitTraceEvent (done) {
-      t.strictEqual(join.read(), null)
+      t.equal(join.read(), null)
       join.once('readable', function () {
-        t.strictDeepEqual(
+        t.strictSame(
           join.read().toJSON(),
           { type: 'traceEvent', asyncId: 1, info: traceEventData[0].toJSON() }
         )
@@ -238,9 +238,9 @@ test('Raw Event - read before available', function (t) {
     },
 
     function awaitStackTrace (done) {
-      t.strictEqual(join.read(), null)
+      t.equal(join.read(), null)
       join.once('readable', function () {
-        t.strictDeepEqual(
+        t.strictSame(
           join.read().toJSON(),
           { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() }
         )
@@ -250,9 +250,9 @@ test('Raw Event - read before available', function (t) {
     },
 
     function awaitTraceEvent (done) {
-      t.strictEqual(join.read(), null)
+      t.equal(join.read(), null)
       join.once('readable', function () {
-        t.strictDeepEqual(
+        t.strictSame(
           join.read().toJSON(),
           { type: 'traceEvent', asyncId: 1, info: traceEventData[1].toJSON() }
         )
@@ -261,7 +261,7 @@ test('Raw Event - read before available', function (t) {
       traceEvent.write(traceEventData[1])
     }
   ], function (err) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
     t.end()
   })
 })
@@ -276,9 +276,9 @@ test('Raw Event - end switches stream', function (t) {
   const join = new JoinAsRawEvent(stackTrace, traceEvent)
 
   stackTrace.write(stackTraceData[0])
-  t.strictEqual(join.read(), null)
+  t.equal(join.read(), null)
   join.once('readable', function () {
-    t.strictDeepEqual(
+    t.strictSame(
       join.read().toJSON(),
       { type: 'stackTrace', asyncId: 1, info: stackTraceData[0].toJSON() }
     )

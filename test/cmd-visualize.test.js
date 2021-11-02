@@ -10,13 +10,13 @@ test('cmd - test visualization', function (t) {
   const tool = new ClinicBubbleprof()
 
   function cleanup (err, dirname) {
-    t.ifError(err)
+    t.error(err)
 
     async.parallel([
       (done) => rimraf(dirname, done),
       (done) => fs.unlink(dirname + '.html', done)
     ], function (err) {
-      t.ifError(err)
+      t.error(err)
       t.end()
     })
   }

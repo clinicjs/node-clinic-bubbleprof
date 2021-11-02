@@ -8,7 +8,7 @@ const CollectAndRead = require('./collect-and-read.js')
 
 test('collect command produces data files with content', function (t) {
   const cmd = new CollectAndRead({}, '-e', 'setTimeout(() => {}, 200)')
-  cmd.on('error', t.ifError.bind(t))
+  cmd.on('error', t.error.bind(t))
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     async.parallel({
       systemInfo (done) {
@@ -54,7 +54,7 @@ test('collect command produces data files with content', function (t) {
           }))
       }
     }, function (err, output) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       // filter untracked events out
       for (const asyncId of output.traceEvent.keys()) {
@@ -64,7 +64,7 @@ test('collect command produces data files with content', function (t) {
       }
 
       // Expect all tracked asyncIds to be found in traceEvent
-      t.strictDeepEqual(
+      t.strictSame(
         Array.from(output.stackTrace.keys()).sort(),
         Array.from(output.traceEvent.keys()).sort()
       )
@@ -85,7 +85,7 @@ test('collect command produces data files with content', function (t) {
             ? ['PROMISE', 'Timeout']
             : ['Timeout']
 
-      t.strictDeepEqual(asyncOperationTypes.sort(), expected)
+      t.strictSame(asyncOperationTypes.sort(), expected)
 
       t.end()
     })

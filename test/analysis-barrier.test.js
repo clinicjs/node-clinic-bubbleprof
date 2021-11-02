@@ -95,7 +95,7 @@ test('Barrier Node - barrier.inspect', function (t) {
     }]
   })
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeNamed, { depth: null }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
                 ' name:a-barrier-node, isWrapper:true, children:[3, 4], nodes:[\n' +
@@ -106,7 +106,7 @@ test('Barrier Node - barrier.inspect', function (t) {
     '                 <Frame functionB fileName.js:20>]>>]>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeWrapper, { depth: null }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
                 ' name:null, isWrapper:true, children:[3, 4], nodes:[\n' +
@@ -117,7 +117,7 @@ test('Barrier Node - barrier.inspect', function (t) {
     '                 <Frame functionB fileName.js:20>]>>]>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeWrapper, { depth: 3 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
                 ' name:null, isWrapper:true, children:[3, 4], nodes:[\n' +
@@ -128,18 +128,18 @@ test('Barrier Node - barrier.inspect', function (t) {
     '                 <Frame functionB fileName.js:20>]>>]>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeWrapper, { depth: 0 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
                 ' name:null, isWrapper:true, children:[3, 4], nodes:[<AggregateNode>]>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeWrapper, { depth: -1 }),
     '<BarrierNode>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeCombined, { depth: 3 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
                 ' name:null, isWrapper:false, children:[3, 4, 6, 7], nodes:[\n' +
@@ -155,7 +155,7 @@ test('Barrier Node - barrier.inspect', function (t) {
     '                 <Frame functionB fileName.js:20>]>>]>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(barrierNodeCombined, { depth: 0 }),
     '<BarrierNode barrierId:2, parentBarrierId:1,' +
                 ' name:null, isWrapper:false, children:[3, 4, 6, 7], nodes:[' +
@@ -182,7 +182,7 @@ test('Barrier Node - barrier.toJSON', function (t) {
     }]
   })
 
-  t.strictDeepEqual(barrierNode.toJSON(), {
+  t.strictSame(barrierNode.toJSON(), {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 4],
@@ -218,9 +218,9 @@ test('Barrier Node - barrier.updateParentBarrierId', function (t) {
       frames: []
     }]
   })
-  t.strictEqual(barrierNode.parentBarrierId, 2)
+  t.equal(barrierNode.parentBarrierId, 2)
   barrierNode.updateParentBarrierId(1)
-  t.strictEqual(barrierNode.parentBarrierId, 1)
+  t.equal(barrierNode.parentBarrierId, 1)
   t.end()
 })
 
@@ -233,11 +233,11 @@ test('Barrier Node - barrier.setName', function (t) {
     nodes: []
   })
 
-  t.strictEqual(barrierNode.name, null)
+  t.equal(barrierNode.name, null)
   barrierNode.setName('barrier-name')
-  t.strictEqual(barrierNode.name, 'barrier-name')
+  t.equal(barrierNode.name, 'barrier-name')
   barrierNode.setName('new-barrier-name')
-  t.strictEqual(barrierNode.name, 'new-barrier-name')
+  t.equal(barrierNode.name, 'new-barrier-name')
   t.end()
 })
 
@@ -249,11 +249,11 @@ test('Barrier Node - barrier.updateChildren', function (t) {
     isWrapper: true,
     nodes: []
   })
-  t.strictDeepEqual(barrierNode.children, [])
+  t.strictSame(barrierNode.children, [])
   barrierNode.updateChildren([1, 5, 2])
-  t.strictDeepEqual(barrierNode.children, [1, 2, 5])
+  t.strictSame(barrierNode.children, [1, 2, 5])
   barrierNode.updateChildren([5, 1])
-  t.strictDeepEqual(barrierNode.children, [1, 5])
+  t.strictSame(barrierNode.children, [1, 5])
   t.end()
 })
 
@@ -284,7 +284,7 @@ test('Barrier Node - barrier.unwrapNode', function (t) {
     }]
   })
 
-  t.strictEqual(
+  t.equal(
     barrierNodeWrapper.unwrapNode(),
     barrierNodeWrapper.nodes[0]
   )
@@ -309,9 +309,9 @@ test('Barrier Node - barrier.makeBarrier', function (t) {
     }]
   })
 
-  t.strictEqual(barrierNode.isWrapper, true)
+  t.equal(barrierNode.isWrapper, true)
   barrierNode.makeBarrier()
-  t.strictEqual(barrierNode.isWrapper, false)
+  t.equal(barrierNode.isWrapper, false)
   t.end()
 })
 
@@ -334,8 +334,8 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
   })
 
   barrierNodeRoot.initializeAsWrapper(aggregateNodeRoot, [2])
-  t.strictEqual(barrierNodeRoot.isRoot, true)
-  t.strictDeepEqual(barrierNodeRoot.toJSON(), {
+  t.equal(barrierNodeRoot.isRoot, true)
+  t.strictSame(barrierNodeRoot.toJSON(), {
     barrierId: 1,
     parentBarrierId: 0,
     children: [2],
@@ -345,8 +345,8 @@ test('Barrier Node - barrier.initializeAsWrapper', function (t) {
   })
 
   barrierNodeNormal.initializeAsWrapper(aggregateNodeNormal, [3, 4])
-  t.strictEqual(barrierNodeNormal.isRoot, false)
-  t.strictDeepEqual(barrierNodeNormal.toJSON(), {
+  t.equal(barrierNodeNormal.isRoot, false)
+  t.strictSame(barrierNodeNormal.toJSON(), {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 4],
@@ -383,7 +383,7 @@ test('Barrier Node - barrier.initializeAsCombined', function (t) {
     [3, 4, 6, 7]
   )
 
-  t.strictDeepEqual(barrierNode.toJSON(), {
+  t.strictSame(barrierNode.toJSON(), {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 4, 6, 7],
@@ -474,7 +474,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     [barrierNodeCat1Node1, barrierNodeCat1Node2]
   )
 
-  t.strictDeepEqual(barrierNodeParent.toJSON(), {
+  t.strictSame(barrierNodeParent.toJSON(), {
     barrierId: 2,
     parentBarrierId: 1,
     children: [3, 5],
@@ -483,7 +483,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     nodes: [barrierNodeParent.nodes[0].toJSON()]
   })
 
-  t.strictDeepEqual(barrierNodeCat1Combined.toJSON(), {
+  t.strictSame(barrierNodeCat1Combined.toJSON(), {
     barrierId: 3,
     parentBarrierId: 2,
     children: [],
@@ -495,7 +495,7 @@ test('Barrier Node - barrier.combineChildren', function (t) {
     ]
   })
 
-  t.strictDeepEqual(barrierNodeCat2Node1.toJSON(), {
+  t.strictSame(barrierNodeCat2Node1.toJSON(), {
     barrierId: 5,
     parentBarrierId: 2,
     children: [],

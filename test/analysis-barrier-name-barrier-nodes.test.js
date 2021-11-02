@@ -93,9 +93,9 @@ test('Barrier Node - set name', function (t) {
     barrierNodeParentExternal,
     barrierNodeParentBoth
   ], function (err, names) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
-    t.deepEquals(names, [
+    t.same(names, [
       'miscellaneous',
       'setImmediate',
       'external',
@@ -198,9 +198,9 @@ test('Barrier Node - set name with multiple modules in stack', function (t) {
     barrierNodeParentExternal,
     barrierNodeParentBoth
   ], function (err, names) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
-    t.deepEquals(names, [
+    t.same(names, [
       'miscellaneous',
       'setImmediate',
       'external > other-external',
@@ -307,9 +307,9 @@ test('Barrier Node - set name with too many modules in stack', function (t) {
     barrierNodeParentExternal,
     barrierNodeParentBoth
   ], function (err, names) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
-    t.deepEquals(names, [
+    t.same(names, [
       'miscellaneous',
       'setImmediate',
       '... > c > d > e',
@@ -422,9 +422,9 @@ test('Barrier Node - set long name', function (t) {
     barrierNodeRoot,
     barrierNodeManyNodesOneType
   ], function (err, names) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
-    t.deepEquals(names, [
+    t.same(names, [
       'miscellaneous',
       'setImmediate'
     ])
@@ -433,9 +433,9 @@ test('Barrier Node - set long name', function (t) {
       barrierNodeRoot,
       barrierNodeManyNodesManyTypes
     ], function (err, names) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.deepEquals(names, [
+      t.same(names, [
         'miscellaneous',
         'setImmediate + nextTick + timeout + http + ...'
       ])
@@ -452,8 +452,8 @@ test('Barrier Node - http server', function (t) {
   ])
 
   pipeline(nodes, function (err, names) {
-    if (err) return t.ifError(err)
-    t.deepEquals(names, [
+    if (err) return t.error(err)
+    t.same(names, [
       'http.server', // root swaps with http server child
       'http.server',
       'http'
@@ -471,8 +471,8 @@ test('Barrier Node - http server with connection', function (t) {
   ])
 
   pipeline(nodes, function (err, names) {
-    if (err) return t.ifError(err)
-    t.deepEquals(names, [
+    if (err) return t.error(err)
+    t.same(names, [
       'http.server', // root swaps with http server child
       'http.server',
       'http.connection',
@@ -491,8 +491,8 @@ test('Barrier Node - tcp server', function (t) {
   ])
 
   pipeline(nodes, function (err, names) {
-    if (err) return t.ifError(err)
-    t.deepEquals(names, [
+    if (err) return t.error(err)
+    t.same(names, [
       'server', // root swaps with http server child
       'server',
       'connection',
@@ -510,8 +510,8 @@ test('Barrier Node - http connect', function (t) {
   ])
 
   pipeline(nodes, function (err, names) {
-    if (err) return t.ifError(err)
-    t.deepEquals(names, [
+    if (err) return t.error(err)
+    t.same(names, [
       'miscellaneous',
       'http.connection.connect',
       'http',
@@ -523,20 +523,20 @@ test('Barrier Node - http connect', function (t) {
 
 test('Barrier Node - simple types', function (t) {
   pipeline(createNodes(['FSREQWRAP']), function (err, names) {
-    if (err) return t.ifError(err)
-    t.deepEquals(names, [
+    if (err) return t.error(err)
+    t.same(names, [
       'miscellaneous',
       'fs'
     ])
     pipeline(createNodes(['PROMISE']), function (err, names) {
-      if (err) return t.ifError(err)
-      t.deepEquals(names, [
+      if (err) return t.error(err)
+      t.same(names, [
         'miscellaneous',
         'promise'
       ])
       pipeline(createNodes(['RANDOMBYTESREQUEST']), function (err, names) {
-        if (err) return t.ifError(err)
-        t.deepEquals(names, [
+        if (err) return t.error(err)
+        t.same(names, [
           'miscellaneous',
           'random-bytes'
         ])

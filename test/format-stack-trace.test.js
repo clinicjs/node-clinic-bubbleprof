@@ -36,7 +36,7 @@ test('format - stack trace - basic encoder-decoder works', function (t) {
   }
 
   decoder.once('end', function () {
-    t.strictDeepEqual(input, output)
+    t.strictSame(input, output)
     t.end()
   })
 
@@ -70,42 +70,42 @@ test('format - stack trace - partial decoding', function (t) {
 
   // partial message length
   decoder.write(example1Encoded.slice(0, 1))
-  t.strictEqual(decoder.read(), null)
+  t.equal(decoder.read(), null)
 
   // message length complete, partial message
   decoder.write(example1Encoded.slice(1, 20))
-  t.strictEqual(decoder.read(), null)
+  t.equal(decoder.read(), null)
 
   // message complete, next message incomplete
   decoder.write(Buffer.concat([
     example1Encoded.slice(20),
     example2Encoded.slice(0, 30)
   ]))
-  t.strictDeepEqual(decoder.read(), example1)
-  t.strictEqual(decoder.read(), null)
+  t.strictSame(decoder.read(), example1)
+  t.equal(decoder.read(), null)
 
   // ended previuse sample, but a partial remains
   decoder.write(Buffer.concat([
     example2Encoded.slice(30),
     example3Encoded.slice(0, 40)
   ]))
-  t.strictDeepEqual(decoder.read(), example2)
-  t.strictEqual(decoder.read(), null)
+  t.strictSame(decoder.read(), example2)
+  t.equal(decoder.read(), null)
 
   // Ended previuse, no partial remains
   decoder.write(Buffer.concat([
     example3Encoded.slice(40),
     example4Encoded
   ]))
-  t.strictDeepEqual(decoder.read(), example3)
-  t.strictDeepEqual(decoder.read(), example4)
-  t.strictEqual(decoder.read(), null)
+  t.strictSame(decoder.read(), example3)
+  t.strictSame(decoder.read(), example4)
+  t.equal(decoder.read(), null)
 
   // No previuse ended
   decoder.write(example5Encoded)
-  t.strictDeepEqual(decoder.read(), example5)
+  t.strictSame(decoder.read(), example5)
 
   // No more data
-  t.strictEqual(decoder.read(), null)
+  t.equal(decoder.read(), null)
   t.end()
 })

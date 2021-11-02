@@ -16,7 +16,7 @@ test('Raw Event - RawEvent.wrapTraceEvent', function (t) {
     executionAsyncId: 0
   })
 
-  t.strictDeepEqual(RawEvent.wrapTraceEvent(traceEventObject).toJSON(), {
+  t.strictSame(RawEvent.wrapTraceEvent(traceEventObject).toJSON(), {
     type: 'traceEvent',
     asyncId: 2,
     info: traceEventObject.toJSON()
@@ -41,7 +41,7 @@ test('Raw Event - RawEvent.wrapStackTrace', function (t) {
     executionAsyncId: 0
   })
 
-  t.strictDeepEqual(RawEvent.wrapStackTrace(stackTraceObject).toJSON(), {
+  t.strictSame(RawEvent.wrapStackTrace(stackTraceObject).toJSON(), {
     type: 'stackTrace',
     asyncId: 2,
     info: stackTraceObject.toJSON()

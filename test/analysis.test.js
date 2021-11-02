@@ -182,10 +182,10 @@ test('Analysis - pipeline', function (t) {
 
   analysis(systemInfo, stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, output) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(output[0].toJSON(), clusterNodeRoot.toJSON())
-      t.strictDeepEqual(output[1].toJSON(), clusterNodeExternal.toJSON())
+      t.strictSame(output[0].toJSON(), clusterNodeRoot.toJSON())
+      t.strictSame(output[1].toJSON(), clusterNodeExternal.toJSON())
 
       t.end()
     }))
@@ -197,7 +197,7 @@ test('Analysis - pipeline with SystemInfo error', function (t) {
 
   analysis(systemInfo, stackTrace, traceEvent)
     .pipe(endpoint({ objectMode: true }, function (err, output) {
-      t.strictDeepEqual(err, new Error('error'))
+      t.strictSame(err, new Error('error'))
       t.end()
     }))
 })

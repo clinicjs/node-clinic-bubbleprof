@@ -113,31 +113,31 @@ test('Barrier Node - make synchronous - BarrierNode parrent', function (t) {
     .pipe(new WrapAsBarrierNodes())
     .pipe(new MakeSynchronousBarrierNodes(systemInfo))
     .pipe(endpoint({ objectMode: true }, function (err, data) {
-      t.ifError(err)
+      t.error(err)
 
       const barrierNodes = new Map(
         data.map((barrierNode) => [barrierNode.barrierId, barrierNode])
       )
 
-      t.strictDeepEqual(getBarrierNodeEssentials(barrierNodes.get(1)), {
+      t.strictSame(getBarrierNodeEssentials(barrierNodes.get(1)), {
         barrierId: 1,
         children: [10],
         nodes: [1],
         isWrapper: true
       })
-      t.strictDeepEqual(getBarrierNodeEssentials(barrierNodes.get(10)), {
+      t.strictSame(getBarrierNodeEssentials(barrierNodes.get(10)), {
         barrierId: 10,
         children: [12, 13],
         nodes: [10, 11],
         isWrapper: false
       })
-      t.strictDeepEqual(getBarrierNodeEssentials(barrierNodes.get(12)), {
+      t.strictSame(getBarrierNodeEssentials(barrierNodes.get(12)), {
         barrierId: 12,
         children: [],
         nodes: [12],
         isWrapper: true
       })
-      t.strictDeepEqual(getBarrierNodeEssentials(barrierNodes.get(13)), {
+      t.strictSame(getBarrierNodeEssentials(barrierNodes.get(13)), {
         barrierId: 13,
         children: [],
         nodes: [13],

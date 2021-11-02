@@ -217,49 +217,49 @@ function checkTreeStructure (t, barrierNodes) {
     barrierNodeRemappend
   ] = barrierNodes
 
-  t.strictDeepEqual(extractState(barrierNodeRoot), {
+  t.strictSame(extractState(barrierNodeRoot), {
     barrierId: 1,
     parentBarrierId: 0,
     isWrapper: true,
     children: [2],
     nodes: [1]
   })
-  t.strictDeepEqual(extractState(barrierNodeParent), {
+  t.strictSame(extractState(barrierNodeParent), {
     barrierId: 2,
     parentBarrierId: 1,
     isWrapper: true,
     children: [3, 4, 6, 7],
     nodes: [2]
   })
-  t.strictDeepEqual(extractState(barrierNodeBarrier), {
+  t.strictSame(extractState(barrierNodeBarrier), {
     barrierId: 3,
     parentBarrierId: 2,
     isWrapper: false,
     children: [],
     nodes: [3]
   })
-  t.strictDeepEqual(extractState(barrierNodeBranchA), {
+  t.strictSame(extractState(barrierNodeBranchA), {
     barrierId: 4,
     parentBarrierId: 2,
     isWrapper: false,
     children: [],
     nodes: [4, 5]
   })
-  t.strictDeepEqual(extractState(barrierNodeWrapper), {
+  t.strictSame(extractState(barrierNodeWrapper), {
     barrierId: 6,
     parentBarrierId: 2,
     isWrapper: true,
     children: [],
     nodes: [6]
   })
-  t.strictDeepEqual(extractState(barrierNodeBranchB), {
+  t.strictSame(extractState(barrierNodeBranchB), {
     barrierId: 7,
     parentBarrierId: 2,
     isWrapper: false,
     children: [9],
     nodes: [7, 8]
   })
-  t.strictDeepEqual(extractState(barrierNodeRemappend), {
+  t.strictSame(extractState(barrierNodeRemappend), {
     barrierId: 9,
     parentBarrierId: 7,
     isWrapper: true,
@@ -275,7 +275,7 @@ test('Barrier Node - make synchronous', function (t) {
   startpoint(barrierNodesInput, { objectMode: true })
     .pipe(new MakeSynchronousBarrierNodes(systemInfo))
     .pipe(endpoint({ objectMode: true }, function (err, barrierNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       checkTreeStructure(t, barrierNodesOutput)
       t.end()

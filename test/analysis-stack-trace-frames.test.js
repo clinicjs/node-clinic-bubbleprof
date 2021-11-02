@@ -48,7 +48,7 @@ test('Stack Trace - frame.toJSON', function (t) {
 
   const frames = new Frames(data)
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.toJSON()),
     data
   )
@@ -77,7 +77,7 @@ test('Stack Trace - frame.isNodecore', function (t) {
   ])
   const root = new FakeSystemInfo('/')
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.isNodecore(root)),
     [true, true, false, false, false]
   )
@@ -114,12 +114,12 @@ test('Stack Trace - frame.isExternal', function (t) {
   const root = new FakeSystemInfo('/')
   const modules = new FakeSystemInfo('/node_modules/internal')
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.isExternal(root)),
     [true, true, true, true, true, false, true]
   )
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.isExternal(modules)),
     [true, true, true, true, true, false, false]
   )
@@ -144,7 +144,7 @@ test('Stack Trace - frame.getModuleName', function (t) {
   ])
   const root = new FakeSystemInfo('/')
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.getModuleName(root)), [
       null,
       {
@@ -189,7 +189,7 @@ test('Stack Trace - frame.getPosition', function (t) {
     }
   ])
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.getPosition()), [
       'events.js:10:20',
       'events.js:0:20',
@@ -242,7 +242,7 @@ test('Stack Trace - frame.format', function (t) {
     }
   ])
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.map((frame) => frame.format()), [
       '<anonymous> filename.js:2:1',
       'typeName.functionName filename.js:2:1',
@@ -266,15 +266,15 @@ test('Stack Trace - frame.inspect', function (t) {
     }
   ]).get(0)
 
-  t.strictEqual(util.inspect(frame, {
+  t.equal(util.inspect(frame, {
     depth: 0
   }), '<Frame functionName filename.js:2:1>')
 
-  t.strictEqual(util.inspect(frame, {
+  t.equal(util.inspect(frame, {
     depth: null
   }), '<Frame functionName filename.js:2:1>')
 
-  t.strictEqual(util.inspect(frame, {
+  t.equal(util.inspect(frame, {
     depth: -1
   }), '<Frame>')
 
@@ -297,7 +297,7 @@ test('Stack Trace - frames.formatPositionOnly', function (t) {
     }
   ])
 
-  t.strictEqual(
+  t.equal(
     frames.formatPositionOnly(),
     'fileName.js:10:20\n' +
     'fileName.js:20:10'
@@ -325,39 +325,39 @@ test('Stack Trace - frames.inspect', function (t) {
     }
   ])
 
-  t.strictEqual(util.inspect(framesEmpty, {
+  t.equal(util.inspect(framesEmpty, {
     depth: 1
   }), '<Frames []>')
 
-  t.strictEqual(util.inspect(framesEmpty, {
+  t.equal(util.inspect(framesEmpty, {
     depth: null
   }), '<Frames []>')
 
-  t.strictEqual(util.inspect(framesEmpty, {
+  t.equal(util.inspect(framesEmpty, {
     depth: 0
   }), '<Frames []>')
 
-  t.strictEqual(util.inspect(framesEmpty, {
+  t.equal(util.inspect(framesEmpty, {
     depth: -1
   }), '<Frames>')
 
-  t.strictEqual(util.inspect(frames, {
+  t.equal(util.inspect(frames, {
     depth: 1
   }), '<Frames [\n' +
       '         <Frame functionA filename.js:2:1>,\n' +
       '         <Frame functionB filename.js:4:1>]>')
 
-  t.strictEqual(util.inspect(frames, {
+  t.equal(util.inspect(frames, {
     depth: null
   }), '<Frames [\n' +
       '         <Frame functionA filename.js:2:1>,\n' +
       '         <Frame functionB filename.js:4:1>]>')
 
-  t.strictEqual(util.inspect(frames, {
+  t.equal(util.inspect(frames, {
     depth: 0
   }), '<Frames [<Frame>, <Frame>]>')
 
-  t.strictEqual(util.inspect(frames, {
+  t.equal(util.inspect(frames, {
     depth: -1
   }), '<Frames>')
 
@@ -383,7 +383,7 @@ test('Stack Trace - frames.toJSON', function (t) {
   ]
   const frames = new Frames(data)
 
-  t.strictDeepEqual(frames.toJSON(), data)
+  t.strictSame(frames.toJSON(), data)
   t.end()
 })
 
@@ -404,7 +404,7 @@ test('Stack Trace - frames.length', function (t) {
       columnNumber: 1
     }
   ])
-  t.strictEqual(frames.length, 2)
+  t.equal(frames.length, 2)
   t.end()
 })
 
@@ -428,11 +428,11 @@ test('Stack Trace - frames.forEach', function (t) {
 
   const calls = []
   frames.forEach(function (frame, index) {
-    t.strictEqual(frame, frames.get(index))
+    t.equal(frame, frames.get(index))
     calls.push(index)
   })
 
-  t.strictDeepEqual(calls, [0, 1])
+  t.strictSame(calls, [0, 1])
   t.end()
 })
 
@@ -454,7 +454,7 @@ test('Stack Trace - frames.map', function (t) {
     }
   ])
 
-  t.strictDeepEqual(frames.map((frame) => frame.functionName), [
+  t.strictSame(frames.map((frame) => frame.functionName), [
     'functionA',
     'functionB'
   ])
@@ -488,7 +488,7 @@ test('Stack Trace - frames.filter', function (t) {
     columnNumber: 1
   }])
 
-  t.strictDeepEqual(
+  t.strictSame(
     frames.filter((frame) => frame.functionName === 'functionB'),
     expectedFrames
   )
@@ -513,11 +513,11 @@ test('Stack Trace - frames.every', function (t) {
     }
   ])
 
-  t.strictEqual(
+  t.equal(
     frames.every((frame) => frame.fileName === 'filename.js'),
     true
   )
-  t.strictEqual(
+  t.equal(
     frames.every((frame) => frame.functionName === 'functionB'),
     false
   )
@@ -542,11 +542,11 @@ test('Stack Trace - frames.some', function (t) {
     }
   ])
 
-  t.strictEqual(
+  t.equal(
     frames.some((frame) => frame.isToplevel === false),
     false
   )
-  t.strictEqual(
+  t.equal(
     frames.some((frame) => frame.functionName === 'functionB'),
     true
   )
@@ -571,7 +571,7 @@ test('Stack Trace - frames.first', function (t) {
     }
   ])
 
-  t.strictEqual(frames.first(), frames.get(0))
+  t.equal(frames.first(), frames.get(0))
   t.end()
 })
 
@@ -593,7 +593,7 @@ test('Stack Trace - frames.last', function (t) {
     }
   ])
 
-  t.strictEqual(frames.last(), frames.get(1))
+  t.equal(frames.last(), frames.get(1))
   t.end()
 })
 
@@ -616,8 +616,8 @@ test('Stack Trace - frames.get', function (t) {
   ]
   const frames = new Frames(data)
 
-  t.strictDeepEqual(frames.get(0).toJSON(), data[0])
-  t.strictDeepEqual(frames.get(1).toJSON(), data[1])
+  t.strictSame(frames.get(0).toJSON(), data[0])
+  t.strictSame(frames.get(1).toJSON(), data[1])
 
   t.throws(
     () => frames.get(2),

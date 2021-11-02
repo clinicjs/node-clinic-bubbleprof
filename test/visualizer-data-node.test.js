@@ -57,8 +57,8 @@ function validateData (dataSet) {
 test('Visualizer data - data nodes - examples/slow-io sample json', function (t) {
   const dataSet = loadData({ debugMode: true }, slowioJson)
 
-  t.equals(dataSet.clusterNodes.size, 33)
-  t.equals(validateData(dataSet), 'Pass')
+  t.equal(dataSet.clusterNodes.size, 33)
+  t.equal(validateData(dataSet), 'Pass')
 
   t.end()
 })
@@ -66,10 +66,10 @@ test('Visualizer data - data nodes - examples/slow-io sample json', function (t)
 test('Visualizer data - data nodes - acmeair sample json', function (t) {
   const dataSet = loadData({ debugMode: true, averaging: 'median' }, acmeairJson)
 
-  t.equals(dataSet.settings.averaging, 'median')
+  t.equal(dataSet.settings.averaging, 'median')
 
-  t.equals(dataSet.clusterNodes.size, 24)
-  t.equals(validateData(dataSet), 'Pass')
+  t.equal(dataSet.clusterNodes.size, 24)
+  t.equal(validateData(dataSet), 'Pass')
 
   t.end()
 })
@@ -155,8 +155,8 @@ test('Visualizer data - data nodes - set invalid stat', function (t) {
     clusterNode.validateStat(Infinity, '')
   }, new Error('For ClusterNode A: Got Infinity, must be finite'))
 
-  t.equals(clusterNode.validateStat(0, ''), 0)
-  t.equals(clusterNode.validateStat(Infinity, '', { isFinite: false }), Infinity)
+  t.equal(clusterNode.validateStat(0, ''), 0)
+  t.equal(clusterNode.validateStat(Infinity, '', { isFinite: false }), Infinity)
 
   t.end()
 })

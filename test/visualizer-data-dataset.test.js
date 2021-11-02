@@ -11,9 +11,9 @@ function round4dp (num) {
 test('Visualizer dataset - fake json', function (t) {
   const dataSet = loadData({ debugMode: true }, fakeJson)
 
-  t.equals(dataSet.clusterNodes.size, 2)
-  t.equals(dataSet.aggregateNodes.size, 2)
-  t.equals(dataSet.sourceNodes.length, 2)
+  t.equal(dataSet.clusterNodes.size, 2)
+  t.equal(dataSet.aggregateNodes.size, 2)
+  t.equal(dataSet.sourceNodes.length, 2)
 
   t.end()
 })
@@ -47,11 +47,11 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
   const dataSet = new DataSet(acmeairJson, { wallTimeSlices: 100 })
 
   // Ensure stats calculated from real profile data subset don't changed from unexpected future feature side effects
-  t.equals(dataSet.wallTime.profileStart, 6783474.641)
-  t.equals(dataSet.wallTime.profileEnd, 6786498.31)
+  t.equal(dataSet.wallTime.profileStart, 6783474.641)
+  t.equal(dataSet.wallTime.profileEnd, 6786498.31)
   dataSet.processData()
-  t.equals(round4dp(dataSet.wallTime.profileDuration), 3023.6690)
-  t.equals(round4dp(dataSet.wallTime.msPerSlice), 30.2367)
+  t.equal(round4dp(dataSet.wallTime.profileDuration), 3023.6690)
+  t.equal(round4dp(dataSet.wallTime.msPerSlice), 30.2367)
 
   // todo - unify variable and class names with UI labels
   const typeDecimals = [
@@ -61,13 +61,13 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
     dataSet.getDecimal('typeCategory', 'timing-promises'),
     dataSet.getDecimal('typeCategory', 'other')
   ]
-  t.equals(round4dp(typeDecimals[0]), 0.8461)
-  t.equals(round4dp(typeDecimals[1]), 0.0017)
-  t.equals(round4dp(typeDecimals[2]), 0)
-  t.equals(round4dp(typeDecimals[3]), 0.1521)
-  t.equals(round4dp(typeDecimals[4]), 0)
-  t.equals(round4dp(typeDecimals.reduce((accum, num) => accum + num, 0)), 1)
-  t.equals(dataSet.decimals.typeCategory.size, 5)
+  t.equal(round4dp(typeDecimals[0]), 0.8461)
+  t.equal(round4dp(typeDecimals[1]), 0.0017)
+  t.equal(round4dp(typeDecimals[2]), 0)
+  t.equal(round4dp(typeDecimals[3]), 0.1521)
+  t.equal(round4dp(typeDecimals[4]), 0)
+  t.equal(round4dp(typeDecimals.reduce((accum, num) => accum + num, 0)), 1)
+  t.equal(dataSet.decimals.typeCategory.size, 5)
 
   const partyDecimals = [
     dataSet.getDecimal('party', 'user'),
@@ -75,15 +75,15 @@ test('Visualizer dataset - wallTime from real sample data', function (t) {
     dataSet.getDecimal('party', 'nodecore'),
     dataSet.getDecimal('party', 'root')
   ]
-  t.equals(round4dp(partyDecimals[0]), 0.2968)
-  t.equals(round4dp(partyDecimals[1]), 0.6829)
-  t.equals(round4dp(partyDecimals[2]), 0.0203)
-  t.equals(round4dp(partyDecimals[3]), 0)
-  t.equals(round4dp(partyDecimals.reduce((accum, num) => accum + num, 0)), 1)
-  t.equals(dataSet.decimals.party.size, 4)
+  t.equal(round4dp(partyDecimals[0]), 0.2968)
+  t.equal(round4dp(partyDecimals[1]), 0.6829)
+  t.equal(round4dp(partyDecimals[2]), 0.0203)
+  t.equal(round4dp(partyDecimals[3]), 0)
+  t.equal(round4dp(partyDecimals.reduce((accum, num) => accum + num, 0)), 1)
+  t.equal(dataSet.decimals.party.size, 4)
 
-  t.equals(dataSet.getDecimal('typeCategory', 'some-key-not-in-map'), null)
-  t.equals(dataSet.getDecimal('party', 'some-key-not-in-map'), null)
+  t.equal(dataSet.getDecimal('typeCategory', 'some-key-not-in-map'), null)
+  t.equal(dataSet.getDecimal('party', 'some-key-not-in-map'), null)
 
   t.end()
 })

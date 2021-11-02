@@ -22,11 +22,11 @@ testNotWindows('cmd - collect - external SIGINT is relayed', function (t) {
     stdout (done) { child.stdout.pipe(endpoint(done)) },
     stderr (done) { child.stderr.pipe(endpoint(done)) }
   }, function (err, output) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
     // Expect the WARNING output to be shown
     t.ok(output.stderr.toString().split('\n').length, 1)
-    t.strictEqual(output.stdout.toString(),
+    t.equal(output.stdout.toString(),
       'listening for SIGINT\nSIGINT received\n')
     t.end()
   })
@@ -34,7 +34,7 @@ testNotWindows('cmd - collect - external SIGINT is relayed', function (t) {
 
 test('cmd - collect - non-success exit code should not throw', function (t) {
   const cmd = new CollectAndRead({}, '--expose-gc', '-e', 'process.exit(1)')
-  cmd.on('error', t.ifError.bind(t))
+  cmd.on('error', t.error.bind(t))
   cmd.on('ready', function () {
     t.end()
   })

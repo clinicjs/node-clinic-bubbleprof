@@ -165,7 +165,7 @@ function checkTreeStructure (t, barrierNodes) {
     barrierNodeParentBothChildExternal
   ] = barrierNodes
 
-  t.strictDeepEqual(extractState(barrierNodeRoot), {
+  t.strictSame(extractState(barrierNodeRoot), {
     barrierId: 1,
     parentBarrierId: 0,
     isWrapper: true,
@@ -173,7 +173,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [1]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentUser), {
+  t.strictSame(extractState(barrierNodeParentUser), {
     barrierId: 2,
     parentBarrierId: 1,
     isWrapper: true,
@@ -181,7 +181,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [2]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentExternal), {
+  t.strictSame(extractState(barrierNodeParentExternal), {
     barrierId: 3,
     parentBarrierId: 1,
     isWrapper: false,
@@ -189,7 +189,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [3]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentBoth), {
+  t.strictSame(extractState(barrierNodeParentBoth), {
     barrierId: 4,
     parentBarrierId: 1,
     isWrapper: false,
@@ -197,7 +197,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [4, 5]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentUserChildUser), {
+  t.strictSame(extractState(barrierNodeParentUserChildUser), {
     barrierId: 6,
     parentBarrierId: 2,
     isWrapper: true,
@@ -205,7 +205,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [6]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentUserChildExternal), {
+  t.strictSame(extractState(barrierNodeParentUserChildExternal), {
     barrierId: 7,
     parentBarrierId: 2,
     isWrapper: false,
@@ -213,7 +213,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [7]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentExternalChildUser), {
+  t.strictSame(extractState(barrierNodeParentExternalChildUser), {
     barrierId: 8,
     parentBarrierId: 3,
     isWrapper: false,
@@ -221,7 +221,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [8]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentExternalChildExternal), {
+  t.strictSame(extractState(barrierNodeParentExternalChildExternal), {
     barrierId: 9,
     parentBarrierId: 3,
     isWrapper: true,
@@ -229,7 +229,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [9]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentBothChildUser), {
+  t.strictSame(extractState(barrierNodeParentBothChildUser), {
     barrierId: 10,
     parentBarrierId: 4,
     isWrapper: true,
@@ -237,7 +237,7 @@ function checkTreeStructure (t, barrierNodes) {
     nodes: [10]
   })
 
-  t.strictDeepEqual(extractState(barrierNodeParentBothChildExternal), {
+  t.strictSame(extractState(barrierNodeParentBothChildExternal), {
     barrierId: 11,
     parentBarrierId: 4,
     isWrapper: true,
@@ -253,7 +253,7 @@ test('Barrier Node - make external', function (t) {
   startpoint(barrierNodesInput, { objectMode: true })
     .pipe(new MakeExternalBarrierNode(systemInfo))
     .pipe(endpoint({ objectMode: true }, function (err, barrierNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       checkTreeStructure(t, barrierNodesOutput)
       t.end()

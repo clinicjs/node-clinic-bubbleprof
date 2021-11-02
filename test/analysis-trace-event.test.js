@@ -19,9 +19,9 @@ test('Trace Event - stream wrap', function (t) {
   startpoint(input, { objectMode: true })
     .pipe(new WrapAsTraceEvent())
     .pipe(endpoint({ objectMode: true }, function (err, output) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(
+      t.strictSame(
         output,
         input.map((data) => new TraceEvent(data))
       )
@@ -40,6 +40,6 @@ test('Trace Event - toJSON', function (t) {
     executionAsyncId: 0
   }
 
-  t.strictDeepEqual(new TraceEvent(input).toJSON(), input)
+  t.strictSame(new TraceEvent(input).toJSON(), input)
   t.end()
 })

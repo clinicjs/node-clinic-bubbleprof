@@ -137,28 +137,28 @@ function checkTreeStructure (t, clusterNodes) {
     clusterNodeExitSameOrigin
   ] = clusterNodes
 
-  t.strictDeepEqual(extractState(clusterNodeRoot), {
+  t.strictSame(extractState(clusterNodeRoot), {
     clusterId: 1,
     parentClusterId: 0,
     children: [2, 3],
     nodes: [1, 2]
   })
 
-  t.strictDeepEqual(extractState(clusterNodeSameOrigin), {
+  t.strictSame(extractState(clusterNodeSameOrigin), {
     clusterId: 2,
     parentClusterId: 1,
     children: [4],
     nodes: [3, 4, 6]
   })
 
-  t.strictDeepEqual(extractState(clusterNodeExitSameOrigin), {
+  t.strictSame(extractState(clusterNodeExitSameOrigin), {
     clusterId: 4,
     parentClusterId: 2,
     children: [],
     nodes: [7]
   })
 
-  t.strictDeepEqual(extractState(clusterNodeStandalone), {
+  t.strictSame(extractState(clusterNodeStandalone), {
     clusterId: 3,
     parentClusterId: 1,
     children: [],
@@ -172,7 +172,7 @@ test('Cluster Node - combine', function (t) {
   startpoint(barrierNodesInput, { objectMode: true })
     .pipe(new CombineAsClusterNodes())
     .pipe(endpoint({ objectMode: true }, function (err, clusterNodeOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       checkTreeStructure(t, clusterNodeOutput)
       t.end()
