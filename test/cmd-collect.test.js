@@ -80,7 +80,7 @@ test('collect command produces data files with content', function (t) {
         // A `Promise.resolve()` call was added to bootstrap code in Node 12.16.x: https://github.com/nodejs/node/pull/30624
         // Node.js 12.17.0 does not appear to show this `resolve()` call in its trace event log.
         expected = ['PROMISE', 'Timeout']
-      } else if(semver.satisfies(process.version, '>= 15.0.0')) {
+      } else if (semver.satisfies(process.version, '>= 15.0.0')) {
         // See: https://github.com/clinicjs/node-clinic-bubbleprof/pull/382#issuecomment-962766194
         expected = ['TickObject', 'Timeout']
       }
