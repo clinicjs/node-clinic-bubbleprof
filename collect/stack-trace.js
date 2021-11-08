@@ -70,7 +70,8 @@ function stackTrace (skip) {
   // Don't include async_hooks frames
   return frames.slice(skip).filter(function (frame) {
     return (frame.fileName !== 'async_hooks.js' &&
-            frame.fileName !== 'internal/async_hooks.js')
+            frame.fileName !== 'internal/async_hooks.js' &&
+            frame.fileName !== 'node:internal/async_hooks')
   })
 }
 module.exports = stackTrace
