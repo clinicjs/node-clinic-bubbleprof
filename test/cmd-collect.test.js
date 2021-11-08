@@ -75,15 +75,15 @@ test('collect command produces data files with content', function (t) {
         asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
-      const expected =
-        // Expect Timeout and TIMERWRAP to be there in Node 10.x and below. TIMERWRAP was removed in https://github.com/nodejs/node/pull/20894
-        semver.satisfies(process.version, '< 11.0')
-          ? ['TIMERWRAP', 'Timeout']
+      let expected = ['Timeout']
+      if (semver.satisfies(process.version, '>= 12.16.0 < 12.17.0')) {
         // A `Promise.resolve()` call was added to bootstrap code in Node 12.16.x: https://github.com/nodejs/node/pull/30624
         // Node.js 12.17.0 does not appear to show this `resolve()` call in its trace event log.
-          : semver.satisfies(process.version, '>= 12.16.0 < 12.17.0')
-            ? ['PROMISE', 'Timeout']
-            : ['Timeout']
+        expected = ['PROMISE', 'Timeout']
+      } else if(semver.satisfies(process.version, '>= 15.0.0')) {
+        // See: https://github.com/clinicjs/node-clinic-bubbleprof/pull/382#issuecomment-962766194
+        expected = ['TickObject', 'Timeout']
+      }
 
       t.strictSame(asyncOperationTypes.sort(), expected)
 
