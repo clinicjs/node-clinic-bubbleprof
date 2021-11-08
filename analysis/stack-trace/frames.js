@@ -38,7 +38,7 @@ class Frame {
     // evals and natives are not in nodecore
     if (this.isEval || this.isNative) return false
 
-    if (fileName.startsWith(`internal${systemInfo.pathSeparator}`)) {
+    if (fileName.startsWith('node:') || fileName.startsWith(`internal${systemInfo.pathSeparator}`)) {
       return true
     }
 
