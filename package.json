@@ -10,8 +10,8 @@
     "test": "standard | snazzy && tap --no-cov test/*.test.js",
     "test:file": "standard | snazzy && tap --no-cov",
     "ci-lint": "standard | snazzy",
-    "ci-test": "NODE_OPTIONS=--no-warnings tap test/*.test.js",
-    "ci-cov": "NODE_OPTIONS=--no-warnings tap test/*.test.js",
+    "ci-test": "tap test/*.test.js",
+    "ci-cov": "tap test/*.test.js",
     "lint": "standard --fix | snazzy",
     "visualize-watch": "node debug/visualize-watch.js",
     "visualize-all": "node debug/visualize-all.js"
