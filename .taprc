@@ -1,0 +1,7 @@
+timeout: 50
+jobs: 1
+statements: 95
+branches: 90
+functions: 95
+lines: 98
+test-env: NODE_OPTIONS=--no-warnings

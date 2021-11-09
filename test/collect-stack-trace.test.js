@@ -12,7 +12,7 @@ test('stack trace - function scope', function (t) {
     frames = stackTrace()
   })()
 
-  t.strictDeepEqual(Object.assign({}, frames[0]), {
+  t.strictSame(Object.assign({}, frames[0]), {
     functionName: 'functionScope',
     typeName: '',
     isEval: false,
@@ -37,7 +37,7 @@ test('stack trace - method', function (t) {
   const type = new Type()
   const frames = type.method()
 
-  t.strictDeepEqual(Object.assign({}, frames[0]), {
+  t.strictSame(Object.assign({}, frames[0]), {
     functionName: 'method',
     typeName: 'Type',
     isEval: false,
@@ -61,7 +61,7 @@ test('stack trace - constructor', function (t) {
   }
   const frames = (new Type()).frames
 
-  t.strictDeepEqual(Object.assign({}, frames[0]), {
+  t.strictSame(Object.assign({}, frames[0]), {
     functionName: 'Type',
     typeName: '',
     isEval: false,
@@ -80,7 +80,7 @@ test('stack trace - constructor', function (t) {
 test('stack trace - eval', function (t) {
   const frames = eval('stackTrace()') // eslint-disable-line no-eval
 
-  t.strictDeepEqual(Object.assign({}, frames[0]), {
+  t.strictSame(Object.assign({}, frames[0]), {
     functionName: 'eval',
     typeName: '',
     isEval: true,
@@ -134,7 +134,7 @@ test('stack trace - native', function (t) {
     columnNumber: 1
   }
 
-  t.strictDeepEqual(
+  t.strictSame(
     Object.assign({}, frames[1]),
     isTorqueSortVersion ? expectedTorque : expectedNative
   )

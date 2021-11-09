@@ -67,10 +67,10 @@ test('Aggregate Node - combine', function (t) {
   startpoint(sourceNodes, { objectMode: true })
     .pipe(new CombineAsAggregateNodes())
     .pipe(endpoint({ objectMode: true }, function (err, aggregateNodes) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       // root
-      t.strictDeepEqual(aggregateNodes[0].toJSON(), {
+      t.strictSame(aggregateNodes[0].toJSON(), {
         aggregateId: 1,
         parentAggregateId: 0,
         children: [2],
@@ -82,7 +82,7 @@ test('Aggregate Node - combine', function (t) {
       })
 
       // server
-      t.strictDeepEqual(aggregateNodes[1].toJSON(), {
+      t.strictSame(aggregateNodes[1].toJSON(), {
         aggregateId: 2,
         parentAggregateId: 1,
         children: [3],
@@ -94,7 +94,7 @@ test('Aggregate Node - combine', function (t) {
       })
 
       // socket
-      t.strictDeepEqual(aggregateNodes[2].toJSON(), {
+      t.strictSame(aggregateNodes[2].toJSON(), {
         aggregateId: 3,
         parentAggregateId: 2,
         children: [4, 5],
@@ -106,7 +106,7 @@ test('Aggregate Node - combine', function (t) {
       })
 
       // log
-      t.strictDeepEqual(aggregateNodes[3].toJSON(), {
+      t.strictSame(aggregateNodes[3].toJSON(), {
         aggregateId: 4,
         parentAggregateId: 3,
         children: [],
@@ -118,7 +118,7 @@ test('Aggregate Node - combine', function (t) {
       })
 
       // end
-      t.strictDeepEqual(aggregateNodes[4].toJSON(), {
+      t.strictSame(aggregateNodes[4].toJSON(), {
         aggregateId: 5,
         parentAggregateId: 3,
         children: [],

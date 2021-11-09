@@ -63,13 +63,13 @@ test('Source Node - combine', function (t) {
   joined
     .pipe(new CombineAsSourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, data) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       const sourceNodes = new Map(data.map((node) => [node.asyncId, node]))
-      t.strictEqual(data.length, 3)
-      t.strictEqual(sourceNodes.size, 3)
+      t.equal(data.length, 3)
+      t.equal(sourceNodes.size, 3)
 
-      t.strictDeepEqual(sourceNodes.get(1).toJSON(), {
+      t.strictSame(sourceNodes.get(1).toJSON(), {
         asyncId: 1,
         triggerAsyncId: 0,
         executionAsyncId: 0,
@@ -83,7 +83,7 @@ test('Source Node - combine', function (t) {
         destroy: 4
       })
 
-      t.strictDeepEqual(sourceNodes.get(2).toJSON(), {
+      t.strictSame(sourceNodes.get(2).toJSON(), {
         asyncId: 2,
         triggerAsyncId: 1,
         executionAsyncId: 1,
@@ -97,7 +97,7 @@ test('Source Node - combine', function (t) {
         destroy: 6
       })
 
-      t.strictDeepEqual(sourceNodes.get(3).toJSON(), {
+      t.strictSame(sourceNodes.get(3).toJSON(), {
         asyncId: 3,
         triggerAsyncId: 1,
         executionAsyncId: 1,

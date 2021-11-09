@@ -24,13 +24,13 @@ test('Source Node - sourceNode.inspect', function (t) {
     destroy: 6
   })
 
-  t.strictEqual(
+  t.equal(
     util.inspect(sourceNode),
     '<SourceNode type:CUSTOM, asyncId:2, parentAsyncId:1,' +
     ' triggerAsyncId:1, executionAsyncId:0, identifier:null>'
   )
   sourceNode.setIdentifier('string will be the id')
-  t.strictEqual(
+  t.equal(
     util.inspect(sourceNode),
     '<SourceNode type:CUSTOM, asyncId:2, parentAsyncId:1,' +
     ' triggerAsyncId:1, executionAsyncId:0, identifier:66e4917ca59cec24>'
@@ -57,7 +57,7 @@ test('Source Node - sourceNode.toJSON', function (t) {
     asyncId: 2
   })
 
-  t.strictDeepEqual(sourceNodeNoData.toJSON(), {
+  t.strictSame(sourceNodeNoData.toJSON(), {
     asyncId: 2,
     frames: null,
     type: null,
@@ -71,7 +71,7 @@ test('Source Node - sourceNode.toJSON', function (t) {
     destroy: null
   })
 
-  t.strictDeepEqual(sourceNodeNoData.toJSON({ short: true }), {
+  t.strictSame(sourceNodeNoData.toJSON({ short: true }), {
     asyncId: 2,
     parentAsyncId: null,
     triggerAsyncId: null,
@@ -82,7 +82,7 @@ test('Source Node - sourceNode.toJSON', function (t) {
     destroy: null
   })
 
-  t.strictDeepEqual(sourceNode.toJSON(), {
+  t.strictSame(sourceNode.toJSON(), {
     asyncId: 2,
     frames: [
       { fileName: 'fileName.js' }
@@ -98,7 +98,7 @@ test('Source Node - sourceNode.toJSON', function (t) {
     destroy: 6
   })
 
-  t.strictDeepEqual(sourceNode.toJSON({ short: true }), {
+  t.strictSame(sourceNode.toJSON({ short: true }), {
     asyncId: 2,
     parentAsyncId: 1,
     triggerAsyncId: 1,
@@ -116,7 +116,7 @@ test('Source Node - sourceNode.makeRoot', function (t) {
   const sourceNodeRoot = new SourceNode(0)
   sourceNodeRoot.makeRoot()
 
-  t.strictDeepEqual(sourceNodeRoot.toJSON(), {
+  t.strictSame(sourceNodeRoot.toJSON(), {
     asyncId: 0,
     frames: [],
     type: null,
@@ -136,22 +136,22 @@ test('Source Node - sourceNode.makeRoot', function (t) {
 test('Source Node - sourceNode.setIdentifier', function (t) {
   const sourceNode = new FakeSourceNode({ asyncId: 2 })
 
-  t.strictEqual(
+  t.equal(
     sourceNode.hash(),
     null
   )
-  t.strictEqual(
+  t.equal(
     sourceNode.toJSON().identifier,
     null
   )
 
   sourceNode.setIdentifier('string will be the id')
 
-  t.strictEqual(
+  t.equal(
     sourceNode.toJSON().identifier,
     'string will be the id'
   )
-  t.strictEqual(
+  t.equal(
     sourceNode.hash(),
     crypto.createHash('sha256').update('string will be the id').digest('hex')
   )
@@ -181,7 +181,7 @@ test('Source Node - sourceNode.addRawEvent', function (t) {
   )
   const sourceNodeWithStackTraceExpected = new SourceNode(2)
   sourceNodeWithStackTraceExpected.addStackTrace(stackTraceObject)
-  t.strictDeepEqual(
+  t.strictSame(
     sourceNodeWithStackTrace,
     sourceNodeWithStackTraceExpected
   )
@@ -192,7 +192,7 @@ test('Source Node - sourceNode.addRawEvent', function (t) {
   )
   const sourceNodeWithTraceEventExpected = new SourceNode(2)
   sourceNodeWithTraceEventExpected.addTraceEvent(traceEventObject)
-  t.strictDeepEqual(
+  t.strictSame(
     sourceNodeWithTraceEvent,
     sourceNodeWithTraceEventExpected
   )
@@ -225,7 +225,7 @@ test('Source Node - sourceNode.addStackTrace', function (t) {
 
   const sourceNode = new SourceNode(2)
   sourceNode.addStackTrace(stackTraceObject)
-  t.strictEqual(sourceNode.frames, stackTraceObject.frames)
+  t.equal(sourceNode.frames, stackTraceObject.frames)
 
   const sourceNodeNodeStackTrace = new SourceNode(2)
   t.throws(
@@ -288,7 +288,7 @@ test('Source Node - sourceNode.addTraceEvent', function (t) {
   sourceNode.addTraceEvent(traceEventAfterObject)
   sourceNode.addTraceEvent(traceEventDestroyObject)
 
-  t.strictDeepEqual(sourceNode.toJSON(), {
+  t.strictSame(sourceNode.toJSON(), {
     asyncId: 2,
     frames: null,
     type: 'CUSTOM',
@@ -386,11 +386,11 @@ test('Source Node - sourceNode.isComplete', function (t) {
     destroy: 6
   })
 
-  t.strictEqual(sourceNodeNoFrames.isComplete(), false)
-  t.strictEqual(sourceNodeNoInit.isComplete(), false)
-  t.strictEqual(sourceNodeNoDestroy.isComplete(), false)
-  t.strictEqual(sourceNodeUnmatchingBeforeAndAfter.isComplete(), false)
-  t.strictEqual(sourceNodeComplete.isComplete(), true)
+  t.equal(sourceNodeNoFrames.isComplete(), false)
+  t.equal(sourceNodeNoInit.isComplete(), false)
+  t.equal(sourceNodeNoDestroy.isComplete(), false)
+  t.equal(sourceNodeUnmatchingBeforeAndAfter.isComplete(), false)
+  t.equal(sourceNodeComplete.isComplete(), true)
   t.end()
 })
 
@@ -417,7 +417,7 @@ test('Source Node - sourceNode.hasStackTrace', function (t) {
     init: 1
   })
 
-  t.strictEqual(sourceNodeNoFrames.hasStackTrace(), false)
-  t.strictEqual(sourceNodeWithFrames.hasStackTrace(), true)
+  t.equal(sourceNodeNoFrames.hasStackTrace(), false)
+  t.equal(sourceNodeWithFrames.hasStackTrace(), true)
   t.end()
 })

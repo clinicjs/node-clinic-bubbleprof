@@ -65,7 +65,7 @@ test('Visualizer data - CallbackEvents - ClusterNode stats from CallbackEvents',
   }
 
   errorMessage = errorMessage || 'Pass'
-  t.equals(errorMessage, 'Pass')
+  t.equal(errorMessage, 'Pass')
   t.end()
 })
 
@@ -87,7 +87,7 @@ test('Visualizer data - CallbackEvents - AggregateNode stats from CallbackEvents
     }
   }
   errorMessage = errorMessage || 'Pass'
-  t.equals(errorMessage, 'Pass')
+  t.equal(errorMessage, 'Pass')
   t.end()
 })
 
@@ -107,18 +107,18 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
   const wallTime = dataSet.wallTime
 
   // Ensure essential stats from fake data set are calculated correctly from callback events
-  t.equals(wallTime.profileStart, 3)
-  t.equals(wallTime.profileEnd, 29.5)
-  t.equals(wallTime.profileDuration, 26.5)
-  t.equals(wallTime.msPerSlice, 0.265)
+  t.equal(wallTime.profileStart, 3)
+  t.equal(wallTime.profileEnd, 29.5)
+  t.equal(wallTime.profileDuration, 26.5)
+  t.equal(wallTime.msPerSlice, 0.265)
 
-  t.equals(wallTime.maxAsyncPending, 5)
-  t.equals(wallTime.maxSyncActive, 3)
+  t.equal(wallTime.maxAsyncPending, 5)
+  t.equal(wallTime.maxSyncActive, 3)
   t.strictSame(wallTime.categoriesOrdered, ['other', 'networks', 'files-streams'])
 
   // Simple slice containing two instances of one aggregate node
   const sliceA = wallTime.getSegments(10, 11)
-  t.equals(sliceA.length, 5)
+  t.equal(sliceA.length, 5)
 
   const expected = {
     syncIds: {},
@@ -132,16 +132,16 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       syncActive
     } = sliceA[i]
 
-    t.equals(syncActive.callbackCount, 0)
+    t.equal(syncActive.callbackCount, 0)
     t.strictSame(syncActive.byAggregateId, expected.syncIds)
 
-    t.equals(asyncPending.callbackCount, 2)
+    t.equal(asyncPending.callbackCount, 2)
     t.strictSame(asyncPending.byAggregateId, expected.asyncAggregateIds)
   }
 
   // More complex slice
   const sliceB = wallTime.getSegments(22.5, 25)
-  t.equals(sliceB.length, 11)
+  t.equal(sliceB.length, 11)
 
   for (i = 0; i < sliceB.length; i++) {
     const {
@@ -156,7 +156,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 3: // 23.055 - 23.32
         wallTime.getSegments(22.26, 23.32, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 1)
+        t.equal(syncActive.callbackCount, 1)
         t.strictSame(syncActive.byAggregateId, {
           d: 1
         })
@@ -164,7 +164,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 1
         })
 
-        t.equals(asyncPending.callbackCount, 2)
+        t.equal(asyncPending.callbackCount, 2)
         t.strictSame(asyncPending.byAggregateId, {
           e: 1,
           f: 1
@@ -177,7 +177,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 4: // 23.32 - 23.585
         wallTime.getSegments(23.4, 23.585, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 1)
+        t.equal(syncActive.callbackCount, 1)
         t.strictSame(syncActive.byAggregateId, {
           d: 1
         })
@@ -185,7 +185,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 1
         })
 
-        t.equals(asyncPending.callbackCount, 4)
+        t.equal(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 2,
@@ -199,11 +199,11 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 5: // 23.585 - 23.85
         wallTime.getSegments(23.585, 23.85, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 0)
+        t.equal(syncActive.callbackCount, 0)
         t.strictSame(syncActive.byAggregateId, {})
         t.strictSame(syncActive.byTypeCategory, {})
 
-        t.equals(asyncPending.callbackCount, 4)
+        t.equal(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 2,
@@ -217,7 +217,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 6: // 23.85 - 24.115
         wallTime.getSegments(23.85, 24.115, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 2)
+        t.equal(syncActive.callbackCount, 2)
         t.strictSame(syncActive.byAggregateId, {
           e: 2
         })
@@ -225,7 +225,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 2
         })
 
-        t.equals(asyncPending.callbackCount, 4)
+        t.equal(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 2,
@@ -239,7 +239,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 7: // 24.115 - 24.38
         wallTime.getSegments(24.115, 24.38, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 2)
+        t.equal(syncActive.callbackCount, 2)
         t.strictSame(syncActive.byAggregateId, {
           e: 2
         })
@@ -247,7 +247,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 2
         })
 
-        t.equals(asyncPending.callbackCount, 2)
+        t.equal(asyncPending.callbackCount, 2)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           f: 1
@@ -260,7 +260,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 8: // 24.38 - 24.645
         wallTime.getSegments(24.38, 24.645, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 2)
+        t.equal(syncActive.callbackCount, 2)
         t.strictSame(syncActive.byAggregateId, {
           e: 2
         })
@@ -268,7 +268,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 2
         })
 
-        t.equals(asyncPending.callbackCount, 4)
+        t.equal(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 1,
@@ -283,7 +283,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 9: // 24.645 - 24.91
         wallTime.getSegments(24.645, 24.91, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 1)
+        t.equal(syncActive.callbackCount, 1)
         t.strictSame(syncActive.byAggregateId, {
           e: 1
         })
@@ -291,7 +291,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 1
         })
 
-        t.equals(asyncPending.callbackCount, 4)
+        t.equal(asyncPending.callbackCount, 4)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 1,
@@ -306,7 +306,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
       case 10: // 24.91 - 25.175
         wallTime.getSegments(24.91, 25.175, true).forEach((segment) => t.strictSame(segment, sliceB[i]))
 
-        t.equals(syncActive.callbackCount, 3)
+        t.equal(syncActive.callbackCount, 3)
         t.strictSame(syncActive.byAggregateId, {
           d: 1,
           e: 2
@@ -315,7 +315,7 @@ test('Visualizer data - CallbackEvents - Wall time slices', function (t) {
           other: 3
         })
 
-        t.equals(asyncPending.callbackCount, 5)
+        t.equal(asyncPending.callbackCount, 5)
         t.strictSame(asyncPending.byAggregateId, {
           d: 1,
           e: 1,

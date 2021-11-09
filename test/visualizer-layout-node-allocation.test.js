@@ -114,7 +114,7 @@ test('Visualizer layout - node allocation - blocks do not overlap or exceed allo
     t.equal(blocks[i - 1].end, blocks[i].begin)
   }
 
-  t.deepEqual(blocks.map(block => block.layoutNode.id), layout.positioning.order)
+  t.same(blocks.map(block => block.layoutNode.id), layout.positioning.order)
 
   t.end()
 })
@@ -141,7 +141,7 @@ test('Visualizer layout - node allocation - xy positions of leaves are allocated
       const { x, y } = block.layoutNode.position
       t.ok(x > 0)
       t.ok(y > 0)
-      t.deepEqual(segment.line.pointAtLength(block.center - segment.begin), { x, y })
+      t.same(segment.line.pointAtLength(block.center - segment.begin), { x, y })
     }
   }
 
@@ -187,7 +187,7 @@ test('Visualizer layout - node allocation - xy positions of nodes are allocated 
     }).length
   }
 
-  t.deepEqual(layout.positioning.order, [8, 7, 5, 2])
+  t.same(layout.positioning.order, [8, 7, 5, 2])
 
   t.equal(positionById[1].x, layout.settings.svgWidth / 2)
   t.equal(positionById[1].y, layout.settings.svgDistanceFromEdge + (scaledStemById[1].ownDiameter / 2))
@@ -296,8 +296,8 @@ test('Visualizer layout - node allocation - can handle collapsets', function (t)
 
   const keys = [...layout.layoutNodes.keys()]
   const clumpId = 'x1'
-  t.deepEqual([1, 2, 3, 'x1', 5, 6, 8, 9, 10, 11], keys)
-  t.deepEqual([4, 7], layout.layoutNodes.get(clumpId).collapsedNodes.map(layoutNode => layoutNode.id))
+  t.same([1, 2, 3, 'x1', 5, 6, 8, 9, 10, 11], keys)
+  t.same([4, 7], layout.layoutNodes.get(clumpId).collapsedNodes.map(layoutNode => layoutNode.id))
 
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()
@@ -359,9 +359,9 @@ test('Visualizer layout - node allocation - can handle collapsets with clumpy le
 
   const keys = [...layout.layoutNodes.keys()]
   const firstClumpId = 'x1'
-  t.deepEqual([1, 'x4', 5, 6, 'x1', 9, 11], keys)
-  t.deepEqual([8, 10], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
-  t.deepEqual([2, 3, 4, 7], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.same([1, 'x4', 5, 6, 'x1', 9, 11], keys)
+  t.same([8, 10], layout.layoutNodes.get('x1').collapsedNodes.map(layoutNode => layoutNode.id))
+  t.same([2, 3, 4, 7], layout.layoutNodes.get('x4').collapsedNodes.map(layoutNode => layoutNode.id))
 
   layout.positioning.formClumpPyramid()
   layout.positioning.placeNodes()

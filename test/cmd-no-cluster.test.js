@@ -11,7 +11,7 @@ test('collect command stops when cluster is used', function (t) {
 
   const bubble = new ClinicBubbleprof({})
   bubble.collect([process.execPath, '-e', 'require("cluster")'], (err, result) => {
-    t.ifError(err, 'should not crash when cluster is required but not used')
+    t.error(err, 'should not crash when cluster is required but not used')
     rimraf.sync(result)
   })
 
@@ -20,7 +20,7 @@ test('collect command stops when cluster is used', function (t) {
   ], { stdio: 'pipe' })
 
   proc.stderr.pipe(endpoint((err, buf) => {
-    t.ifError(err)
+    t.error(err)
     t.ok(buf.toString('utf8').includes('does not support clustering'), 'should crash once cluster is used')
   }))
 })

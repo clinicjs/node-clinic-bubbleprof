@@ -8,7 +8,7 @@ const CollectAndRead = require('./collect-and-read.js')
 
 test('collect command produces data files with content', function (t) {
   const cmd = new CollectAndRead({}, '-e', 'setTimeout(() => {}, 200)')
-  cmd.on('error', t.ifError.bind(t))
+  cmd.on('error', t.error.bind(t))
   cmd.on('ready', function (systemInfoReader, stackTraceReader, traceEventReader) {
     async.parallel({
       systemInfo (done) {
@@ -54,7 +54,7 @@ test('collect command produces data files with content', function (t) {
           }))
       }
     }, function (err, output) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       // filter untracked events out
       for (const asyncId of output.traceEvent.keys()) {
@@ -64,7 +64,7 @@ test('collect command produces data files with content', function (t) {
       }
 
       // Expect all tracked asyncIds to be found in traceEvent
-      t.strictDeepEqual(
+      t.strictSame(
         Array.from(output.stackTrace.keys()).sort(),
         Array.from(output.traceEvent.keys()).sort()
       )
@@ -75,17 +75,17 @@ test('collect command produces data files with content', function (t) {
         asyncOperationTypes.push(trackedTraceEvent[0].type)
       }
 
-      const expected =
-        // Expect Timeout and TIMERWRAP to be there in Node 10.x and below. TIMERWRAP was removed in https://github.com/nodejs/node/pull/20894
-        semver.satisfies(process.version, '< 11.0')
-          ? ['TIMERWRAP', 'Timeout']
+      let expected = ['Timeout']
+      if (semver.satisfies(process.version, '>= 12.16.0 < 12.17.0')) {
         // A `Promise.resolve()` call was added to bootstrap code in Node 12.16.x: https://github.com/nodejs/node/pull/30624
         // Node.js 12.17.0 does not appear to show this `resolve()` call in its trace event log.
-          : semver.satisfies(process.version, '>= 12.16.0 < 12.17.0')
-            ? ['PROMISE', 'Timeout']
-            : ['Timeout']
+        expected = ['PROMISE', 'Timeout']
+      } else if (semver.satisfies(process.version, '>= 15.0.0')) {
+        // See: https://github.com/clinicjs/node-clinic-bubbleprof/pull/382#issuecomment-962766194
+        expected = ['TickObject', 'Timeout']
+      }
 
-      t.strictDeepEqual(asyncOperationTypes.sort(), expected)
+      t.strictSame(asyncOperationTypes.sort(), expected)
 
       t.end()
     })

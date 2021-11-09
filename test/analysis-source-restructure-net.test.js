@@ -102,13 +102,13 @@ function checkTreeStructure (t, sourceNodes) {
   const sourceNodeWriteWrap = sourceNodeIndex.get(6)
   const sourceNodeUnknownParent = sourceNodeIndex.get(7)
 
-  t.strictEqual(sourceNodeRoot.parentAsyncId, 0)
-  t.strictEqual(sourceNodeServer.parentAsyncId, 1)
-  t.strictEqual(sourceNodeSocket.parentAsyncId, 2)
-  t.strictEqual(sourceNodeHttpParser.parentAsyncId, 3)
-  t.strictEqual(sourceNodeReady.parentAsyncId, 4)
-  t.strictEqual(sourceNodeWriteWrap.parentAsyncId, 5)
-  t.strictEqual(sourceNodeUnknownParent.parentAsyncId, 10)
+  t.equal(sourceNodeRoot.parentAsyncId, 0)
+  t.equal(sourceNodeServer.parentAsyncId, 1)
+  t.equal(sourceNodeSocket.parentAsyncId, 2)
+  t.equal(sourceNodeHttpParser.parentAsyncId, 3)
+  t.equal(sourceNodeReady.parentAsyncId, 4)
+  t.equal(sourceNodeWriteWrap.parentAsyncId, 5)
+  t.equal(sourceNodeUnknownParent.parentAsyncId, 10)
 }
 
 test('Source Node - restructure net - tcp right order', function (t) {
@@ -117,7 +117,7 @@ test('Source Node - restructure net - tcp right order', function (t) {
   startpoint(sourceNodesInput, { objectMode: true })
     .pipe(new RestructureNetSourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, sourceNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
       checkTreeStructure(t, sourceNodesOutput)
       t.end()
     }))
@@ -130,7 +130,7 @@ test('Source Node - restructure net - tcp wrong order', function (t) {
   startpoint(sourceNodesInput, { objectMode: true })
     .pipe(new RestructureNetSourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, sourceNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
       checkTreeStructure(t, sourceNodesOutput)
       t.end()
     }))
@@ -142,7 +142,7 @@ test('Source Node - restructure net - pipe right order', function (t) {
   startpoint(sourceNodesInput, { objectMode: true })
     .pipe(new RestructureNetSourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, sourceNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
       checkTreeStructure(t, sourceNodesOutput)
       t.end()
     }))
@@ -155,7 +155,7 @@ test('Source Node - restructure net - pipe wrong order', function (t) {
   startpoint(sourceNodesInput, { objectMode: true })
     .pipe(new RestructureNetSourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, sourceNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
       checkTreeStructure(t, sourceNodesOutput)
       t.end()
     }))

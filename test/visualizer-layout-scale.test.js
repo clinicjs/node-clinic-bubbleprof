@@ -120,7 +120,7 @@ test('Visualizer layout - scale - constrained longest superseeds other weights',
   layout.updateScale()
 
   t.equal(layout.scale.scalesBySmallest[0].category, 'longest constrained')
-  t.notEqual(layout.scale.scalesBySmallest[1].category, 'longest')
+  t.not(layout.scale.scalesBySmallest[1].category, 'longest')
   t.equal(layout.scale.decisiveWeight.category, 'longest constrained')
   t.equal(layout.scale.finalSvgHeight, svgHeight)
   t.ok(layout.scale.scaleFactor < 0.35 && layout.scale.scaleFactor > 0.3)
@@ -349,7 +349,7 @@ test('Visualizer layout - scale - calculation height always greater thans longes
     // Just long enough to have an absolute just below the amount that fits in svgHeight
     ['1.3.' + Array(20).fill(4).map((num, index) => num + index).join('.'), 5]
   ])
-  t.equals(layoutWithScaleModifier.scale.decisiveWeight.modifier.toFixed(2), '0.57')
+  t.equal(layoutWithScaleModifier.scale.decisiveWeight.modifier.toFixed(2), '0.57')
 
   /* TODO - fix error where this fails with error from arrayFlatten recursion being too deep
   // Very slow test - keep it commented out and uncomment as a smoke test for very large profile issues
@@ -367,7 +367,7 @@ test('Visualizer layout - scale - calculation height always greater thans longes
     // Long enough chain that absolute total exceeds svgHeight
     ['1.6' + Array(26).fill(7).map((num, index) => num + index).join('.'), 1]
   ])
-  t.equals(layoutAdjustedThreshold.collapsedLayout.collapseThreshold.toFixed(2), '26.10')
+  t.equal(layoutAdjustedThreshold.collapsedLayout.collapseThreshold.toFixed(2), '26.10')
 
   t.end()
 })

@@ -7,11 +7,11 @@
     "node": ">=12.13.0"
   },
   "scripts": {
-    "test": "standard | snazzy && tap -j1 --no-cov --timeout=50 test/*.test.js",
-    "test:file": "standard | snazzy && tap -j1 --no-cov --timeout=50",
+    "test": "standard | snazzy && tap --no-cov test/*.test.js",
+    "test:file": "standard | snazzy && tap --no-cov",
     "ci-lint": "standard | snazzy",
-    "ci-test": "tap -j1 --timeout=50 test/*.test.js",
-    "ci-cov": "tap -j1 --statements=95 --branches=90 --functions=95 --lines=98 --timeout=60 test/*.test.js",
+    "ci-test": "tap test/*.test.js",
+    "ci-cov": "tap test/*.test.js",
     "lint": "standard --fix | snazzy",
     "visualize-watch": "node debug/visualize-watch.js",
     "visualize-all": "node debug/visualize-all.js"
@@ -27,7 +27,7 @@
     "snazzy": "^9.0.0",
     "standard": "^16.0.3",
     "startpoint": "^0.3.2",
-    "tap": "^14.11.0"
+    "tap": "^15.0.10"
   },
   "keywords": [],
   "license": "MIT",

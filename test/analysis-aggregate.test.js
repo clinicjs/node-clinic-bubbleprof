@@ -7,42 +7,42 @@ const { FakeAggregateNode, FakeSourceNode } = require('./analysis-util')
 
 test('Aggregate Node - aggregate.mark.format', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
-  t.strictDeepEqual(util.inspect(aggregateNode.mark, { depth: -1 }), '<Mark>')
+  t.strictSame(util.inspect(aggregateNode.mark, { depth: -1 }), '<Mark>')
 
-  t.strictDeepEqual(aggregateNode.mark.format(), 'null')
+  t.strictSame(aggregateNode.mark.format(), 'null')
   aggregateNode.mark.set(0, 'party')
-  t.strictDeepEqual(aggregateNode.mark.format(), 'party')
+  t.strictSame(aggregateNode.mark.format(), 'party')
   aggregateNode.mark.set(1, 'module')
-  t.strictDeepEqual(aggregateNode.mark.format(), 'party.module')
+  t.strictSame(aggregateNode.mark.format(), 'party.module')
   aggregateNode.mark.set(2, 'name')
-  t.strictDeepEqual(aggregateNode.mark.format(), 'party.module.name')
+  t.strictSame(aggregateNode.mark.format(), 'party.module.name')
 
   const aggregateNodePartial = new AggregateNode(1, 0)
   aggregateNodePartial.mark.set(2, 'name')
-  t.strictDeepEqual(aggregateNodePartial.mark.format(), 'null')
+  t.strictSame(aggregateNodePartial.mark.format(), 'null')
   aggregateNodePartial.mark.set(0, 'party')
-  t.strictDeepEqual(aggregateNodePartial.mark.format(), 'party')
+  t.strictSame(aggregateNodePartial.mark.format(), 'party')
 
   t.end()
 })
 
 test('Aggregate Node - aggregate.mark.inspect', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
-  t.strictDeepEqual(util.inspect(aggregateNode.mark, { depth: -1 }), '<Mark>')
+  t.strictSame(util.inspect(aggregateNode.mark, { depth: -1 }), '<Mark>')
 
-  t.strictDeepEqual(util.inspect(aggregateNode.mark), '<Mark null>')
+  t.strictSame(util.inspect(aggregateNode.mark), '<Mark null>')
   aggregateNode.mark.set(0, 'party')
-  t.strictDeepEqual(util.inspect(aggregateNode.mark), '<Mark party>')
+  t.strictSame(util.inspect(aggregateNode.mark), '<Mark party>')
   aggregateNode.mark.set(1, 'module')
-  t.strictDeepEqual(util.inspect(aggregateNode.mark), '<Mark party.module>')
+  t.strictSame(util.inspect(aggregateNode.mark), '<Mark party.module>')
   aggregateNode.mark.set(2, 'name')
-  t.strictDeepEqual(util.inspect(aggregateNode.mark), '<Mark party.module.name>')
+  t.strictSame(util.inspect(aggregateNode.mark), '<Mark party.module.name>')
 
   const aggregateNodePartial = new AggregateNode(1, 0)
   aggregateNodePartial.mark.set(2, 'name')
-  t.strictDeepEqual(util.inspect(aggregateNodePartial.mark), '<Mark null>')
+  t.strictSame(util.inspect(aggregateNodePartial.mark), '<Mark null>')
   aggregateNodePartial.mark.set(0, 'party')
-  t.strictDeepEqual(util.inspect(aggregateNodePartial.mark), '<Mark party>')
+  t.strictSame(util.inspect(aggregateNodePartial.mark), '<Mark party>')
 
   t.end()
 })
@@ -50,13 +50,13 @@ test('Aggregate Node - aggregate.mark.inspect', function (t) {
 test('Aggregate Node - aggregate.mark.toJSON', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
 
-  t.strictDeepEqual(aggregateNode.mark.toJSON(), [null, null, null])
+  t.strictSame(aggregateNode.mark.toJSON(), [null, null, null])
   aggregateNode.mark.set(0, 'party')
-  t.strictDeepEqual(aggregateNode.mark.toJSON(), ['party', null, null])
+  t.strictSame(aggregateNode.mark.toJSON(), ['party', null, null])
   aggregateNode.mark.set(1, 'module')
-  t.strictDeepEqual(aggregateNode.mark.toJSON(), ['party', 'module', null])
+  t.strictSame(aggregateNode.mark.toJSON(), ['party', 'module', null])
   aggregateNode.mark.set(2, 'name')
-  t.strictDeepEqual(aggregateNode.mark.toJSON(), ['party', 'module', 'name'])
+  t.strictSame(aggregateNode.mark.toJSON(), ['party', 'module', 'name'])
 
   t.end()
 })
@@ -67,7 +67,7 @@ test('Aggregate Node - aggregate.mark.set', function (t) {
   aggregateNode.mark.set(0, 'party')
   aggregateNode.mark.set(1, 'module')
   aggregateNode.mark.set(2, 'name')
-  t.strictDeepEqual(aggregateNode.mark.toJSON(), ['party', 'module', 'name'])
+  t.strictSame(aggregateNode.mark.toJSON(), ['party', 'module', 'name'])
 
   t.throws(
     () => aggregateNode.mark.set(3, 'extra'),
@@ -84,9 +84,9 @@ test('Aggregate Node - aggregate.mark.get', function (t) {
   aggregateNode.mark.set(1, 'module')
   aggregateNode.mark.set(2, 'name')
 
-  t.strictEqual(aggregateNode.mark.get(0), 'party')
-  t.strictEqual(aggregateNode.mark.get(1), 'module')
-  t.strictEqual(aggregateNode.mark.get(2), 'name')
+  t.equal(aggregateNode.mark.get(0), 'party')
+  t.equal(aggregateNode.mark.get(1), 'module')
+  t.equal(aggregateNode.mark.get(2), 'name')
 
   t.throws(
     () => aggregateNode.mark.get(3),
@@ -108,7 +108,7 @@ test('Aggregate Node - aggregate.inspect', function (t) {
     ]
   })
 
-  t.strictEqual(
+  t.equal(
     util.inspect(aggregateNode, { depth: null }),
     '<AggregateNode type:CUSTOM, mark:<Mark party.module.name>,' +
     ' aggregateId:2, parentAggregateId:1, sources.length:1,' +
@@ -116,7 +116,7 @@ test('Aggregate Node - aggregate.inspect', function (t) {
     '         <Frame <anonymous> fileName.js:>]>>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(aggregateNode, { depth: 2 }),
     '<AggregateNode type:CUSTOM, mark:<Mark party.module.name>,' +
     ' aggregateId:2, parentAggregateId:1, sources.length:1,' +
@@ -124,21 +124,21 @@ test('Aggregate Node - aggregate.inspect', function (t) {
     '         <Frame <anonymous> fileName.js:>]>>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(aggregateNode, { depth: 1 }),
     '<AggregateNode type:CUSTOM, mark:<Mark party.module.name>,' +
     ' aggregateId:2, parentAggregateId:1, sources.length:1,' +
     ' children:[1, 2, 3], frames:<Frames [<Frame>]>>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(aggregateNode, { depth: 0 }),
     '<AggregateNode type:CUSTOM, mark:<Mark>,' +
     ' aggregateId:2, parentAggregateId:1, sources.length:1,' +
     ' children:[1, 2, 3], frames:<Frames>>'
   )
 
-  t.strictEqual(
+  t.equal(
     util.inspect(aggregateNode, { depth: -1 }),
     '<AggregateNode>'
   )
@@ -158,7 +158,7 @@ test('Aggregate Node - aggregate.inspect', function (t) {
     ]
   })
 
-  t.strictDeepEqual(aggregateNode.toJSON(), {
+  t.strictSame(aggregateNode.toJSON(), {
     aggregateId: 2,
     parentAggregateId: 1,
     children: [1, 2, 3],
@@ -178,8 +178,8 @@ test('Aggregate Node - aggregate.makeRoot', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
   aggregateNode.makeRoot()
 
-  t.strictEqual(aggregateNode.isRoot, true)
-  t.strictDeepEqual(aggregateNode.toJSON(), {
+  t.equal(aggregateNode.isRoot, true)
+  t.strictSame(aggregateNode.toJSON(), {
     aggregateId: 1,
     parentAggregateId: 0,
     children: [],
@@ -206,10 +206,10 @@ test('Aggregate Node - aggregate.addChild', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
 
   aggregateNode.addChild(1)
-  t.strictDeepEqual(aggregateNode.toJSON().children, [1])
+  t.strictSame(aggregateNode.toJSON().children, [1])
 
   aggregateNode.addChild(2)
-  t.strictDeepEqual(aggregateNode.toJSON().children, [1, 2])
+  t.strictSame(aggregateNode.toJSON().children, [1, 2])
 
   t.end()
 })
@@ -218,10 +218,10 @@ test('Aggregate Node - aggregate.getChildren', function (t) {
   const aggregateNode = new AggregateNode(1, 0)
 
   aggregateNode.addChild(1)
-  t.strictDeepEqual(aggregateNode.getChildren(), [1])
+  t.strictSame(aggregateNode.getChildren(), [1])
 
   aggregateNode.addChild(2)
-  t.strictDeepEqual(aggregateNode.getChildren(), [1, 2])
+  t.strictSame(aggregateNode.getChildren(), [1, 2])
 
   t.end()
 })
@@ -256,7 +256,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
 
   const aggregateNode = new AggregateNode(1, 0)
   aggregateNode.addSourceNode(sourceNodeA)
-  t.strictDeepEqual(aggregateNode.toJSON(), {
+  t.strictSame(aggregateNode.toJSON(), {
     aggregateId: 1,
     parentAggregateId: 0,
     children: [],
@@ -270,7 +270,7 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
   })
 
   aggregateNode.addSourceNode(sourceNodeB)
-  t.strictDeepEqual(aggregateNode.toJSON(), {
+  t.strictSame(aggregateNode.toJSON(), {
     aggregateId: 1,
     parentAggregateId: 0,
     children: [],
@@ -319,10 +319,10 @@ test('Aggregate Node - aggregate.addSourceNode', function (t) {
 
   const aggregateNode = new AggregateNode(1, 0)
   aggregateNode.addSourceNode(sourceNodeA)
-  t.strictDeepEqual(aggregateNode.getSourceNodes(), [sourceNodeA])
+  t.strictSame(aggregateNode.getSourceNodes(), [sourceNodeA])
 
   aggregateNode.addSourceNode(sourceNodeB)
-  t.strictDeepEqual(aggregateNode.getSourceNodes(), [
+  t.strictSame(aggregateNode.getSourceNodes(), [
     sourceNodeA, sourceNodeB
   ])
 
