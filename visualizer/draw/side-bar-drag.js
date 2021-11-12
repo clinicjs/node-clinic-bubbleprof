@@ -1,6 +1,6 @@
 const HtmlContent = require('./html-content.js')
 const d3 = require('./d3-subset.js')
-const spinner = require('@nearform/clinic-common/spinner')
+const spinner = require('@clinic/clinic-common/spinner')
 
 class SideBarDrag extends HtmlContent {
   constructor (d3Container, contentProperties) {

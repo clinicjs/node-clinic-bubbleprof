@@ -1,7 +1,7 @@
 'use strict'
 
 const drawOuterUI = require('./draw/index.js')
-const loadFonts = require('@nearform/clinic-common/behaviours/font-loader')
+const loadFonts = require('@clinic/clinic-common/behaviours/font-loader')
 
 // Called on font load or timeout
 const drawUi = () => {

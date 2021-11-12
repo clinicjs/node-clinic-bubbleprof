@@ -6,9 +6,9 @@ const EventEmitter = require('events')
 const htmlContentTypes = require('./html-content-types.js')
 const Layout = require('../layout/layout.js')
 const { validateKey } = require('../validation.js')
-const spinner = require('@nearform/clinic-common/spinner')
-const closeIcon = require('@nearform/clinic-common/icons/close')
-const backIcon = require('@nearform/clinic-common/icons/circle-arrow-left')
+const spinner = require('@clinic/clinic-common/spinner')
+const closeIcon = require('@clinic/clinic-common/icons/close')
+const backIcon = require('@clinic/clinic-common/icons/circle-arrow-left')
 
 class BubbleprofUI extends EventEmitter {
   constructor (sections = [], settings = {}, appendTo, parentUI = null) {

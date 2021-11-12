@@ -2,10 +2,10 @@
 const BubbleprofUI = require('./bubbleprof-ui.js')
 const staticKeyHtml = require('./static-key.js')
 const d3 = require('./d3-subset.js')
-const eyeIcon = require('@nearform/clinic-common/icons/eye-show')
-const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
-const arrowUpIcon = require('@nearform/clinic-common/icons/chevron-up')
-const closeIcon = require('@nearform/clinic-common/icons/close')
+const eyeIcon = require('@clinic/clinic-common/icons/eye-show')
+const extLinkIcon = require('@clinic/clinic-common/icons/external-link')
+const arrowUpIcon = require('@clinic/clinic-common/icons/chevron-up')
+const closeIcon = require('@clinic/clinic-common/icons/close')
 
 function drawOuterUI () {
   // Initial DOM drawing that is independent of data
@@ -24,7 +24,7 @@ function drawOuterUI () {
 
   header.addContent(undefined, {
     classNames: 'help-link-block panel',
-    htmlContent: `<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to NearForm’s BubbleProf walkthrough"><span>How to use this</span> ${extLinkIcon}</a>`
+    htmlContent: `<a class="help-link external-link" href="https://clinicjs.org/bubbleprof/walkthrough" title="External link to Clinic BubbleProf walkthrough"><span>How to use this</span> ${extLinkIcon}</a>`
   })
 
   header.addContent(undefined, {
