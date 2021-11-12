@@ -6,8 +6,8 @@ const asyncHooks = require('async_hooks')
 const stackTrace = require('../collect/stack-trace.js')
 const systemInfo = require('../collect/system-info.js')
 const StackTraceEncoder = require('../format/stack-trace-encoder.js')
-const getLoggingPaths = require('@nearform/clinic-common').getLoggingPaths('bubbleprof')
-const checkForTranspiledCode = require('@nearform/clinic-common').checkForTranspiledCode
+const getLoggingPaths = require('@clinic/clinic-common').getLoggingPaths('bubbleprof')
+const checkForTranspiledCode = require('@clinic/clinic-common').checkForTranspiledCode
 
 process.nextTick(function () {
   if (process.mainModule && checkForTranspiledCode(process.mainModule.filename)) {

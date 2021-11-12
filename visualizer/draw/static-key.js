@@ -1,5 +1,5 @@
 'use strict'
-const extLinkIcon = require('@nearform/clinic-common/icons/external-link')
+const extLinkIcon = require('@clinic/clinic-common/icons/external-link')
 
 const svgSample = `
   <svg class="key-item-image bubbleprof" style="width: 70px; height: 180px; display: block;">
