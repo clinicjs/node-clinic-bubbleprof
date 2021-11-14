@@ -11,7 +11,7 @@ Programmable interface to [Clinic.js][clinic-url] Bubbleprof. Learn more about C
 ## Installation
 
 ```console
-npm i -S @nearform/bubbleprof
+npm i -S @clinic/bubbleprof
 ```
 
 ## Supported node versions
