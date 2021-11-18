@@ -9,10 +9,10 @@ test('Stack Trace - isExternal', function (t) {
   const modulesDeep = new FakeSystemInfo('/node_modules/internal/deep')
   const modulesPrivate = new FakeSystemInfo('/node_modules/@private/internal')
 
-  t.strictEqual(root.moduleDirectory, '')
-  t.strictEqual(modules.moduleDirectory, '/node_modules/internal')
-  t.strictEqual(modulesDeep.moduleDirectory, '/node_modules/internal')
-  t.strictEqual(modulesPrivate.moduleDirectory,
+  t.equal(root.moduleDirectory, '')
+  t.equal(modules.moduleDirectory, '/node_modules/internal')
+  t.equal(modulesDeep.moduleDirectory, '/node_modules/internal')
+  t.equal(modulesPrivate.moduleDirectory,
     '/node_modules/@private/internal')
 
   t.end()

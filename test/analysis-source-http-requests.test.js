@@ -41,8 +41,8 @@ test('Source Node - http requests', function (t) {
 
   stream.resume()
   stream.on('end', function () {
-    t.strictEquals(digest.runtime, 2)
-    t.deepEquals(digest.httpRequests, [1])
+    t.equal(digest.runtime, 2)
+    t.same(digest.httpRequests, [1])
     t.end()
   })
 })

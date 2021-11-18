@@ -43,7 +43,7 @@ setImmediate(() => {
   test('Visualizer data - ensure callbackEvents are garbage collected', function (t) {
     global.gc()
     const amountGarbageCollected = getGCCount()
-    t.equals(amountGarbageCollected, callbackEventsGCExpected)
+    t.equal(amountGarbageCollected, callbackEventsGCExpected)
     t.end()
   })
 })

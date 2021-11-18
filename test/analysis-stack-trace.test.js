@@ -18,14 +18,14 @@ test('Stack Trace - stream wrap', function (t) {
   startpoint(input, { objectMode: true })
     .pipe(new WrapAsStackTrace())
     .pipe(endpoint({ objectMode: true }, function (err, output) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(
+      t.strictSame(
         output,
         input.map((data) => new StackTrace(data))
       )
 
-      t.strictDeepEqual(
+      t.strictSame(
         output.map((data) => data.frames),
         input.map((data) => new Frames(data.frames))
       )
@@ -41,6 +41,6 @@ test('Stack Trace - toJSON', function (t) {
     }]
   }
 
-  t.strictDeepEqual(new StackTrace(input).toJSON(), input)
+  t.strictSame(new StackTrace(input).toJSON(), input)
   t.end()
 })

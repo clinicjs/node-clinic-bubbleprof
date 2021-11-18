@@ -18,9 +18,9 @@ test('Barrier Node - wrap', function (t) {
   startpoint([aggregateNode], { objectMode: true })
     .pipe(new WrapAsBarrierNode())
     .pipe(endpoint({ objectMode: true }, function (err, nodes) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictDeepEqual(nodes[0].toJSON(), {
+      t.strictSame(nodes[0].toJSON(), {
         barrierId: 2,
         parentBarrierId: 1,
         children: [3, 4],

@@ -1,5 +1,5 @@
 'use strict'
-const arrowUp = require('@nearform/clinic-common/icons/chevron-up')
+const arrowUp = require('@clinic/clinic-common/icons/chevron-up')
 
 // const d3 = require('./d3-subset.js') // Currently unused but will be used
 const HtmlContent = require('./html-content.js')

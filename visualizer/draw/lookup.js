@@ -2,7 +2,7 @@
 
 const HtmlContent = require('./html-content.js')
 const debounce = require('lodash/debounce')
-const spinner = require('@nearform/clinic-common/spinner')
+const spinner = require('@clinic/clinic-common/spinner')
 
 class Lookup extends HtmlContent {
   constructor (d3Container, contentProperties = {}) {

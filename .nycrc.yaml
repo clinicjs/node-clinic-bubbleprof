@@ -1,0 +1,3 @@
+# # This option avoid an wrap by nyc that affects our expected async events.
+# # See: https://github.com/clinicjs/node-clinic-bubbleprof/pull/382
+use-spawn-wrap: true

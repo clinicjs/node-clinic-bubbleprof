@@ -37,7 +37,7 @@ function runServer (name, callback) {
 
 test('basic server aggregates HTTPPARSER', { skip: skipHTTPPARSER }, function (t) {
   runServer('basic', function (err, nodes) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
     // Get AggregateNodes from BarrierNodes
     const aggregateNodes = [].concat(
@@ -51,14 +51,14 @@ test('basic server aggregates HTTPPARSER', { skip: skipHTTPPARSER }, function (t
     // HTTPPARSER can have different stacks, because it was either new or
     // a cached HTTPPARSER. Check that these two cases are aggregated into
     // one node.
-    t.strictEqual(httpParserNodes.length, 1)
+    t.equal(httpParserNodes.length, 1)
     t.end()
   })
 })
 
 test('latency server has http.connection.end cluster', { skip: skipHTTPPARSER }, function (t) {
   runServer('latency', function (err, nodes) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
     const endName = nodes.some(c => c.name.includes('http.connection.end'))
     t.ok(endName, 'has http.connection.end name')

@@ -39,10 +39,10 @@ test('Source Node - filter', function (t) {
   startpoint([nodeNotFiltered, nodeNoStack, nodeTimer], { objectMode: true })
     .pipe(new FilterSourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, nodes) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
-      t.strictEqual(nodes.length, 1)
-      t.strictEqual(nodes[0], nodeNotFiltered)
+      t.equal(nodes.length, 1)
+      t.equal(nodes[0], nodeNotFiltered)
       t.end()
     }))
 })

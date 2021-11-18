@@ -96,32 +96,32 @@ test('Source Node - indentify', function (t) {
   startpoint(sourceNodesInput, { objectMode: true })
     .pipe(new IdentifySourceNodes())
     .pipe(endpoint({ objectMode: true }, function (err, sourceNodesOutput) {
-      if (err) return t.ifError(err)
+      if (err) return t.error(err)
 
       for (const sourceNode of sourceNodesOutput) {
-        t.strictEqual(typeof sourceNode.identifier, 'string')
+        t.equal(typeof sourceNode.identifier, 'string')
         t.ok(sourceNode.identifier.length > 0)
       }
 
-      t.strictEqual(
+      t.equal(
         sourceNodesOutput[0].identifier, // sourceNodeHttpParserA
         sourceNodesOutput[1].identifier, // sourceNodeHttpParserB
         'HTTPPARSER ignores frames'
       )
 
-      t.notStrictEquals(
+      t.not(
         sourceNodesOutput[2].identifier, // sourceNodeNoFramesA
         sourceNodesOutput[3].identifier, // sourceNodeNoFramesB
         'Without frames the type matters'
       )
 
-      t.notStrictEquals(
+      t.not(
         sourceNodesOutput[4].identifier, // sourceNodeWithFramesA
         sourceNodesOutput[5].identifier, // sourceNodeWithFramesB
         'With frames the type matters'
       )
 
-      t.notStrictEquals(
+      t.not(
         sourceNodesOutput[5].identifier, // sourceNodeWithFramesB
         sourceNodesOutput[6].identifier, // sourceNodeWithFramesC
         'With frames the frames matters'

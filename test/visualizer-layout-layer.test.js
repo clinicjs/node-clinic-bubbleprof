@@ -22,8 +22,8 @@ const lineExtras = (layoutSettings.lineWidth + layoutSettings.labelMinimumSpace 
 
 test('Visualizer - layer - dataset is healthy', function (t) {
   const dataSet = new DataSet({ data: clusterNodesArray })
-  t.deepEqual([...dataSet.clusterNodes.keys()].sort(), clusterNodesArray.map(node => node.id).sort())
-  t.deepEqual([...dataSet.aggregateNodes.keys()].sort(), aggregateNodesArray.map(node => node.id).sort())
+  t.same([...dataSet.clusterNodes.keys()].sort(), clusterNodesArray.map(node => node.id).sort())
+  t.same([...dataSet.aggregateNodes.keys()].sort(), aggregateNodesArray.map(node => node.id).sort())
 
   dataSet.processData()
 
@@ -54,20 +54,20 @@ test('Visualizer - layer - layout is healthy on init', function (t) {
 
   const layout = new Layout({ dataNodes: [...dataSet.clusterNodes.values()] }, layoutSettings)
   // Ensure custom settings get applied over defaults as expected
-  t.deepEqual(layout.settings, Object.assign({}, layout.settings, layoutSettings))
+  t.same(layout.settings, Object.assign({}, layout.settings, layoutSettings))
 
   t.equal(layout.layoutNodes.get('A').parent, null)
-  t.deepEqual(layout.layoutNodes.get('A').children, ['B', 'C'])
+  t.same(layout.layoutNodes.get('A').children, ['B', 'C'])
   t.equal(layout.layoutNodes.get('B').parent.id, layout.layoutNodes.get('A').id)
   t.equal(layout.layoutNodes.get('C').parent.id, layout.layoutNodes.get('A').id)
-  t.deepEqual(layout.layoutNodes.get('B').children, ['D', 'E'])
+  t.same(layout.layoutNodes.get('B').children, ['D', 'E'])
   t.equal(layout.layoutNodes.get('D').parent.id, layout.layoutNodes.get('B').id)
   t.equal(layout.layoutNodes.get('E').parent.id, layout.layoutNodes.get('B').id)
-  t.deepEqual(layout.layoutNodes.get('C').children, [])
-  t.deepEqual(layout.layoutNodes.get('D').children, [])
-  t.deepEqual(layout.layoutNodes.get('E').children, ['F'])
+  t.same(layout.layoutNodes.get('C').children, [])
+  t.same(layout.layoutNodes.get('D').children, [])
+  t.same(layout.layoutNodes.get('E').children, ['F'])
   t.equal(layout.layoutNodes.get('F').parent.id, layout.layoutNodes.get('E').id)
-  t.deepEqual(layout.layoutNodes.get('F').children, [])
+  t.same(layout.layoutNodes.get('F').children, [])
 
   t.end()
 })
@@ -98,7 +98,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.A.rawTotal = expected.A.scalable + expected.A.absolute
   t.equal(layout.layoutNodes.get('A').stem.raw.ownBetween.toFixed(2), expected.A.ownBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('A').stem.raw.ownDiameter.toFixed(2), expected.A.ownDiameter.toFixed(2))
-  t.deepEqual(layout.layoutNodes.get('A').stem.ancestors.ids, expected.A.ancestors)
+  t.same(layout.layoutNodes.get('A').stem.ancestors.ids, expected.A.ancestors)
   t.equal(layout.layoutNodes.get('A').stem.ancestors.totalBetween.toFixed(2), expected.A.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('A').stem.ancestors.totalDiameter.toFixed(2), expected.A.ancestorsDiameter.toFixed(2))
   t.equal(layout.layoutNodes.get('A').stem.lengths.scalable.toFixed(2), expected.A.scalable.toFixed(2))
@@ -115,7 +115,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.B.rawTotal = expected.B.scalable + expected.B.absolute
   t.equal(layout.layoutNodes.get('B').stem.raw.ownBetween.toFixed(2), expected.B.ownBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('B').stem.raw.ownDiameter.toFixed(2), expected.B.ownDiameter.toFixed(2))
-  t.deepEqual(layout.layoutNodes.get('B').stem.ancestors.ids, expected.B.ancestors)
+  t.same(layout.layoutNodes.get('B').stem.ancestors.ids, expected.B.ancestors)
   t.equal(layout.layoutNodes.get('B').stem.ancestors.totalBetween.toFixed(2), expected.B.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('B').stem.ancestors.totalDiameter.toFixed(2), expected.B.ancestorsDiameter.toFixed(2))
   t.equal(layout.layoutNodes.get('B').stem.lengths.scalable.toFixed(2), expected.B.scalable.toFixed(2))
@@ -132,7 +132,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.C.rawTotal = expected.C.scalable + expected.C.absolute
   t.equal(layout.layoutNodes.get('C').stem.raw.ownBetween.toFixed(2), expected.C.ownBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('C').stem.raw.ownDiameter.toFixed(2), expected.C.ownDiameter.toFixed(2))
-  t.deepEqual(layout.layoutNodes.get('C').stem.ancestors.ids, expected.C.ancestors)
+  t.same(layout.layoutNodes.get('C').stem.ancestors.ids, expected.C.ancestors)
   t.equal(layout.layoutNodes.get('C').stem.ancestors.totalBetween.toFixed(2), expected.C.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('C').stem.ancestors.totalDiameter.toFixed(2), expected.C.ancestorsDiameter.toFixed(2))
   t.equal(layout.layoutNodes.get('C').stem.lengths.scalable.toFixed(2), expected.C.scalable.toFixed(2))
@@ -149,7 +149,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.D.rawTotal = expected.D.scalable + expected.D.absolute
   t.equal(layout.layoutNodes.get('D').stem.raw.ownBetween.toFixed(2), expected.D.ownBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('D').stem.raw.ownDiameter.toFixed(2), expected.D.ownDiameter.toFixed(2))
-  t.deepEqual(layout.layoutNodes.get('D').stem.ancestors.ids, expected.D.ancestors)
+  t.same(layout.layoutNodes.get('D').stem.ancestors.ids, expected.D.ancestors)
   t.equal(layout.layoutNodes.get('D').stem.ancestors.totalBetween.toFixed(2), expected.D.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('D').stem.ancestors.totalDiameter.toFixed(2), expected.D.ancestorsDiameter.toFixed(2))
   t.equal(layout.layoutNodes.get('D').stem.lengths.scalable.toFixed(2), expected.D.scalable.toFixed(2))
@@ -166,7 +166,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.E.rawTotal = expected.E.scalable + expected.E.absolute
   t.equal(layout.layoutNodes.get('E').stem.raw.ownBetween.toFixed(2), expected.E.ownBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('E').stem.raw.ownDiameter.toFixed(2), expected.E.ownDiameter.toFixed(2))
-  t.deepEqual(layout.layoutNodes.get('E').stem.ancestors.ids, expected.E.ancestors)
+  t.same(layout.layoutNodes.get('E').stem.ancestors.ids, expected.E.ancestors)
   t.equal(layout.layoutNodes.get('E').stem.ancestors.totalBetween.toFixed(2), expected.E.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('E').stem.ancestors.totalDiameter.toFixed(2), expected.E.ancestorsDiameter.toFixed(2))
   t.equal(layout.layoutNodes.get('E').stem.lengths.scalable.toFixed(2), expected.E.scalable.toFixed(2))
@@ -183,7 +183,7 @@ test('Visualizer - layer - layout stems are healthy on processBetweenData', func
   expected.F.rawTotal = expected.F.scalable + expected.F.absolute
   t.equal(layout.layoutNodes.get('F').stem.raw.ownBetween.toFixed(2), expected.F.ownBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('F').stem.raw.ownDiameter.toFixed(2), expected.F.ownDiameter.toFixed(2))
-  t.deepEqual(layout.layoutNodes.get('F').stem.ancestors.ids, expected.F.ancestors)
+  t.same(layout.layoutNodes.get('F').stem.ancestors.ids, expected.F.ancestors)
   t.equal(layout.layoutNodes.get('F').stem.ancestors.totalBetween.toFixed(2), expected.F.ancestorsBetween.toFixed(2))
   t.equal(layout.layoutNodes.get('F').stem.ancestors.totalDiameter.toFixed(2), expected.F.ancestorsDiameter.toFixed(2))
   t.equal(layout.layoutNodes.get('F').stem.lengths.scalable.toFixed(2), expected.F.scalable.toFixed(2))
@@ -248,7 +248,7 @@ test('Visualizer - layer - layout scale is healthy on calculateScaleFactor', fun
 
   const expectedScaleFactor = 25.7102
 
-  t.deepEqual(layout.scale.scalesBySmallest.map(weight => [weight.category, weight.weight.toFixed(4)]), [
+  t.same(layout.scale.scalesBySmallest.map(weight => [weight.category, weight.weight.toFixed(4)]), [
     ['shortest', expectedScaleFactor + ''],
     ['diameter clamp', '30.1336'],
     ['q50 1-1-sqrt(2) triangle', '32.9860'],
@@ -344,7 +344,7 @@ test('Visualizer - layer - layout positioning is healthy on formClumpPyramid', f
   t.equal(layout.layoutNodes.get('D').stem.lengths.rawTotal.toFixed(2), '78.46')
   t.equal(layout.layoutNodes.get('F').stem.lengths.rawTotal.toFixed(2), '108.90')
   const byLeafOnly = nodeId => !layout.layoutNodes.get(nodeId).children.length
-  t.deepEqual(layout.positioning.order.filter(byLeafOnly), ['C', 'F', 'D'])
+  t.same(layout.positioning.order.filter(byLeafOnly), ['C', 'F', 'D'])
 
   t.end()
 })

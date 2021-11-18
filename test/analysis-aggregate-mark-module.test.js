@@ -72,24 +72,24 @@ test('Aggregate Node - mark module', function (t) {
   startpoint(aggregateNodesInput, { objectMode: true })
     .pipe(new MarkModuleAggregateNodes(systemInfo))
     .pipe(endpoint({ objectMode: true }, function (err, aggregateNodesOutput) {
-      if (err) return t.ifError(err)
-      t.strictDeepEqual(
+      if (err) return t.error(err)
+      t.strictSame(
         aggregateNodesOutput[0].mark.toJSON(),
         ['root', null, null]
       )
-      t.strictDeepEqual(
+      t.strictSame(
         aggregateNodesOutput[1].mark.toJSON(),
         ['nodecore', null, null]
       )
-      t.strictDeepEqual(
+      t.strictSame(
         aggregateNodesOutput[2].mark.toJSON(),
         ['user', null, null]
       )
-      t.strictDeepEqual(
+      t.strictSame(
         aggregateNodesOutput[3].mark.toJSON(),
         ['external', 'deep', null]
       )
-      t.strictDeepEqual(
+      t.strictSame(
         aggregateNodesOutput[4].mark.toJSON(),
         ['external', 'promise', null]
       )

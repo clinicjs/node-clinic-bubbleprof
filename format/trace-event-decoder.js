@@ -1,7 +1,7 @@
 'use strict'
 
 const stream = require('stream')
-const parser = require('@nearform/trace-events-parser')
+const parser = require('@clinic/trace-events-parser')
 
 function has (object, property) { return Object.prototype.hasOwnProperty.call(object, property) }
 

@@ -54,12 +54,12 @@ test('format - trace event - decoder', function (t) {
   }))
 
   decoder.pipe(endpoint({ objectMode: true }, function (err, data) {
-    if (err) return t.ifError(err)
+    if (err) return t.error(err)
 
     // Remove prototype constructor
     const traceEvent = data.map((v) => Object.assign({}, v))
 
-    t.strictDeepEqual(traceEvent, [{
+    t.strictSame(traceEvent, [{
       event: 'init',
       type: 'TYPENAME',
       asyncId: 2,

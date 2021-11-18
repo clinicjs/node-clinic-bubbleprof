@@ -7,11 +7,11 @@ test('cmd - test collect - custom output destination', (t) => {
   const tool = new ClinicBubbleprof({ debug: true, dest: 'test-output-destination' })
 
   function cleanup (err, dirname) {
-    t.ifError(err)
+    t.error(err)
     t.match(dirname, /^test-output-destination[/\\][0-9]+\.clinic-bubbleprof$/)
 
     rimraf('test-output-destination', (err) => {
-      t.ifError(err)
+      t.error(err)
       t.end()
     })
   }

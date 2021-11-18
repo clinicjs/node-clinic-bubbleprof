@@ -1,12 +1,18 @@
 # Clinic.js Bubbleprof
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/nearform/node-clinic-bubbleprof.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/clinicjs/node-clinic-bubbleprof.svg)](https://greenkeeper.io/)
 [![npm version][npm-version]][npm-url] [![Stability Stable][stability-stable]][stability-docs] [![Github Actions build status][actions-status]][actions-url]
 [![Downloads][npm-downloads]][npm-url] [![Code style][lint-standard]][lint-standard-url]
 
 Programmable interface to [Clinic.js][clinic-url] Bubbleprof. Learn more about Clinic.js: https://clinicjs.org/
 
 ![Screenshot](screenshot.png)
+
+## Installation
+
+```console
+npm i -S @clinic/bubbleprof
+```
 
 ## Supported node versions
 
@@ -17,7 +23,7 @@ Programmable interface to [Clinic.js][clinic-url] Bubbleprof. Learn more about C
 ## Example
 
 ```js
-const ClinicBubbleprof = require('@nearform/bubbleprof')
+const ClinicBubbleprof = require('@clinic/bubbleprof')
 const bubbleprof = new ClinicBubbleprof()
 
 bubbleprof.collect(['node', './path-to-script.js'], function (err, filepath) {
@@ -35,7 +41,7 @@ repo](https://github.com/clinicjs/node-clinic-bubbleprof-examples).
 ## Documentation
 
 ```js
-const ClinicBubbleprof = require('@nearform/bubbleprof')
+const ClinicBubbleprof = require('@clinic/bubbleprof')
 const bubbleprof = new ClinicBubbleprof()
 ```
 
@@ -78,9 +84,9 @@ arguments, except a possible error.
 
 [stability-stable]: https://img.shields.io/badge/stability-stable-green.svg?style=flat-square
 [stability-docs]: https://nodejs.org/api/documentation.html#documentation_stability_index
-[npm-version]: https://img.shields.io/npm/v/@nearform/bubbleprof.svg?style=flat-square
-[npm-url]: https://www.npmjs.org/@nearform/bubbleprof
-[npm-downloads]: http://img.shields.io/npm/dm/@nearform/bubbleprof.svg?style=flat-square
+[npm-version]: https://img.shields.io/npm/v/@clinic/bubbleprof.svg?style=flat-square
+[npm-url]: https://www.npmjs.org/@clinic/bubbleprof
+[npm-downloads]: http://img.shields.io/npm/dm/@clinic/bubbleprof.svg?style=flat-square
 [lint-standard]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square
 [lint-standard-url]: https://github.com/feross/standard
 [clinic-url]: https://github.com/clinicjs/node-clinic
