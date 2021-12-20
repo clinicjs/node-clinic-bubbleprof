@@ -66,7 +66,9 @@ hook.enable()
 // before process exits, flush the encoded data to the sample file
 process.once('beforeExit', function () {
   hook.disable()
-  encoder.end()
+  encoder.end(() => {
+    out.destroy()
+  })
   out.on('close', function () {
     process.exit()
   })
