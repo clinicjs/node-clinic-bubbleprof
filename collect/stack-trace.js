@@ -45,6 +45,10 @@ class Frame {
       this.isEval = true
       this.evalOrigin = frame.getEvalOrigin()
     }
+
+    if (this.typeName === null && this.fileName.startsWith('wasm://')) {
+      this.typeName = 'wasm'
+    }
   }
 }
 
