@@ -1,0 +1,10 @@
+{
+  "name": "fixtures-wasm",
+  "scripts": {
+    "build": "asc say-hello.ts --binaryFile ./say-hello.wasm --runtime stub"
+  },
+  "devDependencies": {
+    "assemblyscript": "^0.19.20"
+  },
+  "private": true
+}
