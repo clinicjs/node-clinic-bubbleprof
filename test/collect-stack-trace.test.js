@@ -3,6 +3,7 @@
 const test = require('tap').test
 const stackTrace = require('../collect/stack-trace.js')
 const { createHook } = require('async_hooks')
+const fs = require('fs/promises')
 
 const HEADER_OFFSET = 7
 
@@ -160,4 +161,34 @@ test('stack trace - filter async_hooks', function (t) {
     }))
     t.end()
   })
+})
+
+test('stack trace - work with wasm', async function (t) {
+  let frames = []
+  const hooks = createHook({
+    init () {
+      frames = stackTrace()
+    }
+  })
+
+  const wasmBuffer = await fs.readFile('./test/fixtures-wasm/say-hello.wasm')
+
+  hooks.enable()
+
+  await WebAssembly.instantiate(wasmBuffer, {
+    env: {
+      trace() {
+        process.nextTick(() => {
+          hooks.disable()
+          const wasmFrames = frames.filter(frame => frame.fileName.startsWith('wasm://'))
+
+          t.ok(wasmFrames.length > 0)
+          t.ok(wasmFrames.every(function (frame) {
+            return frame.typeName === 'wasm'
+          }))
+          t.end()
+        })
+      }
+    }
+  });
 })
