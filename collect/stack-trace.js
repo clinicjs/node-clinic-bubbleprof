@@ -46,8 +46,13 @@ class Frame {
       this.evalOrigin = frame.getEvalOrigin()
     }
 
-    if (this.typeName === null && this.fileName.startsWith('wasm://')) {
-      this.typeName = 'wasm'
+    if (this.typeName === null) {
+      /* istanbul ignore if | only on node 16+ we have wasm fileNames */
+      if (this.fileName.startsWith('wasm://')) {
+        this.typeName = 'wasm'
+      } else {
+        this.typeName = ''
+      }
     }
   }
 }
