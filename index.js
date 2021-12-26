@@ -82,6 +82,15 @@ class ClinicBubbleprof extends events.EventEmitter {
       identifier: proc.pid
     })
 
+    // relay SIGINT to process
+    process.once('SIGINT', function () {
+      // we cannot kill(SIGINT) on windows but it seems
+      // to relay the ctrl-c signal per default, so only do this
+      // if not windows
+      /* istanbul ignore else: windows hack */
+      if (os.platform() !== 'win32') proc.kill('SIGINT')
+    })
+
     proc.once('exit', (code, signal) => {
       // Windows exit code STATUS_CONTROL_C_EXIT 0xC000013A returns 3221225786
       // if not caught. See https://msdn.microsoft.com/en-us/library/cc704588.aspx
