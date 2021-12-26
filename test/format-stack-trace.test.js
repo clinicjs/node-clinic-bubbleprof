@@ -40,7 +40,7 @@ test('format - stack trace - basic encoder-decoder works', function (t) {
     t.strictSame(input, output)
   })
 
-  encoder.on('close', () => {
+  encoder.on('end', () => {
     t.pass('close emitted')
   })
 
