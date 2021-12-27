@@ -33,7 +33,8 @@ const out = encoder.pipe(
     // Open log file synchronously to ensure that that .write() only
     // corresponds to one async action. This makes it easy to filter .write()
     // in async_hooks.
-    fd: fs.openSync(paths['/stacktrace'], 'w')
+    fd: fs.openSync(paths['/stacktrace'], 'w'),
+    highWaterMark: 16384 * 100 // 1.6MB
   })
 )
 

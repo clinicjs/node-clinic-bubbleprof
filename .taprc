@@ -3,5 +3,5 @@ jobs: 1
 statements: 95
 branches: 90
 functions: 95
-lines: 98
+lines: 95
 test-env: NODE_OPTIONS=--no-warnings

@@ -21,6 +21,7 @@ function produceExample (asyncId) {
 }
 
 test('format - stack trace - basic encoder-decoder works', function (t) {
+  t.plan(2)
   const encoder = new StackTraceEncoder()
   const decoder = new StackTraceDecoder()
   encoder.pipe(decoder)
@@ -37,7 +38,10 @@ test('format - stack trace - basic encoder-decoder works', function (t) {
 
   decoder.once('end', function () {
     t.strictSame(input, output)
-    t.end()
+  })
+
+  encoder.on('end', () => {
+    t.pass('close emitted')
   })
 
   encoder.end()
