@@ -16,9 +16,7 @@ npm i -S @clinic/bubbleprof
 
 ## Supported node versions
 
-* Node.js 10.0.0 and above
-* Node.js 9.4.0 and above
-* Node.js 8.10.0 and above
+* Node.js 12 and above
 
 ## Example
 
