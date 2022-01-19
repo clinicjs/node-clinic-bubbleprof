@@ -2,11 +2,11 @@
 
 const path = require('path')
 const Module = require('module')
-const semver = require('semver')
+const wrapProviders = require('async_hooks').asyncWrapProviders
 let asyncWrap
 
-if (semver.gte(process.version, '17.2.0')) {
-  asyncWrap = { Providers: require('async_hooks').asyncWrapProviders }
+if (wrapProviders) {
+  asyncWrap = { Providers: wrapProviders }
 } else {
   asyncWrap = process.binding('async_wrap') // eslint-disable-line node/no-deprecated-api
 }
