@@ -2,7 +2,14 @@
 
 const path = require('path')
 const Module = require('module')
-const asyncWrap = process.binding('async_wrap') // eslint-disable-line node/no-deprecated-api
+const semver = require('semver')
+let asyncWrap
+
+if (semver.gte(process.version, '17.2.0')) {
+  asyncWrap = { Providers: require('async_hooks').asyncWrapProviders }
+} else {
+  asyncWrap = process.binding('async_wrap') // eslint-disable-line node/no-deprecated-api
+}
 
 function getMainDirectory () {
   if (process._eval != null) return process.cwd()
