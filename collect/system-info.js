@@ -2,7 +2,14 @@
 
 const path = require('path')
 const Module = require('module')
-const asyncWrap = process.binding('async_wrap') // eslint-disable-line node/no-deprecated-api
+const wrapProviders = require('async_hooks').asyncWrapProviders
+let asyncWrap
+
+if (wrapProviders) {
+  asyncWrap = { Providers: wrapProviders }
+} else {
+  asyncWrap = process.binding('async_wrap') // eslint-disable-line node/no-deprecated-api
+}
 
 function getMainDirectory () {
   if (process._eval != null) return process.cwd()
