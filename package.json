@@ -3,9 +3,6 @@
   "description": "Programmable interface to Clinic.js Bubbleprof",
   "repository": "clinicjs/node-clinic-bubbleprof",
   "version": "8.0.1",
-  "engines": {
-    "node": ">=12.13.0"
-  },
   "scripts": {
     "test": "standard | snazzy && tap --no-cov test/*.test.js",
     "test:file": "standard | snazzy && tap --no-cov",
