@@ -19,7 +19,7 @@ process.nextTick(function () {
 // create dirname
 const paths = getLoggingPaths({
   path: process.env.NODE_CLINIC_BUBBLEPROF_DATA_PATH,
-  identifier: process.pid
+  identifier: process.env.NODE_CLINIC_BUBBLEPROF_NAME || process.pid
 })
 makeDir.sync(paths['/'])
 
