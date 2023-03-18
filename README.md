@@ -8,6 +8,10 @@ Programmable interface to [Clinic.js][clinic-url] Bubbleprof. Learn more about C
 
 ![Screenshot](screenshot.png)
 
+## Issues
+
+To open an issue, please use the [main repository](https://github.com/clinicjs/node-clinic) with the `bubbleprof` label.
+
 ## Installation
 
 ```console
