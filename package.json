@@ -2,7 +2,7 @@
   "name": "@clinic/bubbleprof",
   "description": "Programmable interface to Clinic.js Bubbleprof",
   "repository": "clinicjs/node-clinic-bubbleprof",
-  "version": "9.1.0",
+  "version": "10.0.0",
   "scripts": {
     "test": "standard | snazzy && tap --no-cov test/*.test.js",
     "test:file": "standard | snazzy && tap --no-cov",
